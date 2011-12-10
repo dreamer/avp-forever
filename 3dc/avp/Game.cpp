@@ -41,6 +41,8 @@
 #define	VERSION_DisableStartupMenus 	TRUE
 #define VERSION_DisableStartupCredits	TRUE
 #include "avp_menus.h"
+#include "FileStream.h"
+#include "console.h"
 
 // extern Varibles
 extern int VideoMode;
@@ -62,6 +64,17 @@ extern void AssignAllSBNames();
 extern BOOL Current_Level_Requires_Mirror_Image();
 extern void InitialiseTriggeredFMVs();
 void check_preplaced_decal_modules();
+
+enum GameVersion
+{
+	eRetailStandard,
+	eRetailGold,
+	ePredatorDemo,
+	eMarineDemo,
+	eAlienDemo
+};
+
+static GameVersion gameVersion = eRetailGold; // default to retail Gold edition
 
 /*******************************
 EXPORTED GLOBALS
@@ -98,6 +111,41 @@ void CreateStarArray(void);
 void MessageHistory_Initialise();
 void TimeScaleThingy();
 void MessageHistory_Maintain(void);
+
+void DetermineGameVersion()
+{
+	// test for demo versions first
+	if (DoesFileExist("ENGLISH.TXT")) {
+		gameVersion = ePredatorDemo;
+		Con_PrintMessage("Detected Predator Demo");
+	}
+	else if (DoesFileExist("AENGLISH.TXT")) {
+		gameVersion = eAlienDemo;
+		Con_PrintMessage("Detected Alien Demo");
+	}
+	else if (DoesFileExist("MENGLISH.TXT")) {
+		gameVersion = eMarineDemo;
+		Con_PrintMessage("Detected Marine Demo");
+	}
+
+	// retail standard or Gold?
+	else if (DoesFileExist("avp_huds/mdisk.rif")) {
+		gameVersion = eRetailGold;
+		Con_PrintMessage("Detected Gold edition");
+	}
+	else {
+		gameVersion = eRetailStandard;
+		Con_PrintMessage("Detected Standard edition");
+	}
+}
+
+bool IsDemoVersion()
+{
+	if ((gameVersion == eRetailStandard) || (gameVersion == eRetailGold))
+		return false;
+	else
+		return true;
+}
 
 /*********************************************
 
@@ -231,7 +279,7 @@ void StartGame(void)
 		LeanScale=ONE_FIXED;
 	}
 	
-	MotionTrackerScale = DIV_FIXED(ScreenDescriptorBlock.SDB_Width,640);
+	MotionTrackerScale = DIV_FIXED(ScreenDescriptorBlock.SDB_Width, 640);
 
 	InitialiseTriggeredFMVs();
 	CreateStarArray();

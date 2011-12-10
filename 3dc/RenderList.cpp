@@ -37,9 +37,21 @@ RenderList::RenderList(size_t size)
 	vertexCount = 0;
 	indexCount  = 0;
 
+	useIndicesOffset = false;
+
 	// treat the vector as an array so resize it to desired size
 	Items.reserve(size);
 	Items.resize(size);
+}
+
+void RenderList::EnableIndicesOffset()
+{
+	useIndicesOffset = true;
+}
+
+void RenderList::IncrementIndexCount(uint32_t nI)
+{
+	this->indexCount += nI;
 }
 
 RenderList::~RenderList()
@@ -194,11 +206,21 @@ void RenderList::Reset()
 void RenderList::Draw()
 {
 //	for (std::vector<RenderItem>::iterator it = Items.begin(); it != Items.begin() + listIndex; ++it)
+
+	uint32_t baseIndexValue = 0;
+
 	for (size_t i = 0; i < listIndex; i++)
 	{
 		RenderItem *it = &Items[i];
 
 		uint32_t numPrimitives = (it->indexEnd - it->indexStart) / 3;
+
+		if (this->useIndicesOffset)
+		{
+//			baseIndexValue += 4; // this correct?
+
+//			assert(numPrimitives == 2);
+		}
 
 		if (numPrimitives)
 		{
@@ -209,7 +231,7 @@ void RenderList::Draw()
 			ChangeTextureAddressMode (0, (enum TEXTURE_ADDRESS_MODE) it->texAddressType);
 			ChangeZWriteEnable       ((enum ZWRITE_ENABLE)           it->zWrite);
 
-			R_DrawIndexedPrimitive(this->vertexCount, it->indexStart, numPrimitives);
+			R_DrawIndexedPrimitive(baseIndexValue, 0, this->vertexCount, it->indexStart, numPrimitives);
 		}
 	}
 }

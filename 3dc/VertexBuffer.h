@@ -34,7 +34,6 @@ class VertexBuffer
 		uint32_t		capacity;      // number of verts we can hold
 		uint32_t		sizeInBytes;
 		enum R_USAGE	usage;
-		enum R_FVF		FVF;
 		uint32_t		stride;
 		bool			isLocked;
 
@@ -43,7 +42,6 @@ class VertexBuffer
 			capacity(0),
 			sizeInBytes(0),
 			usage(USAGE_DYNAMIC),
-			FVF(FVF_ORTHO),
 			stride(0),
 			isLocked(false)
 		{
@@ -56,7 +54,7 @@ class VertexBuffer
 		}
 
 		// public functions
-		bool VertexBuffer::Create(uint32_t capacity, enum R_FVF fvf, enum R_USAGE usage);
+		bool VertexBuffer::Create(uint32_t capacity, uint32_t stride, enum R_USAGE usage);
 		bool VertexBuffer::Release();
 		bool VertexBuffer::Lock(void **data);
 		bool VertexBuffer::Unlock();

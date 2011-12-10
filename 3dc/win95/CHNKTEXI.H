@@ -6,6 +6,7 @@
 /* image number for already loaded image - really an internal function */
 #define GEI_NOTLOADED	MISSING_TEXTURE
 
+#if 0
 enum /* flags, etc */
 {
 	/* destination surface type */
@@ -34,6 +35,7 @@ enum /* flags, etc */
 	LIO_NORESTORE    = 0x00000000U, /* not going to be restorable */
 	LIO_RESTORABLE   = 0x00000100U, /* put something in imageheader to allow restoring */
 };
+#endif
 
 /* CL_LoadImageOnce relies on this value to be 1 greater
    than the index of the last loaded image */

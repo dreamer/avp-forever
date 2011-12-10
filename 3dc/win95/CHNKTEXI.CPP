@@ -1,3 +1,6 @@
+
+#if 0
+
 #include "os_header.h"
 #include <string.h>
 #include <string.hpp>
@@ -918,4 +921,6 @@ texID_t CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 			return MISSING_TEXTURE;
 	}
 }
+#endif
+
 #endif

@@ -412,7 +412,7 @@ void Net_ConnectToAddress()
 	Con_PrintMessage(tempString);
 
 	enet_address_set_host(&connectionAddress, tempString.c_str());
-	connectionAddress.port = (uint16_t)StringToInt(addressString.substr(colonPos + 1));
+	connectionAddress.port = (uint16_t)Util::StringToInt(addressString.substr(colonPos + 1));
 
 	// try connect
 	host = enet_host_create(NULL,         // create a client host

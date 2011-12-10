@@ -202,7 +202,7 @@ static int LoadUserProfiles(void)
 		{
 			FileStream findFile;
 
-			findFile.Open(path + profileFiles[i], FileStream::FileRead);
+			findFile.Open(path + profileFiles[i], FileStream::FileRead, true);
 			if (!findFile.IsGood())
 				continue;
 

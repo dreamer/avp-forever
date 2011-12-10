@@ -65,18 +65,9 @@ MAPSETVDB chnk_playcam_vdb = {
 
 	65536 >> 2 ,				/* Ambience */
 
-	#if 0
-	VState_RelativeYRemote,	/* View State */
-	2/*-1*/,					/* View Distance */
-	0,0,						/* Pan X,Y */
-	#endif
-
-#if 1
 	VState_Inside,	/* View State */
 	1,					/* View Distance */
 	0,0,						/* Pan X,Y */
-#endif
-
 };
 
 

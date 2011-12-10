@@ -600,8 +600,8 @@ void Sound_ChangeVolume(int activeSoundNumber, int volume)
 	
 	/* if we're a 2d sound, just change the volume, but if we're 3d
 	then call 3d update instead */
-	if(ActiveSounds[activeSoundNumber].threedee) PlatDo3dSound(activeSoundNumber);
-	else PlatChangeSoundVolume(activeSoundNumber,ActiveSounds[activeSoundNumber].volume);
+	if (ActiveSounds[activeSoundNumber].threedee) PlatDo3dSound(activeSoundNumber);
+	else PlatChangeSoundVolume(activeSoundNumber, ActiveSounds[activeSoundNumber].volume);
 }
 
 void Sound_ChangePitch(int activeSoundNumber, int pitch)

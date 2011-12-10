@@ -1,3 +1,6 @@
+
+#if 0
+
 #ifndef DB_LEVEL
 #define DB_LEVEL 4
 #endif
@@ -1259,4 +1262,6 @@ char const * AwDxErrorToString(HRESULT error)
 {
 	return "AwDxErrorToString Error";
 }
+#endif
+
 #endif

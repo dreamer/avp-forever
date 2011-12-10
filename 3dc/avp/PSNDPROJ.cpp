@@ -591,7 +591,7 @@ void LoadSounds(char *soundDirectory)
 	strcat(filename, "/common.ffl");
 
 	FileStream fStream;
-	fStream.Open(filename, FileStream::FileRead);
+	fStream.Open(filename, FileStream::FileRead, true);
 
 	soundIndex = fStream.GetByte();
 	pitch      = fStream.GetByte();

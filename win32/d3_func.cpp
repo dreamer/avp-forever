@@ -40,6 +40,9 @@ extern void ThisFramesRenderingHasFinished(void);
 extern HWND hWndMain;
 extern int WindowMode;
 extern void ChangeWindowsSize(uint32_t width, uint32_t height);
+extern bool IsDemoVersion();
+
+extern AVPIndexedFont IntroFont_Light;
 
 // size of vertex and index buffers
 const uint32_t kMaxVertices = 4096;
@@ -452,9 +455,9 @@ void R_PreviousVideoMode()
 
 std::string& R_GetVideoModeDescription()
 {
-	videoModeDescription = IntToString(d3d.Driver[d3d.CurrentDriver].DisplayMode[d3d.CurrentVideoMode].Width)
+	videoModeDescription = Util::IntToString(d3d.Driver[d3d.CurrentDriver].DisplayMode[d3d.CurrentVideoMode].Width)
 						   + "x" +
-						   IntToString(d3d.Driver[d3d.CurrentDriver].DisplayMode[d3d.CurrentVideoMode].Height);
+						   Util::IntToString(d3d.Driver[d3d.CurrentDriver].DisplayMode[d3d.CurrentVideoMode].Height);
 
 	return videoModeDescription;
 }
@@ -485,7 +488,7 @@ bool R_SetTexture(uint32_t stage, texID_t textureID)
 	// check that the stage value is within range
 	if (stage > kMaxTextureStages-1)
 	{
-		Con_PrintError("Invalid texture stage: " + IntToString(stage) + " set for texture: " + Tex_GetName(textureID));
+		Con_PrintError("Invalid texture stage: " + Util::IntToString(stage) + " set for texture: " + Tex_GetName(textureID));
 		return false;
 	}
 
@@ -557,11 +560,11 @@ bool R_LockVertexBuffer(class VertexBuffer &vertexBuffer, uint32_t offsetToLock,
 	return true;
 }
 
-bool R_DrawIndexedPrimitive(uint32_t numVerts, uint32_t startIndex, uint32_t numPrimitives)
+bool R_DrawIndexedPrimitive(uint32_t baseVertexIndex, uint32_t minIndex, uint32_t numVerts, uint32_t startIndex, uint32_t numPrimitives)
 {
 	LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
-			0,
-			0,
+			baseVertexIndex,               // BaseVertexIndex - Offset from the start of the vertex buffer to the first vertex
+			minIndex,               // MinIndex - Minimum vertex index for vertices used during this call. This is a zero based index relative to BaseVertexIndex.
 			numVerts,        // total num verts in VB
 			startIndex,
 			numPrimitives);
@@ -657,21 +660,21 @@ bool CreateVolatileResources()
 
 	// main
 	d3d.mainVB = new VertexBuffer;
-	d3d.mainVB->Create(kMaxVertices*5, FVF_LVERTEX, USAGE_DYNAMIC);
+	d3d.mainVB->Create(kMaxVertices*5, sizeof(D3DLVERTEX), USAGE_DYNAMIC);
 
 	d3d.mainIB = new IndexBuffer;
 	d3d.mainIB->Create((kMaxIndices*5) * 3, USAGE_DYNAMIC);
 
 	// orthographic projected quads
 	d3d.orthoVB = new VertexBuffer;
-	d3d.orthoVB->Create(kMaxVertices, FVF_ORTHO, USAGE_DYNAMIC);
+	d3d.orthoVB->Create(kMaxVertices, sizeof(ORTHOVERTEX), USAGE_DYNAMIC);
 
 	d3d.orthoIB = new IndexBuffer;
 	d3d.orthoIB->Create(kMaxIndices * 3, USAGE_DYNAMIC);
 
 	// particle vertex buffer
 	d3d.particleVB = new VertexBuffer;
-	d3d.particleVB->Create(kMaxVertices*6, FVF_PARTICLE, USAGE_DYNAMIC);
+	d3d.particleVB->Create(kMaxVertices*6, sizeof(PARTICLEVERTEX), USAGE_DYNAMIC);
 
 	d3d.particleIB = new IndexBuffer;
 	d3d.particleIB->Create((kMaxIndices*6) * 3, USAGE_DYNAMIC);
@@ -679,11 +682,11 @@ bool CreateVolatileResources()
 	// decal buffers
 	d3d.decalVB = new VertexBuffer;
 	// (MAX_NO_OF_DECALS + MAX_NO_OF_FIXED_DECALS) * 4 * 2 (as we have mirrored decals so we redraw everything)
-	d3d.decalVB->Create(8192 * 2, FVF_DECAL, USAGE_DYNAMIC);
+	d3d.decalVB->Create(8192 * 2, sizeof(DECAL_VERTEX), USAGE_DYNAMIC);
 
 	d3d.decalIB = new IndexBuffer;
 	// (MAX_NO_OF_DECALS + MAX_NO_OF_FIXED_DECALS) * 6 * 2 (as we have mirrored decals so we redraw everything)
-	d3d.decalIB->Create(12288 * 2, USAGE_DYNAMIC);
+	d3d.decalIB->Create(12288 * 2, USAGE_STATIC);
 
 	SetRenderStateDefaults();
 
@@ -763,7 +766,7 @@ void SetFov()
 		return;
 	}
 
-	d3d.fieldOfView = StringToInt(Con_GetArgument(0));
+	d3d.fieldOfView = Util::StringToInt(Con_GetArgument(0));
 
 	SetTransforms();
 }
@@ -795,21 +798,6 @@ void R_SetFov(uint32_t fov)
 void FlushD3DZBuffer()
 {
 	d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0,0,0), 1.0f, 0);
-}
-
-// console command : output all menu textures as .png files
-void WriteMenuTextures()
-{
-#if 0
-	char *filename = new char[strlen(GetSaveFolderPath()) + MAX_PATH];
-
-	for (uint32_t i = 0; i < 54; i++) // 54 == MAX_NO_OF_AVPMENUGFXS
-	{
-		sprintf(filename, "%s%d.png", GetSaveFolderPath(), i);
-
-		D3DXSaveTextureToFileA(filename, D3DXIFF_PNG, AvPMenuGfxStorage[i].menuTexture, NULL);
-	}
-#endif
 }
 
 extern bool frustumCull;
@@ -941,14 +929,32 @@ bool R_CreateTallFontTexture(AVPTEXTURE &tex, enum TextureUsage usageType, Textu
 		}
 	}
 
-	uint32_t width  = 450;
-	uint32_t height = 495;
+	uint32_t width, height;
+	uint32_t padWidth, padHeight;
+	uint32_t charWidth, charHeight;
 
-	uint32_t padWidth  = 512;
-	uint32_t padHeight = 512;
+	if (IsDemoVersion())
+	{	
+		width  = 240;
+		height = 160;
 
-	uint32_t charWidth  = 30;
-	uint32_t charHeight = 33;
+		padWidth  = 256;
+		padHeight = 256;
+
+		charWidth  = 30;
+		charHeight = 21;
+	}
+	else
+	{
+		width  = 450;
+		height = 495;
+
+		padWidth  = 512;
+		padHeight = 512;
+
+		charWidth  = 30;
+		charHeight = 33;
+	}
 
 	uint32_t numTotalChars = tex.height / charHeight;
 
@@ -968,102 +974,53 @@ bool R_CreateTallFontTexture(AVPTEXTURE &tex, enum TextureUsage usageType, Textu
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
-/*
-	if (ScreenDescriptorBlock.SDB_Depth == 16)
+
+	uint8_t *destPtr, *srcPtr;
+
+	srcPtr = (uint8_t*)tex.buffer;
+
+	D3DCOLOR padColour = D3DCOLOR_ARGB(255, 255, 0, 255);
+
+	// lets pad the whole thing black first
+	for (uint32_t y = 0; y < padHeight; y++)
 	{
-		uint16_t *destPtr;
-		uint8_t  *srcPtr;
+		destPtr = (((uint8_t*)lock.pBits) + y*lock.Pitch);
 
-		srcPtr = (uint8_t*)tex->buffer;
-
-		D3DCOLOR padColour = D3DCOLOR_ARGB(255, 255, 0, 255);
-
-		// lets pad the whole thing black first
-		for (uint32_t y = 0; y < padHeight; y++)
+		for (uint32_t x = 0; x < padWidth; x++)
 		{
-			destPtr = ((uint16_t*)(((uint8_t*)lock.pBits) + y*lock.Pitch));
+			// >> 3 for red and blue in a 16 bit texture, 2 for green
+			*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(padColour, padColour, padColour, padColour);
 
-			for (uint32_t x = 0; x < padWidth; x++)
-			{
-				// >> 3 for red and blue in a 16 bit texture, 2 for green
-				*destPtr = static_cast<uint16_t> (RGB16(padColour, padColour, padColour));
-				destPtr += sizeof(uint16_t);
-			}
-		}
-
-		for (uint32_t i = 0; i < numTotalChars; i++)
-		{
-			uint32_t row = i / 15; // get row
-			uint32_t column = i % 15; // get column from remainder value
-
-			uint32_t offset = ((column * charWidth) * sizeof(uint16_t)) + ((row * charHeight) * lock.Pitch);
-
-			destPtr = ((uint16_t*)(((uint8_t*)lock.pBits + offset)));
-
-			for (uint32_t y = 0; y < charHeight; y++)
-			{
-				destPtr = ((uint16_t*)(((uint8_t*)lock.pBits + offset) + (y*lock.Pitch)));
-
-				for (uint32_t x = 0; x < charWidth; x++)
-				{
-					*destPtr = RGB16(srcPtr[0], srcPtr[1], srcPtr[2]);
-
-					destPtr += sizeof(uint16_t);
-					srcPtr += sizeof(uint32_t); // our source is 32 bit, move over an entire 4 byte pixel
-				}
-			}
+			destPtr += sizeof(uint32_t); // move over an entire 4 byte pixel
 		}
 	}
-*/
-//	if (ScreenDescriptorBlock.SDB_Depth == 32)
+
+	for (uint32_t i = 0; i < numTotalChars; i++)
 	{
-		uint8_t *destPtr, *srcPtr;
+		uint32_t row = i / IntroFont_Light.nRows;       // get row
+		uint32_t column = i % IntroFont_Light.nColumns; // get column from remainder value
 
-		srcPtr = (uint8_t*)tex.buffer;
+		uint32_t offset = ((column * charWidth) * sizeof(uint32_t)) + ((row * charHeight) * lock.Pitch);
 
-		D3DCOLOR padColour = D3DCOLOR_ARGB(255, 255, 0, 255);
+		destPtr = (((uint8_t*)lock.pBits + offset));
 
-		// lets pad the whole thing black first
-		for (uint32_t y = 0; y < padHeight; y++)
+		for (uint32_t y = 0; y < charHeight; y++)
 		{
-			destPtr = (((uint8_t*)lock.pBits) + y*lock.Pitch);
+			destPtr = (((uint8_t*)lock.pBits + offset) + (y*lock.Pitch));
 
-			for (uint32_t x = 0; x < padWidth; x++)
+			for (uint32_t x = 0; x < charWidth; x++)
 			{
-				// >> 3 for red and blue in a 16 bit texture, 2 for green
-				*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(padColour, padColour, padColour, padColour);
+				if (srcPtr[0] == 0x00 && srcPtr[1] == 0x00 && srcPtr[2] == 0x00)
+				{
+					*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(srcPtr[0], srcPtr[1], srcPtr[2], 0x00);
+				}
+				else
+				{
+					*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(srcPtr[0], srcPtr[1], srcPtr[2], 0xff);
+				}
 
 				destPtr += sizeof(uint32_t); // move over an entire 4 byte pixel
-			}
-		}
-
-		for (uint32_t i = 0; i < numTotalChars; i++)
-		{
-			uint32_t row = i / 15; // get row
-			uint32_t column = i % 15; // get column from remainder value
-
-			uint32_t offset = ((column * charWidth) * sizeof(uint32_t)) + ((row * charHeight) * lock.Pitch);
-
-			destPtr = (((uint8_t*)lock.pBits + offset));
-
-			for (uint32_t y = 0; y < charHeight; y++)
-			{
-				destPtr = (((uint8_t*)lock.pBits + offset) + (y*lock.Pitch));
-
-				for (uint32_t x = 0; x < charWidth; x++)
-				{
-					if (srcPtr[0] == 0x00 && srcPtr[1] == 0x00 && srcPtr[2] == 0x00)
-					{
-						*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(srcPtr[0], srcPtr[1], srcPtr[2], 0x00);
-					}
-					else
-					{
-						*(D3DCOLOR*)destPtr = D3DCOLOR_RGBA(srcPtr[0], srcPtr[1], srcPtr[2], 0xff);
-					}
-
-					destPtr += sizeof(uint32_t); // move over an entire 4 byte pixel
-					srcPtr += sizeof(uint32_t);
-				}
+				srcPtr  += sizeof(uint32_t);
 			}
 		}
 	}
@@ -1826,17 +1783,6 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bitsPerPixel, enu
 
 	D3DXCheckTextureRequirements(d3d.lpD3DDevice, &realWidth, &realHeight, NULL, textureUsage, &textureFormat, texturePool);
 
-#if 0
-	// check texture sizes are ok
-	if (!IsPowerOfTwo(width))
-	{
-		realWidth = RoundUpToNextPowerOfTwo(width);
-	}
-	if (!IsPowerOfTwo(height))
-	{
-		realHeight = RoundUpToNextPowerOfTwo(height);
-	}
-#endif
 	// create the d3d9 texture
 	LastError = d3d.lpD3DDevice->CreateTexture(realWidth, realHeight, 1, textureUsage, textureFormat, texturePool, &d3dTexture, NULL);
 	if (FAILED(LastError))
@@ -2034,7 +1980,7 @@ bool InitialiseDirect3D()
 	// Get the number of devices/video cards in the system
 	d3d.NumDrivers = d3d.lpD3D->GetAdapterCount();
 
-	Con_PrintMessage("\t Found " + IntToString(d3d.NumDrivers) + " video adapter(s)");
+	Con_PrintMessage("\t Found " + Util::IntToString(d3d.NumDrivers) + " video adapter(s)");
 
 	// Get adapter information for all available devices (vid card name, etc)
 	for (uint32_t driverIndex = 0; driverIndex < d3d.NumDrivers; driverIndex++)
@@ -2220,7 +2166,7 @@ bool InitialiseDirect3D()
 
 	d3dpp.Windowed = (windowed) ? TRUE : FALSE;
 
-	d3dpp.BackBufferWidth = width;
+	d3dpp.BackBufferWidth  = width;
 	d3dpp.BackBufferHeight = height;
 
 	// setting this to interval one will cap the framerate to monitor refresh
@@ -2362,10 +2308,10 @@ bool InitialiseDirect3D()
 	}
 
 	// check max texture size
-	Con_PrintMessage("Max texture size: " + IntToString(d3dCaps.MaxTextureWidth));
+	Con_PrintMessage("Max texture size: " + Util::IntToString(d3dCaps.MaxTextureWidth));
 
 	// Log resolution set
-	Con_PrintMessage("\t Resolution set: " + IntToString(d3dpp.BackBufferWidth) + " x " + IntToString(d3dpp.BackBufferHeight));
+	Con_PrintMessage("\t Resolution set: " + Util::IntToString(d3dpp.BackBufferWidth) + " x " + Util::IntToString(d3dpp.BackBufferHeight));
 
 	// Log format set
 	switch (d3dpp.BackBufferFormat)
@@ -2450,7 +2396,7 @@ bool InitialiseDirect3D()
 	}
 	else
 	{
-		ScreenDescriptorBlock.SDB_SafeZoneWidthOffset = 0;
+		ScreenDescriptorBlock.SDB_SafeZoneWidthOffset  = 0;
 		ScreenDescriptorBlock.SDB_SafeZoneHeightOffset = 0;
 	}
 
@@ -2465,7 +2411,6 @@ bool InitialiseDirect3D()
 
 	SetTransforms();
 
-	Con_AddCommand("dumptex", WriteMenuTextures);
 	Con_AddCommand("r_togglewireframe", ToggleWireframe);
 	Con_AddCommand("r_setfov", SetFov);
 	Con_AddCommand("r_texlist", Tex_ListTextures);

@@ -507,7 +507,7 @@ int PlatStartSoundSys()
 	XAUDIO2_VOICE_DETAILS voiceDetails;
 	pMasteringVoice->GetVoiceDetails(&voiceDetails);
 
-	Con_PrintMessage("\t Created Master Voice with " + IntToString(voiceDetails.InputChannels) + " channel(s) and sample rate of " + IntToString(voiceDetails.InputSampleRate));
+	Con_PrintMessage("\t Created Master Voice with " + Util::IntToString(voiceDetails.InputChannels) + " channel(s) and sample rate of " + Util::IntToString(voiceDetails.InputSampleRate));
 
 	// Get the device details
 	XAUDIO2_DEVICE_DETAILS deviceDetails;
@@ -521,7 +521,7 @@ int PlatStartSoundSys()
 	}
 
 	numOutputChannels = deviceDetails.OutputFormat.Format.nChannels;
-	Con_PrintMessage("\t using " + IntToString(numOutputChannels) + " output channel(s)");
+	Con_PrintMessage("\t using " + Util::IntToString(numOutputChannels) + " output channel(s)");
 
 	// create reverb
 	flags = 0;
@@ -777,14 +777,6 @@ int PlatPlaySound(int activeIndex)
 		if (FAILED(LastError))
 		{
 			LogDxError(LastError, __LINE__, __FILE__);
-			if (GameSounds[gameIndex].flags & SAMPLE_IN_HW)
-			{
-				db_log3("Failed to play a sample in Hardware");
-			}
-			else
-			{
-				db_log3("Failed to play a sample from Software.");
-			}
 			return SOUND_PLATFORMERROR;
 		}
 
@@ -844,7 +836,6 @@ int PlatChangeSoundVolume(int activeIndex, int volume)
 	{
 		return SOUND_PLATFORMERROR;
 	}
-	
 	return 1;
 }
 
@@ -1140,6 +1131,7 @@ int LoadWavFile(int soundNum, const std::string &fileName)
 	uint32_t subChunkSize = fStream.GetUint32LE();
 
 	WAVEFORMATEX myWaveFormat;
+	myWaveFormat.cbSize = 0;
 	myWaveFormat.wFormatTag      = fStream.GetUint16LE();
 	myWaveFormat.nChannels       = fStream.GetUint16LE();
 	myWaveFormat.nSamplesPerSec  = fStream.GetUint32LE();
@@ -1148,7 +1140,11 @@ int LoadWavFile(int soundNum, const std::string &fileName)
 	myWaveFormat.wBitsPerSample  = fStream.GetUint16LE();
 
 	// if not PCM
-	if (subChunkSize != 16) {
+	if (subChunkSize == 18) {
+		myWaveFormat.cbSize = fStream.GetUint16LE();
+		assert(myWaveFormat.cbSize == 0);
+	}
+	else if (subChunkSize != 16) {
 		Con_PrintError("Only PCM WAV files are supported");
 		return 0;
 	}
@@ -1263,6 +1259,7 @@ int ExtractWavFile(int soundNum, FileStream &fStream)
 	uint32_t subChunkSize = fStream.GetUint32LE();
 
 	WAVEFORMATEX myWaveFormat;
+	myWaveFormat.cbSize = 0;
 	myWaveFormat.wFormatTag      = fStream.GetUint16LE();
 	myWaveFormat.nChannels       = fStream.GetUint16LE();
 	myWaveFormat.nSamplesPerSec  = fStream.GetUint32LE();
@@ -1271,7 +1268,11 @@ int ExtractWavFile(int soundNum, FileStream &fStream)
 	myWaveFormat.wBitsPerSample  = fStream.GetUint16LE();
 
 	// if not PCM
-	if (subChunkSize != 16) {
+	if (subChunkSize == 18) {
+		myWaveFormat.cbSize = fStream.GetUint16LE();
+		assert(myWaveFormat.cbSize == 0);
+	}
+	else if (subChunkSize != 16) {
 		Con_PrintError("Only PCM WAV files are supported");
 		return 0;
 	}
@@ -1481,7 +1482,7 @@ void PlatUpdatePlayer()
 				char buf2[100];
 //				sprintf(buf2, "emitter_%d x: %f y: %f z: %f\n",i, ActiveSounds[i].xa2Emitter.Position.x, ActiveSounds[i].xa2Emitter.Position.y, ActiveSounds[i].xa2Emitter.Position.z);
 //				OutputDebugString(buf2);
-#if 1
+#if 0
 				// set emitter position to same as listener as test
 				ActiveSounds[i].xa2Emitter.Position.x = XA2Listener.Position.x;
 				ActiveSounds[i].xa2Emitter.Position.y = XA2Listener.Position.y;

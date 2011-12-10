@@ -23,7 +23,6 @@
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include "VertexBuffer.h"
-#include "logString.h"
 #include "console.h"
 
 enum VertexPrimitive
@@ -52,37 +51,13 @@ bool VertexBuffer::Release()
 	return R_ReleaseVertexBuffer(*this);
 }
 
-bool VertexBuffer::Create(uint32_t capacity, enum R_FVF fvf, enum R_USAGE usage)
+bool VertexBuffer::Create(uint32_t capacity, uint32_t stride, enum R_USAGE usage)
 {
 	// store values for later use
 	this->capacity = capacity;
 	this->usage = usage;
-	this->FVF = fvf;
 
-	switch (this->FVF)
-	{
-		case FVF_LVERTEX:
-			this->stride = sizeof(D3DLVERTEX);
-			break;
-		case FVF_ORTHO:
-			this->stride = sizeof(ORTHOVERTEX);
-			break;
-		case FVF_DECAL:
-			this->stride = sizeof(DECAL_VERTEX);
-			break;
-		case FVF_FMV:
-			this->stride = sizeof(FMVVERTEX);
-			break;
-		case FVF_PARTICLE:
-			this->stride = sizeof(PARTICLEVERTEX);
-			break;
-		default:
-			// error and return
-			Con_PrintError("Invalid FVF type");
-			return false;
-			break;
-	}
-
+	this->stride = stride;
 	this->sizeInBytes = this->capacity * this->stride;
 
 	return R_CreateVertexBuffer(*this);

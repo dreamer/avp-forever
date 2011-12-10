@@ -1,3 +1,6 @@
+
+#if 0
+
 #ifndef DB_LEVEL
 #define DB_LEVEL 4
 #endif
@@ -481,3 +484,5 @@ AwBackupTexture * AwIffLoader::CreateBackupTexture()
 AWTEXLD_IMPLEMENT_DYNCREATE("FORM",AwIffLoader)
 AWTEXLD_IMPLEMENT_DYNCREATE("LIST",AwIffLoader)
 AWTEXLD_IMPLEMENT_DYNCREATE("CAT ",AwIffLoader)
+
+#endif

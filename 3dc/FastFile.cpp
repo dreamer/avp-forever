@@ -25,16 +25,31 @@
 #include "FastFile.h"
 #include "FileStream.h"
 #include "utilities.h"
+#include "console.h"
 #include <algorithm>
+#include "MurmurHash3.h" 
 
-fastFileHandles fastFileMap;
+// Fast file signature
+const int RFFL = 'RFFL';
 
-static bool isInited = false;
+const int hashTableSize = 2600;
+
+// hash table to store fast file entries
+std::vector<std::vector<FastFileHandle>> fastFileHandles;
+
+// store the names of all .fll files available
+std::vector<std::string> fastFiles;
+static const std::string directoryName = "fastfile/";
 
 // the size of the main fast file header, consisting of DWORDS (signature, version, nFiles, nHeaderBytes, nDataBytes)
 const int kMainHeaderSize = 20;
 
-static bool FF_Open(const std::string &fastFileName);
+// total number of files found within all fast files
+static uint32_t fileCount = 0;
+
+static bool isInited = false;
+
+static bool FF_Open(const std::string &fastFileName, int32_t fastFileIndex);
 
 // pass this function the name of a file within a fast file you want to find (eg comp1.wav) and it'll return
 // a handle to the file if it exists in a known fast file, or a null handle if file doesn't exist in a known fast file,
@@ -50,49 +65,91 @@ FastFileHandle* FF_Find(const std::string &fileName)
 	std::string lowercaseFileName = fileName;
 	std::transform(lowercaseFileName.begin(), lowercaseFileName.end(), lowercaseFileName.begin(), tolower);
 
-	fastFileHandles::iterator ffIt = fastFileMap.find(lowercaseFileName);
+	// hash the file name
+	uint32_t hash;
+	MurmurHash3_x86_32(lowercaseFileName.c_str(), lowercaseFileName.length(), 0, &hash);
 
-	if (ffIt == fastFileMap.end())
-	{
-		// the requested file wasn't found within our fast files
+	// mod with table size
+	hash = hash % hashTableSize;
+
+	int32_t theSize = fastFileHandles[hash].size();
+
+	// no entry in hash table for this file
+	if (theSize == 0) {
 		return NULL;
 	}
 	else
 	{
-		// we found the file. return a pointer to the fast file handle
-		return &fastFileMap[lowercaseFileName];
+		/* 
+		 * We use separate chaining to resolve collisions.
+		 * The first entry at a hash location won't contain the file's name as a string. If there's a collision
+		 * and a new entry is added to the location, we *do* add the file name for that entry. So, search backwards 
+		 * through the chain, checking for a matching string. If we've reached entry 0, we have no string to check.
+		 * So, this is a possible point of failure in the system. 
+		 */
+		for (int i = (theSize-1); i >= 0; i--)
+		{
+			if (i == 0) { // no string to check as first entry, just return it and assume it's ok.
+				return &fastFileHandles[hash][i];
+			}
+
+			if (fastFileHandles[hash][i].fileName == lowercaseFileName)
+			{
+				return &fastFileHandles[hash][i];
+			}
+		}
+
+		// shouldn't get here?
+		return NULL;
 	}
+}
+
+const std::string & FF_GetFastFileName(int32_t fastFileIndex)
+{
+	return fastFiles[fastFileIndex];
 }
 
 // initialise the fast file system. searches the current folder for all .FFL files and parses their
 // contents for all files available within.
-// TODO: should be passing a string containing the folder to search within, eg standard AvP folder "fastfile"
+// TODO: should be passing a string containing the folder to search within, eg standard AvP folder "fastfile" ?
 bool FF_Init()
 {
-	// search fast file folder for list of fast files
-	std::vector<std::string> fastFiles;
+	Con_PrintMessage("Initialising Fast File system...");
 
-	if (FindFiles("fastfile/*.FFL", fastFiles))
+	fastFileHandles.resize(hashTableSize);
+
+	if (FindFiles(directoryName + "*.FFL", fastFiles))
 	{
+		// common.ffl isn't a real fast file, so lets remove it
+		if (fastFiles[0] == "common.ffl") {
+			fastFiles.erase(fastFiles.begin());
+		}
+
 		for (size_t i = 0; i < fastFiles.size(); i++)
 		{
-			FF_Open("fastfile/" + fastFiles[i]);
+			fastFiles[i] = directoryName + fastFiles[i];
+			FF_Open(fastFiles[i], i);
 		}
 
 		// only set to true if some fast files were found and loaded
 		isInited = true;
+
+		Con_PrintMessage("Found " + Util::IntToString(fastFiles.size()) + " Fast Files, containing " + Util::IntToString(fileCount) + " files");
+
 		return true;
 	}
+
+	Con_PrintMessage("No Fast Files found");
 
 	// if we got here, we found no fast files to load
 	return false;
 }
 
 // takes in the file name of a fast file, opens it and parses header information and adds all file entries to an std::map
-static bool FF_Open(const std::string &fastFileName)
+static bool FF_Open(const std::string &fastFileName, int32_t fastFileIndex)
 {
 	FileStream file;
-	file.Open(fastFileName, FileStream::FileRead);
+	file.Open(fastFileName, FileStream::FileRead, true);
 
 	if (!file.IsGood())
 	{
@@ -116,6 +173,8 @@ static bool FF_Open(const std::string &fastFileName)
 
 	// number of files available within the fast file
 	uint32_t nFiles = file.GetUint32LE();
+
+	fileCount += nFiles;
 
 	uint32_t nHeaderBytes = file.GetUint32LE(); // total bytes of file data header in fast file
 	uint32_t nDataBytes   = file.GetUint32LE(); // we don't need this
@@ -153,14 +212,28 @@ static bool FF_Open(const std::string &fastFileName)
 
 		// add file handle to map
 		FastFileHandle newHandle;
-		newHandle.sourceFile = fastFileName;
+		newHandle.fastFileIndex = fastFileIndex;
 		newHandle.fileOffset = realFileOffset;
 		newHandle.fileSize   = fileLength;
 
 		// make the whole filename string lowercase and change '\\' to '/'
 		std::transform(requestedFile.begin(), requestedFile.end(), requestedFile.begin(), Util::LowercaseAndChangeSlash);
 
-		fastFileMap.insert(std::make_pair(requestedFile, newHandle));
+		// hash the file name
+		uint32_t hash;
+		MurmurHash3_x86_32(requestedFile.c_str(), requestedFile.length(), 0, &hash);
+
+		// mod with table size
+		hash = hash % hashTableSize;
+
+		// if size > 0, we already have an item at this location, so we've got a collision
+		if (fastFileHandles[hash].size())
+		{
+			// collision detected. store file name for collision resolution
+			newHandle.fileName = requestedFile;
+		}
+
+		fastFileHandles[hash].push_back(newHandle);
 
 		requestedFile.clear();
 	}

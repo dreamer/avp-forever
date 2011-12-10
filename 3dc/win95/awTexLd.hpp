@@ -1,3 +1,6 @@
+
+#if 0
+
 #ifndef _INCLUDED_AWTEXLD_HPP_
 #define _INCLUDED_AWTEXLD_HPP_
 
@@ -476,3 +479,5 @@ namespace AwTl {
 	} rlc ## tokenClassName ##_## nLine;
 
 #endif // ! _INCLUDED_AWTEXLD_HPP_
+
+#endif

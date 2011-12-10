@@ -1,10 +1,3 @@
-/* KJL 14:43:27 10/6/97 - d3d_hud.cpp
-
-	Things just got too messy with ddplat.cpp & d3_func.cpp,
-	so this file will hold all Direct 3D hud code.
-
- */
-
 #include "3dc.h"
 #include "module.h"
 #include "stratdef.h"
@@ -78,6 +71,8 @@ fixed_t MotionTrackerScale;
 
 float HUDScaleFactorf = 1.0f;
 float MotionTrackerScalef = 1.0f;
+
+const char *cl_pszGameMode = NULL;
 
 static struct HUDFontDescTag HUDFontDesc[] =
 {
@@ -221,7 +216,7 @@ void D3D_InitialiseMarineHUD(void)
 	{
 		HUDImageNumber = Tex_CreateFromRIM("graphics/HUDs/Marine/MarineHUD.RIM");
 
-		MotionTrackerHalfWidth = 127/2;
+		MotionTrackerHalfWidth   = 127/2;
 		MotionTrackerTextureSize = 128;
 
 		BlueBar.ImageNumber = HUDImageNumber;
@@ -246,8 +241,8 @@ void D3D_InitialiseMarineHUD(void)
 
 	/* centre of motion tracker */
 	MotionTrackerCentreY = BlueBar.TopLeftY;
-	MotionTrackerCentreX = BlueBar.TopLeftX+(BlueBar.Width/2);
-	MotionTrackerScale = ONE_FIXED;
+	MotionTrackerCentreX = BlueBar.TopLeftX + (BlueBar.Width/2);
+	MotionTrackerScale  = ONE_FIXED;
 	MotionTrackerScalef = 1.0f;
 
 	HUDScaleFactor = DIV_FIXED(ScreenDescriptorBlock.SDB_Width, 640);
@@ -267,9 +262,7 @@ void LoadCommonTextures(void)
 			case I_Predator:
 			{
 				PredatorNumbersImageNumber = Tex_CreateFromRIM("graphics/HUDs/Predator/prednumbers.RIM");
-
 				StaticImageNumber = Tex_CreateFromRIM("graphics/Common/static.RIM");
-
 				break;
 			}
 			case I_Alien:
@@ -289,8 +282,8 @@ void LoadCommonTextures(void)
 	else
 	{
 		PredatorNumbersImageNumber = Tex_CreateFromRIM("graphics/HUDs/Predator/prednumbers.RIM");
-		StaticImageNumber = Tex_CreateFromRIM("graphics/Common/static.RIM");
-		AlienTongueImageNumber = Tex_CreateFromRIM("graphics/HUDs/Alien/AlienTongue.RIM");
+		StaticImageNumber          = Tex_CreateFromRIM("graphics/Common/static.RIM");
+		AlienTongueImageNumber     = Tex_CreateFromRIM("graphics/HUDs/Alien/AlienTongue.RIM");
 	}
 	
 	HUDFontsImageNumber  = Tex_CreateFromRIM("graphics/Common/HUDfonts.RIM");
@@ -363,8 +356,6 @@ void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 
 	int motionTrackerScaledHalfWidth = MUL_FIXED(MotionTrackerScale*3, MotionTrackerHalfWidth/2);
 
-//	motionTrackerScaledHalfWidth /= 2;
-
 	int angle = 4095 - Player->ObEuler.EulerY;
 
 	int widthCos = MUL_FIXED(motionTrackerScaledHalfWidth, GetCos(angle));
@@ -384,20 +375,20 @@ void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 	// top right
 	quadVertices[1].X = (widthCos - (-widthSin));
 	quadVertices[1].Y = (widthSin + (-widthCos)) -1;
-	quadVertices[1].U = 1+MotionTrackerTextureSize;
+	quadVertices[1].U = 1 + MotionTrackerTextureSize;
 	quadVertices[1].V = 1;
 
 	// bottom right
 	quadVertices[2].X = (widthCos - widthSin);
 	quadVertices[2].Y = (widthSin + widthCos) -1;
-	quadVertices[2].U = 1+MotionTrackerTextureSize;
-	quadVertices[2].V = 1+MotionTrackerTextureSize;
+	quadVertices[2].U = 1 + MotionTrackerTextureSize;
+	quadVertices[2].V = 1 + MotionTrackerTextureSize;
 
 	// bottom left
 	quadVertices[3].X = ((-widthCos) - widthSin);
 	quadVertices[3].Y = ((-widthSin) + widthCos) -1;
 	quadVertices[3].U = 1;
-	quadVertices[3].V = 1+MotionTrackerTextureSize;
+	quadVertices[3].V = 1 + MotionTrackerTextureSize;
 
 	/* clip to Y<=0 */
 	YClipMotionTrackerVertices(&quadVertices[0], &quadVertices[1]);
@@ -464,10 +455,10 @@ void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 	BlueBar.Translucency = HUDTranslucencyLevel;
 	Draw_HUDImage(&BlueBar);
 	
-	D3D_BLTDigitToHUD(ValueOfHUDDigit[MARINE_HUD_MOTIONTRACKER_UNITS],17, -4, MARINE_HUD_FONT_MT_SMALL);
-	D3D_BLTDigitToHUD(ValueOfHUDDigit[MARINE_HUD_MOTIONTRACKER_TENS],9, -4, MARINE_HUD_FONT_MT_SMALL);
-	D3D_BLTDigitToHUD(ValueOfHUDDigit[MARINE_HUD_MOTIONTRACKER_HUNDREDS],-9, -4, MARINE_HUD_FONT_MT_BIG);
-	D3D_BLTDigitToHUD(ValueOfHUDDigit[MARINE_HUD_MOTIONTRACKER_THOUSANDS],-25, -4,MARINE_HUD_FONT_MT_BIG);
+	D3D_BLTDigitToHUD(ValueOfHUDDigit[MARINE_HUD_MOTIONTRACKER_UNITS],      17, -4, MARINE_HUD_FONT_MT_SMALL);
+	D3D_BLTDigitToHUD(ValueOfHUDDigit[MARINE_HUD_MOTIONTRACKER_TENS],        9, -4, MARINE_HUD_FONT_MT_SMALL);
+	D3D_BLTDigitToHUD(ValueOfHUDDigit[MARINE_HUD_MOTIONTRACKER_HUNDREDS],   -9, -4, MARINE_HUD_FONT_MT_BIG);
+	D3D_BLTDigitToHUD(ValueOfHUDDigit[MARINE_HUD_MOTIONTRACKER_THOUSANDS], -25, -4, MARINE_HUD_FONT_MT_BIG);
 }
 
 
@@ -737,7 +728,7 @@ void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 
 	if (AvP.PlayerType == I_Marine)
 	{
-		int xCentre = MUL_FIXED(HUDLayout_RightmostTextCentre,HUDScaleFactor)+ScreenDescriptorBlock.SDB_Width - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset;
+		int xCentre = MUL_FIXED(HUDLayout_RightmostTextCentre, HUDScaleFactor)+ScreenDescriptorBlock.SDB_Width - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset;
 		healthColour = HUDLayout_Colour_MarineGreen;
 		armourColour = HUDLayout_Colour_MarineGreen;
 

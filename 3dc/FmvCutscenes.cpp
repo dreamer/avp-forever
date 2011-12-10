@@ -7,7 +7,6 @@
 #include "FmvCutscenes.h"
 #include "console.h"
 #include "TextureManager.h"
-#include "logString.h"
 #include "VorbisPlayer.h"
 #include "console.h"
 #include <vector>

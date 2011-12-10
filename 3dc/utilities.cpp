@@ -70,6 +70,32 @@ int LowercaseAndChangeSlash(char c)
 
 	return c;
 }
+
+// converts an int to a string and returns it
+std::string IntToString(const int value)
+{
+	std::stringstream stream;
+
+	// format int as a string
+	stream << value;
+
+	return stream.str();
+}
+
+// parses an int from a string and returns it
+int StringToInt(const std::string &string)
+{
+	std::stringstream ss;
+	int value = 0;
+
+	// copy string to stringstream
+	ss << string;
+	// copy from stringstream to int
+	ss >> value;
+	
+	return value;
+}
+
 }
 
 char *GetSaveFolderPath()

@@ -27,7 +27,6 @@
  * from http://www.codehead.co.uk/cbfg/
  */
 
-#include "logString.h"
 #include "Fonts.h"
 #include "TextureManager.h"
 #include "FileStream.h"

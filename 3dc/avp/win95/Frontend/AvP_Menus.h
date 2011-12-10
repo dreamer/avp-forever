@@ -5,9 +5,10 @@
 
 extern bool mainMenu;
 
-#define MARINE_DEMO 0
+#define MARINE_DEMO 1
 #define PREDATOR_DEMO 0
 #define ALIEN_DEMO 0
+
  // Edmond modified for Mplayer Demo
  #ifdef MPLAYER_DEMO
  #define DEATHMATCH_DEMO 1

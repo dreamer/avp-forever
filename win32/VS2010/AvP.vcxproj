@@ -122,7 +122,7 @@
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>Sync</ExceptionHandling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
-      <SmallerTypeCheck>true</SmallerTypeCheck>
+      <SmallerTypeCheck>false</SmallerTypeCheck>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
       <StructMemberAlignment>Default</StructMemberAlignment>
       <EnableEnhancedInstructionSet>NotSet</EnableEnhancedInstructionSet>
@@ -263,7 +263,7 @@
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <StructMemberAlignment>Default</StructMemberAlignment>
       <FunctionLevelLinking>false</FunctionLevelLinking>
-      <EnableEnhancedInstructionSet>StreamingSIMDExtensions</EnableEnhancedInstructionSet>
+      <EnableEnhancedInstructionSet>StreamingSIMDExtensions2</EnableEnhancedInstructionSet>
       <FloatingPointModel>Fast</FloatingPointModel>
       <AdditionalOptions> /J</AdditionalOptions>
       <RuntimeTypeInfo>true</RuntimeTypeInfo>
@@ -490,8 +490,6 @@
     <ClCompile Include="..\..\3dc\avp\win95\chtcodes.cpp" />
     <ClCompile Include="..\..\3dc\avp\win95\d3d_hud.cpp" />
     <ClCompile Include="..\..\3dc\avp\win95\endianio.c" />
-    <ClCompile Include="..\..\3dc\avp\win95\FFREAD.CPP" />
-    <ClCompile Include="..\..\3dc\avp\win95\FFSTDIO.CPP" />
     <ClCompile Include="..\..\3dc\avp\win95\Frontend\AvP_EnvInfo.cpp" />
     <ClCompile Include="..\..\3dc\avp\win95\Frontend\AvP_Intro.cpp" />
     <ClCompile Include="..\..\3dc\avp\win95\Frontend\AvP_MenuData.cpp" />
@@ -554,6 +552,7 @@
     <ClCompile Include="..\..\3dc\MODULE.cpp" />
     <ClCompile Include="..\..\3dc\MORPH.cpp" />
     <ClCompile Include="..\..\3dc\MSLHAND.cpp" />
+    <ClCompile Include="..\..\3dc\MurmurHash3.cpp" />
     <ClCompile Include="..\..\3dc\networking.cpp" />
     <ClCompile Include="..\..\3dc\OBJECT.cpp" />
     <ClCompile Include="..\..\3dc\OnScreenKeyboard.cpp" />
@@ -576,9 +575,6 @@
     <ClCompile Include="..\..\3dc\VorbisPlayer.cpp" />
     <ClCompile Include="..\..\3dc\win95\ANIMCHNK.CPP" />
     <ClCompile Include="..\..\3dc\win95\animobs.cpp" />
-    <ClCompile Include="..\..\3dc\win95\awBmpLd.cpp" />
-    <ClCompile Include="..\..\3dc\win95\awIffLd.cpp" />
-    <ClCompile Include="..\..\3dc\win95\awTexLd.cpp" />
     <ClCompile Include="..\..\3dc\win95\BMPNAMES.CPP" />
     <ClCompile Include="..\..\3dc\win95\CD_player.cpp" />
     <ClCompile Include="..\..\3dc\win95\chnkload.cpp" />
@@ -598,14 +594,10 @@
     <ClCompile Include="..\..\3dc\win95\GSPRCHNK.CPP" />
     <ClCompile Include="..\..\3dc\win95\hierchnk.cpp" />
     <ClCompile Include="..\..\3dc\win95\huffman.cpp" />
-    <ClCompile Include="..\..\3dc\win95\iff.cpp" />
-    <ClCompile Include="..\..\3dc\win95\iff_ILBM.cpp" />
-    <ClCompile Include="..\..\3dc\win95\ILBM_ext.cpp" />
     <ClCompile Include="..\..\3dc\win95\io.cpp" />
     <ClCompile Include="..\..\3dc\win95\list_tem.cpp" />
     <ClCompile Include="..\..\3dc\win95\LTCHUNK.CPP" />
     <ClCompile Include="..\..\3dc\win95\md5.c" />
-    <ClCompile Include="..\..\3dc\win95\media.cpp" />
     <ClCompile Include="..\..\3dc\win95\MISHCHNK.CPP" />
     <ClCompile Include="..\..\3dc\win95\OBCHUNK.CPP" />
     <ClCompile Include="..\..\3dc\win95\OEChunk.cpp" />
@@ -740,8 +732,6 @@
     <ClInclude Include="..\..\3dc\avp\win95\d3d_hud.h" />
     <ClInclude Include="..\..\3dc\avp\win95\dbdefs.h" />
     <ClInclude Include="..\..\3dc\avp\win95\endianio.h" />
-    <ClInclude Include="..\..\3dc\avp\win95\FFREAD.HPP" />
-    <ClInclude Include="..\..\3dc\avp\win95\FFSTDIO.H" />
     <ClInclude Include="..\..\3dc\avp\win95\font.h" />
     <ClInclude Include="..\..\3dc\avp\win95\Frontend\AvP_EnvInfo.h" />
     <ClInclude Include="..\..\3dc\avp\win95\Frontend\avp_intro.h" />
@@ -804,6 +794,7 @@
     <ClInclude Include="..\..\3dc\KSHAPE.H" />
     <ClInclude Include="..\..\3dc\logstring.h" />
     <ClInclude Include="..\..\3dc\MSLHAND.H" />
+    <ClInclude Include="..\..\3dc\MurmurHash3.h" />
     <ClInclude Include="..\..\3dc\networking.h" />
     <ClInclude Include="..\..\3dc\OnScreenKeyboard.h" />
     <ClInclude Include="..\..\3dc\os_header.h" />
@@ -828,8 +819,6 @@
     <ClInclude Include="..\..\3dc\win95\ANIMCHNK.HPP" />
     <ClInclude Include="..\..\3dc\win95\animobs.hpp" />
     <ClInclude Include="..\..\3dc\win95\aw.h" />
-    <ClInclude Include="..\..\3dc\win95\awTexLd.h" />
-    <ClInclude Include="..\..\3dc\win95\awTexLd.hpp" />
     <ClInclude Include="..\..\3dc\win95\BMPNAMES.HPP" />
     <ClInclude Include="..\..\3dc\win95\CD_player.h" />
     <ClInclude Include="..\..\3dc\win95\CHNKLOAD.H" />
@@ -852,15 +841,11 @@
     <ClInclude Include="..\..\3dc\win95\Hash_tem.hpp" />
     <ClInclude Include="..\..\3dc\win95\hierchnk.hpp" />
     <ClInclude Include="..\..\3dc\win95\huffman.hpp" />
-    <ClInclude Include="..\..\3dc\win95\iff.hpp" />
-    <ClInclude Include="..\..\3dc\win95\iff_ILBM.hpp" />
-    <ClInclude Include="..\..\3dc\win95\ILBM_ext.hpp" />
     <ClInclude Include="..\..\3dc\win95\INLINE.H" />
     <ClInclude Include="..\..\3dc\win95\io.h" />
     <ClInclude Include="..\..\3dc\win95\list_tem.hpp" />
     <ClInclude Include="..\..\3dc\win95\LTCHUNK.HPP" />
     <ClInclude Include="..\..\3dc\win95\md5.h" />
-    <ClInclude Include="..\..\3dc\win95\media.hpp" />
     <ClInclude Include="..\..\3dc\win95\MISHCHNK.HPP" />
     <ClInclude Include="..\..\3dc\win95\OBCHUNK.HPP" />
     <ClInclude Include="..\..\3dc\win95\objedit.h" />
@@ -885,10 +870,13 @@
     <None Include="..\..\shaders\decal.vsh" />
     <None Include="..\..\shaders\fmvPixel.psh" />
     <None Include="..\..\shaders\fmvVertex.vsh" />
+    <None Include="..\..\shaders\orthoPixel.psh" />
     <None Include="..\..\shaders\orthoVertex.vsh" />
+    <None Include="..\..\shaders\particle.psh" />
+    <None Include="..\..\shaders\particle.vsh" />
     <None Include="..\..\shaders\pixel.psh" />
-    <None Include="..\..\shaders\stars.psh" />
-    <None Include="..\..\shaders\stars.vsh" />
+    <None Include="..\..\shaders\rhw.psh" />
+    <None Include="..\..\shaders\rhw.vsh" />
     <None Include="..\..\shaders\tallText.psh" />
     <None Include="..\..\shaders\tallText.vsh" />
     <None Include="..\..\shaders\vertex.vsh" />

@@ -35,27 +35,34 @@ bool FileStream::IsGood()
 	return isGood;
 }
 
-bool FileStream::Open(const std::string &fileName, eAccess accessType)
+bool FileStream::Open(const std::string &fileName, eAccess accessType, bool skipFastFileCheck)
 {
 	DWORD desiredAccess;       // GENERIC_READ, GENERIC_WRITE, or both (GENERIC_READ | GENERIC_WRITE). 
 	DWORD creationDisposition; // An action to take on a file or device that exists or does not exist.
 
 	std::string realFileName;
 
-	// check if the file is in a fast file first
-	FastFileHandle *ffHandle = FF_Find(fileName);
-	if (ffHandle)
+	// check if the file is in a fast file first (unless we were asked to skip this check)
+	if (skipFastFileCheck)
 	{
-		fromFastFile = true;
-		fileOffset = ffHandle->fileOffset;
-		fileSize   = ffHandle->fileSize;
-
-		// a .FFL file name
-		realFileName = ffHandle->sourceFile;
+		realFileName = fileName;
 	}
 	else
 	{
-		realFileName = fileName;
+		FastFileHandle *ffHandle = FF_Find(fileName);
+		if (ffHandle)
+		{
+			fromFastFile = true;
+			fileOffset = ffHandle->fileOffset;
+			fileSize   = ffHandle->fileSize;
+
+			// a .FFL file name
+			realFileName = FF_GetFastFileName(ffHandle->fastFileIndex);
+		}
+		else
+		{
+			realFileName = fileName;
+		}
 	}
 
 	switch (accessType)
@@ -304,7 +311,7 @@ void FileStream::PutUint64BE(uint64_t value)
 	WriteBytes(reinterpret_cast<uint8_t*>(&value), sizeof(value));
 }
 
-bool FileStream::DoesFileExist(const std::string &fileName)
+bool DoesFileExist(const std::string &fileName)
 {
 	DWORD fileAttributes = ::GetFileAttributes(fileName.c_str());
 

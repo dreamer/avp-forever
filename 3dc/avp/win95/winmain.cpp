@@ -94,6 +94,7 @@ extern int AvP_InGameMenus(void);
 extern int InGameMenusAreRunning(void);
 extern void InitFmvCutscenes();
 extern void ChangeWindowsSize(uint32_t width, uint32_t height); 
+extern void DetermineGameVersion();
 
 extern struct DEBUGGINGTEXTOPTIONS ShowDebuggingText;
 
@@ -141,6 +142,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 		SystemParametersInfo(SPI_SETSTICKYKEYS, sizeof(STICKYKEYS), &skOff, 0);
 	}
+
+	DetermineGameVersion();
 
 	InitFmvCutscenes();
 

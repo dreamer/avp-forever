@@ -67,6 +67,8 @@ class RenderList
 
 		std::vector<RenderItem> Items;
 
+		bool useIndicesOffset;
+
 		void RenderList::AddIndices(uint16_t *indexArray, uint32_t a, uint32_t b, uint32_t c, uint32_t n);
 
 	public:
@@ -85,4 +87,8 @@ class RenderList
 	void RenderList::CreateIndices(uint16_t *indexArray, uint32_t numVerts);
 	void RenderList::CreateOrthoIndices(uint16_t *indexArray);
 	void RenderList::Draw();
+
+	// test
+	void RenderList::EnableIndicesOffset();
+	void RenderList::IncrementIndexCount(uint32_t nI);
 };

@@ -38,6 +38,8 @@
 namespace Util {
 	void ChangeSlashes(std::string &theString);
 	int LowercaseAndChangeSlash(char c);
+	std::string IntToString(const int value);
+	int StringToInt(const std::string &string);
 }
 
 FILE *avp_fopen(const char *fileName, const char *mode);

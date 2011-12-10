@@ -28,13 +28,9 @@
 #include <sstream>
 #include <map>
 #include <algorithm>
-
 #include "logString.h"
 #include "utilities.h"
 #include "ConfigFile.h"
-
-extern int StringToInt(const std::string &string);
-extern std::string IntToString(const int value);
 
 static bool Config_CreateDefault();
 
@@ -201,13 +197,13 @@ int Config_GetInt(const std::string &heading, const std::string &variable, int d
 {
 	if (CheckValuesExist(heading, variable))
 	{
-		return StringToInt(AvPConfig.find(heading)->second.find(variable)->second);
+		return Util::StringToInt(AvPConfig.find(heading)->second.find(variable)->second);
 	}
 	else
 	{
 		// should we be adding this to the map if it doesn't exist using default value? i guess so..
 		MapValue &tempValue = AvPConfig[heading];
-		tempValue.insert(std::make_pair(variable, IntToString(defaultValue)));
+		tempValue.insert(std::make_pair(variable, Util::IntToString(defaultValue)));
 
 		return defaultValue;
 	}
@@ -217,7 +213,7 @@ void Config_SetInt(const std::string &heading, const std::string &variable, int 
 {
 	if (CheckValuesExist(heading, variable))
 	{
-		AvPConfig.find(heading)->second.find(variable)->second = IntToString(newValue);
+		AvPConfig.find(heading)->second.find(variable)->second = Util::IntToString(newValue);
 	}
 }
 

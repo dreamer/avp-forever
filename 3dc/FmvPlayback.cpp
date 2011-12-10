@@ -5,7 +5,6 @@
 #include "assert.h"
 #include <process.h>
 #include <math.h>
-#include "logString.h"
 
 // #define USE_MMX
 #ifdef USE_MMX

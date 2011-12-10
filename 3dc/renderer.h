@@ -36,15 +36,6 @@ enum R_USAGE
 	USAGE_STATIC
 };
 
-enum R_FVF
-{
-	FVF_LVERTEX,
-	FVF_ORTHO,
-	FVF_DECAL,
-	FVF_PARTICLE,
-	FVF_FMV
-};
-
 typedef size_t texID_t;
 typedef int32_t effectID_t;
 typedef int32_t shaderID_t;
@@ -79,7 +70,8 @@ bool R_LockVertexBuffer    (class VertexBuffer &vertexBuffer, uint32_t offsetToL
 bool R_UnlockVertexBuffer  (class VertexBuffer &vertexBuffer);
 bool R_SetVertexBuffer     (class VertexBuffer &vertexBuffer);
 bool R_DrawPrimitive       (uint32_t numPrimitives);
-bool R_DrawIndexedPrimitive(uint32_t numVerts, uint32_t startIndex, uint32_t numPrimitives);
+//bool R_DrawIndexedPrimitive(uint32_t numVerts, uint32_t startIndex, uint32_t numPrimitives);
+bool R_DrawIndexedPrimitive(uint32_t baseVertexIndex, uint32_t minIndex, uint32_t numVerts, uint32_t startIndex, uint32_t numPrimitives);
 
 // index buffer functions
 bool R_CreateIndexBuffer   (class IndexBuffer &indexBuffer);
@@ -120,7 +112,7 @@ void ChangeZWriteEnable       (enum ZWRITE_ENABLE zWriteEnable);
 bool InitialiseDirect3D();
 bool R_ChangeResolution		(uint32_t width, uint32_t height);
 void DrawAlphaMenuQuad		(uint32_t topX, uint32_t topY, texID_t textureID, uint32_t alpha);
-void DrawTallFontCharacter	(uint32_t topX, uint32_t topY, texID_t textureID, uint32_t texU, uint32_t texV, uint32_t charWidth, uint32_t alpha);
+void DrawTallFontCharacter	(uint32_t topX, uint32_t topY, texID_t textureID, uint32_t texU, uint32_t texV, uint32_t charWidth, uint32_t charHeight, uint32_t alpha);
 void DrawCloudTable			(uint32_t topX, uint32_t topY, uint32_t wordLength, uint32_t alpha);
 void DrawFadeQuad			(uint32_t topX, uint32_t topY, uint32_t alpha);
 void DrawSmallMenuCharacter (uint32_t topX, uint32_t topY, uint32_t texU, uint32_t texV, uint32_t red, uint32_t green, uint32_t blue, uint32_t alpha);

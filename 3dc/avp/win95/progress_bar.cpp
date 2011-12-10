@@ -42,42 +42,42 @@ RECT LoadingBarFull_DestRect;
 RECT LoadingBarFull_SrcRect;
 
 extern void DrawProgressBar(const RECT &srcRect, const RECT &destRect, texID_t textureID);
+extern bool IsDemoVersion();
 
-texID_t fullTextureID  = 0;
-texID_t emptyTextureID = 0;
-texID_t dbTextureID    = 0;
-
-AVPTEXTURE *LoadingBarEmpty = NULL;
-AVPTEXTURE *LoadingBarFull  = NULL;
-AVPTEXTURE *image   = NULL;
-AVPTEXTURE *aa_font = NULL;
+texID_t fullTextureID  = NO_TEXTURE;
+texID_t emptyTextureID = NO_TEXTURE;
+texID_t dbTextureID    = NO_TEXTURE;
 
 void Start_Progress_Bar()
 {
 	AAFontImageNumber = Tex_CreateFromRIM("graphics/Common/aa_font.RIM");
 	
 	// load other graphics
-	emptyTextureID = Tex_CreateFromRIM("graphics/Menus/LoadingBar_Empty.RIM");
-	fullTextureID = Tex_CreateFromRIM("graphics/Menus/LoadingBar_Full.RIM");
-
-	// load background image for bar
-	dbTextureID = Tex_CreateFromRIM("graphics/Menus/Loading.RIM");
+	if (!IsDemoVersion())
+	{
+		emptyTextureID = Tex_CreateFromRIM("graphics/Menus/LoadingBar_Empty.RIM");
+		fullTextureID = Tex_CreateFromRIM("graphics/Menus/LoadingBar_Full.RIM");
+	}
+	else 
+	{
+		// load background image for bar
+		dbTextureID = Tex_CreateFromRIM("graphics/Menus/Loading.RIM");
+	}
 
 	// draw initial progress bar
-	LoadingBarEmpty_SrcRect.left = 0;
-	LoadingBarEmpty_SrcRect.right = 639;
-	LoadingBarEmpty_SrcRect.top = 0;
+	LoadingBarEmpty_SrcRect.left   = 0;
+	LoadingBarEmpty_SrcRect.right  = 639;
+	LoadingBarEmpty_SrcRect.top    = 0;
 	LoadingBarEmpty_SrcRect.bottom = 39;
-	LoadingBarEmpty_DestRect.left = 0;
+	LoadingBarEmpty_DestRect.left  = 0;
 	LoadingBarEmpty_DestRect.right = ScreenDescriptorBlock.SDB_Width-1;
-	LoadingBarEmpty_DestRect.top = ((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)*11)/12;
-	LoadingBarEmpty_DestRect.bottom = (ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)-1;
+	LoadingBarEmpty_DestRect.top    = ((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)*11)/12;
+	LoadingBarEmpty_DestRect.bottom =  (ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)-1;
 
 	{
 		ThisFramesRenderingHasBegun();
 
-		// FIXME
-		if (/*LoadingBarEmpty*/1)
+		if (!IsDemoVersion())
 		{
 			DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, emptyTextureID);
 
@@ -112,19 +112,18 @@ void Set_Progress_Bar_Position(int pos)
 	if (NewPosition > CurrentPosition)
 	{
 		CurrentPosition = NewPosition;
-		LoadingBarFull_SrcRect.left = 0;
-		LoadingBarFull_SrcRect.right = MUL_FIXED(639, NewPosition);
-		LoadingBarFull_SrcRect.top = 0;
+		LoadingBarFull_SrcRect.left   = 0;
+		LoadingBarFull_SrcRect.right  = MUL_FIXED(639, NewPosition);
+		LoadingBarFull_SrcRect.top    = 0;
 		LoadingBarFull_SrcRect.bottom = 39;
-		LoadingBarFull_DestRect.left = 0;
+		LoadingBarFull_DestRect.left  = 0;
 		LoadingBarFull_DestRect.right = MUL_FIXED(ScreenDescriptorBlock.SDB_Width-1, NewPosition);
-		LoadingBarFull_DestRect.top = ((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)*11)/12;
-		LoadingBarFull_DestRect.bottom = (ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)-1;
+		LoadingBarFull_DestRect.top    = ((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)*11)/12;
+		LoadingBarFull_DestRect.bottom =  (ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)-1;
 		
 		ThisFramesRenderingHasBegun();
 
-		// FIXME
-		if (/*LoadingBarEmpty*/1)
+		if (!IsDemoVersion())
 		{
 			// need to render the empty bar here again. As we're not blitting anymore, 
 			// the empty bar will only be rendered for one frame.
@@ -196,21 +195,21 @@ void Game_Has_Loaded()
 
 		if (f)
 		{
-			LoadingBarFull_SrcRect.left = 0;
-			LoadingBarFull_SrcRect.right = 639;
-			LoadingBarFull_SrcRect.top = 0;
+			LoadingBarFull_SrcRect.left   = 0;
+			LoadingBarFull_SrcRect.right  = 639;
+			LoadingBarFull_SrcRect.top    = 0;
 			LoadingBarFull_SrcRect.bottom = 39;
-			LoadingBarFull_DestRect.left = MUL_FIXED(ScreenDescriptorBlock.SDB_Width-1,(ONE_FIXED-f)/2);
+			LoadingBarFull_DestRect.left  = MUL_FIXED(ScreenDescriptorBlock.SDB_Width-1,(ONE_FIXED-f)/2);
 			LoadingBarFull_DestRect.right = MUL_FIXED(ScreenDescriptorBlock.SDB_Width-1,f)+LoadingBarFull_DestRect.left;
 
 			int h = MUL_FIXED((ScreenDescriptorBlock.SDB_Height)/24,ONE_FIXED-f);
-			LoadingBarFull_DestRect.top = ((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset) *11)/12+h;
+			LoadingBarFull_DestRect.top   = ((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset) *11)/12+h;
 			LoadingBarFull_DestRect.bottom = (ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)-1-h;
 			
 			// also need this here again, or else the text disappears!
 			RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED);
 	
-			if (/*LoadingBarFull*/1)
+			if (!IsDemoVersion())
 			{
 				DrawProgressBar(LoadingBarFull_SrcRect, LoadingBarFull_DestRect, fullTextureID);
 			}
@@ -231,8 +230,7 @@ void Game_Has_Loaded()
 				f = 0;
 		}
 
-		// FIXME
-//		if (LoadingBarFull) // demo doesn't show this
+		if (!IsDemoVersion()) // demo doesn't show this
 			RenderStringCentred(GetTextString(TEXTSTRING_INGAME_PRESSANYKEYTOCONTINUE), ScreenDescriptorBlock.SDB_Width/2, ((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)*23)/24-9, 0xffffffff);
 
 		ThisFramesRenderingHasFinished();
@@ -249,25 +247,9 @@ void Game_Has_Loaded()
 		}
 	}
 
-	while (!DebouncedGotAnyKey && AvP.Network != I_Host && LoadingBarFull != NULL);
+	while (!DebouncedGotAnyKey && AvP.Network != I_Host /*&& LoadingBarFull != NULL*/); // TODO - check me
 
 	FadingGameInAfterLoading = ONE_FIXED;
-
-	if (image)
-	{
-		ReleaseAvPTexture(image);
-		image = NULL;
-	}
-	if (LoadingBarEmpty) 
-	{
-		ReleaseAvPTexture(LoadingBarEmpty);
-		LoadingBarEmpty = NULL;
-	}
-	if (LoadingBarFull)
-	{
-		ReleaseAvPTexture(LoadingBarFull);
-		LoadingBarFull = NULL;
-	}
 
 	Tex_Release(emptyTextureID);
 	Tex_Release(fullTextureID);

@@ -27,21 +27,18 @@
 
 #include <stdint.h>
 #include <string>
-#include <map>
-
-// Fast file signature
-const int RFFL = 'RFFL';
 
 struct FastFileHandle
 {
-	std::string sourceFile; // filename of fast file which contains the file we want
+	int32_t  fastFileIndex;
 	uint32_t fileOffset;    // nBytes offset into fast file where actual file data starts
 	uint32_t fileSize;
-};
 
-typedef std::map<std::string, FastFileHandle> fastFileHandles;
+	std::string fileName;   // this is only set if this item is part of a collision chain
+};
 
 bool FF_Init();
 FastFileHandle* FF_Find(const std::string &fileName);
+const std::string & FF_GetFastFileName(int32_t fastFileIndex);
 
 #endif

@@ -35,35 +35,9 @@
 
 std::string lastError;
 
-// converts an int to a string and returns it
-std::string IntToString(const int value)
-{
-	std::stringstream stream;
-	std::string temp;
-
-	// format int as a string
-	stream << value;
-
-	return stream.str();
-}
-
 const std::string& GetLastErrorMessage()
 {
 	return lastError;
-}
-
-// parses an int from a string and returns it
-int StringToInt(const std::string &string)
-{
-	std::stringstream ss;
-	int value = 0;
-
-	// copy string to stringstream
-	ss << string;
-	// copy from stringstream to int
-	ss >> value;
-	
-	return value;
 }
 
 void ClearLog() 
@@ -102,7 +76,7 @@ void LogDxError(HRESULT hr, int LINE, const char* FILE)
 	temp.append(DXGetErrorDescription(hr));
 #endif
 	temp.append(" Line: ");
-	temp.append(IntToString(LINE));
+	temp.append(Util::IntToString(LINE));
 	temp.append(" File: ");
 	temp.append(FILE);
 	temp.append("\n");
@@ -114,7 +88,7 @@ void LogDxError(HRESULT hr, int LINE, const char* FILE)
 // logs a string to file, stating line number of error, and source file it occured in
 void LogErrorString(const std::string &errorString, int LINE, const char* FILE)
 {
-	std::string temp = "Error: " + errorString + " Line: " + IntToString(LINE) + " File: " + FILE + "\n";
+	std::string temp = "Error: " + errorString + " Line: " + Util::IntToString(LINE) + " File: " + FILE + "\n";
 	WriteToLog("\t" + temp);
 
 	lastError = temp;

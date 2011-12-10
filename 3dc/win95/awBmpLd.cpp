@@ -1,3 +1,6 @@
+
+#if 0
+
 #ifndef DB_LEVEL
 #define DB_LEVEL 4
 #endif
@@ -184,3 +187,5 @@ void AwBmpLoader::LoadNextRow(AwTl::PtrUnion pRow)
 }
 
 AWTEXLD_IMPLEMENT_DYNCREATE("BM",AwBmpLoader)
+
+#endif

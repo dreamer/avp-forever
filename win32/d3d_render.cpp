@@ -68,6 +68,7 @@ static void D3D_OutputTriangles(void);
 
 extern void DrawParticles();
 extern void DrawCoronas();
+extern bool IsDemoVersion();
 
 int NumberOfLandscapePolygons;
 
@@ -257,6 +258,8 @@ uint32_t GetNumIndices(uint32_t numVerts)
 	return numIndices;
 }
 
+bool staticDecalsTest = false;
+
 // lock our dynamic vertex and index buffers, and reset counters and array indexes used to keep 
 // track of the number of verts and indices in those buffers. Function could be renamed as 
 // we no longer use an execute buffer
@@ -269,13 +272,37 @@ static bool LockExecuteBuffer()
 	// lock main vertex and index buffers
 	d3d.mainVB->Lock((void**)&mainVertex);
 	d3d.mainIB->Lock(&mainIndex);
-	
+
 	// lock ortho vertex and index buffers
 	d3d.orthoVB->Lock((void**)&orthoVertex);
 	d3d.orthoIB->Lock(&orthoIndex);
 
 	d3d.decalVB->Lock((void**)&decalVertex);
-	d3d.decalIB->Lock(&decalIndex);
+
+	if (!staticDecalsTest)
+	{
+		d3d.decalIB->Lock(&decalIndex);
+
+		uint32_t vertexCount = 0;
+
+		// generate indices
+		for (int i = 0; i < (12288 * 2); i+=6)
+		{
+			decalIndex[i]   = 0 + vertexCount;//(vertexCount - (4) + (0));
+			decalIndex[i+1] = 1 + vertexCount;//(vertexCount - (4) + (1));
+			decalIndex[i+2] = 2 + vertexCount;//(vertexCount - (4) + (2));
+
+//			vertexCount+=3;
+
+			decalIndex[i+3] = 0 + vertexCount;//(vertexCount - (4) + (0));
+			decalIndex[i+4] = 2 + vertexCount;//(vertexCount - (4) + (2));
+			decalIndex[i+5] = 3 + vertexCount;//(vertexCount - (4) + (3));
+
+			vertexCount+=4;
+		}
+
+//		staticDecalsTest = true;
+	}
 
 	// reset lists to empty state
 	particleList->Reset();
@@ -307,8 +334,13 @@ static bool UnlockExecuteBufferAndPrepareForUse()
 	d3d.orthoVB->Unlock();
 	d3d.orthoIB->Unlock();
 
+	if (!staticDecalsTest)
+	{
+		d3d.decalIB->Unlock();
+		staticDecalsTest = true;
+	}
+
 	d3d.decalVB->Unlock();
-	d3d.decalIB->Unlock();
 
 	return true;
 }
@@ -582,7 +614,7 @@ void DrawProgressBar(const RECT &srcRect, const RECT &destRect, texID_t textureI
 	orthoList->CreateOrthoIndices(orthoIndex);
 }
 
-void DrawTallFontCharacter(uint32_t topX, uint32_t topY, texID_t textureID, uint32_t texU, uint32_t texV, uint32_t charWidth, uint32_t alpha)
+void DrawTallFontCharacter(uint32_t topX, uint32_t topY, texID_t textureID, uint32_t texU, uint32_t texV, uint32_t charWidth, uint32_t charHeight, uint32_t alpha)
 {
 	alpha = (alpha / 256);
 	if (alpha > 255)
@@ -590,13 +622,10 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, texID_t textureID, uint
 
 	RCOLOR colour = RCOLOR_ARGB(alpha, 255, 255, 255);
 
-	uint32_t realWidth  = 512;
-	uint32_t realHeight = 512;
+	Texture tempTexture = Tex_GetTextureDetails(textureID);
 
-	float RecipW = 1.0f / realWidth;
-	float RecipH = 1.0f / realHeight;
-
-	uint32_t charHeight = 33;
+	float RecipW = 1.0f / tempTexture.realWidth;
+	float RecipH = 1.0f / tempTexture.realHeight;
 
 	float x1 = WPos2DC(topX);
 	float y1 = HPos2DC(topY);
@@ -604,7 +633,7 @@ void DrawTallFontCharacter(uint32_t topX, uint32_t topY, texID_t textureID, uint
 	float x2 = WPos2DC(topX + charWidth);
 	float y2 = HPos2DC(topY + charHeight);
 
-	if (/*d3d.supportsShaders*/1)
+	if ((/*d3d.supportsShaders*/1 ) && (!IsDemoVersion()))
 	{
 		R_SetTexture(0, textureID);
 		R_SetTexture(1, AVPMENUGFX_CLOUDY);
@@ -1668,6 +1697,8 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 	float RecipW, RecipH;
 	RCOLOR colour;
 
+	assert(RenderPolygon.NumberOfVertices == 4);
+
 	if (decalPtr->DecalID == DECAL_SHAFTOFLIGHT || decalPtr->DecalID == DECAL_SHAFTOFLIGHT_OUTER)
 	{
 		textureID = NO_TEXTURE;
@@ -1731,7 +1762,11 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 		decalVb++;
 	}
 
-	decalList->CreateIndices(decalIndex, RenderPolygon.NumberOfVertices);
+	decalList->EnableIndicesOffset();
+
+	decalList->IncrementIndexCount(6);
+
+//	decalList->CreateIndices(decalIndex, RenderPolygon.NumberOfVertices);
 }
 
 void AddCorona(PARTICLE *particlePtr, VECTORCHF *coronaPoint)
@@ -2718,7 +2753,6 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 	for (uint32_t i = 0; i < 255; )
 	{
 		/* this'll do.. */
-//		CheckVertexBuffer(/*1530*/4, NO_TEXTURE, TRANSLUCENCY_OFF);
 		orthoList->AddItem(4, NO_TEXTURE, TRANSLUCENCY_OFF, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
 
 		unsigned int colour = 0;
@@ -2729,7 +2763,7 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 		// set alpha to 255 otherwise d3d alpha test stops pixels being rendered
 		colour = RGBA_MAKE(MUL_FIXED(c,rScale),MUL_FIXED(c,gScale),MUL_FIXED(c,bScale),255);
 /*
-		// top right?
+		// top left?
 		mainVertex[vb].x = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
 		mainVertex[vb].y = (float)yTop;
 		mainVertex[vb].z = 0.0f;
@@ -2741,7 +2775,7 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 
 		vb++;
 
-		// bottom right?
+		// bottom left?
 		mainVertex[vb].x = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
 		mainVertex[vb].y = (float)yBottom;
 		mainVertex[vb].z = 0.0f;
@@ -2757,7 +2791,7 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 		c = GammaValues[i];
 		colour = RGBA_MAKE(MUL_FIXED(c,rScale),MUL_FIXED(c,gScale),MUL_FIXED(c,bScale),255);
 /*
-		//
+		// bottom
 		mainVertex[vb].x = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
 		mainVertex[vb].y = (float)yBottom;
 		mainVertex[vb].z = 0.0f;

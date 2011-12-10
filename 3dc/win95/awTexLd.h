@@ -1,3 +1,5 @@
+#if 0
+
 #ifndef _INCLUDED_AWTEXLD_H_
 #define _INCLUDED_AWTEXLD_H_
 
@@ -548,3 +550,5 @@ extern AVPTEXTURE * _AWTL_VARARG AwCreateTexture(char const * _argFormatS, ...);
 #endif /* __cplusplus */
 
 #endif /* ! _INCLUDED_AWTEXLD_H_ */
+
+#endif

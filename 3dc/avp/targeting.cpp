@@ -12,10 +12,8 @@
 #include "comp_shp.h"
 #include "load_shp.h"
 #include "huddefs.h"
-
 #define UseLocalAssert TRUE
 #include "ourasert.h"
-
 #include "dynblock.h"
 #include "dynamics.h"
 #include "lighting.h"
@@ -32,26 +30,21 @@
 #include "bh_agun.h"
 #include "weapons.h"
 #include "avpview.h"
-
 #include "psnd.h"
 #include "vision.h"
 #include "plat_shp.h"
-
 #include "particle.h"
 #include "psndproj.h"
 #include "showcmds.h"
 #include "los.h"
 #include <math.h>
- 
-
 #include "paintball.h"
-/* for win 95 net support */
 #include "pldghost.h"
 #include "pldnet.h"
 
 /*KJL****************************************************************************************
-*  										G L O B A L S 	            					    *
-****************************************************************************************KJL*/
+*                                       G L O B A L S                                       *
+*****************************************************************************************KJL*/
 
 void SmartTarget_GetCofM(DISPLAYBLOCK *target,VECTORCH *viewSpaceOutput);
 void GetTargetingPointOfObject(DISPLAYBLOCK *objectPtr, VECTORCH *targetPtr);
@@ -87,16 +80,16 @@ void CalculateWhereGunIsPointing(TEMPLATE_WEAPON_DATA *twPtr, PLAYER_WEAPON_DATA
 
 //	textprint("Calculating where gun is pointing...\n");
 
-	/* unnormalised vector in the direction	which the gun's muzzle is pointing, IN VIEW SPACE */				
+	/* unnormalised vector in the direction	which the gun's muzzle is pointing, IN VIEW SPACE */
 	/* very useful when considering sprites, which lie in a Z-plane in view space */
- 	GunMuzzleDirectionInVS.vz = 65536;
-    GunMuzzleDirectionInVS.vx = 
-    	(GunMuzzleSightX-(ScreenDescriptorBlock.SDB_Width<<15))/(VDBPtr->VDB_ProjX);
+	GunMuzzleDirectionInVS.vz = 65536;
+	GunMuzzleDirectionInVS.vx = 
+		(GunMuzzleSightX-(ScreenDescriptorBlock.SDB_Width<<15))/(VDBPtr->VDB_ProjX);
 	GunMuzzleDirectionInVS.vy = 
 		/*((*/(GunMuzzleSightY-(ScreenDescriptorBlock.SDB_Height<<15))/(VDBPtr->VDB_ProjY)/*)*3)/4*/;
-    
+
 	/* Now fudge for gun judder! */
- 	if ((twPtr->UseStateMovement==0)||(weaponPtr->WeaponIDNumber == WEAPON_MINIGUN)) 
+	if ((twPtr->UseStateMovement==0)||(weaponPtr->WeaponIDNumber == WEAPON_MINIGUN)) 
 	{
 		if ((weaponPtr->CurrentState==WEAPONSTATE_FIRING_PRIMARY) 
 			||( (weaponPtr->CurrentState==WEAPONSTATE_FIRING_SECONDARY)&&(weaponPtr->WeaponIDNumber == WEAPON_TWO_PISTOLS) ))
@@ -110,43 +103,43 @@ void CalculateWhereGunIsPointing(TEMPLATE_WEAPON_DATA *twPtr, PLAYER_WEAPON_DATA
 				{
 					weaponPtr->PositionOffset.vz = (FastRandom()%twPtr->RecoilMaxRandomZ) - twPtr->RecoilMaxZ;
 				}
-								
+
 				if ((Weapon_ThisBurst>0)||(weaponPtr->WeaponIDNumber == WEAPON_TWO_PISTOLS)) 
 				{
 					/* jiggle the weapon around when you shoot */
 					int speed=Approximate3dMagnitude(&Player->ObStrategyBlock->DynPtr->LinVelocity);
 					/* speed should be between ~0 and ~27000 (jumping alien). ~15000 is a moving marine. */
-					
+
 					if (twPtr->RecoilMaxXTilt > 0) 
 					{
 						judder.EulerX=(FastRandom()%twPtr->RecoilMaxXTilt)-twPtr->RecoilMaxXTilt/2;
-					} 
-					else 
+					}
+					else
 					{
 						judder.EulerX=0;
 					}
 					if (twPtr->RecoilMaxYTilt > 0) 
 					{
 						judder.EulerY=(FastRandom()%twPtr->RecoilMaxYTilt)-twPtr->RecoilMaxYTilt/2;
-					} 
-					else 
+					}
+					else
 					{
 						judder.EulerY = 0;
 					}
 					judder.EulerZ = 0;
-	
+
 					judder.EulerX = MUL_FIXED(judder.EulerX,(ONE_FIXED+(speed<<2)));
 					judder.EulerY = MUL_FIXED(judder.EulerY,(ONE_FIXED+(speed<<2)));
 
 					judder.EulerX&=wrap360;
 					judder.EulerY&=wrap360;
-	
+
 					CreateEulerMatrix(&judder, &juddermat);
 					RotateVector(&GunMuzzleDirectionInVS, &juddermat);
 				}
 			}
-		} 
-		else 
+		}
+		else
 		{
 			/* Recentre Z offset. */
 			int linearCenteringSpeed = MUL_FIXED(300,NormalFrameTime);
@@ -154,19 +147,19 @@ void CalculateWhereGunIsPointing(TEMPLATE_WEAPON_DATA *twPtr, PLAYER_WEAPON_DATA
 			if (weaponPtr->PositionOffset.vz > 0)
 			{
 				weaponPtr->PositionOffset.vz -= linearCenteringSpeed;
-				if (weaponPtr->PositionOffset.vz < 0) weaponPtr->PositionOffset.vz = 0;	
+				if (weaponPtr->PositionOffset.vz < 0) weaponPtr->PositionOffset.vz = 0;
 			}
 			else if (weaponPtr->PositionOffset.vz < 0)
 			{
 				weaponPtr->PositionOffset.vz += linearCenteringSpeed;
-				if (weaponPtr->PositionOffset.vz > 0) weaponPtr->PositionOffset.vz = 0;	
+				if (weaponPtr->PositionOffset.vz > 0) weaponPtr->PositionOffset.vz = 0;
 			}
 		}
 	}
 
-    GunMuzzleDirectionInWS = GunMuzzleDirectionInVS;
-    /* rotate vector into world space and then normalise */
-    RotateVector(&GunMuzzleDirectionInWS, &matrix);
+	GunMuzzleDirectionInWS = GunMuzzleDirectionInVS;
+	/* rotate vector into world space and then normalise */
+	RotateVector(&GunMuzzleDirectionInWS, &matrix);
 	Normalise(&GunMuzzleDirectionInWS);
 }
 
@@ -223,7 +216,7 @@ void CalculatePlayersTarget(TEMPLATE_WEAPON_DATA *twPtr, PLAYER_WEAPON_DATA *wea
 	{
 		GLOBALASSERT(PlayersTarget.DispPtr->HModelControlBlock==PlayersTarget.HModelSection->my_controller);
 	}
-  	
+
 	if (AvP.Network!=I_No_Network) 
 	{
 		AddNetMsg_PredatorLaserSights(&PlayersTarget.Position,&LOS_ObjectNormal,PlayersTarget.DispPtr);
@@ -250,7 +243,7 @@ void CalculatePlayersTarget(TEMPLATE_WEAPON_DATA *twPtr, PLAYER_WEAPON_DATA *wea
 		{
 			VECTORCH position = offset[i];
 
-		  	RotateVector(&position, &matrix);
+			RotateVector(&position, &matrix);
 			position.vx += Global_VDB_Ptr->VDB_World.vx;
 			position.vy += Global_VDB_Ptr->VDB_World.vy;
 			position.vz += Global_VDB_Ptr->VDB_World.vz;
@@ -259,7 +252,7 @@ void CalculatePlayersTarget(TEMPLATE_WEAPON_DATA *twPtr, PLAYER_WEAPON_DATA *wea
 
 			if (PlayersTarget.DispPtr)
 			{
-				PredatorLaserTarget.Position[i] = LOS_Point;	
+				PredatorLaserTarget.Position[i] = LOS_Point;
 			}
 			else
 			{
@@ -268,18 +261,17 @@ void CalculatePlayersTarget(TEMPLATE_WEAPON_DATA *twPtr, PLAYER_WEAPON_DATA *wea
 				PredatorLaserTarget.Position[i].vy = Global_VDB_Ptr->VDB_World.vy + (Global_VDB_Ptr->VDB_Mat.mat23<<7);
 				PredatorLaserTarget.Position[i].vz = Global_VDB_Ptr->VDB_World.vz + (Global_VDB_Ptr->VDB_Mat.mat33<<7);
 			}
-
 		}
 		while(i--);
 		PredatorLaserTarget.ShouldBeDrawn=1;
-  	}
+	}
 	else
 	{
 		PredatorLaserTarget.ShouldBeDrawn=0;
 	}
 }
 
-BOOL CalculateFiringSolution(VECTORCH* firing_pos,VECTORCH* target_pos,VECTORCH* target_vel,int projectile_speed,VECTORCH* solution)
+BOOL CalculateFiringSolution(VECTORCH* firing_pos,VECTORCH* target_pos, VECTORCH* target_vel, int projectile_speed, VECTORCH* solution)
 {
 	VECTORCH normal; //normal from firer to target
 	VECTORCH rotated_vel; 
@@ -308,7 +300,6 @@ BOOL CalculateFiringSolution(VECTORCH* firing_pos,VECTORCH* target_pos,VECTORCH*
 	{
 		//normal will be the third row
 		VECTORCH row1,row2;
-		
 
 		if(normal.vx>30000 || normal.vx<-30000 || normal.vy>30000 || normal.vy<-30000)
 		{
@@ -316,7 +307,7 @@ BOOL CalculateFiringSolution(VECTORCH* firing_pos,VECTORCH* target_pos,VECTORCH*
 			row1.vy=normal.vx;
 			row1.vz=0;
 		}
-		else 
+		else
 		{
 			row1.vx=-normal.vz;
 			row1.vy=0;
@@ -325,7 +316,7 @@ BOOL CalculateFiringSolution(VECTORCH* firing_pos,VECTORCH* target_pos,VECTORCH*
 		Normalise(&row1);
 
 		CrossProduct(&normal,&row1,&row2);
-	
+
 		mat.mat11=row1.vx;
 		mat.mat21=row1.vy;
 		mat.mat31=row1.vz;
@@ -385,7 +376,7 @@ void SmartTarget(int speed,int projectile_speed)
 	DISPLAYBLOCK *trackedObject;
 
 	if (SmartgunMode==I_Track) {
-		trackedObject=SmartTarget_GetNewTarget();	
+		trackedObject=SmartTarget_GetNewTarget();
 	} else {
 		trackedObject=NULL;
 	}
@@ -403,16 +394,16 @@ void SmartTarget(int speed,int projectile_speed)
 			VIEWDESCRIPTORBLOCK *VDBPtr = ActiveVDBList[0];
 			#if 0
 			STRATEGYBLOCK *sbPtr = trackedObject->ObStrategyBlock;
-		   	int offsetX,offsetY;
+			int offsetX,offsetY;
 			
 			{
-			  	/* calculate offset required to aim at the middle torso rather
+				/* calculate offset required to aim at the middle torso rather
 				than the sprite's bollocks */
 				MATRIXCH mat;
 				int offsetMag;
 				{
-					SHAPEHEADER	*shapePtr = GetShapeData(sbPtr->SBdptr->ObShape);
-			   		offsetMag = shapePtr->shapeminy/2;
+					SHAPEHEADER *shapePtr = GetShapeData(sbPtr->SBdptr->ObShape);
+					offsetMag = shapePtr->shapeminy/2;
 				}
 				
 				offsetX = MUL_FIXED(trackedObject->ObMat.mat21,offsetMag);
@@ -447,39 +438,39 @@ void SmartTarget(int speed,int projectile_speed)
 					}
 				}
 			}
-			
+
 			if (targetView.vz>0)
 			{
 				screenX = WideMulNarrowDiv
-								(				 			
+								(
 									//trackedObject->ObView.vx,//+offsetX,
 									targetView.vx,
 									VDBPtr->VDB_ProjX,
 									//trackedObject->ObView.vz
 									targetView.vz
 								);
-			   	screenY = WideMulNarrowDiv
-			   					(
-			   						//trackedObject->ObView.vy,//+offsetY,  
+				screenY = WideMulNarrowDiv
+								(
+									//trackedObject->ObView.vy,//+offsetY,
 									targetView.vy*4,
-			   						VDBPtr->VDB_ProjY,	    	  
+									VDBPtr->VDB_ProjY,
 									//trackedObject->ObView.vz
 									(targetView.vz*3)
 								);
-		  		CurrentlySmartTargetingObject=1;
+				CurrentlySmartTargetingObject=1;
 			}
 			else
 			{
-		   		screenX=0;
-		   		screenY=0;	   
+				screenX=0;
+				screenY=0;
 			}
-	  	}
-	   	else
-	   	{
-	   		screenX=0;
-	   		screenY=0;	   
 		}
-		
+		else
+		{
+			screenX=0;
+			screenY=0;
+		}
+
 		{
 			extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 			int targetX,targetY,dx,dy;
@@ -489,7 +480,7 @@ void SmartTarget(int speed,int projectile_speed)
 			   at very low frame rates to ensure that the sight doesn't jump about
 			   all over the place. */
 			if (targetingSpeed > 65536)	targetingSpeed=65536;
-							
+
 			targetX = (ScreenDescriptorBlock.SDB_Width>>1);
 			targetY = (ScreenDescriptorBlock.SDB_Height>>1);
 
@@ -498,7 +489,7 @@ void SmartTarget(int speed,int projectile_speed)
 				
 				if ((screenX>-maxRangeX) && (screenX<maxRangeX))
 				{
-		  			int maxRangeY = (ScreenDescriptorBlock.SDB_Height*14)/32; /* gives nearly 90% of screen */
+					int maxRangeY = (ScreenDescriptorBlock.SDB_Height*14)/32; /* gives nearly 90% of screen */
 			
 					if ((screenY>-maxRangeY) && (screenY<maxRangeY))
 					{
@@ -509,38 +500,38 @@ void SmartTarget(int speed,int projectile_speed)
 				}
 				else CurrentlySmartTargetingObject=0;
 			}
-		  		
+
 			if (speed<=0)
 			{
-    	        SmartTargetSightX = targetX<<16;
-        	    SmartTargetSightY = targetY<<16;
+				SmartTargetSightX = targetX<<16;
+				SmartTargetSightY = targetY<<16;
 			}
 			else
 			{
 				dx = MUL_FIXED( ((targetX<<16)-SmartTargetSightX), targetingSpeed );
-			  	dy = MUL_FIXED( ((targetY<<16)-SmartTargetSightY), targetingSpeed );
-		
+				dy = MUL_FIXED( ((targetY<<16)-SmartTargetSightY), targetingSpeed );
+
 				/* If the x-coord difference between the sight and the target is small,
 				   just move the sight so that it has the same x-coord as the target.
 				   This stops the sight from hovering a pixel away from where it should be */
 				if (dx>16384 || dx<-16384) SmartTargetSightX += dx;
-    	        else SmartTargetSightX = targetX<<16;
-            
-	            /* Similarly for the y-coord */
+				else SmartTargetSightX = targetX<<16;
+
+				/* Similarly for the y-coord */
 				if (dy>16384 || dy<-16384) SmartTargetSightY += dy;
-        	    else SmartTargetSightY = targetY<<16;
+				else SmartTargetSightY = targetY<<16;
 			}
-	 	}
-    }
+		}
+	}
 	
 	Old_SmartTarget_Object=SmartTarget_Object;
 
-   	if (CurrentlySmartTargetingObject) {
+	if (CurrentlySmartTargetingObject) {
 		SmartTarget_Object=trackedObject;
 	} else {
 		SmartTarget_Object=NULL;
 	}
-    
+
 	return;
 }
 
@@ -556,7 +547,7 @@ DISPLAYBLOCK *SmartTarget_GetNewTarget(void) {
 	DISPLAYBLOCK *track_array[SMART_TRACKABLE_TARGETS];
 
 	target=NULL;
-		
+
 	nearestObjectPtr=NULL;
 
 	for (a=0; a<SMART_TRACKABLE_TARGETS; a++) {
@@ -568,14 +559,14 @@ DISPLAYBLOCK *SmartTarget_GetNewTarget(void) {
 	{
 		DISPLAYBLOCK* objectPtr = OnScreenBlockList[numberOfObjects];
 		STRATEGYBLOCK* sbPtr = objectPtr->ObStrategyBlock;
-				
+
 		if (sbPtr && sbPtr->DynPtr)
 		{
 			VECTORCH viewPos;
 			/* Arc reject. */
 			SmartTarget_GetCofM(objectPtr,&viewPos);
 			if (viewPos.vz>0) {
-				if (SmartTarget_TargetFilter(sbPtr))	{
+				if (SmartTarget_TargetFilter(sbPtr)) {
 					if (a<SMART_TRACKABLE_TARGETS) {
 						track_array[a]=objectPtr;
 						a++;
@@ -591,7 +582,6 @@ DISPLAYBLOCK *SmartTarget_GetNewTarget(void) {
 	b=a;
 	c=a;
 
-
 	while (b--) {
 
 		int notFar;
@@ -602,8 +592,8 @@ DISPLAYBLOCK *SmartTarget_GetNewTarget(void) {
 
 		a=c;
 
-		while (a) {
-
+		while (a)
+		{
 			DISPLAYBLOCK* objectPtr;
 			STRATEGYBLOCK* sbPtr;
 
@@ -615,7 +605,7 @@ DISPLAYBLOCK *SmartTarget_GetNewTarget(void) {
 				/* calc distance to player - no parallel strat support yet */
 				/* 2d vector from player to object */
 				int dist = FandVD_Distance_3d(&objectPtr->ObWorld,&Player->ObWorld);
-				
+
 				sbPtr = objectPtr->ObStrategyBlock;
 
 				if (dist<nearestObjectDist)
@@ -638,12 +628,11 @@ DISPLAYBLOCK *SmartTarget_GetNewTarget(void) {
 			} else {
 				/* Remove from list. */
 				track_array[notFar]=NULL;
-			}		
+			}
 		}
 	}
 
 	return(target);
-
 }
 
 void SmartTarget_GetCofM(DISPLAYBLOCK *target,VECTORCH *viewSpaceOutput) {
@@ -668,7 +657,7 @@ void SmartTarget_GetCofM(DISPLAYBLOCK *target,VECTORCH *viewSpaceOutput) {
 		NETGHOSTDATABLOCK *dataptr = static_cast<NETGHOSTDATABLOCK*>(target->ObStrategyBlock->SBdataptr);
 
 		targetType=dataptr->type;
-	} 
+	}
 	else if (
 		(target->ObStrategyBlock->I_SBtype==I_BehaviourMarinePlayer)||
 		(target->ObStrategyBlock->I_SBtype==I_BehaviourAlienPlayer)||
@@ -778,10 +767,7 @@ void SmartTarget_GetCofM(DISPLAYBLOCK *target,VECTORCH *viewSpaceOutput) {
 			}
 			break;
 	}
-
 }
-
-
 
 int SmartTarget_TargetFilter(STRATEGYBLOCK *candidate)
 {
@@ -806,10 +792,10 @@ int SmartTarget_TargetFilter(STRATEGYBLOCK *candidate)
 				}
 				if (candidate->I_SBtype==I_BehaviourMarine && !NPC_IsDead(candidate))
 				{
-					MARINE_STATUS_BLOCK *marineStatusPointer;    	
+					MARINE_STATUS_BLOCK *marineStatusPointer;
 					LOCALASSERT(candidate);
 					marineStatusPointer = (MARINE_STATUS_BLOCK *)(candidate->SBdataptr);
-					LOCALASSERT(marineStatusPointer);	
+					LOCALASSERT(marineStatusPointer);
 					
 					if (marineStatusPointer->My_Weapon->Android) {
 						return(1);
@@ -819,7 +805,7 @@ int SmartTarget_TargetFilter(STRATEGYBLOCK *candidate)
 				}
 				if (candidate->I_SBtype==I_BehaviourNetGhost)
 				{
-			   		NETGHOSTDATABLOCK *ghostDataPtr = (NETGHOSTDATABLOCK *)candidate->SBdataptr;
+					NETGHOSTDATABLOCK *ghostDataPtr = (NETGHOSTDATABLOCK *)candidate->SBdataptr;
 
 					if (ghostDataPtr->type==I_BehaviourAlienPlayer || ghostDataPtr->type==I_BehaviourAlien)
 					{
@@ -832,10 +818,10 @@ int SmartTarget_TargetFilter(STRATEGYBLOCK *candidate)
 			{
 				if (candidate->I_SBtype==I_BehaviourMarine && !NPC_IsDead(candidate))
 				{
-					MARINE_STATUS_BLOCK *marineStatusPointer;    	
+					MARINE_STATUS_BLOCK *marineStatusPointer;
 					LOCALASSERT(candidate);
 					marineStatusPointer = (MARINE_STATUS_BLOCK *)(candidate->SBdataptr);
-					LOCALASSERT(marineStatusPointer);	
+					LOCALASSERT(marineStatusPointer);
 					
 					if (marineStatusPointer->My_Weapon->Android) {
 						return(0);
@@ -844,8 +830,8 @@ int SmartTarget_TargetFilter(STRATEGYBLOCK *candidate)
 					}
 				}
 				if (candidate->I_SBtype==I_BehaviourNetGhost)
-			   	{
-			   		NETGHOSTDATABLOCK *ghostDataPtr = (NETGHOSTDATABLOCK *)candidate->SBdataptr;
+				{
+					NETGHOSTDATABLOCK *ghostDataPtr = (NETGHOSTDATABLOCK *)candidate->SBdataptr;
 
 					if (ghostDataPtr->type==I_BehaviourMarinePlayer || ghostDataPtr->type==I_BehaviourMarine)
 					{
@@ -863,7 +849,7 @@ int SmartTarget_TargetFilter(STRATEGYBLOCK *candidate)
 				}
 				if (candidate->I_SBtype==I_BehaviourNetGhost)
 				{
-			   		NETGHOSTDATABLOCK *ghostDataPtr = (NETGHOSTDATABLOCK *)candidate->SBdataptr;
+					NETGHOSTDATABLOCK *ghostDataPtr = (NETGHOSTDATABLOCK *)candidate->SBdataptr;
 
 					if (ghostDataPtr->type==I_BehaviourPredatorPlayer || ghostDataPtr->type==I_BehaviourPredator)
 					{
@@ -900,7 +886,7 @@ int SmartTarget_TargetFilter(STRATEGYBLOCK *candidate)
 	} else if (weaponPtr->WeaponIDNumber == WEAPON_SMARTGUN) {
 		/* Don't target marines if Friendly Fire is disabled. */
 		if (netGameData.disableFriendlyFire && (netGameData.gameType==NGT_CoopDeathmatch || netGameData.gameType==NGT_Coop)) {
-	   		NETGHOSTDATABLOCK *ghostDataPtr = (NETGHOSTDATABLOCK *)candidate->SBdataptr;
+			NETGHOSTDATABLOCK *ghostDataPtr = (NETGHOSTDATABLOCK *)candidate->SBdataptr;
 			if (ghostDataPtr->type==I_BehaviourMarinePlayer || ghostDataPtr->type==I_BehaviourMarine) {
 				return(0);
 			}
@@ -970,15 +956,13 @@ int SmartTarget_TargetFilter(STRATEGYBLOCK *candidate)
 					case I_BehaviourProximityGrenade:
 						{
 							DYNAMICSBLOCK *dynPtr=candidate->DynPtr;
-	
+
 							/* Only visible when moving. */
-	
+
 							if (!((dynPtr->Position.vx==dynPtr->PrevPosition.vx)
 								&&(dynPtr->Position.vy==dynPtr->PrevPosition.vy)
 								&&(dynPtr->Position.vz==dynPtr->PrevPosition.vz) )) {
-						
 								return(1);
-							
 							} else {
 								return(0);
 							}
@@ -1012,7 +996,6 @@ void GetTargetingPointOfObject_Far(STRATEGYBLOCK *sbPtr, VECTORCH *targetPtr)
 			GLOBALASSERT(0);
 		}
 	}
-	
 }
 
 void GetTargetingPointOfObject(DISPLAYBLOCK *objectPtr, VECTORCH *targetPtr)
@@ -1023,10 +1006,10 @@ void GetTargetingPointOfObject(DISPLAYBLOCK *objectPtr, VECTORCH *targetPtr)
 		SECTION_DATA *targetSectionPtr;
 		SECTION_DATA *firstSectionPtr;
 
-	  	ProveHModel(objectPtr->HModelControlBlock,objectPtr);
+		ProveHModel(objectPtr->HModelControlBlock,objectPtr);
 
-	  	firstSectionPtr=objectPtr->HModelControlBlock->section_data;
-	  	LOCALASSERT(firstSectionPtr);
+		firstSectionPtr=objectPtr->HModelControlBlock->section_data;
+		LOCALASSERT(firstSectionPtr);
 		LOCALASSERT(firstSectionPtr->flags&section_data_initialised);
 
 		/* look for the object's torso in preference */
@@ -1082,6 +1065,5 @@ void GetTargetingPointOfObject(DISPLAYBLOCK *objectPtr, VECTORCH *targetPtr)
 		{
 			*targetPtr = objectPtr->ObWorld;
 		}
-
 	}
 }

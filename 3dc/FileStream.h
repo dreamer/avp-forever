@@ -73,7 +73,9 @@ class FileStream
 			fileSize = 0;
 		}
 		~FileStream();
-		bool Open(const std::string &fileName, eAccess accessType);
+
+		// pass true for skipFastFileCheck to skip fast file check, for accessing files we know aren't in a fast file
+		bool FileStream::Open(const std::string &fileName, eAccess accessType, bool skipFastFileCheck = false);
 		void Close();
 		bool IsGood();
 
@@ -101,7 +103,6 @@ class FileStream
 		bool WriteString(const std::string &theString);
 		bool WriteString(const char *theString);
 		uint32_t GetFileSize();
-		bool DoesFileExist(const std::string &fileName);
 		bool Seek(int64_t offset, eSeek seekType);
 		bool SkipBytes(int64_t nBytes);
 		int64_t FileStream::GetCurrentPos();
@@ -116,6 +117,7 @@ class FileStream
 		uint32_t fileSize;
 };
 
+bool DoesFileExist(const std::string &fileName);
 bool FindFiles(const std::string &fileName, std::vector<std::string> &filesFound);
 
 #endif

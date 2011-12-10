@@ -23,6 +23,7 @@ static void LoadMenuFont(void);
 static void UnloadMenuFont(void);
 extern int RenderSmallFontString(char *textPtr,int sx,int sy,int alpha, int red, int green, int blue);
 static void CalculateWidthsOfAAFont(void);
+extern bool IsDemoVersion();
 
 texID_t AVPMENUGFX_CLOUDY;
 texID_t AVPMENUGFX_SMALL_FONT;
@@ -117,7 +118,20 @@ static void LoadMenuFont(void)
 		will fit nicely into a 512 x 512 d3d texture
 	*/
 
-	IntroFont_Light.height = 33;
+	if (IsDemoVersion())
+	{
+		IntroFont_Light.charHeight = 21;
+		IntroFont_Light.nRows    = 8;
+		IntroFont_Light.nColumns = 8;
+	}
+	else
+	{
+		IntroFont_Light.charHeight = 33;
+		IntroFont_Light.nRows    = 15;
+		IntroFont_Light.nColumns = 15;
+	}
+
+	IntroFont_Light.charWidth = 30;
 	IntroFont_Light.swidth = 5;
 	IntroFont_Light.ascii  = 32;
 
@@ -138,20 +152,20 @@ static void LoadMenuFont(void)
 
 	uint8_t *srcPtr = srcBuffer;
 
-	IntroFont_Light.numchars = height / 33;
+	IntroFont_Light.numchars = height / IntroFont_Light.charHeight;
 	IntroFont_Light.FontWidth[32] = 5;
 
 	for (int c = 33; c < (32+IntroFont_Light.numchars); c++)
 	{
-		int y1 = 1+(c-32)*33;
+		int y1 = 1+(c-32) * IntroFont_Light.charHeight;
 
-		IntroFont_Light.FontWidth[c] = 31;
+		IntroFont_Light.FontWidth[c] = IntroFont_Light.charWidth + 1;//31;
 
-		for (int x = 29; x > 0; x--)
+		for (int x = IntroFont_Light.charWidth - 1; x > 0; x--)
 		{
 			bool blank = true;
 
-			for (int y = y1; y < y1+31; y++)
+			for (int y = y1; y < y1 + (IntroFont_Light.charHeight-2); y++)
 			{
 				uint8_t *s = &srcPtr[(x + y * width) * sizeof(uint32_t)];
 				if (s[2])
@@ -167,6 +181,15 @@ static void LoadMenuFont(void)
 			else {
 				break;
 			}
+		}
+	}
+
+	if (IsDemoVersion())
+	{
+		// the demo font graphic has no lowercase letters, so set all lowercase entry widths to same as uppercase
+		for (int i = 0; i < 26; i++)
+		{
+			IntroFont_Light.FontWidth['a'+i] = IntroFont_Light.FontWidth['A'+i];
 		}
 	}
 
@@ -235,7 +258,9 @@ extern int RenderMenuText(char *textPtr, int pX, int pY, int alpha, enum AVPMENU
 			if (size < 18) 
 				size = 18;
 
-			DrawMenuTextGlow(pX+18, pY-8, size-18, alpha);
+			if (!IsDemoVersion()) {
+				DrawMenuTextGlow(pX+18, pY-8, size-18, alpha);
+			}
 		}
 	}
 
@@ -247,22 +272,31 @@ extern int RenderMenuText(char *textPtr, int pX, int pY, int alpha, enum AVPMENU
 	{
 		char c = *textPtr++;
 
+		/*
+		 * Demo font graphics have no lowercase
+		 * letters, so convert all lowercase letters
+		 * to uppercase
+		 */ 
+		if (IsDemoVersion()) {
+			c = toupper(c);
+		}
+
 		if (c >= ' ')
 		{
 			uint32_t charWidth = IntroFont_Light.FontWidth[(unsigned int) c];
 
 			c = c - 32;
 
-			int row = (int)(c / 15); // get row 
-			int column = c % 15;     // get column from remainder value
+			int row = (int)(c / IntroFont_Light.nRows); // get row 
+			int column = c % IntroFont_Light.nColumns;  // get column from remainder value
 
-			int tex_y = row    * 33;
-			int tex_x = column * 30;
+			int tex_y = row    * IntroFont_Light.charHeight;
+			int tex_x = column * IntroFont_Light.charWidth;
 
 			int topLeftU = tex_x;
 			int topLeftV = tex_y;
 
-			DrawTallFontCharacter(positionX, positionY, IntroFont_Light.textureID, topLeftU, topLeftV, charWidth, alpha);
+			DrawTallFontCharacter(positionX, positionY, IntroFont_Light.textureID, topLeftU, topLeftV, charWidth, IntroFont_Light.charHeight, alpha);
 
 			positionX   += charWidth;
 			word_length += charWidth;
@@ -279,13 +313,12 @@ extern int RenderMenuText_Clipped(char *textPtr, int pX, int pY, int alpha, enum
 	return pX;
 }
 
-
 extern int RenderSmallMenuText(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format) 
 {
 	int length;
 	char *ptr;
 
-	switch(format)
+	switch (format)
 	{
 		default:
 		GLOBALASSERT("UNKNOWN TEXT FORMAT"==0);
@@ -299,7 +332,7 @@ extern int RenderSmallMenuText(char *textPtr, int x, int y, int alpha, enum AVPM
 			length = 0;
 			ptr = textPtr;
 
-			while(*ptr)
+			while (*ptr)
 			{
 				//length+=AAFontWidths[*ptr++];
 				length += AAFontWidths[(unsigned int) *ptr++];
@@ -313,7 +346,7 @@ extern int RenderSmallMenuText(char *textPtr, int x, int y, int alpha, enum AVPM
 			length = 0;
 			ptr = textPtr;
 
-			while(*ptr)
+			while (*ptr)
 			{
 				//length+=AAFontWidths[*ptr++];
 				length += AAFontWidths[(unsigned int) *ptr++];

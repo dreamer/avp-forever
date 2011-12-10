@@ -24,12 +24,12 @@
 
 #include <stdio.h>
 #include "VorbisPlayer.h"
-#include "logString.h"
 #include <process.h>
 #include <vector>
 #include <fstream>
 #include <assert.h>
 #include "utilities.h" // avp_open()
+#include "logstring.h"
 #include "console.h"
 #include <new>
 

@@ -27,7 +27,7 @@
 #include "console.h"
 #include <assert.h>
 #include <process.h>
-#include "logstring.h"
+#include "utilities.h"
 
 static const int kAudioBufferCount = 3;
 static const int kAudioBufferSize  = 4096;
@@ -230,7 +230,7 @@ int TheoraPlayback::Open(const std::string &fileName)
 		}
 
 		// create the texture with desired parameters
-		frameTextureIDs[i] = Tex_Create(/*"CUTSCENE_"*/fileName + IntToString(i), width, height, mNumTextureBits, TextureUsage_Dynamic);
+		frameTextureIDs[i] = Tex_Create(/*"CUTSCENE_"*/fileName + Util::IntToString(i), width, height, mNumTextureBits, TextureUsage_Dynamic);
 		if (frameTextureIDs[i] == MISSING_TEXTURE)
 		{
 			Con_PrintError("Unable to create texture(s) for FMV playback");
