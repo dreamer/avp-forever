@@ -555,7 +555,7 @@ void PlayCudgelSound(void)
 	}
 }
 
-int FindAndLoadWavFile(int soundNum, char* wavFileName)
+int FindAndLoadWavFile(int soundNum, const char* wavFileName)
 {
 	std::string fileName = FirstSoundDir;
 	fileName += wavFileName;

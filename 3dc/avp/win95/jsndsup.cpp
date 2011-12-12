@@ -136,7 +136,6 @@ LOADED_SOUND const * GetSound(char const *fname)
 	}
 	
 	// not loaded, so try and load it
-	
 	int soundNum = find_empty_game_sound();
 	if (soundNum == -1)
 	{
@@ -144,7 +143,7 @@ LOADED_SOUND const * GetSound(char const *fname)
 		return 0;
 	}
 
-	int ok = FindAndLoadWavFile (soundNum, (char *)fname);
+	int ok = FindAndLoadWavFile(soundNum, fname);
 
 	if (ok)
 	{

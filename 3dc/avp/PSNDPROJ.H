@@ -379,7 +379,7 @@ void PlayWeaponClickingNoise(enum WEAPON_ID weaponIDNumber);
 extern void LoadSounds(char *soundDirectory);
 
 //loads wav file locally or from network or from fast file as appropriate
-extern int FindAndLoadWavFile(int soundNum,char* wavFileName);
+extern int FindAndLoadWavFile(int soundNum, const char* wavFileName);
 
 /* Patrick 10/6/97 -------------------------------------------------------------
   Enumeration of CDDA tracks
