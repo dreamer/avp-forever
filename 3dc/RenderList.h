@@ -77,10 +77,13 @@ class RenderList
 
 	void Reset();
 	void RenderList::Init(size_t size);
+
 	size_t RenderList::GetCapacity() const { return capacity; }
+	size_t RenderList::GetSize()     const { return listIndex; }
+
 	uint32_t RenderList::GetVertexCount() const { return vertexCount; }
-	uint32_t RenderList::GetIndexCount() const { return indexCount; }
-	uint32_t RenderList::GetSize() const { return indexCount; }
+	uint32_t RenderList::GetIndexCount()  const { return indexCount; }
+	
 	void RenderList::Sort();
 	void RenderList::AddTriangle(uint16_t *indexArray, uint32_t a, uint32_t b, uint32_t c, uint32_t n);
 	void RenderList::AddItem(uint32_t numVerts, texID_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON, enum TEXTURE_ADDRESS_MODE textureAddress = TEXTURE_WRAP, enum ZWRITE_ENABLE = ZWRITE_ENABLED);
