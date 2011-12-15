@@ -334,7 +334,6 @@ extern int RenderSmallMenuText(char *textPtr, int x, int y, int alpha, enum AVPM
 
 			while (*ptr)
 			{
-				//length+=AAFontWidths[*ptr++];
 				length += AAFontWidths[(unsigned int) *ptr++];
 			}
 
@@ -348,7 +347,6 @@ extern int RenderSmallMenuText(char *textPtr, int x, int y, int alpha, enum AVPM
 
 			while (*ptr)
 			{
-				//length+=AAFontWidths[*ptr++];
 				length += AAFontWidths[(unsigned int) *ptr++];
 			}
 
@@ -381,7 +379,7 @@ extern int RenderSmallMenuText_Coloured(char *textPtr, int x, int y, int alpha, 
 
 			while(*ptr)
 			{
-				length+=AAFontWidths[*ptr++];
+				length += AAFontWidths[*ptr++];
 			}
 
 			x -= length;
@@ -394,7 +392,7 @@ extern int RenderSmallMenuText_Coloured(char *textPtr, int x, int y, int alpha, 
 
 			while(*ptr)
 			{
-				length+=AAFontWidths[*ptr++];
+				length += AAFontWidths[*ptr++];
 			}
 
 			x -= length/2;
@@ -759,7 +757,13 @@ void LoadAllMenuTextures()
 {
 	AVPMENUGFX_CLOUDY = Tex_CreateFromRIM("graphics/Menus/fractal.RIM");
 
-	AVPMENUGFX_SMALL_FONT       = Tex_CreateFromRIM("graphics/Common/aa_font.RIM");
+	if (IsDemoVersion()) {
+		AVPMENUGFX_SMALL_FONT = Tex_CreateFromRIM("graphics/Menus/smallfont.RIM");
+	}
+	else {
+		AVPMENUGFX_SMALL_FONT = Tex_CreateFromRIM("graphics/Common/aa_font.RIM");
+	}
+
 	AVPMENUGFX_COPYRIGHT_SCREEN = Tex_CreateFromRIM("graphics/Menus/Copyright.RIM");
 
 	AVPMENUGFX_PRESENTS        = Tex_CreateFromRIM("graphics/Menus/FIandRD.RIM");
@@ -1076,8 +1080,8 @@ static void CalculateWidthsOfAAFont(void)
 	Tex_GetDimensions(AVPMENUGFX_SMALL_FONT, textureWidth, textureHeight);
 
 	// we'll assume it can't be smaller than the original AvP font texture
-	assert(textureWidth  >= 256);
-	assert(textureHeight >= 256);
+//	assert(textureWidth  >= 256);
+//	assert(textureHeight >= 256);
 
 	uint8_t *originalSrcPtr = NULL;
 	uint32_t pitch = 0;
@@ -1092,7 +1096,16 @@ static void CalculateWidthsOfAAFont(void)
 
 	AAFontWidths[32] = 3;
 
-	for (int c = 33; c < 255; c++) 
+	int nChars;
+	
+	if (IsDemoVersion()) {
+		nChars = 64;
+	}
+	else {
+		nChars = 255;
+	}
+
+	for (int c = 33; c < nChars; c++) 
 	{
 		int x,y;
 		int x1 = 1+((c-32)&15)*16;

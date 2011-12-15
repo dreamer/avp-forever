@@ -5,7 +5,7 @@
 
 extern bool mainMenu;
 
-#define MARINE_DEMO 1
+#define MARINE_DEMO 0
 #define PREDATOR_DEMO 0
 #define ALIEN_DEMO 0
 

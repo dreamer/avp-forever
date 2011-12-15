@@ -1068,28 +1068,29 @@ void DrawMenuTextGlow(uint32_t topLeftX, uint32_t topLeftY, uint32_t size, uint3
 void DrawSmallMenuCharacter(uint32_t topX, uint32_t topY, uint32_t texU, uint32_t texV, uint32_t red, uint32_t green, uint32_t blue, uint32_t alpha)
 {
 	alpha = (alpha / 256);
-
-	red = (red / 256);
+	red   = (red   / 256);
 	green = (green / 256);
-	blue = (blue / 256);
+	blue  = (blue  / 256);
 
 	// clamp if needed
 	if (alpha > 255) alpha = 255;
-	if (red > 255) red = 255;
+	if (red   > 255) red   = 255;
 	if (green > 255) green = 255;
-	if (blue > 255) blue = 255;
+	if (blue  > 255) blue  = 255;
 
 	RCOLOR colour = RCOLOR_ARGB(alpha, 255, 255, 255);
 
-	uint32_t font_height = 15;
-	uint32_t font_width = 15;
+	uint32_t font_height = HUD_FONT_HEIGHT;
+	uint32_t font_width  = HUD_FONT_WIDTH;
 
 	// aa_font.bmp is 256 x 256
-	uint32_t image_height = 256;
-	uint32_t image_width = 256;
+	uint32_t textureWidth  = 0;
+	uint32_t textureHeight = 0;
 
-	float RecipW = 1.0f / image_width; // 0.00390625
-	float RecipH = 1.0f / image_height;
+	Tex_GetDimensions(AVPMENUGFX_SMALL_FONT, textureWidth, textureHeight);
+
+	float RecipW = 1.0f / textureWidth; // 0.00390625
+	float RecipH = 1.0f / textureHeight;
 
 	float x1 = WPos2DC(topX);
 	float y1 = HPos2DC(topY);

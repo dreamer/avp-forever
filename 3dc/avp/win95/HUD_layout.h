@@ -1,9 +1,13 @@
 /* KJL 17:58:47 18/04/98 - layout defines */
 
-#define HUD_FONT_WIDTH 15
-//5
-#define HUD_FONT_HEIGHT 15
-//8
+#if (MARINE_DEMO || ALIEN_DEMO || PREDATOR_DEMO)
+#define HUD_FONT_WIDTH  5 // 5 for demo - smallfont.rim
+#define HUD_FONT_HEIGHT 8 // 8 for demo - smallfont.rim
+#else
+#define HUD_FONT_WIDTH  15 // 5 for demo - smallfont.rim
+#define HUD_FONT_HEIGHT 15 // 8 for demo - smallfont.rim
+#endif
+
 #define HUD_DIGITAL_NUMBERS_WIDTH		14
 #define HUD_DIGITAL_NUMBERS_HEIGHT		22
 

@@ -580,7 +580,6 @@ void LoadSounds(char *soundDirectory)
 	if (!SoundSys_IsOn())
 		return;
 
-	/* load RebSnd file into a (big) buffer	*/
 	char filename[MAX_PATH];
 
 #if ALIEN_DEMO

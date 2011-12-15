@@ -514,7 +514,6 @@
     <ClCompile Include="..\..\3dc\avp\win95\iofocus.cpp" />
     <ClCompile Include="..\..\3dc\avp\win95\jsndsup.cpp" />
     <ClCompile Include="..\..\3dc\avp\win95\KZSORT.cpp" />
-    <ClCompile Include="..\..\3dc\avp\win95\LANGPLAT.C" />
     <ClCompile Include="..\..\3dc\avp\win95\modcmds.cpp" />
     <ClCompile Include="..\..\3dc\avp\win95\MouseCentreing.cpp" />
     <ClCompile Include="..\..\3dc\avp\win95\NPCSETUP.CPP" />

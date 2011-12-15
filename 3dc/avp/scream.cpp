@@ -60,8 +60,8 @@ void CharacterSoundEffects::LoadSounds(const char* filename, const char* directo
 	if (voice_types) 
 		return;
 
-	char path[100] = ScreamFilePath;
-	strcat(path,filename);
+	char path[MAX_PATH] = ScreamFilePath;
+	strcat(path, filename);
 
 	HANDLE file = avp_CreateFile(path, GENERIC_READ, 0, 0, OPEN_EXISTING,FILE_FLAG_RANDOM_ACCESS, 0);
 	if (file == INVALID_HANDLE_VALUE)
@@ -93,9 +93,9 @@ void CharacterSoundEffects::LoadSounds(const char* filename, const char* directo
 	
 	voice_types = (ScreamVoiceType*) PoolAllocateMem(num_voice_types * sizeof(ScreamVoiceType));
 	
-	char wavpath[200];
+	char wavpath[MAX_PATH];
 	strcpy(wavpath, directory);
-	char* wavname=&wavpath[strlen(wavpath)];
+	char* wavname = &wavpath[strlen(wavpath)];
 	
 	for (int i=0;i<num_voice_types;i++)	
 	{
@@ -165,8 +165,6 @@ void CharacterSoundEffects::UnloadSounds()
 	num_voice_cats=0;
 }
 
-
-
 void CharacterSoundEffects::PlaySound(int VoiceType,int SoundCategory,int PitchShift,int* ExternalRef,VECTORCH* Location)
 {
 //	GLOBALASSERT(Location);
@@ -234,8 +232,6 @@ void CharacterSoundEffects::PlaySound(int VoiceType,int SoundCategory,int PitchS
 	global_last_sound=cat->last_sound=(SOUNDINDEX)sound->sound_loaded->sound_num;
 }
 
-
-
 void UnloadScreamSounds()
 {
 	MarineSounds.UnloadSounds();
@@ -244,15 +240,16 @@ void UnloadScreamSounds()
 	QueenSounds.UnloadSounds();
 }
 
-
 void LoadMarineScreamSounds()
 {
 	MarineSounds.LoadSounds("marsound.dat","npc/marinevoice/");
 }
+
 void LoadAlienScreamSounds()
 {
 	AlienSounds.LoadSounds("aliensound.dat","npc/alienvoice/");
 }
+
 void LoadPredatorScreamSounds()
 {
 	PredatorSounds.LoadSounds("predsound.dat","npc/predatorvoice/");
@@ -263,15 +260,16 @@ void LoadQueenScreamSounds()
 	QueenSounds.LoadSounds("queensound.dat","npc/queenvoice/");
 }
 
-
 void PlayMarineScream(int VoiceType,int SoundCategory,int PitchShift,int* ExternalRef,VECTORCH* Location)
 {
 	MarineSounds.PlaySound(VoiceType,SoundCategory,PitchShift,ExternalRef,Location);
 }
+
 void PlayAlienSound(int VoiceType,int SoundCategory,int PitchShift,int* ExternalRef,VECTORCH* Location)
 {
 	AlienSounds.PlaySound(VoiceType,SoundCategory,PitchShift,ExternalRef,Location);
 }
+
 void PlayPredatorSound(int VoiceType,int SoundCategory,int PitchShift,int* ExternalRef,VECTORCH* Location)
 {
 	PredatorSounds.PlaySound(VoiceType,SoundCategory,PitchShift,ExternalRef,Location);
