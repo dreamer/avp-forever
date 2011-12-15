@@ -1656,7 +1656,7 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 				mainVertex[vb].color = RGBA_MAKE(255, 255, 255, 32);
 			}
 
-			mainVertex[vb].specular = RGBA_MAKE(0,0,0,255);
+			mainVertex[vb].specular = RGBA_MAKE(0,0,0,0);
 			mainVertex[vb].u = 0.0f;
 			mainVertex[vb].v = 0.0f;
 
