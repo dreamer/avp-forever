@@ -27,11 +27,10 @@
 #include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
 #include "logString.h"
 #include "configFile.h"
-#include "console.h"
-#include "networking.h"
 #include "Fonts.h"
 #include <XInput.h> // XInput API
 #include "AvP_UserProfile.h"
+#include "console.h"
 
 extern void RenderListInit();
 extern void RenderListDeInit();
@@ -2552,10 +2551,6 @@ bool InitialiseDirect3D()
 	RenderListInit();
 
 	Con_PrintMessage("Initialised Direct3D9 succesfully");
-
-	Con_Init();
-
-	Net_Initialise();
 
 	return true;
 }

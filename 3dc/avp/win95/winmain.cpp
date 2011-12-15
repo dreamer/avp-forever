@@ -38,6 +38,7 @@
 #include "AvP_MP_Config.h"
 #include "logString.h"
 #include "FastFile.h"
+#include "console.h"
 
 #if debug
 #define MainTextPrint 1
@@ -357,6 +358,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		MessageBox(hWndMain, error.c_str(), "Couldn't create render device!", MB_OK | MB_ICONSTOP);
 		exit(-1);
 	}
+
+	Con_Init();
+
+	Net_Initialise();
 
 	LoadKeyConfiguration();
 
