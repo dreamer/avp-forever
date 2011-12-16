@@ -15,6 +15,13 @@ struct r_VertexBuffer
 	uint8_t *dynamicVBMemory;
 	size_t	dynamicVBMemorySize;
 	uint32_t stride;
+
+	// constructor to ensure above pointers are null
+	r_VertexBuffer()
+	{
+		vertexBuffer    = 0;
+		dynamicVBMemory = 0;
+	}
 };
 
 struct r_IndexBuffer
@@ -22,6 +29,13 @@ struct r_IndexBuffer
 	IDirect3DIndexBuffer8 *indexBuffer;
 	uint8_t *dynamicIBMemory;
 	size_t	dynamicIBMemorySize;
+
+	// constructor to ensure above pointers are null
+	r_IndexBuffer()
+	{
+		indexBuffer     = 0;
+		dynamicIBMemory = 0;
+	}
 };
 
 typedef IDirect3DTexture8		*r_Texture;		// keep this as pointer type?
@@ -35,6 +49,14 @@ struct r_VertexShader
 	DWORD			shader;
 	r_vertexDeclaration		vertexDeclaration;
 	std::string 	shaderName;
+
+	r_VertexShader()
+	{
+		isValid  = false;
+		refCount = 0;
+		shader   = 0;
+		vertexDeclaration = 0;
+	}
 };
 
 struct r_PixelShader
@@ -43,6 +65,13 @@ struct r_PixelShader
 	uint32_t		refCount;
 	DWORD			shader;
 	std::string 	shaderName;
+
+	r_PixelShader()
+	{
+		isValid  = false;
+		refCount = 0;
+		shader   = 0;
+	}
 };
 
 #define D3DLOCK_DISCARD	0
@@ -62,7 +91,7 @@ struct r_PixelShader
  *	taken from http://www.mvps.org/directx/articles/definitions_for_dx7_vertex_types.htm
  */
 
-typedef struct _D3DLVERTEX
+struct D3DLVERTEX
 {
 	float x;
 	float y;
@@ -73,43 +102,88 @@ typedef struct _D3DLVERTEX
 
 	float u;
 	float v;
+};
 
-} D3DLVERTEX;
-
-#define D3DFVF_LVERTEX	(D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_SPECULAR | D3DFVF_TEX1)
-
-typedef struct ORTHOVERTEX
+struct ORTHOVERTEX
 {
 	float x;
 	float y;
-	float z;		// Position in 3d space
+	float z;
 
-	DWORD colour;	// Colour
+	DWORD colour;
 
 	float u;
-	float v;		// Texture coordinates
+	float v;
+};
 
-} ORTHOVERTEX;
-
-// orthographic quad vertex format
-#define D3DFVF_ORTHOVERTEX (D3DFVF_XYZ | D3DFVF_DIFFUSE | D3DFVF_TEX1)
-
-typedef struct FMVVERTEX
+struct PARTICLEVERTEX
 {
 	float x;
 	float y;
-	float z;		// Position in 3d space
+	float z;
+
+	DWORD colour;
+
+	float u;
+	float v;
+};
+
+struct TALLFONT
+{
+	float x;
+	float y;
+	float z;
+
+	DWORD colour;
 
 	float u1;
-	float v1;		// Texture coordinates 1
+	float v1;
 
 	float u2;
-	float v2;		// Texture coordinates 2
+	float v2;
+};
+
+
+struct FMVVERTEX
+{
+	float x;
+	float y;
+	float z;
+
+	float u1;
+	float v1;        // Texture coordinates 1
+
+	float u2;
+	float v2;        // Texture coordinates 2
 
 	float u3;
-	float v3;		// Texture coordinates 3
+	float v3;        // Texture coordinates 3
+};
 
-} FMVVERTEX;
+struct DECAL_VERTEX
+{
+	float x;
+	float y;
+	float z;
+
+	DWORD colour;
+
+	float u;
+	float v;
+};
+
+struct RHW_VERTEX
+{
+	float x;
+	float y;
+	float z;
+	float rhw;
+
+	D3DCOLOR color;
+
+	float u;
+	float v;
+};
 
 /*
   Maximum number of Direct3D drivers ever
@@ -145,29 +219,38 @@ typedef struct D3DInfo
 	D3DPRESENT_PARAMETERS	d3dpp;
 
 	// vertex and index buffers
-	class VertexBuffer		*particleVB;
-	class IndexBuffer		*particleIB;
-
 	class VertexBuffer		*mainVB;
 	class IndexBuffer		*mainIB;
 
 	class VertexBuffer		*orthoVB;
 	class IndexBuffer		*orthoIB;
 
+	class VertexBuffer		*particleVB;
+	class IndexBuffer		*particleIB;
+
+	class VertexBuffer		*decalVB;
+	class IndexBuffer		*decalIB;
+
 	// effect manager to handle shaders
 	class EffectManager		*effectSystem;
 
 	// shader IDs
 	effectID_t				mainEffect;
+	effectID_t				decalEffect;
 	effectID_t				orthoEffect;
-	effectID_t				cloudEffect;
+	effectID_t				tallTextEffect;
 	effectID_t				fmvEffect;
+	effectID_t				particleEffect;
+	effectID_t				rhwEffect;
 
 	// vertex declarations
 	class VertexDeclaration		*mainDecl;
 	class VertexDeclaration		*orthoDecl;
+	class VertexDeclaration		*decalDecl;
 	class VertexDeclaration		*fmvDecl;
-	class VertexDeclaration		*tallFontText;
+	class VertexDeclaration		*tallTextDecl;
+	class VertexDeclaration		*particleDecl;
+	class VertexDeclaration		*rhwDecl;
 
 	// enumeration
 	uint32_t				NumDrivers;
@@ -181,10 +264,14 @@ typedef struct D3DInfo
 	bool					supportsDynamicTextures;
 
 	uint32_t				fieldOfView;
+	float					aspectRatio;
 
 } D3DINFO;
 
 extern D3DINFO d3d;
+
+uint32_t XPercentToScreen(float percent);
+uint32_t YPercentToScreen(float percent);
 
 uint32_t R_GetScreenWidth();
 

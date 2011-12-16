@@ -29,6 +29,11 @@ extern void D3D_DecalSystem_End(void);
 extern void D3D_FadeDownScreen(int brightness, int colour);
 extern void D3D_PlayerOnFireOverlay(void);
 
+void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin);
+void D3D_DrawWaterFall(int xOrigin, int yOrigin, int zOrigin);
+void D3D_DrawMoltenMetalMesh_Unclipped(void);
+static void D3D_OutputTriangles(void);
+
 void ThisFramesRenderingHasBegun();
 void ThisFramesRenderingHasFinished();
 extern void D3D_DrawSliderBar(int x, int y, int alpha);

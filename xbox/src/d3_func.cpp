@@ -27,59 +27,22 @@
 #include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
 #include "logString.h"
 #include "configFile.h"
-#include "console.h"
-#include "networking.h"
-#include "font2.h"
+#include "Fonts.h"
 #include <xgraphics.h>
 #include <xgmath.h>
 #include "AvP_UserProfile.h"
-
-// Alien FOV - 115
-// Marine & Predator FOV - 77
-
-/*
-// shaders
-const char *orthoShader =
-    "vs.1.1\n"
-    "def c4, 0, 0, 0, 0\n"
-    "dp4 oPos.x, v0, c0\n"
-    "dp4 oPos.y, v0, c1\n"
-    "dp4 oPos.z, v0, c2\n"
-    "dp4 oPos.w, v0, c3\n"
-    "mov oD0, v1\n"
-    "mov oD1, c4\n"
-    "mov oT0, v2\0";
-
-const char *vertShader =
-    "vs.1.1\n"
-    "dp4 oPos.x, v0, c0\n"
-    "dp4 oPos.y, v0, c1\n"
-    "dp4 oPos.z, v0, c2\n"
-    "dp4 oPos.w, v0, c3\n"
-    "mov oD0, v1\n"
-    "mov oD1, v2\n"
-    "mov oT0.xy, v3\0";
-
-const char *pixelShader =
-	"ps.1.1\n"
-    "def c4, 0, 0, 0, 0\n"
-    "tex t0\n"
-    "add r0, v0, v1\n"
-    "mul r0, t0, r0\0";
-*/
-
-D3DXMATRIX matOrtho;
-D3DXMATRIX matProjection;
-D3DXMATRIX matView;
-D3DXMATRIX matIdentity;
-D3DXMATRIX matViewPort;
-
-static D3DXPLANE m_frustum[6];
+#include "console.h"
 
 extern void RenderListInit();
 extern void RenderListDeInit();
 extern void ThisFramesRenderingHasBegun(void);
 extern void ThisFramesRenderingHasFinished(void);
+extern HWND hWndMain;
+extern int WindowMode;
+extern void ChangeWindowsSize(uint32_t width, uint32_t height);
+extern bool IsDemoVersion();
+
+extern AVPIndexedFont IntroFont_Light;
 
 // size of vertex and index buffers
 const uint32_t kMaxVertices = 4096;
@@ -113,7 +76,11 @@ bool SetRenderStateDefaults();
 void ToggleWireframe();
 
 const int kMaxTextureStages = 4;
-std::vector<uint32_t> setTextureArray;
+std::vector<texID_t> setTextureArray;
+
+// Alien FOV - 115
+// Marine & Predator FOV - 77
+const int kDefaultFOV = 77;
 
 // byte order macros for A8R8G8B8 d3d texture
 enum
@@ -184,6 +151,9 @@ bool ReleaseVolatileResources()
 	SAFE_DELETE(d3d.particleVB);
 	SAFE_DELETE(d3d.particleIB);
 
+	SAFE_DELETE(d3d.decalVB);
+	SAFE_DELETE(d3d.decalIB);
+
 	SAFE_DELETE(d3d.orthoVB);
 	SAFE_DELETE(d3d.orthoIB);
 
@@ -195,7 +165,7 @@ bool CheckPointIsInFrustum(D3DXVECTOR3 *point)
 	// check if point is in front of each plane
 	for (int i = 0; i < 6; i++)
 	{
-		if (D3DXPlaneDotCoord(&m_frustum[i], point) < 0.0f)
+		if (D3DXPlaneDotCoord(&d3d.frustumPlanes[i], point) < 0.0f)
 		{
 			// its outside
 			return false;
@@ -204,30 +174,6 @@ bool CheckPointIsInFrustum(D3DXVECTOR3 *point)
 
 	// return here if the point is entirely within
 	return true;
-}
-
-static float deltaTime = 0.0f;
-
-void UpdateTestTimer()
-{
-	static float currentTime = timeGetTime();
-
-	float newTime = timeGetTime();
-	float frameTime = newTime - currentTime;
-	currentTime = newTime;
-
-	deltaTime = frameTime;
-
-	std::stringstream ss;
-
-	ss << deltaTime;
-
-	Font_DrawCenteredText(ss.str());
-}
-
-float GetTestTimer()
-{
-	return deltaTime;
 }
 
 bool R_BeginScene()
@@ -409,9 +355,9 @@ void R_PreviousVideoMode()
 
 std::string& R_GetVideoModeDescription()
 {
-	videoModeDescription = IntToString(d3d.Driver[d3d.CurrentDriver].DisplayMode[d3d.CurrentVideoMode].Width)
+	videoModeDescription = Util::IntToString(d3d.Driver[d3d.CurrentDriver].DisplayMode[d3d.CurrentVideoMode].Width)
 						   + "x" +
-						   IntToString(d3d.Driver[d3d.CurrentDriver].DisplayMode[d3d.CurrentVideoMode].Height);
+						   Util::IntToString(d3d.Driver[d3d.CurrentDriver].DisplayMode[d3d.CurrentVideoMode].Height);
 
 	return videoModeDescription;
 }
@@ -442,7 +388,7 @@ bool R_SetTexture(uint32_t stage, texID_t textureID)
 	// check that the stage value is within range
 	if (stage > kMaxTextureStages-1)
 	{
-		Con_PrintError("Invalid texture stage: " + IntToString(stage) + " set for texture: " + Tex_GetName(textureID));
+		Con_PrintError("Invalid texture stage: " + Util::IntToString(stage) + " set for texture: " + Tex_GetName(textureID));
 		return false;
 	}
 
@@ -673,24 +619,33 @@ bool CreateVolatileResources()
 
 	// main
 	d3d.mainVB = new VertexBuffer;
-	d3d.mainVB->Create(kMaxVertices*5, FVF_LVERTEX, USAGE_STATIC);
+	d3d.mainVB->Create(kMaxVertices*5, sizeof(D3DLVERTEX), USAGE_DYNAMIC);
 
 	d3d.mainIB = new IndexBuffer;
-	d3d.mainIB->Create((kMaxIndices*5) * 3, USAGE_STATIC);
+	d3d.mainIB->Create((kMaxIndices*5) * 3, USAGE_DYNAMIC);
 
 	// orthographic projected quads
 	d3d.orthoVB = new VertexBuffer;
-	d3d.orthoVB->Create(kMaxVertices, FVF_ORTHO, USAGE_STATIC);
+	d3d.orthoVB->Create(kMaxVertices, sizeof(ORTHOVERTEX), USAGE_DYNAMIC);
 
 	d3d.orthoIB = new IndexBuffer;
-	d3d.orthoIB->Create(kMaxIndices * 3, USAGE_STATIC);
+	d3d.orthoIB->Create(kMaxIndices * 3, USAGE_DYNAMIC);
 
 	// particle vertex buffer
 	d3d.particleVB = new VertexBuffer;
-	d3d.particleVB->Create(kMaxVertices*6, FVF_LVERTEX, USAGE_STATIC);
+	d3d.particleVB->Create(kMaxVertices*6, sizeof(PARTICLEVERTEX), USAGE_DYNAMIC);
 
 	d3d.particleIB = new IndexBuffer;
-	d3d.particleIB->Create((kMaxIndices*6) * 3, USAGE_STATIC);
+	d3d.particleIB->Create((kMaxIndices*6) * 3, USAGE_DYNAMIC);
+
+	// decal buffers
+	d3d.decalVB = new VertexBuffer;
+	// (MAX_NO_OF_DECALS + MAX_NO_OF_FIXED_DECALS) * 4 * 2 (as we have mirrored decals so we redraw everything)
+	d3d.decalVB->Create(8192 * 2, sizeof(DECAL_VERTEX), USAGE_DYNAMIC);
+
+	d3d.decalIB = new IndexBuffer;
+	// (MAX_NO_OF_DECALS + MAX_NO_OF_FIXED_DECALS) * 6 * 2 (as we have mirrored decals so we redraw everything)
+	d3d.decalIB->Create(12288 * 2, USAGE_STATIC);
 
 	SetRenderStateDefaults();
 
@@ -2005,7 +1960,7 @@ bool InitialiseDirect3D()
 	}
 
 	// Log resolution set
-	Con_PrintMessage("\t Resolution set: " + IntToString(d3dpp.BackBufferWidth) + " x " + IntToString(d3dpp.BackBufferHeight));
+	Con_PrintMessage("\t Resolution set: " + Util::IntToString(d3dpp.BackBufferWidth) + " x " + Util::IntToString(d3dpp.BackBufferHeight));
 /*
 	// Log format set
 	switch (d3dpp.BackBufferFormat)
@@ -2096,7 +2051,7 @@ bool InitialiseDirect3D()
 
 	SetTransforms();
 
-	// create vertex declarations
+		// create vertex declarations
 	d3d.mainDecl = new VertexDeclaration;
 	d3d.mainDecl->Add(0, VDTYPE_FLOAT3, VDMETHOD_DEFAULT, VDUSAGE_POSITION, 0);
 	d3d.mainDecl->Add(0, VDTYPE_COLOR,  VDMETHOD_DEFAULT, VDUSAGE_COLOR,    0);
@@ -2110,6 +2065,12 @@ bool InitialiseDirect3D()
 	d3d.orthoDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 0);
 	d3d.orthoDecl->Create();
 
+	d3d.decalDecl = new VertexDeclaration;
+	d3d.decalDecl->Add(0, VDTYPE_FLOAT3, VDMETHOD_DEFAULT, VDUSAGE_POSITION, 0);
+	d3d.decalDecl->Add(0, VDTYPE_COLOR,  VDMETHOD_DEFAULT, VDUSAGE_COLOR,    0);
+	d3d.decalDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 0);
+	d3d.decalDecl->Create();
+
 	d3d.fmvDecl = new VertexDeclaration;
 	d3d.fmvDecl->Add(0, VDTYPE_FLOAT3, VDMETHOD_DEFAULT, VDUSAGE_POSITION, 0);
 	d3d.fmvDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 0);
@@ -2117,12 +2078,25 @@ bool InitialiseDirect3D()
 	d3d.fmvDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 2);
 	d3d.fmvDecl->Create();
 
-	d3d.tallFontText = new VertexDeclaration;
-	d3d.tallFontText->Add(0, VDTYPE_FLOAT3, VDMETHOD_DEFAULT, VDUSAGE_POSITION, 0);
-	d3d.tallFontText->Add(0, VDTYPE_COLOR,  VDMETHOD_DEFAULT, VDUSAGE_COLOR,    0);
-	d3d.tallFontText->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 0);
-	d3d.tallFontText->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 1);
-	d3d.tallFontText->Create();
+	d3d.tallTextDecl = new VertexDeclaration;
+	d3d.tallTextDecl->Add(0, VDTYPE_FLOAT3, VDMETHOD_DEFAULT, VDUSAGE_POSITION, 0);
+	d3d.tallTextDecl->Add(0, VDTYPE_COLOR,  VDMETHOD_DEFAULT, VDUSAGE_COLOR,    0);
+	d3d.tallTextDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 0);
+	d3d.tallTextDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 1);
+	d3d.tallTextDecl->Create();
+
+	d3d.particleDecl = new VertexDeclaration;
+	d3d.particleDecl->Add(0, VDTYPE_FLOAT3, VDMETHOD_DEFAULT, VDUSAGE_POSITION, 0);
+	d3d.particleDecl->Add(0, VDTYPE_COLOR,  VDMETHOD_DEFAULT, VDUSAGE_COLOR,    0);
+	d3d.particleDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD, 0);
+	d3d.particleDecl->Create();
+
+	// rhw pretransformed
+	d3d.rhwDecl = new VertexDeclaration;
+	d3d.rhwDecl->Add(0, VDTYPE_FLOAT4, VDMETHOD_DEFAULT, VDUSAGE_POSITION, 0);
+	d3d.rhwDecl->Add(0, VDTYPE_COLOR,  VDMETHOD_DEFAULT, VDUSAGE_COLOR,     0);
+	d3d.rhwDecl->Add(0, VDTYPE_FLOAT2, VDMETHOD_DEFAULT, VDUSAGE_TEXCOORD,  0);
+	d3d.rhwDecl->Create();
 
 	r_Texture whiteTexture;
 	r_Texture missingTexture;
@@ -2185,27 +2159,18 @@ bool InitialiseDirect3D()
 
 	setTextureArray.resize(kMaxTextureStages);
 
-/*
-	// set all texture stages to sample the white texture
-	for (uint32_t i = 0; i < kMaxTextureStages; i++)
-	{
-		setTextureArray[i] = NO_TEXTURE;
-		d3d.lpD3DDevice->SetTexture(i, Tex_GetTexture(NO_TEXTURE));
-	}
-*/
 	d3d.effectSystem = new EffectManager;
 
-	d3d.mainEffect  = d3d.effectSystem->Add("main", "vertex_1_1.vsh", "pixel_1_1.psh", d3d.mainDecl);
-	d3d.orthoEffect = d3d.effectSystem->Add("ortho", "orthoVertex_1_1.vsh", "pixel_1_1.psh", d3d.orthoDecl);
-//	d3d.fmvEffect   = d3d.effectSystem->Add("fmv", "fmvVertex.vsh", "fmvPixel.psh");
-//	d3d.cloudEffect = d3d.effectSystem->Add("cloud", "tallFontTextVertex.vsh", "tallFontTextPixel.psh");
+	d3d.mainEffect  = d3d.effectSystem->Add("main", "vertex.vsh", "pixel.psh", d3d.mainDecl);
+	d3d.orthoEffect = d3d.effectSystem->Add("ortho", "orthoVertex.vsh", "orthoPixel.psh", d3d.orthoDecl);
+	d3d.decalEffect = d3d.effectSystem->Add("decal", "decal.vsh", "decal.psh", d3d.decalDecl);
+	d3d.fmvEffect   = d3d.effectSystem->Add("fmv", "fmvVertex.vsh", "fmvPixel.psh", d3d.fmvDecl);
+	d3d.rhwEffect   = d3d.effectSystem->Add("rhw", "rhw.vsh", "rhw.psh", d3d.rhwDecl);
+	d3d.tallTextEffect = d3d.effectSystem->Add("tallText", "tallText.vsh", "tallText.psh", d3d.tallTextDecl);
+	d3d.particleEffect = d3d.effectSystem->Add("particle", "particle.vsh", "particle.psh", d3d.particleDecl);
 
 	// create vertex and index buffers
 	CreateVolatileResources();
-
-	Con_Init();
-	Net_Initialise();
-	Font_Init();
 
 	RenderListInit();
 
@@ -2264,8 +2229,11 @@ void ReleaseDirect3D()
 	// release vertex declarations
 	delete d3d.mainDecl;
 	delete d3d.orthoDecl;
+	delete d3d.decalDecl;
 	delete d3d.fmvDecl;
-	delete d3d.tallFontText;
+	delete d3d.tallTextDecl;
+	delete d3d.particleDecl;
+	delete d3d.rhwDecl;
 
 	// clean up render list classes
 	RenderListDeInit();
@@ -2440,24 +2408,6 @@ void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
 			}
 			break;
 		}
-		case TRANSLUCENCY_JUSTSETZ:
-		{
-			if (D3DAlphaBlendEnable != TRUE)
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-				D3DAlphaBlendEnable = TRUE;
-			}
-			if (D3DSrcBlend != D3DBLEND_ZERO)
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
-				D3DSrcBlend = D3DBLEND_ZERO;
-			}
-			if (D3DDestBlend != D3DBLEND_ONE)
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
-				D3DDestBlend = D3DBLEND_ONE;
-			}
-		}
 		default: break;
 	}
 }
@@ -2494,10 +2444,10 @@ void ChangeZWriteEnable(enum ZWRITE_ENABLE zWriteEnable)
 
 void ChangeTextureAddressMode(uint32_t samplerIndex, enum TEXTURE_ADDRESS_MODE textureAddressMode)
 {
-	if (CurrentRenderStates.TextureAddressMode == textureAddressMode)
+	if (CurrentRenderStates.TextureAddressMode[samplerIndex] == textureAddressMode)
 		return;
 
-	CurrentRenderStates.TextureAddressMode = textureAddressMode;
+	CurrentRenderStates.TextureAddressMode[samplerIndex] = textureAddressMode;
 
 	if (textureAddressMode == TEXTURE_WRAP)
 	{
@@ -2545,12 +2495,12 @@ void ChangeTextureAddressMode(uint32_t samplerIndex, enum TEXTURE_ADDRESS_MODE t
 
 void ChangeFilteringMode(uint32_t samplerIndex, enum FILTERING_MODE_ID filteringRequired)
 {
-	if (CurrentRenderStates.FilteringMode == filteringRequired)
+	if (CurrentRenderStates.FilteringMode[samplerIndex] == filteringRequired)
 		return;
 
-	CurrentRenderStates.FilteringMode = filteringRequired;
+	CurrentRenderStates.FilteringMode[samplerIndex] = filteringRequired;
 
-	switch (CurrentRenderStates.FilteringMode)
+	switch (CurrentRenderStates.FilteringMode[samplerIndex])
 	{
 		case FILTERING_BILINEAR_OFF:
 		{
@@ -2587,9 +2537,15 @@ void ToggleWireframe()
 
 bool SetRenderStateDefaults()
 {
-	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_MAGFILTER, D3DTEXF_LINEAR);
-	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_MINFILTER, D3DTEXF_LINEAR);
-	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_MIPFILTER, D3DTEXF_LINEAR);
+	const int kNumStages = 4; // TODO, dont hardcode this?
+
+	for (int i = 0; i < kNumStages; i++)
+	{
+		d3d.lpD3DDevice->SetTextureStageState(i, D3DTSS_MAGFILTER, D3DTEXF_LINEAR);
+		d3d.lpD3DDevice->SetTextureStageState(i, D3DTSS_MINFILTER, D3DTEXF_LINEAR);
+		d3d.lpD3DDevice->SetTextureStageState(i, D3DTSS_MIPFILTER, D3DTEXF_LINEAR);
+	}
+
 //	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_MAXANISOTROPY, 8);
 /*
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLOROP,	D3DTOP_MODULATE);
@@ -2637,21 +2593,27 @@ bool SetRenderStateDefaults()
 
 	{
 		// enable bilinear filtering (FILTERING_BILINEAR_ON)
-		d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_MAGFILTER, D3DTEXF_LINEAR);
-		d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_MINFILTER, D3DTEXF_LINEAR);
+		for (int i = 0; i < kNumStages; i++)
+		{
+			d3d.lpD3DDevice->SetTextureStageState(i, D3DTSS_MAGFILTER, D3DTEXF_LINEAR);
+			d3d.lpD3DDevice->SetTextureStageState(i, D3DTSS_MINFILTER, D3DTEXF_LINEAR);
 
-		// make sure render state tracking reflects above setting
-		CurrentRenderStates.FilteringMode = FILTERING_BILINEAR_ON;
+			// make sure render state tracking reflects above setting
+			CurrentRenderStates.FilteringMode[i] = FILTERING_BILINEAR_ON;
+		}
 	}
 
 	{
 		// set texture addressing mode to clamp (TEXTURE_CLAMP)
-		d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSU, D3DTADDRESS_CLAMP);
-		d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSV, D3DTADDRESS_CLAMP);
-		d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_ADDRESSW, D3DTADDRESS_CLAMP);
+		for (int i = 0; i < kNumStages; i++)
+		{
+			d3d.lpD3DDevice->SetTextureStageState(i, D3DTSS_ADDRESSU, D3DTADDRESS_CLAMP);
+			d3d.lpD3DDevice->SetTextureStageState(i, D3DTSS_ADDRESSV, D3DTADDRESS_CLAMP);
+			d3d.lpD3DDevice->SetTextureStageState(i, D3DTSS_ADDRESSW, D3DTADDRESS_CLAMP);
 
-		// make sure render state tracking reflects above setting
-		CurrentRenderStates.TextureAddressMode = TEXTURE_CLAMP;
+			// make sure render state tracking reflects above setting
+			CurrentRenderStates.TextureAddressMode[i] = TEXTURE_CLAMP;
+		}
 	}
 
 	{
@@ -2668,6 +2630,9 @@ bool SetRenderStateDefaults()
 		d3d.lpD3DDevice->SetRenderState(D3DRS_ZFUNC, D3DCMP_LESSEQUAL);
 		D3DZFunc = D3DCMP_LESSEQUAL;
 	}
+
+	CurrentRenderStates.FogIsOn = 0;
+	CurrentRenderStates.WireFrameModeIsOn = 0;
 
 	return true;
 }

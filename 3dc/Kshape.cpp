@@ -2633,7 +2633,6 @@ int* GetTxAnimArrayZ(int shape, int item)
 TXANIMHEADER* GetTxAnimDataZ(int shape, int item, int sequence)
 {
 	TXANIMHEADER **txah_ptr;
-	TXANIMHEADER *txah;
 	int **item_array_ptr;
 	int **shape_textures;
 	int *item_ptr;
@@ -2794,7 +2793,6 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 	int x1, y1;
 	int o1, o2, od;
 	POLYHEADER *pheader = (POLYHEADER*) shapeitemptr;
-	int *txf_imageptr;
 
 	/* The sequence # will have been copied across by the control block */
 	int sequence = *txa_data++;

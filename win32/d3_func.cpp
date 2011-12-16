@@ -187,9 +187,6 @@ bool ReleaseVolatileResources()
 	SAFE_DELETE(d3d.particleVB);
 	SAFE_DELETE(d3d.particleIB);
 
-	SAFE_DELETE(d3d.decalVB);
-	SAFE_DELETE(d3d.decalIB);
-
 	SAFE_DELETE(d3d.orthoVB);
 	SAFE_DELETE(d3d.orthoIB);
 
@@ -2530,9 +2527,9 @@ bool InitialiseDirect3D()
 	d3d.orthoEffect = d3d.effectSystem->Add("ortho", "orthoVertex.vsh", "orthoPixel.psh", d3d.orthoDecl);
 	d3d.decalEffect = d3d.effectSystem->Add("decal", "decal.vsh", "decal.psh", d3d.decalDecl);
 	d3d.fmvEffect   = d3d.effectSystem->Add("fmv", "fmvVertex.vsh", "fmvPixel.psh", d3d.fmvDecl);
+	d3d.rhwEffect   = d3d.effectSystem->Add("rhw", "rhw.vsh", "rhw.psh", d3d.rhwDecl);
 	d3d.tallTextEffect = d3d.effectSystem->Add("tallText", "tallText.vsh", "tallText.psh", d3d.tallTextDecl);
 	d3d.particleEffect = d3d.effectSystem->Add("particle", "particle.vsh", "particle.psh", d3d.particleDecl);
-	d3d.rhwEffect   = d3d.effectSystem->Add("rhw", "rhw.vsh", "rhw.psh", d3d.rhwDecl);
 
 	// we should bail out if the shaders can't be loaded
 	if ((d3d.mainEffect  == kNullShaderID)    ||

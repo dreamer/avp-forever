@@ -7,7 +7,6 @@
 #include "gameplat.h"
 #include "bh_types.h"
 #include "usr_io.h"
-#include "font.h"
 #include "renderer.h"
 #include "comp_shp.h"
 #include "chnkload.hpp"

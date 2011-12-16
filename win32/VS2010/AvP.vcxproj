@@ -355,6 +355,7 @@
     <ClCompile Include="..\..\3dc\avp\win95\xa2_audio.cpp" />
     <ClCompile Include="..\..\3dc\ConfigFile.cpp" />
     <ClCompile Include="..\..\3dc\console.cpp" />
+    <ClCompile Include="..\..\3dc\d3d_render.cpp" />
     <ClCompile Include="..\..\3dc\FastFile.cpp" />
     <ClCompile Include="..\..\3dc\FileStream.cpp" />
     <ClCompile Include="..\..\3dc\FmvCutscenes.cpp" />
@@ -432,7 +433,6 @@
     <ClCompile Include="..\..\3dc\win95\win_func.cpp" />
     <ClCompile Include="..\..\3dc\win95\wpchunk.cpp" />
     <ClCompile Include="..\..\3dc\win95\Zsp.cpp" />
-    <ClCompile Include="..\d3d_render.cpp" />
     <ClCompile Include="..\d3_func.cpp" />
     <ClCompile Include="..\Di_func.cpp" />
   </ItemGroup>
@@ -597,6 +597,7 @@
     <ClInclude Include="..\..\3dc\avp\win95\VISION.H" />
     <ClInclude Include="..\..\3dc\ConfigFile.h" />
     <ClInclude Include="..\..\3dc\console.h" />
+    <ClInclude Include="..\..\3dc\d3d_render.h" />
     <ClInclude Include="..\..\3dc\FastFile.h" />
     <ClInclude Include="..\..\3dc\FileStream.h" />
     <ClInclude Include="..\..\3dc\FmvCutscenes.h" />

@@ -60,12 +60,6 @@ uint32_t FMVParticleColour;
 const int kNumMeshVerts = 256;
 VECTORCH MeshVertex[kNumMeshVerts];
 
-void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin);
-
-void D3D_DrawWaterFall(int xOrigin, int yOrigin, int zOrigin);
-void D3D_DrawMoltenMetalMesh_Unclipped(void);
-static void D3D_OutputTriangles(void);
-
 extern void DrawParticles();
 extern void DrawCoronas();
 extern bool IsDemoVersion();
@@ -174,7 +168,7 @@ struct renderParticle
 };
 
 // particle buckets
-std::vector<std::vector<renderParticle>> particleBucket;
+std::vector<std::vector<renderParticle> > particleBucket;
 bool pbInit = false;
 
 struct renderCorona
