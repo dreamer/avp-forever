@@ -111,7 +111,6 @@ extern void set_local_scale(RIFFHANDLE, int flags);
 
 // copies all shapes and objects etc
 extern BOOL copy_rif_data (RIFFHANDLE, int flags,int progress_start,int progress_interval);
-#define CopyRIFData(h,f) copy_rif_data(h,f)
 
 // this should return the next free main shape list position for loaded shapes; it may be called more than once
 extern int load_precompiled_shapes();

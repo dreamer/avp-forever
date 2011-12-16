@@ -131,8 +131,6 @@ void InitCharacter()
 		avp_undo_rif_load(predator_weapon_rif);
 	}
 
-	InitialiseTextures();
-
 	Start_Progress_Bar();
 
 	Set_Progress_Bar_Position(PBAR_HUD_START);

@@ -1276,13 +1276,6 @@ static BOOL copy_rif_data_as_hierarchy (RIFFHANDLE h, int flags,int progress_sta
 
 	//SelectGenTexDirectory(ITI_TEXTURE);
 
-	#if 0 //disable the multiple image group stuff
-	if(!(flags & CCF_DONT_INITIALISE_TEXTURES))
-	{
-		InitialiseTextures();
-	}
-	#endif
-
 	/*find this rif's sound directory*/
 	Rif_Sound_Directory = 0;
 	Sound_Directory_Chunk* dir_chunk = (Sound_Directory_Chunk*)h->envd->lookup_single_child("SOUNDDIR");
@@ -2542,6 +2535,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 /*--------------**
 ** Load sprites **
 **--------------*/
+#if 0
 	//SelectGenTexDirectory(ITI_SPRITE);
 	Chunk * pChunk = h->fc->lookup_single_child ("RSPRITES");
 	if (pChunk)
@@ -2567,6 +2561,7 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 			copy_sprite_to_mainshapelist(h,shc,flags);
 		}
 	}
+#endif
 
 	//setup shape fragments;
 	{
@@ -3321,8 +3316,6 @@ void DeallocateSoundsAndPoolAllocatedMemory()
 	LoseAllNonCommonSounds();
 	
 	DeallocateAllFragments();
-
-	DeallocateAllImages();
 
 	PurgeMSLShapeList();
 }

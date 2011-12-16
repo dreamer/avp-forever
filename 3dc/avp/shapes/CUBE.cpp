@@ -1,6 +1,11 @@
 #include <stdio.h>
 #include "system.h"
 #include "shape.h"
+
+#if 1
+
+#define col24(r, g, b) ((r << 16) + (g << 8) + b)
+
 /*
 
 CUBE_
@@ -177,3 +182,5 @@ int CUBE_item5[] =
 	2*1,1*1,0*1,3*1,
 	Term
 };
+
+#endif

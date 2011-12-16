@@ -352,8 +352,6 @@ void FlushTextprintBuffer(void);
 void InitPrintQueue(void);
 void InitJoysticks(void);
 void ReadJoysticks(void);
-int DeallocateAllImages(void);
-int RestoreAllImages(void);
 void ExitGame(void);
 
 #endif

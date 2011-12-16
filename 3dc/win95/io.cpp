@@ -44,10 +44,7 @@ extern int WinBotY;
 
 extern int WindowRequestMode;
 extern int VideoRequestMode;
-
 extern int NumAvailableVideoModes;
-
-extern IMAGEHEADER ImageHeaderArray[]; /* Array of Image Headers */
 
 void InitialiseRawInput();
 
@@ -107,7 +104,6 @@ bool GotAnyKey = false;
 
 int textprintPosX;
 int textprintPosY;
-IMAGEHEADER* fontHeader;
 
 /* Added 28/11/97 by DHM: boolean for run-time switching on/off of textprint */
 int bEnableTextprint = FALSE;

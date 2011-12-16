@@ -148,7 +148,7 @@ void RenderList::AddItem(uint32_t numVerts, texID_t textureID, enum TRANSLUCENCY
 {
 	assert(numVerts != 0);
 
-	if (listIndex >= GetCapacity())
+	if (GetSize()+1 >= GetCapacity())
 	{
 		// list is full
 		OutputDebugString("List full\n");

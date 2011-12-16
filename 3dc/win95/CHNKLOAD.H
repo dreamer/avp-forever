@@ -86,10 +86,6 @@ BOOL get_rif_palette_remap_table (RIFFHANDLE, int flags);
 SHAPEHEADER * CopyNamedShapePtr (RIFFHANDLE, char const * shapename);
 #define copy_named_shape_ptr(h,s) CopyNamedShapePtr(h,s)
 
-// copy one named shape or sprite; put it in the main shape list
-int CopyNamedShapeMSL (RIFFHANDLE, char const * shapename);
-#define copy_named_shape_msl(h,s) CopyNamedShapeMSL(h,s)
-
 ////////////////////////////////////////////////////////////////////////
 // Functions which do not operate on RIFFHANDLEs and may become obsolete
 ////////////////////////////////////////////////////////////////////////

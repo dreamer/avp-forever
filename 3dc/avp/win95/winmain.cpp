@@ -590,8 +590,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 		Destroy_CurrentEnvironment();
 
-		DeallocateAllImages();
-
 		EndNPCs(); /* JH 30/4/97 - unload npc rifs */
 		ExitGame();
 

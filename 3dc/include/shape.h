@@ -1,37 +1,16 @@
 #ifndef SHAPE_INCLUDED
+#define SHAPE_INCLUDED
 
-/*
-
- Header File for Shape Data
-
-*/
+// Header File for Shape Data
 
 #include "aw.h"
 #include "shpanim.h"
-
 #include <stdint.h>
 
+// Shape Item Function Array Indices
 
-/*
-
- Macros for Defining Colours
-
-*/
-
-#define col6(r, g, b) ((r << 4) + (g << 2) + b)
-#define col8T(r, g, b) ((r << 5) + (g << 2) + b)
-#define col15(r, g, b) ((r << 10) + (g << 5) + b)
-#define col24(r, g, b) ((r << 16) + (g << 8) + b)
-
-
-/*
-
- Shape Item Function Array Indices
-
-*/
-
-typedef enum {
-
+typedef enum 
+{
 	I_Pixel,
 	I_Line,
 
@@ -74,89 +53,7 @@ typedef enum {
 
 } ShapeItems;
 
-
-/*
-
- "shape.c" has been updated so that shapes without normals are outcoded
- using the "scaled sprite" outcoding function, which looks at clip outcodes
- but does not perform a back face cull.
-
-*/
-
-#define I_ZB_ScaledSprite I_ZB_2dTexturedPolygon
-
-
-
-/*
-
- Structs for Shape Data
-
-*/
-
-
-/*
-
- BSP Block
-
-*/
-
-#define bsp_mid_block 0
-
-/*
-
- This struct is the one that ends up being walked.
- It is also used by z-trees, hence its unconditional inclusion.
-
-*/
-
-typedef struct bsp_block
-{
-	void *frontblock;		/* +ve side of normal */
-	void *backblock;		/* -ve side of normal */
-
-	#if bsp_mid_block
-	void *middleblock;	/* For inclusion of another tree */
-	#endif
-
-	int bsp_block_z;						/* For inclusion of z sorted data */
-
-	int bsp_block_flags;
-
-	int *bsp_block_data;					/* Polygon or other */
-
-} BSP_BLOCK;
-
-
-/*
-
- This struct is the form that Static BSP Tree blocks are allocated in
-
-*/
-
-typedef struct static_bsp_block 
-{
-	void *frontblock;		/* +ve side of normal */
-	void *backblock;		/* -ve side of normal */
-
-	#if bsp_mid_block
-	void *middleblock;	/* For inclusion of another tree */
-	#endif
-
-	int bsp_numitems;						/* # items in array */
-
-	int bsp_block_flags;
-
-	int **bsp_block_data;				/* Pointer to item pointer array */
-
-} STATIC_BSP_BLOCK;
-
-
-/*
-
- Shape Instruction Block
-
-*/
-
+// Shape Instruction Block
 typedef struct shapeinstr 
 {
 	int sh_instr;								/* int data */
@@ -165,17 +62,7 @@ typedef struct shapeinstr
 
 } SHAPEINSTR;
 
-
-
-
-
-
-/*
-
- ZSP Header Block
-
-*/
-
+// ZSP Header Block
 typedef struct zspheader 
 {
 	int zsp_x;						/* ZSP Array dimensions */
@@ -189,14 +76,7 @@ typedef struct zspheader
 
 } ZSPHEADER;
 
-
-
-/*
-
- ZSP Zone Structure
-
-*/
-
+// ZSP Zone Structure
 typedef struct zspzone 
 {
 	int zsp_numitems;
@@ -207,13 +87,7 @@ typedef struct zspzone
 
 } ZSPZONE;
 
-
-/*
-
- RSP plane outcode flags
-
-*/
-
+// RSP plane outcode flags
 #define rsp_oc_x0 0x00000001
 #define rsp_oc_x1 0x00000002
 #define rsp_oc_y0 0x00000004
@@ -432,53 +306,30 @@ typedef struct polyheader
 #endif
 
 #define iflag_nosubdiv			0x00000008	// polygon too small to need sub dividing
-
 #define iflag_transparent		0x00000010	/* Function depends on Video Mode */
 #define iflag_no_bfc			0x00000020	/* No Back Face Cull */
 #define iflag_hazing			0x00000040	/* Haze / Depth Cue colour */
-
 #define iflag_zbuffer_w			0x00000080	/* Z-Buffer, Write-Only */
-
 #define iflag_shadingtable		0x00000100	/* Hue is a table index */
 #define iflag_tab_gour_8		0x00000200	/* Gour. for 8-bit modes uses tab. */
 #define iflag_extended			0x00000400	/* N. Index ptr to item ext. blk */
-
-#define iflag_verticaledges	0x00000800		/* A collision option whereby the
-															item is treated as if it is a
-															prism of infinite extent formed
-															by extrusion of its world xz
-															projection in the y-axis */
-
+#define iflag_verticaledges	0x00000800		/* A collision option whereby the item is treated as if it is a prism of infinite extent formed by extrusion of its world xz projection in the y-axis */
 #define iflag_mirror			0x00001000	/* polygon is a mirror polygon. Now there's a suprise*/
 #define iflag_viewdotpos		0x00002000	/* Used by BFCRO */
-
 #define iflag_hue_per_vertex	0x00004000	/* INTERNAL USE ONLY! */
-
 #define iflag_no_mip			0x00008000	/* Use Index #0 */
-
 #define iflag_zbuffer_r			0x00010000	/* Z-Buffer, Read-Only */
-
 #define iflag_linear			0x00020000	/* Linear Interpolation */
-
 #define iflag_sortnearz			0x00040000	/* Use minz for depth value */
-
 #define iflag_detail			0x00080000	/* Item can be range outcoded */
 #define iflag_dtest_not_done	0x00100000	/* Ensure just one range test */
-
 #define iflag_augz_planetest	0x00200000	/* Plane Test to help build tree */
-
 #define iflag_tx2dor3d			0x00400000	/* Decide each frame which it is */
-
 #define iflag_linear_s			0x00800000	/* Subdivided linear scans for 3d textured polygons */
-
 #define iflag_gsort_ptest		0x01000000	/* Global sort, use plane test */
-
 #define iflag_drawtx3das2d		0x02000000	/* 3d until SC, draw as 2d */
-
 #define iflag_sortfarz			0x04000000	/* Use maxz for depth value */
-
 #define iflag_light_corona		0x20000000 /* For use by the placed light strategy */
-
 #define iflag_txanim			0x40000000	/* UV array has animation data */
 
 // Taken this flag
@@ -563,20 +414,6 @@ typedef struct texelf
 
 #if StandardShapeLanguage
 
-#define ImageNameSize 128+1
-
-typedef struct imageheader 
-{
-	uint32_t ImageWidth;
-	uint32_t ImageHeight;				/* Height, Pixels */
-
-	AVPTEXTURE *AvPTexture;
-
-	char ImageName[ImageNameSize];		/* Filename */
-
-} IMAGEHEADER;
-
-
 /* Image Header Flags */
 
 #define ih_flag_mip         0x00000001 /* MIP map data is available */
@@ -651,10 +488,6 @@ typedef struct txanimheader
 	int txa_speed;
 	int txa_anim_id;			//this will be the same for all sequences on a given polygon
 
-	int txa_num_mvs_images;		/* Multi-View Sprites - TOTAL number of images */
-	int txa_eulerxshift;		/* Multi-View Sprites, scale Euler X for index */
-	int txa_euleryshift;		/* As above, for Euler Y */
-
 	struct txanimframe *txa_framedata;
 
 } TXANIMHEADER;
@@ -685,30 +518,10 @@ typedef struct txanimframe
 	int txf_orientx;
 	int txf_orienty;
 	int txf_numuvs;
-	int *txf_uvdata;
-	intptr_t txf_image;
+	int txf_image;
+	int* txf_uvdata;
 
 } TXANIMFRAME;
-
-
-/* For a multi-view sprite use this structure instead */
-
-typedef struct txanimframe_mvs 
-{
-	int txf_flags;
-	int txf_scale;
-	int txf_scalex;
-	int txf_scaley;
-	int txf_orient;
-	int txf_orientx;
-	int txf_orienty;
-	int txf_numuvs;
-
-	int **txf_uvdata;	/* Pointer to array of pointers to UV array per image */
-
-	int *txf_images;	/* Pointer to a 2d array of image indices */
-
-} TXANIMFRAME_MVS;
 
 /*
 

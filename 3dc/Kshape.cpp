@@ -34,6 +34,7 @@
 #include "tables.h"
 #include "renderer.h"
 #include "renderlist.h"
+#include "d3d_render.h"
 
 const RCOLOR ALIENS_LIFEFORCE_GLOW_COLOUR    = 0x20ff8080;
 const RCOLOR MARINES_LIFEFORCE_GLOW_COLOUR   = 0x208080ff;
@@ -135,22 +136,13 @@ static void DecalPolygon_Construct(DECAL *decalPtr);
 void RenderShaftOfLight2(MODULE *modulePtr);
 void FindIntersectionWithYPlane(VECTORCH *startPtr, VECTORCH *directionPtr, VECTORCH *intersectionPtr);
 void FindZFromXYIntersection(VECTORCH *startPtr, VECTORCH *directionPtr, VECTORCH *intersectionPtr);
-void AddToTranslucentPolyList(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr);
+void AddToTranslucentPolyList(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr);
 void DrawWaterFallPoly(VECTORCH *v);
 void RenderAllParticlesFurtherAwayThan(int zThreshold);
 
 extern void UpdateViewMatrix(float *viewMat);
 extern void UpdateProjectionMatrix();
 extern void BuildFrustum();
-
-void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr,RENDERVERTEX *renderVerticesPtr);
-void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr);
-void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr);
-void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr);
-void D3D_PredatorThermalVisionPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr);
-void D3D_DecalSystem_Setup();
-void D3D_DecalSystem_End();
-void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr);
 
 extern void TransformToViewspace(VECTORCHF *vector);
 extern void AddCorona(PARTICLE *particlePtr, VECTORCHF *coronaPoint);
@@ -2614,14 +2606,12 @@ static void VertexIntensity_Underwater(RENDERVERTEX *renderVertexPtr)
 
 int* GetTxAnimArrayZ(int shape, int item)
 {
-	SHAPEHEADER *sptr;
 	int **item_array_ptr;
 	int **shape_textures;
 	int *item_ptr;
 	POLYHEADER *pheader;
-	int texture_defn_index;
 
-	sptr = GetShapeData(shape);
+	SHAPEHEADER *sptr = GetShapeData(shape);
 
 	if (sptr && sptr->sh_textures && sptr->items)
 	{
@@ -2631,32 +2621,25 @@ int* GetTxAnimArrayZ(int shape, int item)
 		item_ptr = item_array_ptr[item];
 		pheader  = (POLYHEADER *) item_ptr;
 
-		texture_defn_index = (pheader->PolyColour >> TxDefn);
-
 		if (pheader->PolyFlags & iflag_txanim)
 		{
-			return /*(int*)*/ shape_textures[texture_defn_index];
+			return (int*) shape_textures[pheader->PolyColour >> TxDefn];
 		}
-
-		else return 0;
 	}
 
-	else return 0;
+	return 0;
 }
-
 
 TXANIMHEADER* GetTxAnimDataZ(int shape, int item, int sequence)
 {
-	SHAPEHEADER *sptr;
 	TXANIMHEADER **txah_ptr;
 	TXANIMHEADER *txah;
 	int **item_array_ptr;
 	int **shape_textures;
 	int *item_ptr;
 	POLYHEADER *pheader;
-	int texture_defn_index;
 
-	sptr = GetShapeData(shape);
+	SHAPEHEADER *sptr = GetShapeData(shape);
 
 	if (sptr && sptr->sh_textures && sptr->items)
 	{
@@ -2666,52 +2649,16 @@ TXANIMHEADER* GetTxAnimDataZ(int shape, int item, int sequence)
 		item_ptr = item_array_ptr[item];
 		pheader  = (POLYHEADER *) item_ptr;
 
-		texture_defn_index = (pheader->PolyColour >> TxDefn);
-
 		if (pheader->PolyFlags & iflag_txanim)
 		{
-			txah_ptr = (TXANIMHEADER **) shape_textures[texture_defn_index];
+			txah_ptr = (TXANIMHEADER **) shape_textures[pheader->PolyColour >> TxDefn];
 			txah_ptr++;		/* Skip sequence shadow */
 
-			txah = txah_ptr[sequence];
-
-			return txah;
-
+			return txah_ptr[sequence];
 		}
-		else return 0;
 	}
-	else return 0;
+	return 0;
 }
-
-
-
-
-/*
-
- For some animated textures each sequence will represent a different view
- of a sprite. When each sequence has the same number of frames there is no
- problem transferring the value from one "txa_currentframe" to the other.
- However if the new sequence has a different number of frames a scaling must
- be done.
-
-*/
-
-#if 0 // bjd - unused
-void ChangeSequence(TXANIMHEADER *txah_old, TXANIMHEADER *txah_new)
-{
-	if(txah_new->txa_numframes == txah_old->txa_numframes)
-	{
-		txah_new->txa_currentframe = txah_old->txa_currentframe;
-	}
-	else
-	{
-		txah_new->txa_currentframe = WideMulNarrowDiv(txah_old->txa_currentframe,
-								txah_new->txa_maxframe,
-								txah_old->txa_maxframe);
-	}
-}
-#endif
-
 
 /*
 
@@ -2722,9 +2669,7 @@ void ChangeSequence(TXANIMHEADER *txah_old, TXANIMHEADER *txah_new)
 
 TXANIMHEADER* GetTxAnimHeaderFromShape(TXACTRLBLK *taptr, int shape)
 {
-	TXANIMHEADER *txah = 0;
-
-	txah = GetTxAnimDataZ(shape, taptr->tac_item, taptr->tac_sequence);
+	TXANIMHEADER *txah = GetTxAnimDataZ(shape, taptr->tac_item, taptr->tac_sequence);
 
 	if (txah)
 	{
@@ -2759,11 +2704,10 @@ void UpdateTxAnim(TXANIMHEADER *txah)
 		{
 			/* This option is still being designed and tested */
 			UpdateRate = txah->txa_speed & (~4096);		/* 1/16th */
-			if(UpdateRate < 4096) UpdateRate = 4096;
-			UpdateRate = MUL_FIXED(NormalFrameTime, txah->txa_speed);
+			if (UpdateRate < 4096) UpdateRate = 4096;
 		}
 
-		else UpdateRate = MUL_FIXED(NormalFrameTime, txah->txa_speed);
+		UpdateRate = MUL_FIXED(NormalFrameTime, txah->txa_speed);
 
 		/* Update the current frame */
 		if (txah->txa_flags & txa_flag_reverse)
@@ -2801,20 +2745,13 @@ void UpdateTxAnim(TXANIMHEADER *txah)
 	}
 }
 
-
-/*
-
- Display block TXACTRLBLKS pass their data on to shape TXANIMHEADERs
-
-*/
-
+// Display block TXACTRLBLKS pass their data on to shape TXANIMHEADERs
 void ControlTextureAnimation(DISPLAYBLOCK *dptr)
 {
-	TXACTRLBLK *taptr;
 	TXANIMHEADER *txah;
 	int *iptr;
 
-	taptr = dptr->ObTxAnimCtrlBlks;
+	TXACTRLBLK *taptr = dptr->ObTxAnimCtrlBlks;
 
 	while(taptr)
 	{
@@ -2831,8 +2768,8 @@ void ControlTextureAnimation(DISPLAYBLOCK *dptr)
 
 		iptr = taptr->tac_txarray;
 		LOCALASSERT(iptr);
-		*iptr = taptr->tac_sequence;
 
+		*iptr = taptr->tac_sequence;
 		taptr = taptr->tac_next;
 	}
 }
@@ -2857,29 +2794,16 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 	int x1, y1;
 	int o1, o2, od;
 	POLYHEADER *pheader = (POLYHEADER*) shapeitemptr;
-	int sequence;
 	int *txf_imageptr;
 
-
 	/* The sequence # will have been copied across by the control block */
-
-//	sequence = *txa_data++;
-
-	sequence = *txa_data;
-
-	txa_data = (int *)((intptr_t) txa_data + sizeof(int *));
-
-	#if 0
-	textprint("sequence = %d\n", sequence);
-	#endif
+	int sequence = *txa_data++;
 
 	txah_ptr = (TXANIMHEADER **) txa_data;
 	txah = txah_ptr[sequence];
 	txaf = txah->txa_framedata;
 
-
 	/* Because the current frame can be set from outside, clamp it first */
-
 	if (txah->txa_currentframe < 0)
 	{
 		txah->txa_currentframe = 0;
@@ -2889,7 +2813,6 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 	{
 		txah->txa_currentframe = txah->txa_maxframe - 1;
 	}
-
 
 	/* Frame # */
 	CurrentFrame  = txah->txa_currentframe >> 16;
@@ -2916,32 +2839,10 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 
 	pheader->PolyColour &= ClrTxIndex;
 
-	/* Multi-View Sprites need to select an image from the array */
-	if (Global_ShapeHeaderPtr->shapeflags & ShapeFlag_MultiViewSprite)
-	{
-		int **txf_uvarrayptr0 = (int **) txaf0->txf_uvdata;
-		int **txf_uvarrayptr1 = (int **) txaf1->txf_uvdata;
-		int index;
+	pheader->PolyColour |= txaf0->txf_image;
 
-		index = GetMVSIndex(txah, &LToVMat_Euler);
-
-		/*textprint("index = %d\n", index);*/
-		txf_imageptr = (int *) txaf0->txf_image;
-		pheader->PolyColour |= txf_imageptr[index];
-
-		/* Get the uv data */
-		txaf0_uv = txf_uvarrayptr0[index];
-		txaf1_uv = txf_uvarrayptr1[index];
-	}
-
-	/* Single-View Sprites have just one image per frame */
-	else
-	{
-		pheader->PolyColour |= txaf0->txf_image;
-
-		txaf0_uv = txaf0->txf_uvdata;
-		txaf1_uv = txaf1->txf_uvdata;
-	}
+	txaf0_uv = txaf0->txf_uvdata;
+	txaf1_uv = txaf1->txf_uvdata;
 
 	/* Calculate UVs */
 	iptr = uv_array;
@@ -2950,11 +2851,8 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 	{
 		for (i = txaf0->txf_numuvs; i!=0; i--)
 		{
-			iptr[0] = MUL_FIXED(txaf0_uv[0], OneMinusAlpha)
-							+ MUL_FIXED(txaf1_uv[0], Alpha);
-
-			iptr[1] = MUL_FIXED(txaf0_uv[1], OneMinusAlpha)
-							+ MUL_FIXED(txaf1_uv[1], Alpha);
+			iptr[0] = MUL_FIXED(txaf0_uv[0], OneMinusAlpha) + MUL_FIXED(txaf1_uv[0], Alpha);
+			iptr[1] = MUL_FIXED(txaf0_uv[1], OneMinusAlpha) + MUL_FIXED(txaf1_uv[1], Alpha);
 
 			/*textprint("%d, %d\n", iptr[0] >> 16, iptr[1] >> 16);*/
 			txaf0_uv += 2;
@@ -3524,74 +3422,6 @@ void ShapeSpriteRPointsInstr(SHAPEINSTR *shapeinstrptr)
 
 
 #endif		/* UseKevinsModifiedSSRPI */
-
-int GetMVSIndex(TXANIMHEADER *txah, EULER *e)
-{
-	int EulerXIndex, EulerYIndex;
-	int theta,phi; //angles in spherical polar coordinates
-				   //phi goes from 0 (top) to deg180 (bottom)
-	VECTORCH v;
-
-	MakeVectorLocal(&Global_ODB_Ptr->ObWorld,&v,&Global_VDB_Ptr->VDB_World,&Global_ODB_Ptr->ObMat);
-	Normalise(&v);
-	phi=-ArcSin(v.vy);
-	phi+=deg90;
-	phi&=wrap360;
-
-	if (phi == deg180)
-	{
-		phi--;
-	}
-
-	if (!v.vx && !v.vz)
-	{
-		theta = 0;
-	}
-	else
-	{
-		v.vy=0;
-		Normalise(&v);
-		if (v.vz > Cosine45 || -v.vz>Cosine45)
-		{
-			theta = ArcSin(-v.vx);
-
-			if (v.vz < 0)
-			{
-				theta &= wrap360;
-			}
-			else
-			{
-				theta += deg180;
-				theta =- theta;
-				theta &= wrap360;
-			}
-		}
-		else
-		{
-			theta = ArcCos(v.vz);
-
-			if (v.vx < 0)
-			{
-				theta = -theta;
-			}
-			theta += deg180;
-			theta &= wrap360;
-		}
-	}
-
-	EulerYIndex = theta;
-	EulerYIndex >>= txah->txa_euleryshift;
-
-	EulerYIndex <<= (11 - txah->txa_eulerxshift);
-
-	EulerXIndex = phi;
-	EulerXIndex >>= txah->txa_eulerxshift;
-
-	GLOBALASSERT((EulerXIndex+EulerYIndex)<txah->txa_num_mvs_images);
-
-	return (EulerXIndex + EulerYIndex);
-}
-
 
 void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 {

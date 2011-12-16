@@ -30,38 +30,7 @@ typedef struct
 	/* fog component */
 	unsigned char Fog;
 
-
 } RENDERVERTEX;
-
-// float based version of above
-typedef struct
-{
-	/* base coords */
-	float X;
-	float Y;
-	float Z;
-
-	/* texels and intensity */
-	float U;
-	float V;
-
-	/* coloured components */
-	unsigned char R;
-	unsigned char G;
-	unsigned char B;
-
-	/* alpha component */
-	unsigned char A;
-
-	/* specular colour */
-	unsigned char SpecularR;
-	unsigned char SpecularG;
-	unsigned char SpecularB;
-
-	/* fog component */
-	unsigned char Fog;
-
-} RENDERVERTEXF;
 
 typedef struct
 {
