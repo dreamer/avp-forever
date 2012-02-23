@@ -1,0 +1,351 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<!-- Created with Inkscape (http://www.inkscape.org/) -->
+
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   width="640"
+   height="480"
+   id="svg2"
+   version="1.1"
+   inkscape:version="0.47 r22583"
+   sodipodi:docname="avp.svg"
+   inkscape:export-filename="C:\Users\SwissCM\Documents\avp.png"
+   inkscape:export-xdpi="300"
+   inkscape:export-ydpi="300">
+  <defs
+     id="defs4">
+    <inkscape:perspective
+       sodipodi:type="inkscape:persp3d"
+       inkscape:vp_x="0 : 526.18109 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_z="744.09448 : 526.18109 : 1"
+       inkscape:persp3d-origin="372.04724 : 350.78739 : 1"
+       id="perspective10" />
+    <inkscape:perspective
+       id="perspective2824"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective2842"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective3641"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective3669"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective3692"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective3802"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective3837"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective3837-5"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective3877"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective3946"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective3994"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective4008"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective4022"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective4036"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective4050"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective4064"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+    <inkscape:perspective
+       id="perspective4089"
+       inkscape:persp3d-origin="0.5 : 0.33333333 : 1"
+       inkscape:vp_z="1 : 0.5 : 1"
+       inkscape:vp_y="0 : 1000 : 0"
+       inkscape:vp_x="0 : 0.5 : 1"
+       sodipodi:type="inkscape:persp3d" />
+  </defs>
+  <sodipodi:namedview
+     id="base"
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1.0"
+     inkscape:pageopacity="0.0"
+     inkscape:pageshadow="2"
+     inkscape:zoom="0.7"
+     inkscape:cx="399.42731"
+     inkscape:cy="295.92665"
+     inkscape:document-units="px"
+     inkscape:current-layer="layer1"
+     showgrid="true"
+     inkscape:window-width="1600"
+     inkscape:window-height="1148"
+     inkscape:window-x="-8"
+     inkscape:window-y="-8"
+     inkscape:window-maximized="1">
+    <inkscape:grid
+       type="xygrid"
+       id="grid2830"
+       empspacing="5"
+       visible="true"
+       enabled="false"
+       snapvisiblegridlinesonly="true"
+       spacingx="0.25px"
+       spacingy="0.25px" />
+  </sodipodi:namedview>
+  <metadata
+     id="metadata7">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+        <dc:title></dc:title>
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <g
+     inkscape:label="Layer 1"
+     inkscape:groupmode="layer"
+     id="layer1"
+     transform="translate(0,-572.36218)">
+    <g
+       id="g4070"
+       transform="translate(-7.499998,286.80609)">
+      <path
+         inkscape:export-ydpi="300"
+         inkscape:export-xdpi="300"
+         inkscape:export-filename="C:\Users\SwissCM\Documents\path3865-5-1.png"
+         transform="matrix(1.003196,0,0,1.003196,-93.092348,297.0358)"
+         d="m 389.34799,227.79227 c 0,74.32091 -60.249,134.56991 -134.56991,134.56991 -74.32092,0 -134.56992,-60.249 -134.56992,-134.56991 0,-74.32092 60.249,-134.569919 134.56992,-134.569919 74.32091,0 134.56991,60.248999 134.56991,134.569919 z"
+         sodipodi:ry="134.56992"
+         sodipodi:rx="134.56992"
+         sodipodi:cy="227.79227"
+         sodipodi:cx="254.77808"
+         id="path2832-4"
+         style="fill:#ffffff;fill-opacity:1;stroke:none"
+         sodipodi:type="arc" />
+      <path
+         inkscape:export-ydpi="300"
+         inkscape:export-xdpi="300"
+         inkscape:export-filename="C:\Users\SwissCM\Documents\path3865-5-1.png"
+         id="path2832-1-8"
+         d="M 142.5,397.10015 C 80.19208,406.71499 32.50001,460.56884 32.50001,525.5689 c 0,42.37318 20.2807,79.98566 51.65624,103.71875 C 109.00061,620.51347 142.5,567.59265 142.5,535.5689 l 0,-138.46875 z m 40,0 0,138.46875 c 0,32.02375 33.49939,84.94457 58.34375,93.71875 C 272.21929,605.55456 292.5,567.94208 292.5,525.5689 c 0,-65.00006 -47.69208,-118.85391 -110,-128.46875 z"
+         style="fill:#1a275f;fill-opacity:1;stroke:none" />
+      <path
+         inkscape:export-ydpi="300"
+         inkscape:export-xdpi="300"
+         inkscape:export-filename="C:\Users\SwissCM\Documents\path3865-5-1.png"
+         id="rect3656-8"
+         d="m 162.5,395.56891 c -1.67751,0 -3.3379,0.0308 -5,0.0937 l 0,129.90625 c 0,26.75371 -5.8573,97.25995 -10.84375,129.03125 0.84784,0.10301 1.7097,0.19464 2.5625,0.28125 3.27766,0.33286 6.59244,0.54025 9.9375,0.625 1.11502,0.0283 2.22192,0.0625 3.34375,0.0625 1.12183,0 2.22873,-0.0342 3.34375,-0.0625 1.11502,-0.0283 2.23588,-0.0688 3.34375,-0.125 1.10787,-0.0562 2.21212,-0.13502 3.3125,-0.21875 0.67028,-0.051 1.3326,-0.0951 2,-0.15625 0.64784,-0.0594 1.29243,-0.11868 1.9375,-0.1875 0.66576,-0.071 1.33728,-0.16898 2,-0.25 C 173.43132,621.92349 167.5,548.64108 167.5,525.56891 l 0,-129.90625 c -1.6621,-0.063 -3.32249,-0.0937 -5,-0.0937 z"
+         style="fill:#ce0b0b;fill-opacity:1;stroke:none" />
+      <path
+         inkscape:export-ydpi="300"
+         inkscape:export-xdpi="300"
+         inkscape:export-filename="C:\Users\SwissCM\Documents\path3865-5-1.png"
+         id="rect3659-2"
+         d="m 152.5,395.94391 c -1.67644,0.12756 -3.34194,0.2782 -5,0.46875 l 0,139.15625 c 0,43.95651 -28.73756,87.87007 -47.9375,103.75 0.78716,0.43633 1.57753,0.86055 2.375,1.28125 0.53398,0.28167 1.05541,0.56933 1.59375,0.84375 0.67144,0.34245 1.35299,0.66879 2.03125,1 0.30975,0.15112 0.62638,0.28878 0.9375,0.4375 0.26081,0.1248 0.51947,0.25188 0.78125,0.375 0.57048,0.26804 1.14378,0.55254 1.71875,0.8125 0.0811,0.0367 0.16886,0.0572 0.25,0.0937 1.31201,0.59048 2.63435,1.17105 3.96875,1.71875 0.34662,0.14227 0.68318,0.29817 1.03125,0.4375 0.19594,0.0784 0.39734,0.1413 0.59375,0.21875 0.7549,0.29789 1.51978,0.5911 2.28125,0.875 0.74686,0.27828 1.49672,0.54763 2.25,0.8125 13.49692,-19.28173 33.12502,-59.88645 33.125,-112.6562 l 0,-139.625 z"
+         style="fill:#ce0b0b;fill-opacity:1;stroke:none" />
+      <path
+         inkscape:export-ydpi="300"
+         inkscape:export-xdpi="300"
+         inkscape:export-filename="C:\Users\SwissCM\Documents\path3865-5-1.png"
+         id="rect3659-0-4"
+         d="m 172.5,395.94391 0,139.625 c -2e-5,52.76975 19.62808,93.37447 33.125,112.65625 0.26127,-0.0919 0.52074,-0.18776 0.78125,-0.28125 0.26108,-0.0937 0.52091,-0.18588 0.78125,-0.28125 0.3349,-0.12262 0.66639,-0.2497 1,-0.375 0.65549,-0.24635 1.31816,-0.49327 1.96875,-0.75 0.19641,-0.0774 0.39781,-0.14037 0.59375,-0.21875 0.34807,-0.13933 0.68463,-0.29523 1.03125,-0.4375 1.3344,-0.5477 2.65674,-1.12827 3.96875,-1.71875 0.0811,-0.0365 0.16895,-0.0571 0.25,-0.0937 0.73998,-0.33456 1.48623,-0.68331 2.21875,-1.03125 0.21903,-0.10414 0.4379,-0.20718 0.65625,-0.3125 0.5978,-0.28805 1.18858,-0.57811 1.78125,-0.875 0.34544,-0.17316 0.68762,-0.35516 1.03125,-0.53125 0.463,-0.23715 0.91524,-0.47623 1.375,-0.71875 0.79747,-0.4207 1.58784,-0.84492 2.375,-1.28125 C 206.23756,623.43898 177.5,579.52542 177.5,535.56891 l 0,-139.15625 c -1.65806,-0.19055 -3.32356,-0.34119 -5,-0.46875 z"
+         style="fill:#ce0b0b;fill-opacity:1;stroke:none" />
+      <path
+         inkscape:export-ydpi="300"
+         inkscape:export-xdpi="300"
+         sodipodi:nodetypes="ccccccccccc"
+         id="path3865"
+         d="m 122.5,496.80609 -16.25,-11.25 -16.25,11.25 6.25,-18.75 -17.5,-13.75 21.25,0 6.25,-17.5 6.25001,17.5 19.99999,0 -16.24999,13.75 6.24999,18.75 z"
+         style="fill:#ffffff;fill-opacity:0.99603176;stroke:none" />
+      <path
+         inkscape:export-ydpi="300"
+         inkscape:export-xdpi="300"
+         sodipodi:nodetypes="ccccccccccc"
+         id="path3865-5"
+         d="m 110,561.80609 -16.25,-11.25 -16.25,11.25 6.25,-18.75 -17.5,-13.75 21.25,0 6.25,-17.5 6.25,17.5 20,0 -16.25,13.75 6.25,18.75 z"
+         style="fill:#ffffff;fill-opacity:0.99603176;stroke:none" />
+      <path
+         inkscape:export-ydpi="300"
+         inkscape:export-xdpi="300"
+         inkscape:export-filename="C:\Users\SwissCM\Documents\path3865-5-1.png"
+         sodipodi:nodetypes="ccccccccccc"
+         id="path3865-7"
+         d="m 202.5,496.8061 16.25,-11.25 16.25,11.25 -6.25,-18.75 17.5,-13.75001 -21.25,0 -6.25,-17.49999 -6.25,17.49999 -20,0 16.25,13.75001 -6.25,18.75 z"
+         style="fill:#ffffff;fill-opacity:0.99603176;stroke:none" />
+      <path
+         inkscape:export-ydpi="300"
+         inkscape:export-xdpi="300"
+         sodipodi:nodetypes="ccccccccccc"
+         id="path3865-5-1"
+         d="m 215,561.80609 16.25,-11.25 16.25,11.25 -6.25,-18.75 17.5,-13.75 -21.25,0 -6.25,-17.5 -6.25,17.5 -20,0 16.25,13.75 -6.25,18.75 z"
+         style="fill:#ffffff;fill-opacity:0.99603176;stroke:none" />
+    </g>
+    <rect
+       style="fill:#000000;fill-opacity:1;stroke:none"
+       id="rect4130"
+       width="320"
+       height="480"
+       x="320"
+       y="572.36218" />
+    <g
+       id="g4070-1"
+       transform="translate(322.5,286.80609)">
+      <path
+         inkscape:export-ydpi="300"
+         inkscape:export-xdpi="300"
+         inkscape:export-filename="C:\Users\SwissCM\Documents\path3865-5-1.png"
+         transform="matrix(1.003196,0,0,1.003196,-93.092348,297.0358)"
+         d="m 389.34799,227.79227 c 0,74.32091 -60.249,134.56991 -134.56991,134.56991 -74.32092,0 -134.56992,-60.249 -134.56992,-134.56991 0,-74.32092 60.249,-134.569919 134.56992,-134.569919 74.32091,0 134.56991,60.248999 134.56991,134.569919 z"
+         sodipodi:ry="134.56992"
+         sodipodi:rx="134.56992"
+         sodipodi:cy="227.79227"
+         sodipodi:cx="254.77808"
+         id="path2832-4-5"
+         style="fill:#ffffff;fill-opacity:1;stroke:none"
+         sodipodi:type="arc" />
+      <path
+         inkscape:export-ydpi="300"
+         inkscape:export-xdpi="300"
+         inkscape:export-filename="C:\Users\SwissCM\Documents\path3865-5-1.png"
+         id="path2832-1-8-2"
+         d="M 142.5,397.10015 C 80.19208,406.71499 32.50001,460.56884 32.50001,525.5689 c 0,42.37318 20.2807,79.98566 51.65624,103.71875 C 109.00061,620.51347 142.5,567.59265 142.5,535.5689 l 0,-138.46875 z m 40,0 0,138.46875 c 0,32.02375 33.49939,84.94457 58.34375,93.71875 C 272.21929,605.55456 292.5,567.94208 292.5,525.5689 c 0,-65.00006 -47.69208,-118.85391 -110,-128.46875 z"
+         style="fill:#1a275f;fill-opacity:1;stroke:none" />
+      <path
+         inkscape:export-ydpi="300"
+         inkscape:export-xdpi="300"
+         inkscape:export-filename="C:\Users\SwissCM\Documents\path3865-5-1.png"
+         id="rect3656-8-7"
+         d="m 162.5,395.56891 c -1.67751,0 -3.3379,0.0308 -5,0.0937 l 0,129.90625 c 0,26.75371 -5.8573,97.25995 -10.84375,129.03125 0.84784,0.10301 1.7097,0.19464 2.5625,0.28125 3.27766,0.33286 6.59244,0.54025 9.9375,0.625 1.11502,0.0283 2.22192,0.0625 3.34375,0.0625 1.12183,0 2.22873,-0.0342 3.34375,-0.0625 1.11502,-0.0283 2.23588,-0.0688 3.34375,-0.125 1.10787,-0.0562 2.21212,-0.13502 3.3125,-0.21875 0.67028,-0.051 1.3326,-0.0951 2,-0.15625 0.64784,-0.0594 1.29243,-0.11868 1.9375,-0.1875 0.66576,-0.071 1.33728,-0.16898 2,-0.25 C 173.43132,621.92349 167.5,548.64108 167.5,525.56891 l 0,-129.90625 c -1.6621,-0.063 -3.32249,-0.0937 -5,-0.0937 z"
+         style="fill:#ce0b0b;fill-opacity:1;stroke:none" />
+      <path
+         inkscape:export-ydpi="300"
+         inkscape:export-xdpi="300"
+         inkscape:export-filename="C:\Users\SwissCM\Documents\path3865-5-1.png"
+         id="rect3659-2-6"
+         d="m 152.5,395.94391 c -1.67644,0.12756 -3.34194,0.2782 -5,0.46875 l 0,139.15625 c 0,43.95651 -28.73756,87.87007 -47.9375,103.75 0.78716,0.43633 1.57753,0.86055 2.375,1.28125 0.53398,0.28167 1.05541,0.56933 1.59375,0.84375 0.67144,0.34245 1.35299,0.66879 2.03125,1 0.30975,0.15112 0.62638,0.28878 0.9375,0.4375 0.26081,0.1248 0.51947,0.25188 0.78125,0.375 0.57048,0.26804 1.14378,0.55254 1.71875,0.8125 0.0811,0.0367 0.16886,0.0572 0.25,0.0937 1.31201,0.59048 2.63435,1.17105 3.96875,1.71875 0.34662,0.14227 0.68318,0.29817 1.03125,0.4375 0.19594,0.0784 0.39734,0.1413 0.59375,0.21875 0.7549,0.29789 1.51978,0.5911 2.28125,0.875 0.74686,0.27828 1.49672,0.54763 2.25,0.8125 13.49692,-19.28173 33.12502,-59.88645 33.125,-112.6562 l 0,-139.625 z"
+         style="fill:#ce0b0b;fill-opacity:1;stroke:none" />
+      <path
+         inkscape:export-ydpi="300"
+         inkscape:export-xdpi="300"
+         inkscape:export-filename="C:\Users\SwissCM\Documents\path3865-5-1.png"
+         id="rect3659-0-4-1"
+         d="m 172.5,395.94391 0,139.625 c -2e-5,52.76975 19.62808,93.37447 33.125,112.65625 0.26127,-0.0919 0.52074,-0.18776 0.78125,-0.28125 0.26108,-0.0937 0.52091,-0.18588 0.78125,-0.28125 0.3349,-0.12262 0.66639,-0.2497 1,-0.375 0.65549,-0.24635 1.31816,-0.49327 1.96875,-0.75 0.19641,-0.0774 0.39781,-0.14037 0.59375,-0.21875 0.34807,-0.13933 0.68463,-0.29523 1.03125,-0.4375 1.3344,-0.5477 2.65674,-1.12827 3.96875,-1.71875 0.0811,-0.0365 0.16895,-0.0571 0.25,-0.0937 0.73998,-0.33456 1.48623,-0.68331 2.21875,-1.03125 0.21903,-0.10414 0.4379,-0.20718 0.65625,-0.3125 0.5978,-0.28805 1.18858,-0.57811 1.78125,-0.875 0.34544,-0.17316 0.68762,-0.35516 1.03125,-0.53125 0.463,-0.23715 0.91524,-0.47623 1.375,-0.71875 0.79747,-0.4207 1.58784,-0.84492 2.375,-1.28125 C 206.23756,623.43898 177.5,579.52542 177.5,535.56891 l 0,-139.15625 c -1.65806,-0.19055 -3.32356,-0.34119 -5,-0.46875 z"
+         style="fill:#ce0b0b;fill-opacity:1;stroke:none" />
+      <path
+         inkscape:export-ydpi="300"
+         inkscape:export-xdpi="300"
+         sodipodi:nodetypes="ccccccccccc"
+         id="path3865-4"
+         d="m 122.5,496.80609 -16.25,-11.25 -16.25,11.25 6.25,-18.75 -17.5,-13.75 21.25,0 6.25,-17.5 6.25001,17.5 19.99999,0 -16.24999,13.75 6.24999,18.75 z"
+         style="fill:#ffffff;fill-opacity:0.99603176;stroke:none" />
+      <path
+         inkscape:export-ydpi="300"
+         inkscape:export-xdpi="300"
+         sodipodi:nodetypes="ccccccccccc"
+         id="path3865-5-2"
+         d="m 110,561.80609 -16.25,-11.25 -16.25,11.25 6.25,-18.75 -17.5,-13.75 21.25,0 6.25,-17.5 6.25,17.5 20,0 -16.25,13.75 6.25,18.75 z"
+         style="fill:#ffffff;fill-opacity:0.99603176;stroke:none" />
+      <path
+         inkscape:export-ydpi="300"
+         inkscape:export-xdpi="300"
+         inkscape:export-filename="C:\Users\SwissCM\Documents\path3865-5-1.png"
+         sodipodi:nodetypes="ccccccccccc"
+         id="path3865-7-3"
+         d="m 202.5,496.8061 16.25,-11.25 16.25,11.25 -6.25,-18.75 17.5,-13.75001 -21.25,0 -6.25,-17.49999 -6.25,17.49999 -20,0 16.25,13.75001 -6.25,18.75 z"
+         style="fill:#ffffff;fill-opacity:0.99603176;stroke:none" />
+      <path
+         inkscape:export-ydpi="300"
+         inkscape:export-xdpi="300"
+         sodipodi:nodetypes="ccccccccccc"
+         id="path3865-5-1-2"
+         d="m 215,561.80609 16.25,-11.25 16.25,11.25 -6.25,-18.75 17.5,-13.75 -21.25,0 -6.25,-17.5 -6.25,17.5 -20,0 16.25,13.75 -6.25,18.75 z"
+         style="fill:#ffffff;fill-opacity:0.99603176;stroke:none" />
+    </g>
+  </g>
+</svg>
