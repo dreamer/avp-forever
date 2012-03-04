@@ -1829,38 +1829,10 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Ffread.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\FastFile.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Ffstdio.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\FileStream.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\fmvCutscenes.cpp">
@@ -2111,57 +2083,6 @@
 			</File>
 			<File
 				RelativePath="..\3dc\win95\huffman.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\win95\iff.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\win95\iff_ILBM.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\win95\ILBM_ext.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2492,9 +2413,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\mem3dc.c">
-			</File>
-			<File
 				RelativePath="..\3dc\Mem3dcpp.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -2680,6 +2598,9 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\3dc\MurmurHash3.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\networking.cpp">
@@ -3165,6 +3086,9 @@
 						AdditionalIncludeDirectories=""
 						PreprocessorDefinitions=""/>
 				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\3dc\RimLoader.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\ringbuffer.cpp">
@@ -4145,19 +4069,16 @@
 				RelativePath="..\3dc\win95\fail.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Ffread.hpp">
+				RelativePath="..\3dc\FastFile.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Ffstdio.h">
+				RelativePath="..\3dc\FileStream.h">
 			</File>
 			<File
 				RelativePath="..\3dc\fmvCutscenes.h">
 			</File>
 			<File
 				RelativePath="..\3dc\fmvPlayback.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\font.h">
 			</File>
 			<File
 				RelativePath="..\3dc\font2.h">
@@ -4224,18 +4145,6 @@
 			</File>
 			<File
 				RelativePath="..\3dc\win95\huffman.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\Ia3d.h">
-			</File>
-			<File
-				RelativePath="..\3dc\win95\iff.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\win95\iff_ILBM.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\win95\ILBM_ext.hpp">
 			</File>
 			<File
 				RelativePath="..\3dc\indexBuffer.h">
@@ -4325,6 +4234,9 @@
 			</File>
 			<File
 				RelativePath="..\3dc\avp\win95\Multmenu.h">
+			</File>
+			<File
+				RelativePath="..\3dc\MurmurHash3.h">
 			</File>
 			<File
 				RelativePath="..\3dc\networking.h">
@@ -4436,6 +4348,9 @@
 			</File>
 			<File
 				RelativePath="..\3dc\avp\support\rentrntq.h">
+			</File>
+			<File
+				RelativePath="..\3dc\RimLoader.h">
 			</File>
 			<File
 				RelativePath="..\3dc\ringbuffer.h">
@@ -4588,6 +4503,22 @@
 				Name="Resource Files"
 				Filter="ico;cur;bmp;dlg;rc2;rct;bin;rgs;gif;jpg;jpeg;jpe">
 			</Filter>
+		</Filter>
+		<Filter
+			Name="Video"
+			Filter="">
+			<File
+				RelativePath="..\3dc\video\BinkPlayback.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\video\BinkPlayback.h">
+			</File>
+			<File
+				RelativePath="..\3dc\video\SmackerPlayback.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\video\SmackerPlayback.h">
+			</File>
 		</Filter>
 	</Files>
 	<Globals>

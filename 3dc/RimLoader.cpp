@@ -205,7 +205,7 @@ uint32_t RimLoader::GetUnpackedBytes()
 		{
 			length = val+1;
 
-			length = std::min(length, rowBytes-bytesDone);
+			length = (std::min)(length, rowBytes-bytesDone);
 
 			// get next n bytes literally
 			for (uint32_t i = 0; i < length; i++)
@@ -218,7 +218,7 @@ uint32_t RimLoader::GetUnpackedBytes()
 			// replicate the next byte -val+1 times
 			length = (-val)+1;
 
-			length = std::min(length, rowBytes-bytesDone);
+			length = (std::min)(length, rowBytes-bytesDone);
 
 			// get next byte and memset it to dest times length
 			memset(&destRow[destRowIndex], file.GetByte(), length);

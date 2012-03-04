@@ -759,7 +759,7 @@ void SetFov()
 		return;
 	}
 
-	d3d.fieldOfView = StringToInt(Con_GetArgument(0));
+	d3d.fieldOfView = Util::StringToInt(Con_GetArgument(0));
 
 	SetTransforms();
 }
@@ -2181,31 +2181,27 @@ bool InitialiseDirect3D()
 
 void SetTransforms()
 {
-	// Setup orthographic projection matrix
-	uint32_t standardWidth = 640;
-	uint32_t wideScreenWidth = 852;
-
 	// create an identity matrix
-	D3DXMatrixIdentity(&matIdentity);
+	D3DXMatrixIdentity(&d3d.matIdentity);
 
-	D3DXMatrixIdentity(&matView);
+	D3DXMatrixIdentity(&d3d.matView);
 
 	// set up orthographic projection matrix
-	D3DXMatrixOrthoLH(&matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
+	D3DXMatrixOrthoLH(&d3d.matOrtho, 2.0f, -2.0f, 1.0f, 10.0f);
 
 	// set up projection matrix
-	D3DXMatrixPerspectiveFovLH(&matProjection, D3DXToRadian(d3d.fieldOfView), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
+	D3DXMatrixPerspectiveFovLH(&d3d.matProjection, D3DXToRadian(d3d.fieldOfView), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
 
 	// set up a viewport transform matrix
-	matViewPort = matIdentity;
+	d3d.matViewPort = d3d.matIdentity;
 
-	matViewPort._11 = (float)(ScreenDescriptorBlock.SDB_Width / 2);
-	matViewPort._22 = (float)((-ScreenDescriptorBlock.SDB_Height) / 2);
-	matViewPort._33 = (1.0f - 0.0f);
-	matViewPort._41 = (0 + matViewPort._11); // dwX + dwWidth / 2
-	matViewPort._42 = (float)(ScreenDescriptorBlock.SDB_Height / 2) + 0;
-	matViewPort._43 = 0.0f; // minZ
-	matViewPort._44 = 1.0f;
+	d3d.matViewPort._11 = (float)(ScreenDescriptorBlock.SDB_Width / 2);
+	d3d.matViewPort._22 = (float)((-ScreenDescriptorBlock.SDB_Height) / 2);
+	d3d.matViewPort._33 = (1.0f - 0.0f);
+	d3d.matViewPort._41 = (0.0f + d3d.matViewPort._11); // dwX + dwWidth / 2
+	d3d.matViewPort._42 = (float)(ScreenDescriptorBlock.SDB_Height / 2) + 0;
+	d3d.matViewPort._43 = 0.0f; // minZ
+	d3d.matViewPort._44 = 1.0f;
 }
 
 void FlipBuffers()

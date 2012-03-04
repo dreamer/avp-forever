@@ -25,6 +25,7 @@ extern unsigned char KeyboardInput[256];
 
 #include "dxlog.h"
 #include <zmouse.h>
+#include "vdb.h"
 
 void MakeToAsciiTable(void);
 
@@ -39,7 +40,7 @@ unsigned char ToAsciiTable[256][256];
 #define grabmousecapture FALSE
 
 /*
-	Name of project window etc for Win95 interface
+	Name of project window etc for windows interface
 	Project specific (fairly obviously...).
 	Determines the default menu in which the application
 	appears (altho' other code will undoubtedly be needed
@@ -57,12 +58,8 @@ bool		bRunning = true;
 
 // Parameters for main (assumed full screen) window
 int WinLeftX, WinRightX, WinTopY, WinBotY;
-int WinWidth, WinHeight;
 
 // Externs
-
-
-
 extern int VideoMode;
 extern int WindowMode;
 extern WINSCALEXY TopLeftSubWindow;
@@ -89,8 +86,7 @@ extern void Mouse_ButtonDown(unsigned char button);
 
 int xPosRelative = 0;
 int yPosRelative = 0;
-BOOL mouseMoved = FALSE;
-
+bool mouseMoved = false;
 
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
@@ -98,8 +94,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 	HDC			hdc;
 	RECT		NewWindCoord;
 
-	if (message == RWM_MOUSEWHEEL)
-	{
+	if (message == RWM_MOUSEWHEEL) {
 		message = WM_MOUSEWHEEL;
 	}
 
@@ -122,7 +117,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
 			if (raw->header.dwType == RIM_TYPEMOUSE)
 			{
-				mouseMoved = TRUE;
+				mouseMoved = true;
 				xPosRelative = raw->data.mouse.lLastX;
 				yPosRelative = raw->data.mouse.lLastY;
 			}
@@ -140,7 +135,6 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
 			RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR((char)wParam);
 			KeyboardEntryQueue_Add((char)wParam);
-
 			break;
 		}
 		case WM_KEYDOWN:
@@ -411,31 +405,9 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 	return DefWindowProc(hWnd, message, wParam, lParam);
 }
 
-/*
-	Persuade Win95 to give us the window we want and, like,
-	TOTAL CONTROL, and then shut up, stop whinging and
-	go away.
-	Or at least as much control as we can get.. safely...
-	elegantly... ummm...
-*/
-
-// IMPORTANT!!! Windows initialisation is project specific,
-// because of the project name and title if nothing else
-
-// This function now takes a mode which is
-// set to full or change.  Full should be
-// run ONLY when the system is starting.  
-// Change is used to change the window 
-// characteristics during a run, e.g. to
-// change from SubWindow to FullScreen
-// mode, and will not attempt to register
-// the windows class.
-
 BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 {
 	WNDCLASSEX	wcex;
-	RECT		clientRect;
-
 	memset(&wcex, 0, sizeof(WNDCLASSEX));
 	wcex.cbSize = sizeof(WNDCLASSEX);
 	wcex.style  = CS_DBLCLKS;
@@ -455,34 +427,22 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 		return FALSE;
 	}
 
-//	MakeToAsciiTable();
-/*
-	Set up the width and height we want from
-	the VideoMode, taking account of WindowMode.
-*/
-
-// This has now been modified to just set the
-// size to the current system metrics, which
-// may or may not be ideal.  Surprisingly, it
-// seems not to make much difference.
-	
-	/* if "-w" passed to command line */
+	// if "-w" passed to command line
 	if (WindowMode == WindowModeSubWindow)
 	{
-		// force window to be 800x600 to avoid stretch blits.
-		WinWidth = 800;
-		WinHeight = 600;
-
+		RECT clientRect;
 		clientRect.left = 0;
-		clientRect.top = 0;
-		clientRect.right = WinWidth;
-		clientRect.bottom = WinHeight;
+		clientRect.top  = 0;
+		clientRect.right  = CW_USEDEFAULT;//800;
+		clientRect.bottom = CW_USEDEFAULT;//600;
 
 		hWndMain = CreateWindowEx(
-			WS_EX_TOPMOST,
+//			WS_EX_TOPMOST,
+			0,
 			NAME,  // Name of class (registered by RegisterClass call above) 
 			TITLE, // Name of window 
-			WS_OVERLAPPEDWINDOW,
+//			WS_OVERLAPPEDWINDOW,
+			0,
 			clientRect.left,
 			clientRect.top,
 			clientRect.right,
@@ -498,10 +458,11 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 	}
 	else if (WindowMode == WindowModeFullScreen)
 	{
-		// test DXUT code..
-		RECT rc;
-		SetRect(&rc, 0, 0, 800, 600);
-		AdjustWindowRect(&rc, WS_EX_TOPMOST, FALSE);
+		RECT clientRect;
+		clientRect.left = 0;
+		clientRect.top  = 0;
+		clientRect.right  = ScreenDescriptorBlock.SDB_Width;
+		clientRect.bottom = ScreenDescriptorBlock.SDB_Height;
 
 		hWndMain = CreateWindowEx(
 			WS_EX_TOPMOST,
@@ -510,10 +471,8 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 			WS_POPUP,
 			0,
 			0,
-			(rc.right - rc.left),
-			(rc.bottom - rc.top),
-//			GetSystemMetrics(SM_CXSCREEN),
-//			GetSystemMetrics(SM_CYSCREEN),
+			clientRect.right,
+			clientRect.bottom,
 			NULL,
 			NULL,
 			hInstance,
@@ -523,7 +482,7 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 
 	if (!hWndMain)
 	{
-		UnregisterClass(NULL, wcex.hInstance);
+		UnregisterClass(wcex.lpszClassName, wcex.hInstance);
 		MessageBox(NULL, "Could not create Window", "Error!", MB_ICONEXCLAMATION | MB_OK);
 		return FALSE;
 	}
@@ -601,42 +560,12 @@ void InitialiseRawInput()
 
 BOOL ExitWindowsSystem(void)
 {
-	BOOL rc;
-
 	// Release dedicated mouse capture
 	#if grabmousecapture
 	ReleaseCapture();
 	#endif
 
-	rc = DestroyWindow(hWndMain);
-
-	return rc;
+	return DestroyWindow(hWndMain);
 }
-
-/*
-void MakeToAsciiTable(void)
-{
-	WORD output;
-	for (int k=0; k<=255; k++)
-	{
-		ksarray[k]=0;
-	}
-
-	for (int i=0; i<=255; i++)
-	{
-		for (int s=0; s<=255; s++)
-		{
-			if(ToAscii(i,s,&ksarray[0],&output,0)!=0)
-			{
-				ToAsciiTable[i][s] = (unsigned char)output;
-			}
-			else 
-			{
-				ToAsciiTable[i][s] = 0;
-			}
-		}
-	}
-}
-*/
 
 #endif //ifdef WIN32

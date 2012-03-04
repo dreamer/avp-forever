@@ -252,6 +252,15 @@ typedef struct D3DInfo
 	class VertexDeclaration		*particleDecl;
 	class VertexDeclaration		*rhwDecl;
 
+	// matrices
+	D3DXMATRIX matOrtho;
+	D3DXMATRIX matProjection;
+	D3DXMATRIX matView;
+	D3DXMATRIX matIdentity;
+	D3DXMATRIX matViewPort;
+
+	D3DXPLANE  frustumPlanes[6];
+
 	// enumeration
 	uint32_t				NumDrivers;
 	uint32_t				CurrentDriver;

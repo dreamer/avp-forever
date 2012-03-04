@@ -543,8 +543,6 @@ void _cdecl main()
 
 		Destroy_CurrentEnvironment();
 
-		DeallocateAllImages();
-
 		EndNPCs(); /* JH 30/4/97 - unload npc rifs */
 
 		ExitGame();

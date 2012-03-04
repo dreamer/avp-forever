@@ -26,6 +26,7 @@
 #include "FmvPlayback.h"
 #include "console.h"
 #include <process.h>
+#include <new>
 
 static const int kAudioBufferSize  = 4096;
 static const int kAudioBufferCount = 3;
@@ -88,7 +89,11 @@ int SmackerPlayback::Open(const std::string &fileName)
 
 	Smacker_GetFrameSize(handle, frameWidth, frameHeight);
 
-	frame = new uint8_t[frameWidth * frameHeight];
+	frame = new(std::nothrow) uint8_t[frameWidth * frameHeight];
+	if (!frame) {
+		Con_PrintError("can't allocate frame memory for FMV file " + mFileName);
+		return FMV_ERROR;
+	}
 
 	uint32_t nAudioTracks = Smacker_GetNumAudioTracks(handle);
 
@@ -136,8 +141,8 @@ int SmackerPlayback::Open(const std::string &fileName)
 
 	// now start the threads
 	mDecodeThreadHandle = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, SmackerDecodeThread, static_cast<void*>(this), 0, NULL));
-	if (nAudioTracks)
-	{
+
+	if (nAudioTracks) {
 		mAudioThreadHandle = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, SmackerAudioThread, static_cast<void*>(this), 0, NULL));
 	}
 
@@ -156,8 +161,9 @@ bool SmackerPlayback::IsPlaying()
 
 bool SmackerPlayback::ConvertFrame(uint32_t width, uint32_t height, uint8_t *bufferPtr, uint32_t pitch)
 {
-	if (!mFmvPlaying)
+	if (!mFmvPlaying) {
 		return false;
+	}
 
 	if (!bufferPtr)
 	{
@@ -208,8 +214,9 @@ unsigned int __stdcall SmackerDecodeThread(void *args)
 	while (fmv->currentFrame < nFrames)
 	{
 		// check if we should still be playing or not
-		if (!fmv->IsPlaying())
+		if (!fmv->IsPlaying()) {
 			break;
+		}
 
 		uint32_t startTime = timeGetTime();
 
@@ -235,8 +242,9 @@ unsigned int __stdcall SmackerDecodeThread(void *args)
 				while (audioSize > fmv->mRingBuffer->GetWritableSize())
 				{
 					// little bit of insurance in case we get stuck in here
-					if (!fmv->mFmvPlaying)
+					if (!fmv->mFmvPlaying) {
 						break;
+					}
 
 					// wait for the audio buffer to tell us it's just freed up another audio buffer for us to fill
 					WaitForSingleObject(fmv->audioStream->voiceContext->hBufferEndEvent, /*INFINITE*/20);
@@ -248,16 +256,13 @@ unsigned int __stdcall SmackerDecodeThread(void *args)
 
 		uint32_t endTime = timeGetTime();
 
-//		double audio_time = static_cast<double>(fmv->audioStream->GetNumSamplesPlayed()) / static_cast<double>(fmv->sampleRate);
-//		double video_time = (1.0f / fmv->frameRate) * (float)(Smacker_GetCurrentFrameNum(fmv->handle) - 1);
-
 		// sleep for frame time minus time to decode frame
 		int32_t timeToSleep = (1000 / fmv->frameRate) - (endTime - startTime);
-		if (timeToSleep < 0) timeToSleep = 1;
-			Sleep(timeToSleep);
-
-		// sleep a frames worth
-//		Sleep(1000 / fmv->frameRate);
+		if (timeToSleep < 0) {
+			timeToSleep = 1;
+		}
+		
+		Sleep(timeToSleep);
 
 		fmv->currentFrame++;
 	}
@@ -315,8 +320,7 @@ unsigned int __stdcall SmackerAudioThread(void *args)
 		timetoSleep = endTime - startTime;
 		timetoSleep -= kQuantum;
 
-		if (timetoSleep < 0 || timetoSleep > kQuantum)
-		{
+		if (timetoSleep < 0 || timetoSleep > kQuantum) {
 			timetoSleep = 1;
 		}
 

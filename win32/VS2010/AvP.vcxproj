@@ -551,7 +551,6 @@
     <ClInclude Include="..\..\3dc\avp\win95\d3d_hud.h" />
     <ClInclude Include="..\..\3dc\avp\win95\dbdefs.h" />
     <ClInclude Include="..\..\3dc\avp\win95\endianio.h" />
-    <ClInclude Include="..\..\3dc\avp\win95\font.h" />
     <ClInclude Include="..\..\3dc\avp\win95\Frontend\AvP_EnvInfo.h" />
     <ClInclude Include="..\..\3dc\avp\win95\Frontend\avp_intro.h" />
     <ClInclude Include="..\..\3dc\avp\win95\Frontend\AvP_MenuData.h" />

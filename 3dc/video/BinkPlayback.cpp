@@ -46,8 +46,7 @@ int BinkPlayback::Open(const std::string &fileName)
 #endif
 
 	// hack to make the menu background FMV loop
-	if (mFileName == "fmvs/menubackground.bik")
-	{
+	if (mFileName == "fmvs/menubackground.bik") {
 		isLooped = true;
 	}
 
@@ -77,8 +76,7 @@ int BinkPlayback::Open(const std::string &fileName)
 	if (nAudioTracks)
 	{
 		// get audio information for all available tracks
-		for (uint32_t i = 0; i < audioTrackInfos.size(); i++)
-		{
+		for (uint32_t i = 0; i < audioTrackInfos.size(); i++) {
 			audioTrackInfos[i] = Bink_GetAudioTrackDetails(handle, i);
 		}
 
@@ -165,8 +163,7 @@ int BinkPlayback::Open(const std::string &fileName)
 	// now start the threads
 	mDecodeThreadHandle = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, BinkDecodeThread, static_cast<void*>(this), 0, NULL));
 
-	if (nAudioTracks)
-	{
+	if (nAudioTracks) {
 		mAudioThreadHandle = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, BinkAudioThread, static_cast<void*>(this), 0, NULL));
 	}
 
@@ -199,8 +196,7 @@ BinkPlayback::~BinkPlayback()
 		delete mRingBuffer;
 	}
 
-	for (uint32_t i = 0; i < frameTextureIDs.size(); i++)
-	{
+	for (uint32_t i = 0; i < frameTextureIDs.size(); i++) {
 		Tex_Release(frameTextureIDs[i]);
 	}
 
@@ -224,8 +220,9 @@ bool BinkPlayback::IsPlaying()
 // copies a decoded Theora YUV frame to texture(s) for GPU to convert via shader
 bool BinkPlayback::ConvertFrame()
 {
-	if (!mFmvPlaying)
+	if (!mFmvPlaying) {
 		return false;
+	}
 
 	// critical section
 	EnterCriticalSection(&mFrameCriticalSection);
@@ -278,8 +275,9 @@ unsigned int __stdcall BinkDecodeThread(void *args)
 	while (Bink_GetCurrentFrameNum(fmv->handle) < Bink_GetNumFrames(fmv->handle))
 	{
 		// check if we should still be playing or not
-		if (!fmv->IsPlaying())
+		if (!fmv->IsPlaying()) {
 			break;
+		}
 
 		uint32_t startTime = timeGetTime();
 
@@ -306,8 +304,9 @@ unsigned int __stdcall BinkDecodeThread(void *args)
 				while (audioSize > fmv->mRingBuffer->GetWritableSize())
 				{
 					// little bit of insurance in case we get stuck in here
-					if (!fmv->mFmvPlaying)
+					if (!fmv->mFmvPlaying) {
 						break;
+					}
 
 					// wait for the audio buffer to tell us it's just freed up another audio buffer for us to fill
 					WaitForSingleObject(fmv->audioStream->voiceContext->hBufferEndEvent, /*INFINITE*/20);
@@ -325,14 +324,18 @@ unsigned int __stdcall BinkDecodeThread(void *args)
 		
 		// sleep for frame time minus time to decode frame
 		int32_t timeToSleep = (1000 / fmv->frameRate) - (endTime - startTime);
-		if (timeToSleep < 0) timeToSleep = 1;
-			Sleep(timeToSleep);
+		if (timeToSleep < 0) {
+			timeToSleep = 1;
+		}
+
+		Sleep(timeToSleep);
 
 		if (fmv->isLooped)
 		{
 			// handle looping
-			if (Bink_GetCurrentFrameNum(fmv->handle) >= Bink_GetNumFrames(fmv->handle))
+			if (Bink_GetCurrentFrameNum(fmv->handle) >= Bink_GetNumFrames(fmv->handle)) {
 				Bink_GotoFrame(fmv->handle, 0);
+			}
 		}
 	}
 	
@@ -389,8 +392,7 @@ unsigned int __stdcall BinkAudioThread(void *args)
 		timetoSleep = endTime - startTime;
 		timetoSleep -= kQuantum;
 
-		if (timetoSleep < 0 || timetoSleep > kQuantum)
-		{
+		if (timetoSleep < 0 || timetoSleep > kQuantum) {
 			timetoSleep = 1;
 		}
 

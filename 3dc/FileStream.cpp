@@ -123,8 +123,7 @@ int64_t FileStream::GetCurrentPos()
 
 	LARGE_INTEGER theOffset2;
 
-	if (::SetFilePointerEx(fileHandle, theOffset, &theOffset2, FILE_CURRENT) == 0)
-	{
+	if (::SetFilePointerEx(fileHandle, theOffset, &theOffset2, FILE_CURRENT) == 0) {
 		return -1;
 	}
 
@@ -155,8 +154,7 @@ bool FileStream::Seek(int64_t offset, eSeek seekType)
 	LARGE_INTEGER theOffset;
 	theOffset.QuadPart = offset;
 
-	if (::SetFilePointerEx(fileHandle, theOffset, 0, moveMethod) == 0)
-	{
+	if (::SetFilePointerEx(fileHandle, theOffset, 0, moveMethod) == 0) {
 		return false;
 	}
 
@@ -167,10 +165,10 @@ bool FileStream::WriteBytes(const uint8_t *buffer, size_t nBytes)
 {
 	DWORD nBytesWritten = 0;
 
-	if (::WriteFile(fileHandle, static_cast<LPCVOID>(buffer), nBytes, &nBytesWritten, NULL) == 0)
-	{
+	if (::WriteFile(fileHandle, static_cast<LPCVOID>(buffer), nBytes, &nBytesWritten, NULL) == 0) {
 		return false;
 	}
+
 	return true;
 }
 
@@ -178,10 +176,10 @@ DWORD FileStream::ReadBytes(uint8_t *buffer, size_t nBytes)
 {
 	DWORD nBytesRead = 0;
 
-	if (::ReadFile(fileHandle, static_cast<LPVOID>(buffer), nBytes, &nBytesRead, NULL) == 0)
-	{
+	if (::ReadFile(fileHandle, static_cast<LPVOID>(buffer), nBytes, &nBytesRead, NULL) == 0) {
 		return 0;
 	}
+
 	return nBytesRead;
 }
 
@@ -199,12 +197,10 @@ bool FileStream::WriteString(const char *theString)
 
 uint32_t FileStream::GetFileSize()
 {
-	if (fromFastFile)
-	{
+	if (fromFastFile) {
 		return fileSize;
 	}
-	else
-	{
+	else {
 		return ::GetFileSize(fileHandle, NULL);
 	}
 }
@@ -285,7 +281,7 @@ void FileStream::PutUint16LE(uint16_t value)
 
 void FileStream::PutUint16BE(uint16_t value)
 {
-	_byteswap_ushort(value);
+	value = _byteswap_ushort(value);
 	WriteBytes(reinterpret_cast<uint8_t*>(&value), sizeof(value));
 }
 
@@ -296,7 +292,7 @@ void FileStream::PutUint32LE(uint32_t value)
 
 void FileStream::PutUint32BE(uint32_t value)
 {
-	_byteswap_ulong(value);
+	value = _byteswap_ulong(value);
 	WriteBytes(reinterpret_cast<uint8_t*>(&value), sizeof(value));
 }
 
@@ -307,7 +303,7 @@ void FileStream::PutUint64LE(uint64_t value)
 
 void FileStream::PutUint64BE(uint64_t value)
 {
-	_byteswap_uint64(value);
+	value = _byteswap_uint64(value);
 	WriteBytes(reinterpret_cast<uint8_t*>(&value), sizeof(value));
 }
 
@@ -315,8 +311,7 @@ bool DoesFileExist(const std::string &fileName)
 {
 	DWORD fileAttributes = ::GetFileAttributes(fileName.c_str());
 
-	if (0xffffffff == fileAttributes || FILE_ATTRIBUTE_DIRECTORY & fileAttributes)
-	{
+	if (0xffffffff == fileAttributes || FILE_ATTRIBUTE_DIRECTORY & fileAttributes) {
 		return false;
 	}
 

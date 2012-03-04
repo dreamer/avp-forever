@@ -1008,7 +1008,7 @@ BOOL InitialiseDirectMouse()
 
 extern int xPosRelative;
 extern int yPosRelative;
-extern BOOL mouseMoved;
+extern bool mouseMoved;
 
 void DirectReadMouse(void)
 {
@@ -1017,7 +1017,7 @@ void DirectReadMouse(void)
 
 	GotMouse = FALSE;
 
-	if (mouseMoved == FALSE) 
+	if (mouseMoved == false) 
 		return;
 
 	MouseVelX = 0;
@@ -1042,7 +1042,7 @@ void DirectReadMouse(void)
 	MouseVelX = DIV_FIXED(MouseX-OldMouseX, NormalFrameTime);
 	MouseVelY = DIV_FIXED(MouseY-OldMouseY, NormalFrameTime);
 
-	mouseMoved = FALSE;
+	mouseMoved = false;
 
 #else
     DIDEVICEOBJECTDATA od[DMouse_RetrieveSize];

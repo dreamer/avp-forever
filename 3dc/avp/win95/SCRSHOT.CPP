@@ -26,9 +26,9 @@ void LogCameraPosForModuleLinking()
 {
 	if(!playerPherModule) return;
 	if(!playerPherModule->name) return;
-	
+
 	char Filename[MAX_PATH]={"avp_rifs/"};
-	
+
 	strcat(Filename,Env_List[AvP.CurrentEnv]->main);
 	strcat(Filename,".mlf");
 
@@ -37,7 +37,7 @@ void LogCameraPosForModuleLinking()
 
 	char output_buffer[300];
 	int length=0;
-	
+
 	strcpy(output_buffer,playerPherModule->name);
 	length+=(strlen(playerPherModule->name)+4)&~3;
 
@@ -47,7 +47,7 @@ void LogCameraPosForModuleLinking()
 	length+=sizeof(MATRIXCH);
 	*(VECTORCH*)&output_buffer[length]=Global_VDB_Ptr->VDB_World;
 	length+=sizeof(VECTORCH);
-	
+
 	if(length%4 !=0)
 	{
 		GLOBALASSERT(0);

@@ -66,13 +66,11 @@ TheoraPlayback::~TheoraPlayback()
 	ogg_sync_clear(&mState);
 
 	// clear stream map
-	for (streamMap::iterator it = mStreams.begin(); it != mStreams.end(); ++it)
-	{
+	for (streamMap::iterator it = mStreams.begin(); it != mStreams.end(); ++it) {
 		delete it->second;
 	}
 
-	for (uint32_t i = 0; i < frameTextureIDs.size(); i++)
-	{
+	for (uint32_t i = 0; i < frameTextureIDs.size(); i++) {
 		Tex_Release(frameTextureIDs[i]);
 	}
 
@@ -179,14 +177,14 @@ int TheoraPlayback::Open(const std::string &fileName)
 		}
 
 		// we need some temporary mAudio data storage space and a ring buffer instance
-		mAudioData = new uint8_t[kAudioBufferSize];
+		mAudioData = new (std::nothrow)uint8_t[kAudioBufferSize];
 		if (mAudioData == NULL)
 		{
 			Con_PrintError("Failed to create mAudioData stream buffer for FMV playback");
 			return FMV_ERROR;
 		}
 
-		mRingBuffer = new RingBuffer(kAudioBufferSize * kAudioBufferCount);
+		mRingBuffer = new (std::nothrow)RingBuffer(kAudioBufferSize * kAudioBufferCount);
 		if (mRingBuffer == NULL)
 		{
 			Con_PrintError("Failed to create mRingBuffer for FMV playback");
@@ -248,8 +246,7 @@ int TheoraPlayback::Open(const std::string &fileName)
 	// now start the threads
 	mDecodeThreadHandle = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, TheoraDecodeThread, static_cast<void*>(this), 0, NULL));
 
-	if (mAudio)
-	{
+	if (mAudio) {
 		mAudioThreadHandle = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, TheoraAudioThread, static_cast<void*>(this), 0, NULL));
 	}
 
@@ -268,8 +265,9 @@ bool TheoraPlayback::HandleTheoraHeader(OggStream* stream, ogg_packet* packet)
 		&stream->mTheora.mSetupInfo,
 		packet);
 
-	if (ret == TH_ENOTFORMAT)
+	if (ret == TH_ENOTFORMAT) {
 		return false; // Not a theora header
+	}
 
 	if (ret > 0)
 	{
@@ -295,26 +293,22 @@ bool TheoraPlayback::HandleSkeletonHeader(OggStream* stream, ogg_packet* packet)
 		return false;
 	}
 
-	if (stream->mType != TYPE_SKELETON) 
-	{
+	if (stream->mType != TYPE_SKELETON) {
 		// The first packet must be the skeleton identifier.
 		return false;
 	}
 
 	// "fisbone" stream info packet?
-	if (packet->bytes >= 8 && memcmp(packet->packet, "fisbone", 8) == 0) 
-	{
+	if (packet->bytes >= 8 && memcmp(packet->packet, "fisbone", 8) == 0) {
 		return false;
 	}
 
 	// "index" keyframe index packet?
-	if (packet->bytes > 6 && memcmp(packet->packet, "index", 6) == 0) 
-	{
+	if (packet->bytes > 6 && memcmp(packet->packet, "index", 6) == 0) {
 		return false;
 	}
 
-	if (packet->e_o_s) 
-	{
+	if (packet->e_o_s) {
 		return false;
 	}
 
@@ -333,13 +327,11 @@ bool TheoraPlayback::HandleVorbisHeader(OggStream* stream, ogg_packet* packet)
 	// indicate that we've finished loading the headers and got the
 	// first data packet. To detect this I check if I already know the
 	// stream type and if the vorbis_synthesis_headerin call failed.
-	if (stream->mType == TYPE_VORBIS && ret == OV_ENOTVORBIS)
-	{
+	if (stream->mType == TYPE_VORBIS && ret == OV_ENOTVORBIS) {
 		// First data packet
 		return true;
 	}
-	else if (ret == 0)
-	{
+	else if (ret == 0) {
 		stream->mType = TYPE_VORBIS;
 	}
 	return false;
@@ -353,8 +345,9 @@ bool TheoraPlayback::IsPlaying()
 // converts a decoded Theora YUV frame to RGB texture using CPU conversion routine
 bool TheoraPlayback::ConvertFrame(uint32_t width, uint32_t height, uint8_t *bufferPtr, uint32_t pitch)
 {
-	if (mFmvPlaying == false)
+	if (mFmvPlaying == false) {
 		return false;
+	}
 
 	// critical section
 	EnterCriticalSection(&mFrameCriticalSection);
@@ -390,8 +383,9 @@ bool TheoraPlayback::ConvertFrame(uint32_t width, uint32_t height, uint8_t *buff
 // copies a decoded Theora YUV frame to texture(s) for GPU to convert via shader
 bool TheoraPlayback::ConvertFrame()
 {
-	if (!mFmvPlaying)
+	if (!mFmvPlaying) {
 		return false;
+	}
 
 	// critical section
 	EnterCriticalSection(&mFrameCriticalSection);
@@ -461,8 +455,7 @@ ogg_int64_t TheoraPlayback::ReadPage(ogg_page *page)
 				mPageOffset = mDataOffset;
 				ogg_sync_reset(&mState);
 			}
-			else
-			{
+			else {
 				return -1;
 			}
 		}
@@ -476,8 +469,7 @@ ogg_int64_t TheoraPlayback::ReadPage(ogg_page *page)
 		mFileStream.read(buffer, 4096);
 		std::streamsize amountRead = mFileStream.gcount();
 
-		if (amountRead == 0)
-		{
+		if (amountRead == 0) {
 			// eof
 			continue;
 		}
@@ -500,8 +492,9 @@ bool TheoraPlayback::ReadPacket(OggStream *stream, ogg_packet *packet)
 	{
 		ogg_page page;
 
-		if (ReadPage(&page) == -1)
+		if (ReadPage(&page) == -1) {
 			return false;
+		}
 
 		int serialNumber = ogg_page_serialno(&page);
 		assert(mStreams.find(serialNumber) != mStreams.end());
@@ -587,8 +580,9 @@ void TheoraPlayback::HandleTheoraData(OggStream *stream, ogg_packet *packet)
 {
 	int ret = th_decode_packetin(stream->mTheora.mDecodeContext, packet, &mGranulePos);
 
-	if (ret == TH_DUPFRAME)  // same as previous frame, don't bother decoding it
+	if (ret == TH_DUPFRAME) { // same as previous frame, don't bother decoding it
 		return;
+	}
 
 	assert (ret == 0);
 
@@ -620,8 +614,9 @@ unsigned int __stdcall TheoraDecodeThread(void *args)
 	{
 		while (fmv->ReadPacket(fmv->mVideo, &packet))
 		{
-			if (!fmv->IsPlaying())
+			if (!fmv->IsPlaying()) {
 				break;
+			}
 
 			fmv->HandleTheoraData(fmv->mVideo, &packet);
 			float framerate = float(fmv->mVideo->mTheora.mInfo.fps_numerator) / float(fmv->mVideo->mTheora.mInfo.fps_denominator);
@@ -629,8 +624,7 @@ unsigned int __stdcall TheoraDecodeThread(void *args)
 			int32_t timeToSleep = static_cast<DWORD>((1.0f / framerate) * 1000);
 
 			// just to be sure, clamp the value to 0 and greater
-			if (timeToSleep < 0)
-			{
+			if (timeToSleep < 0) {
 				timeToSleep = 1;
 			}
 
@@ -642,8 +636,9 @@ unsigned int __stdcall TheoraDecodeThread(void *args)
 		while (fmv->ReadPacket(fmv->mAudio, &packet))
 		{
 			// check if we should still be playing or not
-			if (!fmv->IsPlaying())
+			if (!fmv->IsPlaying()) {
 				break;
+			}
 
 			if (vorbis_synthesis(&fmv->mAudio->mVorbis.mBlock, &packet) == 0)
 			{
@@ -709,8 +704,9 @@ unsigned int __stdcall TheoraDecodeThread(void *args)
 						while (audioSize > fmv->mRingBuffer->GetWritableSize())
 						{
 							// little bit of insurance in case we get stuck in here
-							if (!fmv->mFmvPlaying)
+							if (!fmv->mFmvPlaying) {
 								break;
+							}
 
 							// wait for the audio buffer to tell us it's just freed up another audio buffer for us to fill
 							WaitForSingleObject(fmv->audioStream->voiceContext->hBufferEndEvent, /*INFINITE*/20);
@@ -806,8 +802,7 @@ unsigned int __stdcall TheoraAudioThread(void *args)
 		timetoSleep = endTime - startTime;
 		timetoSleep -= kQuantum;
 
-		if (timetoSleep < 0 || timetoSleep > kQuantum)
-		{
+		if (timetoSleep < 0 || timetoSleep > kQuantum) {
 			timetoSleep = 1;
 		}
 

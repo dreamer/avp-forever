@@ -13,13 +13,13 @@ CD3D9Renderer::CD3D9Renderer(void)
 
 CD3D9Renderer::~CD3D9Renderer(void)
 {
-	OutputDebugString("We're getting here? \n"); 
+	OutputDebugString("We're getting here? \n");
 	renderList->Destroy();
 }
 
 /**
  * Return instance
- */ 
+ */
 CD3D9Renderer * CD3D9Renderer::GetInstance()
 {
 	return &_instance;
@@ -56,14 +56,19 @@ void CD3D9Renderer::ProcessAVPDisplayBlock(DISPLAYBLOCK * displayblock)
 	// Creates the model matrix for this display block
 	D3DXMATRIX * modelMatrix = new D3DXMATRIX;
 	*modelMatrix = ConvertMatrixFixedToFloat(&displayblock->ObMat,&displayblock->ObWorld);
+
 	// Get our shape from display block
 	SHAPEHEADER * shape = displayblock->ObShapeData;
+
 	// We are rendering something right?
 	if(shape == NULL) return;
+
 	// Get the number of polygons in this shape
 	unsigned numitems = shape->numitems;
+
 	// Get the polygons array (PolyHeaders)
 	int **itemArrayPtr = shape->items;
+
 	// For each item in this shape
 	while(numitems)
 	{
@@ -72,7 +77,7 @@ void CD3D9Renderer::ProcessAVPDisplayBlock(DISPLAYBLOCK * displayblock)
 		// Get the polygon's header
 		POLYHEADER *polyPtr = (POLYHEADER*) (*itemArrayPtr++);
 		// So, avp doesn't say how many idexes there are, you need to loop a pointer until you find a
-		//  "Termination" flag which is an Index with value "-1" that takes up 32bits. Not making a 
+		//  "Termination" flag which is an Index with value "-1" that takes up 32bits. Not making a
 		// 8,16,32 bit variable like "numberOfVertices" so we can read and know in advance reamains one
 		// of AvP's many mysteries.
 		// Here we get the pointer for the 1st index
@@ -87,8 +92,8 @@ void CD3D9Renderer::ProcessAVPDisplayBlock(DISPLAYBLOCK * displayblock)
 		int * uvArrayForThisPoly = shape->sh_textures[uvIndex];
 		// Loop through the indexes and find the number of vertices and store their data
 		D3DXVECTOR4 vec;
-		for (int * vertexNumberPtr = &polyPtr->Poly1stPt ; (*vertexNumberPtr) != -1 ; vertexNumberPtr++) 
-		{ 
+		for (int * vertexNumberPtr = &polyPtr->Poly1stPt ; (*vertexNumberPtr) != -1 ; vertexNumberPtr++)
+		{
 			// AvP's positions are scaled in milimiters, and are integers
 			vertices[numberOfVerticesInThisItem].position = ConvertVectorIntegerToFloat((VECTORCH *)&(*shape->points)[(*vertexNumberPtr)]);
 			D3DXVec3Transform(&vec,&vertices[numberOfVerticesInThisItem].position,modelMatrix);
@@ -111,13 +116,15 @@ void CD3D9Renderer::ProcessAVPDisplayBlock(DISPLAYBLOCK * displayblock)
 		CD3D9RenderItem * renderItem = new CD3D9RenderItem();
 		renderItem->SetModelMatrix(modelMatrix);
 		renderItem->SetTextures(textureId);
+
 		renderList->AddDynamicVertexData(renderItem,vertices,sizeof(CD3D9RenderVertex),numberOfVerticesInThisItem);
+
 		renderList->AddRenderItem(renderItem);
 		numitems--;
-	
+
 	}
-	
-	
+
+
 }
 void CD3D9Renderer::SetViewProjectionMatrix(D3DXMATRIX * projectionMatrix)
 {
@@ -136,7 +143,7 @@ void CD3D9Renderer::DrawGeometry()
 	while(numItems--)
 	{
 		// So basically, what we'll do here, is to get a RenderItem, check it's states,
-		// update the piepeline and then ask the RenderList to draw it, first we get the 
+		// update the piepeline and then ask the RenderList to draw it, first we get the
 		// RenderItem (using dynamics for now)
 		CD3D9RenderItem * ri = renderList->GetNextDynamicRenderItem();
 		D3DXMATRIX * modelMatrix = ri->GetModelMatrix();
@@ -147,15 +154,15 @@ void CD3D9Renderer::DrawGeometry()
 			OutputDebugString("CD3D9Renderer::DrawGeometry() invalid texture ID found, aborting");
 			exit(0);
 		}
-	
+
 		lpD3DDevice->SetTexture(0,textureList[texID].texture);
 
 		D3DXMATRIX ide;
 		D3DXMatrixIdentity(&ide);
 		shaderList->SetShaderAndVertexDeclaration(ri->GetShaderId());
 		shaderList->SetVertexShaderModelMatrix(&ide,0);
-	
-	
+
+
 		renderList->DrawRenderItem(ri);
 	}
 	renderList->PrepareForNextFrame();

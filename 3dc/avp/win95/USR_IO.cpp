@@ -1164,7 +1164,7 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 				 ||KeyboardInput[secondaryInput->Jetpack])
 					playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Jetpack = 1;
 				#endif
-				
+
 				if(KeyboardInput[primaryInput->MarineTaunt]
 				 ||KeyboardInput[secondaryInput->MarineTaunt])
 					StartPlayerTaunt();
@@ -1298,7 +1298,7 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_LookDown = 1;
 				playerStatusPtr->Mvt_PitchIncrement = ONE_FIXED;
 			}
-  			
+			
 			if(KeyboardInput[primaryInput->CentreView]
 			 ||KeyboardInput[secondaryInput->CentreView])
 				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_CentreView = 1;
@@ -1329,10 +1329,10 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_WeaponNo = 1;
 			
 			#if !PREDATOR_DEMO
-		  	if(KeyboardInput[FixedInputConfig.Weapon2])
+			if(KeyboardInput[FixedInputConfig.Weapon2])
 				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_WeaponNo = 2;
 			#else
-		  	if(DebouncedKeyboardInput[FixedInputConfig.Weapon2])
+			if(DebouncedKeyboardInput[FixedInputConfig.Weapon2])
 				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_WeaponNo = 2;
 			#endif
 			if(KeyboardInput[FixedInputConfig.Weapon3])
@@ -1350,7 +1350,7 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 			if(KeyboardInput[FixedInputConfig.Weapon5])
 				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_WeaponNo = 5;
 			#else
-		  	if(DebouncedKeyboardInput[FixedInputConfig.Weapon5])
+			if(DebouncedKeyboardInput[FixedInputConfig.Weapon5])
 				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_WeaponNo = 5;
 			#endif
 
@@ -1361,7 +1361,7 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 			if(DebouncedKeyboardInput[FixedInputConfig.Weapon6])
 				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_WeaponNo = 6;
 			#endif
-			
+
 			if(KeyboardInput[FixedInputConfig.Weapon7])
 				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_WeaponNo = 7;
 			
@@ -1373,11 +1373,9 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 			
 			if(KeyboardInput[FixedInputConfig.Weapon10])
 				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_WeaponNo = 10;
-			
-		 
 		}
 		#if !(PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO||DEATHMATCH_DEMO)
-		else // Cool - paintball mode				`
+		else // Cool - paintball mode
 		{
 			if(DebouncedKeyboardInput[primaryInput->NextWeapon]
 			 ||DebouncedKeyboardInput[secondaryInput->NextWeapon])
@@ -1402,39 +1400,38 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 			{
 				PaintBallMode_ChangeSize(-1);
 			}
-			
+
 			if(KeyboardInput[primaryInput->CentreView]
 			 ||KeyboardInput[secondaryInput->CentreView])
 			{
-				PaintBallMode_Rotate();				
+				PaintBallMode_Rotate();
 			}
-						  
+
 			if(DebouncedKeyboardInput[FixedInputConfig.Weapon1])
 			{
 				PaintBallMode_ChangeSubclass(+1);
 			}
 			
-		  	if(DebouncedKeyboardInput[FixedInputConfig.Weapon2])
+			if(DebouncedKeyboardInput[FixedInputConfig.Weapon2])
 			{
 				PaintBallMode_ChangeSubclass(-1);
 			}
 
-		  	if(DebouncedKeyboardInput[FixedInputConfig.Weapon3])
+			if(DebouncedKeyboardInput[FixedInputConfig.Weapon3])
 			{
 				PaintBallMode.DecalIsInverted = ~PaintBallMode.DecalIsInverted;
 			}
 
-		  	if(DebouncedKeyboardInput[FixedInputConfig.Weapon4])
+			if(DebouncedKeyboardInput[FixedInputConfig.Weapon4])
 			{
 				PaintBallMode_Randomise();
 			}
 
-		  	if(DebouncedKeyboardInput[FixedInputConfig.Weapon10])
+			if(DebouncedKeyboardInput[FixedInputConfig.Weapon10])
 			{
 				extern void save_preplaced_decals();
 				save_preplaced_decals();
 			}
-	
 
 			if(DebouncedKeyboardInput[primaryInput->FirePrimaryWeapon]
 			 ||DebouncedKeyboardInput[secondaryInput->FirePrimaryWeapon])

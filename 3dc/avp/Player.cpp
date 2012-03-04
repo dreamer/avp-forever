@@ -1004,20 +1004,19 @@ void PlayerIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiplie
 
 		if (sbPtr->SBDamageBlock.Health <= 0)
 		{
-//			sbPtr->SBDamageBlock.Health = 0;
-//			if (playerStatusPtr->IsImmortal)
-			if (1) // bjd - revert me
+			if (playerStatusPtr->IsImmortal)
+//			if (1) // bjd - revert me
 			{ 
 				sbPtr->SBDamageBlock.Health = 0;
 			}
 			else
 			{
-				PlayerIsDead(damage,multiplier,incoming);
+				PlayerIsDead(damage, multiplier, incoming);
 			}
 		}
 
-		playerStatusPtr->Health=sbPtr->SBDamageBlock.Health;
-		playerStatusPtr->Armour=sbPtr->SBDamageBlock.Armour;
+		playerStatusPtr->Health = sbPtr->SBDamageBlock.Health;
+		playerStatusPtr->Armour = sbPtr->SBDamageBlock.Armour;
 	}
 }
 

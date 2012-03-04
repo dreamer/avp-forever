@@ -187,6 +187,9 @@ bool ReleaseVolatileResources()
 	SAFE_DELETE(d3d.particleVB);
 	SAFE_DELETE(d3d.particleIB);
 
+	SAFE_DELETE(d3d.decalVB);
+	SAFE_DELETE(d3d.decalIB);
+
 	SAFE_DELETE(d3d.orthoVB);
 	SAFE_DELETE(d3d.orthoIB);
 
@@ -516,8 +519,7 @@ void R_UnsetTexture(texID_t textureID)
 	// unbind this texture if it's set to any stage
 	for (uint32_t i = 0; i < kMaxTextureStages; i++)
 	{
-		if (setTextureArray[i] == textureID)
-		{
+		if (setTextureArray[i] == textureID) {
 			setTextureArray[i] = NO_TEXTURE;
 		}
 	}
@@ -537,16 +539,21 @@ bool R_DrawPrimitive(uint32_t numPrimitives)
 
 bool R_LockVertexBuffer(class VertexBuffer &vertexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, void **data, enum R_USAGE usage)
 {
+	if (vertexBuffer.isLocked) {
+		Con_PrintError("Vertex buffer already locked!");
+		assert(0);
+		return false;
+	}
+
 	DWORD vbFlags = 0;
-	if (usage == USAGE_DYNAMIC)
-	{
+	if (usage == USAGE_DYNAMIC) {
 		vbFlags = D3DLOCK_DISCARD;
 	}
 
 	LastError = vertexBuffer.vertexBuffer.vertexBuffer->Lock(offsetToLock, sizeToLock, data, vbFlags);
 	if (FAILED(LastError))
 	{
-		Con_PrintError("Can't vertex index buffer");
+		Con_PrintError("Can't lock vertex buffer");
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
@@ -559,9 +566,9 @@ bool R_LockVertexBuffer(class VertexBuffer &vertexBuffer, uint32_t offsetToLock,
 bool R_DrawIndexedPrimitive(uint32_t baseVertexIndex, uint32_t minIndex, uint32_t numVerts, uint32_t startIndex, uint32_t numPrimitives)
 {
 	LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
-			baseVertexIndex,               // BaseVertexIndex - Offset from the start of the vertex buffer to the first vertex
-			minIndex,               // MinIndex - Minimum vertex index for vertices used during this call. This is a zero based index relative to BaseVertexIndex.
-			numVerts,        // total num verts in VB
+			baseVertexIndex,    // BaseVertexIndex - Offset from the start of the vertex buffer to the first vertex
+			minIndex,           // MinIndex - Minimum vertex index for vertices used during this call. This is a zero based index relative to BaseVertexIndex.
+			numVerts,           // total num verts in VB
 			startIndex,
 			numPrimitives);
 
@@ -577,9 +584,14 @@ bool R_DrawIndexedPrimitive(uint32_t baseVertexIndex, uint32_t minIndex, uint32_
 
 bool R_LockIndexBuffer(class IndexBuffer &indexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, uint16_t **data, enum R_USAGE usage)
 {
+	if (indexBuffer.isLocked) {
+		Con_PrintError("Index buffer is already locked!");
+		assert(0);
+		return false;
+	}
+
 	DWORD ibFlags = 0;
-	if (usage == USAGE_DYNAMIC)
-	{
+	if (usage == USAGE_DYNAMIC) {
 		ibFlags = D3DLOCK_DISCARD;
 	}
 
@@ -590,6 +602,8 @@ bool R_LockIndexBuffer(class IndexBuffer &indexBuffer, uint32_t offsetToLock, ui
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
+
+	indexBuffer.isLocked = true;
 
 	return true;
 }
@@ -622,6 +636,12 @@ bool R_SetIndexBuffer(class IndexBuffer &indexBuffer)
 
 bool R_UnlockVertexBuffer(class VertexBuffer &vertexBuffer)
 {
+	if (vertexBuffer.isLocked = false) {
+		Con_PrintError("Vertex buffer is already unlocked!");
+		assert(0);
+		return false;
+	}
+
 	LastError = vertexBuffer.vertexBuffer.vertexBuffer->Unlock();
 	if (FAILED(LastError))
 	{
@@ -637,6 +657,12 @@ bool R_UnlockVertexBuffer(class VertexBuffer &vertexBuffer)
 
 bool R_UnlockIndexBuffer(class IndexBuffer &indexBuffer)
 {
+	if (indexBuffer.isLocked = false) {
+		Con_PrintError("Index buffer is already unlocked!");
+		assert(0);
+		return false;
+	}
+
 	LastError = indexBuffer.indexBuffer.indexBuffer->Unlock();
 	if (FAILED(LastError))
 	{
@@ -716,7 +742,8 @@ bool R_LockTexture(Texture &texture, uint8_t **data, uint32_t *pitch, enum Textu
 			lockFlag = D3DLOCK_DISCARD;
 			break;
 		default:
-			// error and return
+			Con_PrintError("Unknown texture lock type");
+			return false;
 			break;
 	}
 
@@ -1802,8 +1829,7 @@ bool R_CreateTexture(uint32_t width, uint32_t height, uint32_t bitsPerPixel, enu
 
 void R_ReleaseTexture(Texture &texture)
 {
-	if (texture.texture)
-	{
+	if (texture.texture) {
 		texture.texture->Release();
 		texture.texture = NULL;
 	}
@@ -1811,15 +1837,13 @@ void R_ReleaseTexture(Texture &texture)
 
 void R_ReleaseVertexShader(r_VertexShader &vertexShader)
 {
-	if (vertexShader.shader)
-	{
+	if (vertexShader.shader) {
 		vertexShader.shader->Release();
 		vertexShader.shader = 0;
 	}
 
 	// release the constant table too
-	if (vertexShader.constantTable)
-	{
+	if (vertexShader.constantTable) {
 		vertexShader.constantTable->Release();
 		vertexShader.constantTable = 0;
 	}
@@ -1827,15 +1851,13 @@ void R_ReleaseVertexShader(r_VertexShader &vertexShader)
 
 void R_ReleasePixelShader(r_PixelShader &pixelShader)
 {
-	if (pixelShader.shader)
-	{
+	if (pixelShader.shader) {
 		pixelShader.shader->Release();
 		pixelShader.shader = 0;
 	}
 
 	// release the constant table too
-	if (pixelShader.constantTable)
-	{
+	if (pixelShader.constantTable) {
 		pixelShader.constantTable->Release();
 		pixelShader.constantTable = 0;
 	}
@@ -1844,8 +1866,7 @@ void R_ReleasePixelShader(r_PixelShader &pixelShader)
 bool R_ChangeResolution(uint32_t width, uint32_t height)
 {
 	// don't bother resetting device if we're already using the requested settings
-	if ((width == d3d.d3dpp.BackBufferWidth) && (height == d3d.d3dpp.BackBufferHeight))
-	{
+	if ((width == d3d.d3dpp.BackBufferWidth) && (height == d3d.d3dpp.BackBufferHeight)) {
 		return true;
 	}
 
@@ -1886,14 +1907,12 @@ bool R_ChangeResolution(uint32_t width, uint32_t height)
 
 			// try reset again, if it doesnt work, bail out
 			LastError = d3d.lpD3DDevice->Reset(&d3d.d3dpp);
-			if (FAILED(LastError))
-			{
+			if (FAILED(LastError)) {
 				LogDxError(LastError, __LINE__, __FILE__);
 				return false;
 			}
 		}
-		else
-		{
+		else {
 			LogDxError(LastError, __LINE__, __FILE__);
 			return false;
 		}
@@ -1903,8 +1922,7 @@ bool R_ChangeResolution(uint32_t width, uint32_t height)
 	d3d.D3DViewport.Height = height;
 
 	LastError = d3d.lpD3DDevice->SetViewport(&d3d.D3DViewport);
-	if (FAILED(LastError))
-	{
+	if (FAILED(LastError)) {
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
 
@@ -2626,12 +2644,6 @@ void ReleaseDirect3D()
 	Config_Save();
 }
 
-void ReleaseAvPTexture(AVPTEXTURE *texture)
-{
-	delete[] texture->buffer;
-	delete texture;
-}
-
 void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
 {
 	if (CurrentRenderStates.TranslucencyMode == translucencyRequired)
@@ -2777,26 +2789,6 @@ void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
 			}
 			break;
 		}
-/*
-		case TRANSLUCENCY_JUSTSETZ:
-		{
-			if (D3DAlphaBlendEnable != TRUE)
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_ALPHABLENDENABLE, TRUE);
-				D3DAlphaBlendEnable = TRUE;
-			}
-			if (D3DSrcBlend != D3DBLEND_ZERO)
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_SRCBLEND, D3DBLEND_ZERO);
-				D3DSrcBlend = D3DBLEND_ZERO;
-			}
-			if (D3DDestBlend != D3DBLEND_ONE) 
-			{
-				d3d.lpD3DDevice->SetRenderState(D3DRS_DESTBLEND, D3DBLEND_ONE);
-				D3DDestBlend = D3DBLEND_ONE;
-			}
-		}
-*/
 		default: break;
 	}
 }

@@ -3195,6 +3195,7 @@ static void MakeBackupFile(File_Chunk* fc)
 
 	char* Name1 = new char[length+30];
 	char* Name2 = new char[length+30];
+
 	strncpy(Name1,"avp_rifs/Backup/",16);
 	strncpy(&Name1[16],filename,length);
 	length += 16;

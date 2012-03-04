@@ -326,7 +326,6 @@ BOOL CheckForJoystick(void);
 /* Direct 3D */
 void FlipBuffers(void);
 void ReleaseDirect3D(void);
-void ReleaseAvPTexture(AVPTEXTURE *texture);
 
 /* KJL 11:28:31 9/9/97 - Direct Input prototypes */
 BOOL InitialiseDirectInput(void);

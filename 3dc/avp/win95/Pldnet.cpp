@@ -7796,12 +7796,9 @@ static void ProcessNetMsg_GhostHierarchyDamaged(char *messagePtr, DPID senderId)
 				RotateVector(&incoming,&mat);
 
 				//set the incoming pointer 
-				incoming_ptr=&incoming;	
-			
-			}	
-
+				incoming_ptr=&incoming;
+			}
 		}
-			
 
 		if (messageSection && messageSection->SectionID!=-1) {
 			/* Hmm. */

@@ -294,7 +294,7 @@ void avp_GetCommandLineArgs(char *args, uint32_t size)
 	assert (args);
 	std::string commandLine = Config_GetString("[Misc]", "CommandLine", "");
 
-	size_t copySize = min(size, commandLine.size());
+	size_t copySize = (std::min)(size, commandLine.size());
 
 	strncpy(args, commandLine.c_str(), copySize);
 }

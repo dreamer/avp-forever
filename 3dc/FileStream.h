@@ -37,10 +37,7 @@
 
 // delete file?
 
-#ifdef _WIN32
-	#define NOMINMAX
-	#include <windows.h>
-#endif
+#include "os_header.h"
 
 #include <string>
 #include <vector>
@@ -105,7 +102,7 @@ class FileStream
 		uint32_t GetFileSize();
 		bool Seek(int64_t offset, eSeek seekType);
 		bool SkipBytes(int64_t nBytes);
-		int64_t FileStream::GetCurrentPos();
+		int64_t GetCurrentPos();
 
 	private:
 		HANDLE fileHandle;

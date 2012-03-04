@@ -26,12 +26,7 @@
 #define _console_h_
 
 #include <string>
-#ifdef WIN32
-#include <windows.h>
-#endif
-#ifdef _XBOX
-#include <xtl.h>
-#endif
+#include "os_header.h"
 
 // function pointer for commands
 typedef void (*funcPointer) (void);

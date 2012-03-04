@@ -18,7 +18,7 @@
 #include <math.h>
 #include <assert.h>
 
-#include "TheoraPlayback.h"
+//#include "TheoraPlayback.h"
 #include "BinkPlayback.h"
 #include "SmackerPlayback.h"
 
@@ -147,13 +147,11 @@ extern int PlayMenuBackgroundFmv()
 	if (!MenuBackgroundFMV)
 		return 0;
 
-	if (menuFMV->mFrameReady)
-	{
+	if (menuFMV->mFrameReady) {
 		menuFMV->ConvertFrame();
 	}
 
-	if (menuFMV->mTexturesReady)
-	{
+	if (menuFMV->mTexturesReady) {
 		DrawFmvFrame(menuFMV->mFrameWidth, menuFMV->mFrameHeight, menuFMV->frameTextureIDs);
 	}
 
@@ -162,8 +160,9 @@ extern int PlayMenuBackgroundFmv()
 
 extern void EndMenuBackgroundFmv()
 {
-	if (!MenuBackgroundFMV)
+	if (!MenuBackgroundFMV) {
 		return;
+	}
 
 	menuFMV->Close();
 	delete menuFMV;
@@ -186,8 +185,7 @@ int32_t FindFreeFmvHandle()
 	for (uint32_t i = 0; i < kMaxFMVs; i++)
 	{
 		// find a slot with a NULL (free) pointer
-		if (!fmvList[i])
-		{
+		if (!fmvList[i]) {
 			return i;
 		}
 	}
@@ -221,13 +219,15 @@ int32_t OpenFMV(const char *filenamePtr)
 
 extern void PlayFMV(const char *filenamePtr)
 {
-	if (!IntroOutroMoviesAreActive)
+	if (!IntroOutroMoviesAreActive) {
 		return;
+	}
 
 	BinkPlayback fmv;
 
-	if (fmv.Open(filenamePtr) != FMV_OK)
+	if (fmv.Open(filenamePtr) != FMV_OK) {
 		return;
+	}
 
 	bool playing = true;
 
@@ -237,14 +237,15 @@ extern void PlayFMV(const char *filenamePtr)
 
 		ThisFramesRenderingHasBegun();
 
-		if (!fmv.IsPlaying())
+		if (!fmv.IsPlaying()) {
 			playing = false;
+		}
 
-		if (fmv.mFrameReady)
+		if (fmv.mFrameReady) {
 			playing = fmv.ConvertFrame();
+		}
 
-		if (fmv.mTexturesReady)
-		{
+		if (fmv.mTexturesReady) {
 			DrawFmvFrame(fmv.mFrameWidth, fmv.mFrameHeight, fmv.frameTextureIDs);
 		}
 
@@ -266,8 +267,7 @@ void UpdateAllFMVTextures()
 {
 	uint32_t i = NumberOfFMVTextures;
 
-	while (i--)
-	{
+	while (i--) {
 		UpdateFMVTexture(&FMVTexture[i]);
 	}
 }
@@ -277,8 +277,9 @@ extern void StartTriggerPlotFMV(int number)
 	uint32_t i = NumberOfFMVTextures;
 	char buffer[25];
 
-	if (CheatMode_Active != CHEATMODE_NONACTIVE)
+	if (CheatMode_Active != CHEATMODE_NONACTIVE) {
 		return;
+	}
 
 	sprintf(buffer, "FMVs/message%d.smk", number);
 
@@ -301,14 +302,12 @@ extern void StartTriggerPlotFMV(int number)
 				{
 					delete fmvList[FMVTexture[i].fmvHandle];
 					fmvList[FMVTexture[i].fmvHandle] = 0;
-//					fmvList[FMVTexture[i].fmvHandle]->Close();
 					FMVTexture[i].fmvHandle = -1;
 				}
 			}
 
 			FMVTexture[i].fmvHandle = OpenFMV(buffer);
-			if (FMVTexture[i].fmvHandle == -1)
-			{
+			if (FMVTexture[i].fmvHandle == -1) {
 				// couldn't open it
 				return;
 			}
@@ -349,16 +348,17 @@ void ScanImagesForFMVs()
 
 			// generate a new string, from occurrence of "FMVs" in string to before the fullstop, then append ".smk" extension
 			std::string fileName = fmvTextures[i].substr(offset1, offset2-offset1) + ".smk";
+
+			FMVTexture[NumberOfFMVTextures].IsTriggeredPlotFMV = 0;
 			
 			// do a check here to see if it's a valid video file rather than just any old file with the right name?
 			FILE *file = avp_fopen(fileName.c_str(), "rb");
 			if (file)
 			{
 				fclose(file);
-				FMVTexture[NumberOfFMVTextures].IsTriggeredPlotFMV = 0;
+				continue;
 			}
-			else
-			{
+			else {
 				FMVTexture[NumberOfFMVTextures].IsTriggeredPlotFMV = 1;
 			}
 
@@ -392,13 +392,6 @@ void ReleaseAllFMVTextures()
 			// close and delete the FMV object
 			delete fmvList[FMVTexture[i].fmvHandle];
 			fmvList[FMVTexture[i].fmvHandle] = NULL;
-/*
-			if (fmvList[FMVTexture[i].fmvHandle]->IsPlaying())
-			{
-				delete fmvList[FMVTexture[i].fmvHandle];
-				fmvList[FMVTexture[i].fmvHandle] = NULL;
-			}
-*/
 			FMVTexture[i].fmvHandle = -1;
 		}
 

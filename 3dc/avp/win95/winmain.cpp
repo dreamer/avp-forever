@@ -291,7 +291,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	if (instr = strstr(command_line, "-ip"))
 	{
 		char buffer[100];
-		sscanf(instr, "-ip %s", &buffer);
+		sscanf(instr, "-ip %s", buffer);
 		strncpy(CommandLineIPAddressString,buffer,15);
 		CommandLineIPAddressString[15] = 0;
 	}
@@ -401,7 +401,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		#if !(PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO)
 		if (instr = strstr(command_line, "-n"))
 		{
-			sscanf(instr, "-n %s", &LevelName);
+			sscanf(instr, "-n %s", LevelName);
 		}
 		#endif
 

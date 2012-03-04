@@ -35,7 +35,7 @@ const int RFFL = 'RFFL';
 const int hashTableSize = 2600;
 
 // hash table to store fast file entries
-std::vector<std::vector<FastFileHandle>> fastFileHandles;
+std::vector<std::vector<FastFileHandle> > fastFileHandles;
 
 // store the names of all .fll files available
 std::vector<std::string> fastFiles;
