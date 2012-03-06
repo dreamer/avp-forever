@@ -37,18 +37,14 @@ static bool Config_CreateDefault();
 typedef std::map<std::string, std::string> MapValue;
 typedef std::map<std::string, MapValue> MapHeading;
 
-#ifdef _XBOX
-	const char* FILENAME = "d:\\AliensVsPredator.cfg";
-#else
-	const char* FILENAME = "AliensVsPredator.cfg";
-#endif
+static const char* kCfgFileName = "AliensVsPredator.cfg";
 
 MapHeading AvPConfig;
 
 bool Config_Load()
 {
 	std::string filePath(GetSaveFolderPath());
-	filePath += FILENAME;
+	filePath += kCfgFileName;
 
 	std::ifstream file(filePath.c_str());
 
@@ -142,7 +138,7 @@ bool Config_Load()
 bool Config_Save()
 {
 	std::string filePath(GetSaveFolderPath());
-	filePath += FILENAME;
+	filePath += kCfgFileName;
 
 	std::ofstream file(filePath.c_str());
 
@@ -304,7 +300,7 @@ void Config_SetBool(const std::string &heading, const std::string &variable, boo
 static bool Config_CreateDefault()
 {
 	std::string filePath(GetSaveFolderPath());
-	filePath += FILENAME;
+	filePath += kCfgFileName;
 
 	std::ofstream file(filePath.c_str());
 	if (!file.is_open())

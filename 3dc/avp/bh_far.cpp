@@ -53,7 +53,7 @@ static MODULE **Global_ModuleArrayPtr;
 
 extern void Execute_Alien_Dying(STRATEGYBLOCK *sbPtr);
 int PrintDebuggingText(const char* t, ...);
-void AddNetMsg_FarAlienPosition(STRATEGYBLOCK* sbPtr,int targetModuleIndex,int index,BOOL indexIsModuleIndex);
+void AddNetMsg_FarAlienPosition(STRATEGYBLOCK* sbPtr, int targetModuleIndex, int index,BOOL indexIsModuleIndex);
 
 /*--------------------Patrick 9/12/96-----------------------
   Far Alien behaviour execution shell.
@@ -64,26 +64,26 @@ void AddNetMsg_FarAlienPosition(STRATEGYBLOCK* sbPtr,int targetModuleIndex,int i
   ----------------------------------------------------------*/
 void FarAlienBehaviour(STRATEGYBLOCK *sbPtr)
 {
-	ALIEN_STATUS_BLOCK *alienStatusPointer;    
+	ALIEN_STATUS_BLOCK *alienStatusPointer;
 	char *descriptor;
 
 	LOCALASSERT(sbPtr);
- 	/* a precondition: there should be no display block */
- 	LOCALASSERT(!(sbPtr->SBdptr));
+	/* a precondition: there should be no display block */
+	LOCALASSERT(!(sbPtr->SBdptr));
 
- 	/* get the alien's status block */
-	alienStatusPointer=(ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+	/* get the alien's status block */
+	alienStatusPointer=(ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(alienStatusPointer);
-	
+
 	/* execute far behaviour state... */
-	switch(alienStatusPointer->BehaviourState)
+	switch (alienStatusPointer->BehaviourState)
 	{
-   		case(ABS_Wait):
-		{	
+		case(ABS_Wait):
+		{
 			Execute_AFS_Wait(sbPtr);
-   			descriptor="Waiting";
-   			break;
-   		}
+			descriptor="Waiting";
+			break;
+		}
 		case(ABS_Approach):
 		case(ABS_Jump):
 		{
@@ -94,21 +94,21 @@ void FarAlienBehaviour(STRATEGYBLOCK *sbPtr)
 		case(ABS_Hunt):
 		{
 			Execute_AFS_Hunt(sbPtr);
-   			descriptor="Hunting";
-   			break;
-   		}
-   		case(ABS_Retreat):
-		{	
+			descriptor="Hunting";
+			break;
+		}
+		case(ABS_Retreat):
+		{
 			Execute_AFS_Retreat(sbPtr);
-   			descriptor="Retreating";
-   			break;
-   		}
-   		case(ABS_Wander):
-		{	
+			descriptor="Retreating";
+			break;
+		}
+		case(ABS_Wander):
+		{
 			Execute_AFS_Wander(sbPtr);
-   			descriptor="Wandering";
-   			break;
-   		}
+			descriptor="Wandering";
+			break;
+		}
 		case(ABS_Attack):
 		case(ABS_Pounce):
 		{
@@ -124,7 +124,7 @@ void FarAlienBehaviour(STRATEGYBLOCK *sbPtr)
 		}
 		case(ABS_Dying):
 		{
-   			descriptor="Dying";
+			descriptor="Dying";
 			Execute_Alien_Dying(sbPtr);
 			break;
 		}
@@ -132,19 +132,19 @@ void FarAlienBehaviour(STRATEGYBLOCK *sbPtr)
 		{
 			AlienNearState_Dormant(sbPtr);
 			descriptor="Dormant";
-			break;		
-		}		
+			break;
+		}
 		case ABS_Awakening:
 		{
 			AlienNearState_Awakening(sbPtr);
 			descriptor="Awakening";
-			break;		
+			break;
 		}
 		case ABS_Taunting:
 		{
 			AlienNearState_Taunting(sbPtr);
 			descriptor="Taunting";
-			break;		
+			break;
 		}
 		default:
 		{
@@ -152,32 +152,29 @@ void FarAlienBehaviour(STRATEGYBLOCK *sbPtr)
 			LOCALASSERT(1==0); /* should never get here */
 		}
 	}
-	
+
 	/* check here to see if the alien is in a doorway....
 	If so, and it is a proximity door, make sure it is open. */
 	{
 		MODULEDOORTYPE doorType = ModuleIsADoor(sbPtr->containingModule);
 
-		if(doorType == MDT_ProxDoor) {
+		if (doorType == MDT_ProxDoor) {
 			((PROXDOOR_BEHAV_BLOCK *)sbPtr->containingModule->m_sbptr->SBdataptr)->alienTrigger = 1;
 		}
 	}
 
 	if (ShowHiveState) {
 		/* Alien position print. */
-
 		MODULE *thisModule = sbPtr->containingModule;
-		
 		LOCALASSERT(thisModule);
 
 		PrintDebuggingText("This FAR %s ALIEN is in module %d, %s\n",descriptor,thisModule->m_index,thisModule->name);
-
 	}
-		
+
 	/* make sure that we are inside a module:
 	if this fires it means that a far alien is not inside
 	the module it is supposed to be in */
-	#if UseLocalAssert   
+	#if UseLocalAssert
 	{
 		VECTORCH localCoords;
 		MODULE *thisModule = sbPtr->containingModule;
@@ -189,24 +186,22 @@ void FarAlienBehaviour(STRATEGYBLOCK *sbPtr)
 		localCoords.vy -= thisModule->m_world.vy;
 		localCoords.vz -= thisModule->m_world.vz;
 		
-		if(PointIsInModule(thisModule, &localCoords)==0)
+		if (PointIsInModule(thisModule, &localCoords)==0)
 		{
 			textprint("FAR ALIEN MODULE CONTAINMENT FAILURE \n");
 
 			LOGDXFMT(("Alien containment failure: %s alien is in %s, position is %d,%d,%d:\nModule extents are: %d:%d, %d:%d, %d:%d",
 				descriptor,
-				thisModule->name,localCoords.vx,localCoords.vy,localCoords.vz,
-				thisModule->m_maxx,thisModule->m_minx,thisModule->m_maxy,thisModule->m_miny,
-				thisModule->m_maxz,thisModule->m_minz));
+				thisModule->name, localCoords.vx, localCoords.vy, localCoords.vz,
+				thisModule->m_maxx, thisModule->m_minx, thisModule->m_maxy, thisModule->m_miny,
+				thisModule->m_maxz, thisModule->m_minz));
 
 			LOCALASSERT(1==0);
-		}  
+		}
 	}
 	#endif
 
 	/* textprint("NO ENTRY POINT COUNT %d \n", entryPointFailures);	*/
-
-
 }
 
 /*--------------------Patrick 9/12/96-----------------------
@@ -225,25 +220,25 @@ void FarAlienBehaviour(STRATEGYBLOCK *sbPtr)
   ----------------------------------------------------------*/
 static void Execute_AFS_Hunt(STRATEGYBLOCK *sbPtr)
 {
-	ALIEN_STATUS_BLOCK *alienStatusPointer;    
+	ALIEN_STATUS_BLOCK *alienStatusPointer;
 	AIMODULE *targetModule = 0;
 
- 	/* get the alien's status block */
+	/* get the alien's status block */
 	LOCALASSERT(sbPtr);
-	alienStatusPointer=(ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+	alienStatusPointer=(ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(alienStatusPointer);
 
 	/* Decrement the Far state timer */
 	alienStatusPointer->FarStateTimer -= NormalFrameTime;
-		
+
 	/* check if far state timer has timed-out. If so, it is time 
 	to do something. Otherwise just return. */
-	if(alienStatusPointer->FarStateTimer>0) return;
-		
+	if (alienStatusPointer->FarStateTimer>0) return;
+
 	/* check the alien hive, to see itf we've switched to regroup:
 	if so, reset the alien far behaviour state to retreat, with the alien far 
 	state timer set to 0, forcing a retreating movement next frame... */
-	if(NPCHive.currentState == HS_Regroup)
+	if (NPCHive.currentState == HS_Regroup)
 	{
 		alienStatusPointer->BehaviourState = ABS_Retreat;
 		alienStatusPointer->FarStateTimer = 0; /* forces execution of new state next frame*/
@@ -265,8 +260,8 @@ static void Execute_AFS_Hunt(STRATEGYBLOCK *sbPtr)
 	targetModule = FarNPC_GetTargetAIModuleForHunt(sbPtr, 1);
 
 	/* if there is no target module, it means that the alien is trapped in an
-	unlinked module. In this case, reset the timer and return. */			
-	if(!targetModule)
+	unlinked module. In this case, reset the timer and return. */
+	if (!targetModule)
 	{
 		alienStatusPointer->FarStateTimer = ALIEN_FAR_MOVE_TIME;
 
@@ -283,7 +278,7 @@ static void Execute_AFS_Hunt(STRATEGYBLOCK *sbPtr)
 		alienStatusPointer->BehaviourState = ABS_Wander;
 		alienStatusPointer->CurveTimeOut = 0;
 		#endif
-		return;		
+		return;
 	}
 
 	/* Examine target, and decide what to do */
@@ -313,9 +308,9 @@ static void Execute_AFS_Wait(STRATEGYBLOCK *sbPtr)
 	#if 0
 	/* ...I think not. */
 
-	ALIEN_STATUS_BLOCK *alienStatusPointer;    
+	ALIEN_STATUS_BLOCK *alienStatusPointer;
 
-	alienStatusPointer=(ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+	alienStatusPointer=(ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(alienStatusPointer);
 
 	alienStatusPointer->BehaviourState = ABS_Hunt;
@@ -326,15 +321,15 @@ static void Execute_AFS_Wait(STRATEGYBLOCK *sbPtr)
 
 static void Execute_AFS_Approach(STRATEGYBLOCK *sbPtr) {
 
-	ALIEN_STATUS_BLOCK *alienStatusPointer;    
+	ALIEN_STATUS_BLOCK *alienStatusPointer;
 
-	alienStatusPointer=(ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+	alienStatusPointer=(ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(alienStatusPointer);
 
 	/* For the moment, switch to attack or to hunt. */
 
 	if (Validate_Target(alienStatusPointer->Target,alienStatusPointer->Target_SBname)==0) {
-		/* Whoops, no target. */	
+		/* Whoops, no target. */
 		//GLOBALASSERT(0);
 		/* Go back to hunt. */
 		alienStatusPointer->BehaviourState = ABS_Hunt;
@@ -354,14 +349,13 @@ static void Execute_AFS_Approach(STRATEGYBLOCK *sbPtr) {
 		alienStatusPointer->BehaviourState = ABS_Attack;
 		alienStatusPointer->FarStateTimer = 0; /* forces execution of new state next frame*/
 	}
-
 }
 
 static void Execute_AFS_Attack(STRATEGYBLOCK *sbPtr) {
 
-	ALIEN_STATUS_BLOCK *alienStatusPointer;    
+	ALIEN_STATUS_BLOCK *alienStatusPointer;
 
-	alienStatusPointer=(ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+	alienStatusPointer=(ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(alienStatusPointer);
 
 	/* For the moment, switch to hunt, or smite the target. */
@@ -392,17 +386,15 @@ static void Execute_AFS_Attack(STRATEGYBLOCK *sbPtr) {
 		/* Kersplat. */
 		alienStatusPointer->FarStateTimer=ALIEN_ATTACKTIME;
 		/* Cunning, eh? */
-
 	}
-
 }
 
 static void Execute_AFS_Avoidance(STRATEGYBLOCK *sbPtr) {
 
 	/* No obstacles in far behaviour. */
-	ALIEN_STATUS_BLOCK *alienStatusPointer;    
+	ALIEN_STATUS_BLOCK *alienStatusPointer;
 
-	alienStatusPointer=(ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+	alienStatusPointer=(ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(alienStatusPointer);
 
 	Initialise_AvoidanceManager(sbPtr,&alienStatusPointer->avoidanceManager);
@@ -410,16 +402,15 @@ static void Execute_AFS_Avoidance(STRATEGYBLOCK *sbPtr) {
 	/* Go directly to hunt.  Do not pass GO. */
 	alienStatusPointer->BehaviourState = ABS_Hunt;
 	alienStatusPointer->FarStateTimer = 0; /* forces execution of new state next frame*/
-
 }
 
 static void Execute_AFS_Retreat(STRATEGYBLOCK *sbPtr)
 {
-	ALIEN_STATUS_BLOCK *alienStatusPointer;    
+	ALIEN_STATUS_BLOCK *alienStatusPointer;
 	AIMODULE *targetModule = 0;
 
- 	/* get the alien's status block */
-	alienStatusPointer=(ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+	/* get the alien's status block */
+	alienStatusPointer=(ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(alienStatusPointer);
 
 	/* Decrement the Far state timer */
@@ -427,14 +418,14 @@ static void Execute_AFS_Retreat(STRATEGYBLOCK *sbPtr)
 		
 	/* check if far state timer has timed-out. If so, it is time 
 	to do something. Otherwise just return. */
-	if(alienStatusPointer->FarStateTimer>0) return;
+	if (alienStatusPointer->FarStateTimer>0) return;
 
 	/* check the alien hive, to see if we've switched to attack:
 	if so, reset the alien far behaviour state to attack, with the alien far 
 	state timer set to 0, forcing a movement next frame... 
 	NB if we can't attack the player, hunting function will automatically
 	switch to wander */
-	if(NPCHive.currentState == HS_Attack)
+	if (NPCHive.currentState == HS_Attack)
 	{
 		alienStatusPointer->BehaviourState = ABS_Hunt;
 		alienStatusPointer->FarStateTimer = 0; /* forces execution of new state next frame*/
@@ -444,20 +435,20 @@ static void Execute_AFS_Retreat(STRATEGYBLOCK *sbPtr)
 	/* get the target module... */
 	targetModule = FarNPC_GetTargetAIModuleForRetreat(sbPtr);
 
-	/* if there is no target module, reset the timer and return. */			
-	if(!targetModule)
+	/* if there is no target module, reset the timer and return. */
+	if (!targetModule)
 	{
 		alienStatusPointer->FarStateTimer = ALIEN_FAR_MOVE_TIME;
-		return;		
+		return;
 	}
-	
+
 	/* Examine target, and decide what to do */
 	GLOBALASSERT(AIModuleIsPhysical(targetModule));
 
-	#if 0	
+	#if 0
 	ProcessFarAlienTargetModule(sbPtr, targetModule);
 	/* reset the timer */
-	alienStatusPointer->FarStateTimer = ALIEN_FAR_MOVE_TIME;			
+	alienStatusPointer->FarStateTimer = ALIEN_FAR_MOVE_TIME;
 	#else
 	alienStatusPointer->FarStateTimer = ProcessFarAlienTargetModule(sbPtr, targetModule);
 	#endif
@@ -465,11 +456,11 @@ static void Execute_AFS_Retreat(STRATEGYBLOCK *sbPtr)
 
 static void Execute_AFS_Wander(STRATEGYBLOCK *sbPtr)
 {
-	ALIEN_STATUS_BLOCK *alienStatusPointer;    
+	ALIEN_STATUS_BLOCK *alienStatusPointer;
 	AIMODULE *targetModule = 0;
 
- 	/* get the alien's status block */
-	alienStatusPointer=(ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+	/* get the alien's status block */
+	alienStatusPointer=(ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(alienStatusPointer);
 
 	/* Decrement the Far state timer */
@@ -477,51 +468,49 @@ static void Execute_AFS_Wander(STRATEGYBLOCK *sbPtr)
 		
 	/* check if far state timer has timed-out. If so, it is time 
 	to do something. Otherwise just return. */
-	if(alienStatusPointer->FarStateTimer>0) return;
+	if (alienStatusPointer->FarStateTimer>0) return;
 
 	/* check for state changes:
 	if hive says retreat, then retreat, regardless of whether or not we can see the player 
 	otherwise, if we can see the player, go to hunt */
-	if(NPCHive.currentState == HS_Regroup)
+	if (NPCHive.currentState == HS_Regroup)
 	{
 		alienStatusPointer->BehaviourState = ABS_Retreat;
 		alienStatusPointer->FarStateTimer = 0; /* forces execution of new state next frame*/
 		return;
 	}
-	
+
 	/* see if we want to switch to attack */
-	if(AlienIsAwareOfTarget(sbPtr))
+	if (AlienIsAwareOfTarget(sbPtr))
 	{
 		alienStatusPointer->BehaviourState = ABS_Hunt;
 		alienStatusPointer->FarStateTimer = 0; /* forces execution of new state next frame*/
 		return;
 	}
 	/* That used to be 100% for ULTRAVIOLENCE. But,
-	now, there might concievably be NO targets, -> wander. */	
+	now, there might concievably be NO targets, -> wander. */
 
 	/* get the target module... */
 	targetModule = FarNPC_GetTargetAIModuleForWander(sbPtr, NULL, 0);
 
-	/* if there is no target module, reset the timer and return. */			
-	if(!targetModule)
+	/* if there is no target module, reset the timer and return. */
+	if (!targetModule)
 	{
 		alienStatusPointer->FarStateTimer = ALIEN_FAR_MOVE_TIME;
-		return;		
+		return;
 	}
-	
+
 	/* Examine target, and decide what to do */
 	GLOBALASSERT(AIModuleIsPhysical(targetModule));
-	
+
 	#if 0
 	ProcessFarAlienTargetModule(sbPtr, targetModule);
 	/* reset the timer */
-	alienStatusPointer->FarStateTimer = ALIEN_FAR_MOVE_TIME;			
+	alienStatusPointer->FarStateTimer = ALIEN_FAR_MOVE_TIME;
 	#else
 	alienStatusPointer->FarStateTimer = ProcessFarAlienTargetModule(sbPtr, targetModule);
 	#endif
 }
-
-
 
 
 /*--------------------Patrick 27/1/97----------------------
@@ -543,12 +532,12 @@ static int ProcessFarAlienTargetModule(STRATEGYBLOCK *sbPtr, AIMODULE* targetMod
 	LOCALASSERT(targetModule);
 	LOCALASSERT(sbPtr->I_SBtype == I_BehaviourAlien);
 
- 	/* get the alien's status block */
-	alienStatusPointer=(ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);    
+	/* get the alien's status block */
+	alienStatusPointer=(ALIEN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 	LOCALASSERT(alienStatusPointer);
 	
 	oldPos=sbPtr->DynPtr->Position;
-		
+
 	/* get the target module's status, and decide what to do */
 	targetStatus = GetTargetAIModuleStatus(sbPtr, targetModule, 1);
 	switch(targetStatus)
@@ -583,7 +572,7 @@ static int ProcessFarAlienTargetModule(STRATEGYBLOCK *sbPtr, AIMODULE* targetMod
 			/* locate to target	*/
 			LocateFarNPCInAIModule(sbPtr, targetModule);
 			break;
-		}		
+		}
 		case(NPCTM_ProxDoorNotOpen):
 		{
 			MODULE *renderModule;
@@ -605,9 +594,9 @@ static int ProcessFarAlienTargetModule(STRATEGYBLOCK *sbPtr, AIMODULE* targetMod
 		}
 		case(NPCTM_LiftDoorNotOpen):
 		{
-		   /*  do nothing - well, there's nothing we can do, really*/
+			/*  do nothing - well, there's nothing we can do, really*/
 			FarNpc_FlipAround(sbPtr);
-		   	break;
+			break;
 		}
 		case(NPCTM_SecurityDoorOpen):
 		{
@@ -617,9 +606,9 @@ static int ProcessFarAlienTargetModule(STRATEGYBLOCK *sbPtr, AIMODULE* targetMod
 		}
 		case(NPCTM_SecurityDoorNotOpen):
 		{
-		   /*  do nothing - well, there's nothing we can do, really*/
+			/*  do nothing - well, there's nothing we can do, really*/
 			FarNpc_FlipAround(sbPtr);
-		   	break;
+			break;
 		}
 		default:
 		{
@@ -675,64 +664,64 @@ void LocateFarNPCInModule(STRATEGYBLOCK *sbPtr, MODULE *targetModule)
 	GLOBALASSERT(ModuleIsPhysical(targetModule));
 
 	/* now: a few tests for npc's that are generated... (aliens and marines) */
-	if((sbPtr->I_SBtype==I_BehaviourAlien)||(sbPtr->I_SBtype==I_BehaviourMarine))
+	if ((sbPtr->I_SBtype==I_BehaviourAlien)||(sbPtr->I_SBtype==I_BehaviourMarine))
 	{
-		if((PherAi_Buf[(targetModule->m_index)]) >= MAX_GENERATORNPCSPERMODULE)		 
+		if ((PherAi_Buf[(targetModule->m_index)]) >= MAX_GENERATORNPCSPERMODULE)
 		{
 			/* do nothing (since there are only a few auxilary locs per module) */
-			return;	
+			return;
 		}
 
-		if(ModuleCurrVisArray[(targetModule->m_index)])
+		if (ModuleCurrVisArray[(targetModule->m_index)])
 		{
 			/* the target is visible... */
-			if(NumGeneratorNPCsVisible() >= MAX_VISIBLEGENERATORNPCS)
+			if (NumGeneratorNPCsVisible() >= MAX_VISIBLEGENERATORNPCS)
 			{
 				/* do nothing: there are already enough visible npcs */
 				return;
 			}
 		}
 	}
-	
+
 	/* now move the npc to it's target... */
 	noOfAuxLocs = FALLP_AuxLocs[(targetModule->m_index)].numLocations;
 	auxLocsList = FALLP_AuxLocs[(targetModule->m_index)].locationsList;  
 	noOfEntryPoints = FALLP_EntryPoints[(targetModule->m_index)].numEntryPoints;
 	entryPointsList = FALLP_EntryPoints[(targetModule->m_index)].entryPointsList;  
-	
+
 	/* find the entry point for the target */
 	LOCALASSERT(sbPtr->containingModule);
 	targetEntryPoint = GetModuleEP(targetModule,(sbPtr->containingModule));
 	LOCALASSERT(targetEntryPoint);
-	
+
 	/* if it's visible, use the entry point.
 	if it's not visible, use an auxilary location. If there aren't any auxilary
 	locations, use the entry point. */
 
-	if(ModuleCurrVisArray[(targetModule->m_index)])
+	if (ModuleCurrVisArray[(targetModule->m_index)])
 	{
 		newPosition = targetEntryPoint->position;
-   	}
+	}
 	else
 	{
-   		/* pick an auxilary location: if there aren't any, use the entry point */
-		if(noOfAuxLocs)
+		/* pick an auxilary location: if there aren't any, use the entry point */
+		if (noOfAuxLocs)
 		{
 			int targetLocInx;
-   			int npcHeight;
-   			targetLocInx = FastRandom() % noOfAuxLocs;
-   			newPosition = auxLocsList[targetLocInx];
-   			/* move up 1/2 npc height, plus a bit more(100). this only applies
-   			to auxilary locations, not eps */			
-			npcHeight = (mainshapelist[sbPtr->shapeIndex]->shapemaxy 
-   				- mainshapelist[sbPtr->shapeIndex]->shapeminy)/2;
-   			if(npcHeight>1000) npcHeight = 1000;   					
-   			newPosition.vy -=(npcHeight + 100); 	 
-   		}
+			int npcHeight;
+			targetLocInx = FastRandom() % noOfAuxLocs;
+			newPosition = auxLocsList[targetLocInx];
+			/* move up 1/2 npc height, plus a bit more(100). this only applies
+			to auxilary locations, not eps */
+			npcHeight = (mainshapelist[sbPtr->shapeIndex]->shapemaxy
+				- mainshapelist[sbPtr->shapeIndex]->shapeminy)/2;
+			if (npcHeight>1000) npcHeight = 1000;
+			newPosition.vy -=(npcHeight + 100);
+		}
 		else newPosition = targetEntryPoint->position;
-   	}
-   	
-   	/* now set the alien's new position and current module. 
+	}
+	
+	/* now set the alien's new position and current module. 
 	   NB this is world position + alien height in y + a little extra in y to make sure */
 	{
 		DYNAMICSBLOCK *dynPtr = sbPtr->DynPtr;
@@ -744,19 +733,19 @@ void LocateFarNPCInModule(STRATEGYBLOCK *sbPtr, MODULE *targetModule)
 		dynPtr->Position.vz += targetModule->m_world.vz;
 		dynPtr->PrevPosition = dynPtr->Position;
 
-	   	dynPtr->OrientEuler.EulerX = 0;
-	   	dynPtr->OrientEuler.EulerZ = 0;
-	   	{
-			VECTORCH vec; 
+		dynPtr->OrientEuler.EulerX = 0;
+		dynPtr->OrientEuler.EulerZ = 0;
+		{
+			VECTORCH vec;
 			vec.vx = targetModule->m_world.vx - sbPtr->containingModule->m_world.vx;
 			vec.vz = targetModule->m_world.vz - sbPtr->containingModule->m_world.vz;
 			vec.vy = 0;
 			Normalise(&vec);
-	   		dynPtr->OrientEuler.EulerY = ArcTan(vec.vx, vec.vz);
+			dynPtr->OrientEuler.EulerY = ArcTan(vec.vx, vec.vz);
 		}
 	}
 	/* finally, update the alien's module */
-	sbPtr->containingModule = targetModule;	
+	sbPtr->containingModule = targetModule;
 }
 
 void LocateFarNPCInAIModule(STRATEGYBLOCK *sbPtr, AIMODULE *targetModule)
@@ -776,37 +765,37 @@ void LocateFarNPCInAIModule(STRATEGYBLOCK *sbPtr, AIMODULE *targetModule)
 	Global_ModuleArrayPtr = smptr->sm_marray;
 
 	/* now: a few tests for npc's that are generated... (aliens and marines) */
-	if((sbPtr->I_SBtype==I_BehaviourAlien)||(sbPtr->I_SBtype==I_BehaviourMarine))
+	if ((sbPtr->I_SBtype==I_BehaviourAlien)||(sbPtr->I_SBtype==I_BehaviourMarine))
 	{
-		if((PherAi_Buf[(targetModule->m_index)]) >= MAX_GENERATORNPCSPERMODULE)		 
+		if ((PherAi_Buf[(targetModule->m_index)]) >= MAX_GENERATORNPCSPERMODULE)
 		{
 			/* do nothing (since there are only a few auxilary locs per module) */
-			return;	
+			return;
 		}
 
 		//if(ModuleCurrVisArray[(*(targetModule->m_module_ptrs))->m_index])
-		if (AIModuleIsVisible(targetModule)) 
+		if (AIModuleIsVisible(targetModule))
 		{
 			/* the target is visible... */
-			if(NumGeneratorNPCsVisible() >= MAX_VISIBLEGENERATORNPCS)
+			if (NumGeneratorNPCsVisible() >= MAX_VISIBLEGENERATORNPCS)
 			{
 				/* do nothing: there are already enough visible npcs */
 				return;
 			}
 		}
 	}
-	
+
 	/* now move the npc to it's target... */
 	noOfAuxLocs = FALLP_AuxLocs[(targetModule->m_index)].numLocations;
-	auxLocsList = FALLP_AuxLocs[(targetModule->m_index)].locationsList;  
+	auxLocsList = FALLP_AuxLocs[(targetModule->m_index)].locationsList;
 	noOfEntryPoints = FALLP_EntryPoints[(targetModule->m_index)].numEntryPoints;
-	entryPointsList = FALLP_EntryPoints[(targetModule->m_index)].entryPointsList;  
-	
+	entryPointsList = FALLP_EntryPoints[(targetModule->m_index)].entryPointsList;
+
 	/* find the entry point for the target */
 	LOCALASSERT(sbPtr->containingModule);
 	targetEntryPoint = GetAIModuleEP(targetModule,(sbPtr->containingModule->m_aimodule));
 	LOCALASSERT(targetEntryPoint);
-	
+
 	/* if it's visible, use the entry point.
 	if it's not visible, use an auxilary location. If there aren't any auxilary
 	locations, use the entry point. */
@@ -816,44 +805,44 @@ void LocateFarNPCInAIModule(STRATEGYBLOCK *sbPtr, AIMODULE *targetModule)
 	{
 		newPosition = targetEntryPoint->position;
 		targetLocInx=-1;
-   	}
+	}
 	else
 	{
-   		/* pick an auxilary location: if there aren't any, use the entry point */
-		if(noOfAuxLocs)
+		/* pick an auxilary location: if there aren't any, use the entry point */
+		if (noOfAuxLocs)
 		{
-			#if 0 
-   			int npcHeight;
+			#if 0
+			int npcHeight;
 			#endif
-   			targetLocInx = FastRandom() % noOfAuxLocs;
-   			newPosition = auxLocsList[targetLocInx];
-   			/* move up 1/2 npc height, plus a bit more(100). this only applies
-   			to auxilary locations, not eps */			
-			#if 0 
+			targetLocInx = FastRandom() % noOfAuxLocs;
+			newPosition = auxLocsList[targetLocInx];
+			/* move up 1/2 npc height, plus a bit more(100). this only applies
+			to auxilary locations, not eps */
+			#if 0
 			npcHeight = (mainshapelist[sbPtr->shapeIndex]->shapemaxy 
-   				- mainshapelist[sbPtr->shapeIndex]->shapeminy)/2;
-   			if(npcHeight>1000) npcHeight = 1000;
-   			newPosition.vy -=(npcHeight + 100); 	 
+				- mainshapelist[sbPtr->shapeIndex]->shapeminy)/2;
+			if(npcHeight>1000) npcHeight = 1000;
+			newPosition.vy -=(npcHeight + 100); 
 			#endif
 
-			if(AvP.Network != I_No_Network)
+			if (AvP.Network != I_No_Network)
 			{
 				//Multiplayer game
 				//send this new position to the other players
 				AddNetMsg_FarAlienPosition(sbPtr,targetModule->m_index,targetLocInx,FALSE);
 			}
-   		}
+		}
 		else {
 			newPosition = targetEntryPoint->position;
-			if(AvP.Network != I_No_Network)
+			if (AvP.Network != I_No_Network)
 			{
 				//Multiplayer game
 				//send this new position to the other players
 				AddNetMsg_FarAlienPosition(sbPtr,targetModule->m_index,sbPtr->containingModule->m_aimodule->m_index,TRUE);
 			}
 		}
-   	}
-	
+	}
+
 	{
 		VECTORCH temp_Pos;
 
@@ -879,8 +868,8 @@ void LocateFarNPCInAIModule(STRATEGYBLOCK *sbPtr, AIMODULE *targetModule)
 			return;
 		}
 	}
-	   	
-   	/* now set the alien's new position and current module. 
+
+	/* now set the alien's new position and current module. 
 	   NB this is world position + alien height in y + a little extra in y to make sure */
 	{
 		DYNAMICSBLOCK *dynPtr = sbPtr->DynPtr;
@@ -892,21 +881,21 @@ void LocateFarNPCInAIModule(STRATEGYBLOCK *sbPtr, AIMODULE *targetModule)
 		dynPtr->Position.vz += targetModule->m_world.vz;
 		dynPtr->PrevPosition = dynPtr->Position;
 
-	   	dynPtr->OrientEuler.EulerX = 0;
-	   	dynPtr->OrientEuler.EulerZ = 0;
-	   	{
-			VECTORCH vec; 
+		dynPtr->OrientEuler.EulerX = 0;
+		dynPtr->OrientEuler.EulerZ = 0;
+		{
+			VECTORCH vec;
 			vec.vx = targetModule->m_world.vx - sbPtr->containingModule->m_world.vx;
 			vec.vz = targetModule->m_world.vz - sbPtr->containingModule->m_world.vz;
 			vec.vy = 0;
 			Normalise(&vec);
-	   		dynPtr->OrientEuler.EulerY = ArcTan(vec.vx, vec.vz);
+			dynPtr->OrientEuler.EulerY = ArcTan(vec.vx, vec.vz);
 		}
 	}
 	/* finally, update the alien's module */
-	sbPtr->containingModule = renderModule;	
+	sbPtr->containingModule = renderModule;
 
-	#if UseLocalAssert   
+	#if UseLocalAssert
 	{
 		VECTORCH localCoords;
 		MODULE *thisModule = sbPtr->containingModule;
@@ -917,8 +906,8 @@ void LocateFarNPCInAIModule(STRATEGYBLOCK *sbPtr, AIMODULE *targetModule)
 		localCoords.vx -= thisModule->m_world.vx;
 		localCoords.vy -= thisModule->m_world.vy;
 		localCoords.vz -= thisModule->m_world.vz;
-		
-		if(PointIsInModule(thisModule, &localCoords)==0)
+
+		if (PointIsInModule(thisModule, &localCoords)==0)
 		{
 			textprint("FAR ALIEN MODULE CONTAINMENT FAILURE \n");
 
@@ -928,7 +917,7 @@ void LocateFarNPCInAIModule(STRATEGYBLOCK *sbPtr, AIMODULE *targetModule)
 				thisModule->m_maxz,thisModule->m_minz));
 
 			LOCALASSERT(1==0);
-		}  
+		}
 	}
 	#endif
 }
@@ -949,10 +938,10 @@ NPC_TARGETMODULESTATUS GetTargetAIModuleStatus(STRATEGYBLOCK *sbPtr, AIMODULE *t
 		FARENTRYPOINT *targetEntryPoint;
 		targetEntryPoint = GetAIModuleEP(targetModule,(sbPtr->containingModule->m_aimodule));
 
-		if (targetEntryPoint == (FARENTRYPOINT *)0) 
-			return NPCTM_NoEntryPoint;			
+		if (targetEntryPoint == (FARENTRYPOINT *)0)
+			return NPCTM_NoEntryPoint;
 
-		if (!alien) 
+		if (!alien)
 		{
 			if (targetEntryPoint->alien_only) 
 			{
@@ -960,7 +949,7 @@ NPC_TARGETMODULESTATUS GetTargetAIModuleStatus(STRATEGYBLOCK *sbPtr, AIMODULE *t
 			}
 		}
 	}
-	
+
 	renderModule=*(targetModule->m_module_ptrs);
 
 	doorStatus = (ModuleIsADoor(renderModule));
@@ -968,9 +957,9 @@ NPC_TARGETMODULESTATUS GetTargetAIModuleStatus(STRATEGYBLOCK *sbPtr, AIMODULE *t
 	switch(doorStatus)
 	{
 		case(MDT_ProxDoor):
-		{	
- 			if(GetState(renderModule->m_sbptr)) 
- 				return NPCTM_ProxDoorOpen;
+		{
+			if (GetState(renderModule->m_sbptr)) 
+				return NPCTM_ProxDoorOpen;
 			else
 				return NPCTM_ProxDoorNotOpen;
 
@@ -978,9 +967,9 @@ NPC_TARGETMODULESTATUS GetTargetAIModuleStatus(STRATEGYBLOCK *sbPtr, AIMODULE *t
 		}
 
 		case(MDT_LiftDoor):
-		{	
- 			if(GetState(renderModule->m_sbptr)) 
- 				return NPCTM_LiftDoorOpen;
+		{
+			if (GetState(renderModule->m_sbptr)) 
+				return NPCTM_LiftDoorOpen;
 			else
 				return NPCTM_LiftDoorNotOpen;
 
@@ -988,9 +977,9 @@ NPC_TARGETMODULESTATUS GetTargetAIModuleStatus(STRATEGYBLOCK *sbPtr, AIMODULE *t
 		}
 
 		case(MDT_SecurityDoor):
-		{	
- 			if(GetState(renderModule->m_sbptr)) 
- 				return NPCTM_SecurityDoorOpen;
+		{
+			if (GetState(renderModule->m_sbptr)) 
+				return NPCTM_SecurityDoorOpen;
 			else
 				return NPCTM_SecurityDoorNotOpen;
 
@@ -1001,17 +990,16 @@ NPC_TARGETMODULESTATUS GetTargetAIModuleStatus(STRATEGYBLOCK *sbPtr, AIMODULE *t
 		{
 			LOCALASSERT(doorStatus==MDT_NotADoor);
 		}
-
 	}
 	
 	/* now check for lift */
-	if(sbPtr->I_SBtype == I_BehaviourLift) return NPCTM_LiftTeleport;
+	if (sbPtr->I_SBtype == I_BehaviourLift) return NPCTM_LiftTeleport;
 
 	/* check for air duct */
-	if(renderModule->m_flags & MODULEFLAG_AIRDUCT) return NPCTM_AirDuct;
+	if (renderModule->m_flags & MODULEFLAG_AIRDUCT) return NPCTM_AirDuct;
 	
 	/* at this point, we know it's a room (or stairs) ... */
-	return NPCTM_NormalRoom;	 	
+	return NPCTM_NormalRoom;
 }
 
 /* Patrick 1/7/97-----------------------------------------
@@ -1026,15 +1014,15 @@ AIMODULE *FarNPC_GetTargetAIModuleForHunt(STRATEGYBLOCK *sbPtr, int alien)
 	unsigned int highestSmell = 0;
 	AIMODULE* targetModule = (AIMODULE *)0;
 
-	LOCALASSERT(sbPtr);	
-	if(sbPtr->containingModule==NULL) return targetModule;
+	LOCALASSERT(sbPtr);
+	if (sbPtr->containingModule==NULL) return targetModule;
 	AdjModuleRefPtr = sbPtr->containingModule->m_aimodule->m_link_ptrs;
 
 	/* check that there is a list of adjacent modules, and that it is not
 	empty (ie points to zero) */
-	if (AdjModuleRefPtr)	
+	if (AdjModuleRefPtr)
 	{
-		while(*AdjModuleRefPtr != 0)
+		while (*AdjModuleRefPtr != 0)
 		{
 			/* get the index */
 			AdjModuleIndex = (*AdjModuleRefPtr)->m_index;
@@ -1044,10 +1032,10 @@ AIMODULE *FarNPC_GetTargetAIModuleForHunt(STRATEGYBLOCK *sbPtr, int alien)
 				/* if this adjacent module's smell value is higher than
 				the current 'highest smell' record the new module as the
 				target. */
-				if(PherPl_ReadBuf[AdjModuleIndex] > highestSmell)
-				{						
+				if (PherPl_ReadBuf[AdjModuleIndex] > highestSmell)
+				{
 					highestSmell = PherPl_ReadBuf[AdjModuleIndex];
-					targetModule = *AdjModuleRefPtr;							
+					targetModule = *AdjModuleRefPtr;
 				}
 			}
 			/* next adjacent module reference pointer */
@@ -1068,14 +1056,14 @@ AIMODULE *FarNPC_GetTargetAIModuleForWander(STRATEGYBLOCK *sbPtr, AIMODULE *exce
 	AIMODULE **AdjModuleRefPtr;
 	DYNAMICSBLOCK *dynPtr;
 	AIMODULE* targetModule = (AIMODULE *)0;
-	int bestDirn = -100000;	/* lower than the lowest */
+	int bestDirn = -100000; /* lower than the lowest */
 	VECTORCH npcDirn;
 
 	/* some checks */
-	if(!sbPtr) return targetModule;	
-	if(!sbPtr) return targetModule;	
+	if (!sbPtr) return targetModule;
+	if (!sbPtr) return targetModule;
 	dynPtr = sbPtr->DynPtr;
-	if(!dynPtr) return targetModule;	
+	if (!dynPtr) return targetModule;
 
 	/* get npc 2d directional vector */
 	npcDirn.vx = GetSin(dynPtr->OrientEuler.EulerY);
@@ -1088,12 +1076,12 @@ AIMODULE *FarNPC_GetTargetAIModuleForWander(STRATEGYBLOCK *sbPtr, AIMODULE *exce
 
 	/* check that there is a list of adjacent modules, and that it is not
 	empty (ie points to zero) */
-	if(AdjModuleRefPtr)	
+	if (AdjModuleRefPtr)	
 	{
-		while(*AdjModuleRefPtr != 0)
+		while (*AdjModuleRefPtr != 0)
 		{
 			AIMODULE *nextAdjModule = *AdjModuleRefPtr;
-			VECTORCH moduleDirn;	
+			VECTORCH moduleDirn;
 			int thisDirn;
 
 			if (CheckAdjacencyValidity((*AdjModuleRefPtr), sbPtr->containingModule->m_aimodule, alien)) 
@@ -1119,23 +1107,22 @@ AIMODULE *FarNPC_GetTargetAIModuleForWander(STRATEGYBLOCK *sbPtr, AIMODULE *exce
 AIMODULE *FarNPC_GetTargetAIModuleForRetreat(STRATEGYBLOCK *sbPtr)
 {
 	extern unsigned int PlayerSmell;
-	
+
 	AIMODULE **AdjModuleRefPtr;
 	AIMODULE* targetModule = (AIMODULE *)0;
-	unsigned int targetSmell = PlayerSmell + 1;	/* should be higher than any smell anywhere this frame */
+	unsigned int targetSmell = PlayerSmell + 1; /* should be higher than any smell anywhere this frame */
 	unsigned int targetNumAdj = 0;
 
-	LOCALASSERT(sbPtr);	
-	if(sbPtr->containingModule==NULL) return targetModule;	
+	LOCALASSERT(sbPtr);
+	if (sbPtr->containingModule==NULL) return targetModule;
 	AdjModuleRefPtr = sbPtr->containingModule->m_aimodule->m_link_ptrs;
 
 	/* check that there is a list of adjacent modules, and that it is not
 	empty (ie points to zero) */
-	if(AdjModuleRefPtr)	
+	if (AdjModuleRefPtr)
 	{
-		while(*AdjModuleRefPtr != 0)
+		while (*AdjModuleRefPtr != 0)
 		{
-
 			/* get the index */
 			int AdjModuleIndex = (*AdjModuleRefPtr)->m_index;
 			int AdjModuleSmell = PherPl_ReadBuf[AdjModuleIndex];
@@ -1144,14 +1131,14 @@ AIMODULE *FarNPC_GetTargetAIModuleForRetreat(STRATEGYBLOCK *sbPtr)
 			/* if this adjacent module's smell value is lower than
 			the current 'highest smell' record the new module as the
 			target.  If they're equal, tie-break on number of adjacencies*/
-			if( (!targetModule) ||
-				(AdjModuleSmell < targetSmell)||
+			if ((!targetModule) ||
+				(AdjModuleSmell < targetSmell) ||
 				((AdjModuleSmell == targetSmell) && (AdjModuleNumAdjacencies > targetNumAdj))
 			  )
-			{						
+			{
 				targetSmell = PherPl_ReadBuf[AdjModuleIndex];
 				targetModule = *AdjModuleRefPtr;
-				targetNumAdj = NumAdjacentModules((*AdjModuleRefPtr));							
+				targetNumAdj = NumAdjacentModules((*AdjModuleRefPtr));
 			}
 			/* next adjacent module reference pointer */
 			AdjModuleRefPtr++;
@@ -1167,17 +1154,17 @@ AIMODULE *FarNPC_GetTargetAIModuleForGlobalHunt(STRATEGYBLOCK *sbPtr)
 	unsigned int highestSmell = 0;
 	AIMODULE* targetModule = (AIMODULE *)0;
 
-	LOCALASSERT(sbPtr);	
-	if(sbPtr->containingModule==NULL) {
+	LOCALASSERT(sbPtr);
+	if (sbPtr->containingModule==NULL) {
 		return targetModule;
 	}
 	AdjModuleRefPtr = sbPtr->containingModule->m_aimodule->m_link_ptrs;
 
 	/* check that there is a list of adjacent modules, and that it is not
 	empty (ie points to zero) */
-	if(AdjModuleRefPtr)	
+	if (AdjModuleRefPtr)
 	{
-		while(*AdjModuleRefPtr != 0)
+		while (*AdjModuleRefPtr != 0)
 		{
 			/* get the index */
 			AdjModuleIndex = (*AdjModuleRefPtr)->m_index;
@@ -1185,10 +1172,10 @@ AIMODULE *FarNPC_GetTargetAIModuleForGlobalHunt(STRATEGYBLOCK *sbPtr)
 			/* if this adjacent module's smell value is higher than
 			the current 'highest smell' record the new module as the
 			target. */
-			if(PherAls_ReadBuf[AdjModuleIndex] > highestSmell)
-			{						
+			if (PherAls_ReadBuf[AdjModuleIndex] > highestSmell)
+			{
 				highestSmell = PherAls_ReadBuf[AdjModuleIndex];
-				targetModule = *AdjModuleRefPtr;							
+				targetModule = *AdjModuleRefPtr;
 			}
 			/* next adjacent module reference pointer */
 			AdjModuleRefPtr++;
@@ -1210,15 +1197,15 @@ AIMODULE *FarNPC_GetTargetAIModuleForMarineRespond(STRATEGYBLOCK *sbPtr)
 	unsigned int highestSmell = 0;
 	AIMODULE* targetModule = (AIMODULE *)0;
 
-	LOCALASSERT(sbPtr);	
-	if(sbPtr->containingModule==NULL) return targetModule;
+	LOCALASSERT(sbPtr);
+	if (sbPtr->containingModule==NULL) return targetModule;
 	AdjModuleRefPtr = sbPtr->containingModule->m_aimodule->m_link_ptrs;
 
 	/* check that there is a list of adjacent modules, and that it is not
 	empty (ie points to zero) */
-	if(AdjModuleRefPtr)	
+	if (AdjModuleRefPtr)
 	{
-		while(*AdjModuleRefPtr != 0)
+		while (*AdjModuleRefPtr != 0)
 		{
 			/* get the index */
 			AdjModuleIndex = (*AdjModuleRefPtr)->m_index;
@@ -1228,10 +1215,10 @@ AIMODULE *FarNPC_GetTargetAIModuleForMarineRespond(STRATEGYBLOCK *sbPtr)
 				the current 'highest smell' record the new module as the
 				target. */
 
-				if(PherMars_ReadBuf[AdjModuleIndex] > highestSmell)
-				{						
+				if (PherMars_ReadBuf[AdjModuleIndex] > highestSmell)
+				{
 					highestSmell = PherMars_ReadBuf[AdjModuleIndex];
-					targetModule = *AdjModuleRefPtr;							
+					targetModule = *AdjModuleRefPtr;
 				}
 			}
 			/* next adjacent module reference pointer */
@@ -1251,10 +1238,10 @@ void FarNpc_FlipAround(STRATEGYBLOCK *sbPtr)
 	DYNAMICSBLOCK *dynPtr;
 
 	LOCALASSERT(sbPtr);
- 	/* get the dynamics block */
+	/* get the dynamics block */
 	dynPtr = sbPtr->DynPtr;
 	LOCALASSERT(dynPtr);
-			
+
 	dynPtr->OrientEuler.EulerY += (1024 + FastRandom()%1024);
 	dynPtr->OrientEuler.EulerY &= wrap360;
 }

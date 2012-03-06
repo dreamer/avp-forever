@@ -490,6 +490,7 @@ void Con_AddCommand(char *command, funcPointer function)
 
 void Con_Init()
 {
+	return;
 	Font_Load("console_font", kFontConsole);
 
 	console.xPos = 0;

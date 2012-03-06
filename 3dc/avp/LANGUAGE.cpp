@@ -39,8 +39,6 @@ void InitTextStrings(void)
 	char *textPtr;
 	char *filenamePtr;
 
-	int i;
-
 	/* language select here! */
 	GLOBALASSERT(AvP.Language>=0);
 	GLOBALASSERT(AvP.Language<I_MAX_NO_OF_LANGUAGES);
@@ -68,7 +66,7 @@ void InitTextStrings(void)
 
 	if (!strncmp(TextBufferPtr, "REBCRIF1", 8))
 	{
-		textPtr = (char*)HuffmanDecompress((HuffmanPackage*)(TextBufferPtr)); 		
+		textPtr = (char*)HuffmanDecompress((HuffmanPackage*)(TextBufferPtr));
 		DeallocateMem(TextBufferPtr);
 		TextBufferPtr = textPtr;
 	}
@@ -88,8 +86,8 @@ void InitTextStrings(void)
 
 	AddToTable(EmptyString);
 
-	for (i = 1; i < MAX_NO_OF_TEXTSTRINGS; i++)
-	{	
+	for (int i = 1; i < MAX_NO_OF_TEXTSTRINGS; i++)
+	{
 		/* scan for a quote mark */
 		while (*textPtr++ != '"');
 
@@ -98,7 +96,7 @@ void InitTextStrings(void)
 
 		/* scan for a quote mark */
 		while (*textPtr != '"')
-		{	
+		{
 			textPtr++;
 		}
 

@@ -47,14 +47,14 @@ unsigned char ToAsciiTable[256][256];
 	as well...), so that a NULL here should ensure no menu.
 */
 
-#define NAME "AvP"
-#define TITLE "AvP"
+const char *className = "AvP";
+const char *windowTitle = "AvP";
 
 //	Necessary globals
 
-HWND 		hWndMain;
-bool		bActive  = true;        // is application active?
-bool		bRunning = true;
+HWND hWndMain;
+bool bActive  = true;   // is application active?
+bool bRunning = true;
 
 // Parameters for main (assumed full screen) window
 int WinLeftX, WinRightX, WinTopY, WinBotY;
@@ -111,9 +111,9 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			UINT dwSize = 40;
 			static BYTE lpb[40];
 
-			GetRawInputData((HRAWINPUT)lParam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER));
+			::GetRawInputData((HRAWINPUT)lParam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER));
 
-			RAWINPUT* raw = (RAWINPUT*)lpb;
+			RAWINPUT *raw = (RAWINPUT*)lpb;
 
 			if (raw->header.dwType == RIM_TYPEMOUSE)
 			{
@@ -147,29 +147,33 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			// handle left/right alt keys
 			if (wParam == VK_MENU)
 			{
-				if (lParam&(1<<24))
+				if (lParam&(1<<24)) {
 					wParam = VK_RMENU;
-				else
+				}
+				else {
 					wParam = VK_LMENU;
+				}
 			}
 
 			// handle left/right control keys
 			if (wParam == VK_CONTROL)
 			{
-				if (lParam&(1<<24))
+				if (lParam&(1<<24)) {
 					wParam = VK_RCONTROL;
-				else
+				}
+				else {
 					wParam = VK_LCONTROL;
+				}
 			}
 
 			// handle left/right shift keys
 			if (wParam == VK_SHIFT)
 			{
-				if ((GetKeyState(VK_RSHIFT) & 0x8000) && (KeyboardInput[KEY_RIGHTSHIFT] == FALSE))
+				if ((::GetKeyState(VK_RSHIFT) & 0x8000) && (KeyboardInput[KEY_RIGHTSHIFT] == FALSE))
 				{
 					wParam = VK_RSHIFT;
 				}
-				else if ((GetKeyState(VK_LSHIFT) & 0x8000) && (KeyboardInput[KEY_LEFTSHIFT] == FALSE))
+				else if ((::GetKeyState(VK_LSHIFT) & 0x8000) && (KeyboardInput[KEY_LEFTSHIFT] == FALSE))
 				{
 					wParam = VK_LSHIFT;
 				}
@@ -215,29 +219,33 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			// handle left/right alt keys
 			if (wParam == VK_MENU)
 			{
-				if (lParam&(1<<24))
+				if (lParam&(1<<24)) {
 					wParam = VK_RMENU;
-				else
+				}
+				else {
 					wParam = VK_LMENU;
+				}
 			}
 
 			// handle left/right control keys
 			if (wParam == VK_CONTROL)
 			{
-				if (lParam&(1<<24))
+				if (lParam&(1<<24)) {
 					wParam = VK_RCONTROL;
-				else
+				}
+				else {
 					wParam = VK_LCONTROL;
+				}
 			}
 
 			// handle left/right shift keys
 			if (wParam == VK_SHIFT)
 			{
-				if ((!(GetKeyState(VK_RSHIFT) & 0x8000)) && (KeyboardInput[KEY_RIGHTSHIFT] == TRUE))
+				if ((!(::GetKeyState(VK_RSHIFT) & 0x8000)) && (KeyboardInput[KEY_RIGHTSHIFT] == TRUE))
 				{
 					wParam = VK_RSHIFT;
 				}
-				else if ((!(GetKeyState(VK_LSHIFT) & 0x8000)) && (KeyboardInput[KEY_LEFTSHIFT] == TRUE))
+				else if ((!(::GetKeyState(VK_LSHIFT) & 0x8000)) && (KeyboardInput[KEY_LEFTSHIFT] == TRUE))
 				{
 					wParam = VK_LSHIFT;
 				}
@@ -325,10 +333,12 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 	 // will hopefully disable Alt-Tabbing...
 		case WM_ACTIVATEAPP:
 		{
-			if (wParam)
+			if (wParam) {
 				bActive = true;
-			else
+			}
+			else {
 				bActive = false;
+			}
 
 			IngameKeyboardInput_ClearBuffer();
 			return 0;
@@ -350,11 +360,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			// FullScreen modes on window initialisation
 			if (WindowMode == WindowModeSubWindow)
 			{
-				GetWindowRect(hWndMain, &NewWindCoord);
-				WinLeftX = NewWindCoord.left;
-				WinTopY = NewWindCoord.top;
+				::GetWindowRect(hWndMain, &NewWindCoord);
+				WinLeftX  = NewWindCoord.left;
+				WinTopY   = NewWindCoord.top;
 				WinRightX = NewWindCoord.right;
-				WinBotY = NewWindCoord.bottom;
+				WinBotY   = NewWindCoord.bottom;
 			}
 			break;
 		}
@@ -365,11 +375,11 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			// FullScreen modes on window initialisation
 			if (WindowMode == WindowModeSubWindow)
 			{
-				GetWindowRect(hWndMain, &NewWindCoord);
-				WinLeftX = NewWindCoord.left;
-				WinTopY = NewWindCoord.top;
+				::GetWindowRect(hWndMain, &NewWindCoord);
+				WinLeftX  = NewWindCoord.left;
+				WinTopY   = NewWindCoord.top;
 				WinRightX = NewWindCoord.right;
-				WinBotY = NewWindCoord.bottom;
+				WinBotY   = NewWindCoord.bottom;
 			}
 			break;
 		}
@@ -381,8 +391,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			return TRUE;
 
 		case WM_PAINT:
-			hdc = BeginPaint(hWnd, &ps);
-			EndPaint(hWnd, &ps);
+			hdc = ::BeginPaint(hWnd, &ps);
+			::EndPaint(hWnd, &ps);
 			return TRUE;
 
 		/* Patrick 11/6/97: this to detects the end of a cdda track */
@@ -398,14 +408,14 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
 		case WM_DESTROY:
 		{
-			PostQuitMessage(0);
+			::PostQuitMessage(0);
 			break;
 		}
 	}
-	return DefWindowProc(hWnd, message, wParam, lParam);
+	return ::DefWindowProc(hWnd, message, wParam, lParam);
 }
 
-BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
+bool InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 {
 	WNDCLASSEX	wcex;
 	memset(&wcex, 0, sizeof(WNDCLASSEX));
@@ -415,16 +425,16 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 	wcex.cbClsExtra = 0; 
 	wcex.cbWndExtra = 0;
 	wcex.hInstance  = hInstance;
-	wcex.hIcon   = LoadIcon(NULL, IDI_APPLICATION);
-	wcex.hCursor = LoadCursor(NULL, IDC_ARROW);
+	wcex.hIcon   = ::LoadIcon(NULL, IDI_APPLICATION);
+	wcex.hCursor = ::LoadCursor(NULL, IDC_ARROW);
 	wcex.hbrBackground = NULL;
 	wcex.lpszMenuName  = NULL;
-	wcex.lpszClassName = NAME;
+	wcex.lpszClassName = className;
 
 	if (!RegisterClassEx(&wcex))
 	{
-		MessageBox(NULL, "Could not register Window", "Error!", MB_ICONEXCLAMATION | MB_OK);
-		return FALSE;
+		::MessageBox(NULL, "Could not register Window", "Error!", MB_ICONEXCLAMATION | MB_OK);
+		return false;
 	}
 
 	// if "-w" passed to command line
@@ -433,28 +443,24 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 		RECT clientRect;
 		clientRect.left = 0;
 		clientRect.top  = 0;
-		clientRect.right  = CW_USEDEFAULT;//800;
-		clientRect.bottom = CW_USEDEFAULT;//600;
+		clientRect.right  = CW_USEDEFAULT;
+		clientRect.bottom = CW_USEDEFAULT;
 
-		hWndMain = CreateWindowEx(
-//			WS_EX_TOPMOST,
-			0,
-			NAME,  // Name of class (registered by RegisterClass call above) 
-			TITLE, // Name of window 
-//			WS_OVERLAPPEDWINDOW,
+		::AdjustWindowRect(&clientRect, ::GetWindowLongPtr(hWndMain, GWL_STYLE), FALSE);
+
+		hWndMain = ::CreateWindow(
+			className,
+			windowTitle,
 			0,
 			clientRect.left,
 			clientRect.top,
-			clientRect.right,
-			clientRect.bottom,
-			NULL,
+			(clientRect.right - clientRect.left),
+			(clientRect.bottom - clientRect.top),
+			0,
 			NULL,
 			hInstance,
-			NULL
+			0
 		);
-
-		AdjustWindowRect(&clientRect, GetWindowLongPtr(hWndMain, GWL_STYLE), FALSE);
-		SetWindowPos(hWndMain, 0, 0, 0, clientRect.right - clientRect.left, clientRect.bottom - clientRect.top, SWP_SHOWWINDOW);
 	}
 	else if (WindowMode == WindowModeFullScreen)
 	{
@@ -464,10 +470,10 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 		clientRect.right  = ScreenDescriptorBlock.SDB_Width;
 		clientRect.bottom = ScreenDescriptorBlock.SDB_Height;
 
-		hWndMain = CreateWindowEx(
+		hWndMain = ::CreateWindowEx(
 			WS_EX_TOPMOST,
-			NAME,  // Name of class (registered by RegisterClass call above) 
-			TITLE, // Name of window 
+			className,   // Name of class (registered by RegisterClass call above) 
+			windowTitle, // Name of window 
 			WS_POPUP,
 			0,
 			0,
@@ -482,15 +488,15 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 
 	if (!hWndMain)
 	{
-		UnregisterClass(wcex.lpszClassName, wcex.hInstance);
-		MessageBox(NULL, "Could not create Window", "Error!", MB_ICONEXCLAMATION | MB_OK);
-		return FALSE;
+		::UnregisterClass(wcex.lpszClassName, wcex.hInstance);
+		::MessageBox(NULL, "Could not create Window", "Error!", MB_ICONEXCLAMATION | MB_OK);
+		return false;
 	}
 
 	// Set the window up to be displayed 
-	ShowWindow(hWndMain, nCmdShow);
+	::ShowWindow(hWndMain, nCmdShow);
 	// Update once (i.e. send WM_PAINT message to the window procedure)
-	UpdateWindow(hWndMain);
+	::UpdateWindow(hWndMain);
 
 // Grab ALL mouse messages for our window.
 // Note this will only work if the window is
@@ -504,7 +510,7 @@ BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 	SetCursor(NULL);
 	#endif
 
-	return TRUE;
+	return true;
 }
 
 void ChangeWindowsSize(uint32_t width, uint32_t height)
@@ -513,28 +519,31 @@ void ChangeWindowsSize(uint32_t width, uint32_t height)
 	RECT newWindowSize;
 	HRESULT LastError;
 
-	newWindowSize.top = 0;
+	newWindowSize.top  = 0;
 	newWindowSize.left = 0;
-	newWindowSize.right = width;
+	newWindowSize.right  = width;
 	newWindowSize.bottom = height;
 
-	if (AdjustWindowRect(&newWindowSize, GetWindowLongPtr(hWndMain, GWL_STYLE), FALSE) == 0)
+	if (WindowMode == WindowModeSubWindow)
 	{
-		LastError = HRESULT_FROM_WIN32(GetLastError());
+		if (::AdjustWindowRect(&newWindowSize, ::GetWindowLongPtr(hWndMain, GWL_STYLE), FALSE) == 0)
+		{
+			LastError = ::HRESULT_FROM_WIN32(::GetLastError());
+			LogDxError(LastError, __LINE__, __FILE__);
+			return;
+		}
+	}
+
+	if (::SetWindowPos(hWndMain, 0, 0, 0, newWindowSize.right - newWindowSize.left, newWindowSize.bottom - newWindowSize.top, SWP_SHOWWINDOW) == 0)
+	{
+		LastError = ::HRESULT_FROM_WIN32(::GetLastError());
 		LogDxError(LastError, __LINE__, __FILE__);
 		return;
 	}
 
-	if (SetWindowPos(hWndMain, 0, 0, 0, newWindowSize.right - newWindowSize.left, newWindowSize.bottom - newWindowSize.top, SWP_SHOWWINDOW) == 0)
+	if (::GetClientRect(hWndMain, &testRect) == 0)
 	{
-		LastError = HRESULT_FROM_WIN32(GetLastError());
-		LogDxError(LastError, __LINE__, __FILE__);
-		return;
-	}
-
-	if (GetClientRect(hWndMain, &testRect) == 0)
-	{
-		LastError = HRESULT_FROM_WIN32(GetLastError());
+		LastError = ::HRESULT_FROM_WIN32(::GetLastError());
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
 }
@@ -553,7 +562,7 @@ void InitialiseRawInput()
 	Rid[0].usUsage = HID_USAGE_GENERIC_MOUSE; 
 	Rid[0].dwFlags = RIDEV_INPUTSINK;   
 	Rid[0].hwndTarget = hWndMain;
-	RegisterRawInputDevices(Rid, 1, sizeof(Rid[0]));
+	::RegisterRawInputDevices(Rid, 1, sizeof(Rid[0]));
 }
 
 // Project specific to go with the initialiser
@@ -565,7 +574,7 @@ BOOL ExitWindowsSystem(void)
 	ReleaseCapture();
 	#endif
 
-	return DestroyWindow(hWndMain);
+	return ::DestroyWindow(hWndMain);
 }
 
 #endif //ifdef WIN32

@@ -164,8 +164,6 @@ void PlatformSpecificShowViewExit(VIEWDESCRIPTORBLOCK *vdb, SCREENDESCRIPTORBLOC
 
 void InitialiseSystem(HINSTANCE hInstance, int nCmdShow)
 {
-	BOOL rc;
-
 	/*
 		Copy initial requests to current variables,
 		subject to later modification.
@@ -175,7 +173,7 @@ void InitialiseSystem(HINSTANCE hInstance, int nCmdShow)
 	WindowMode = WindowRequestMode;
 
     /* Initialise main window, windows procedure etc */
-	rc = InitialiseWindowsSystem(hInstance, nCmdShow, WinInitFull);
+	bool rc = InitialiseWindowsSystem(hInstance, nCmdShow, WinInitFull);
 
     /* Initialise input interface */
 	memset((void*)KeyboardInput, FALSE, MAX_NUMBER_OF_INPUT_KEYS);

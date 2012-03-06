@@ -1877,9 +1877,6 @@ bool R_ChangeResolution(uint32_t width, uint32_t height)
 	d3d.d3dpp.BackBufferWidth  = width;
 	d3d.d3dpp.BackBufferHeight = height;
 
-	// change the window size
-	ChangeWindowsSize(width, height);
-
 	// try reset the device
 	LastError = d3d.lpD3DDevice->Reset(&d3d.d3dpp);
 	if (FAILED(LastError))
@@ -1900,8 +1897,6 @@ bool R_ChangeResolution(uint32_t width, uint32_t height)
 			width  = 800;
 			height = 600;
 
-			ChangeWindowsSize(width, height);
-
 			d3d.d3dpp.BackBufferWidth  = width;
 			d3d.d3dpp.BackBufferHeight = height;
 
@@ -1917,6 +1912,9 @@ bool R_ChangeResolution(uint32_t width, uint32_t height)
 			return false;
 		}
 	}
+
+	// change the window size
+	ChangeWindowsSize(width, height);
 
 	d3d.D3DViewport.Width  = width;
 	d3d.D3DViewport.Height = height;
