@@ -79,7 +79,7 @@ bool VorbisPlayback::Open(const std::string &fileName)
 	mVorbisInfo = ov_info(&mOggFile, -1);
 
 	// create the streaming audio buffer
-	this->audioStream = new (std::nothrow) AudioStream;
+	this->audioStream = new(std::nothrow) AudioStream;
 	if (!this->audioStream->Init(mVorbisInfo->channels, mVorbisInfo->rate, 16, kBufferSize, kBufferCount))
 	{
 		Con_PrintError("Couldn't initialise audio stream for Vorbis playback");
@@ -172,7 +172,7 @@ unsigned int __stdcall VorbisUpdateThread(void *args)
 	VorbisPlayback *vorbis = static_cast<VorbisPlayback*>(args);
 
 #ifdef USE_XAUDIO2
-	CoInitializeEx (NULL, COINIT_MULTITHREADED);
+	::CoInitializeEx (NULL, COINIT_MULTITHREADED);
 #endif
 
 	while (vorbis->mIsPlaying)
@@ -185,7 +185,7 @@ unsigned int __stdcall VorbisUpdateThread(void *args)
 			vorbis->audioStream->WriteData(vorbis->mAudioData, kBufferSize);
 		}
 
-		Sleep(kQuantum);
+		::Sleep(kQuantum);
 	}
 
 	_endthreadex(0);
@@ -203,8 +203,8 @@ void VorbisPlayback::Stop()
 	// wait until audio processing thread has finished running before continuing
 	if (mPlaybackThreadFinished)
 	{
-		WaitForSingleObject(mPlaybackThreadFinished, INFINITE);
-		CloseHandle(mPlaybackThreadFinished);
+		::WaitForSingleObject(mPlaybackThreadFinished, INFINITE);
+		::CloseHandle(mPlaybackThreadFinished);
 	}
 }
 
@@ -218,14 +218,12 @@ void LoadVorbisTrack(size_t track)
 	}
 
 	// TODO? rather than return, pick a random track or just play last?
-	if (track > TrackList.size())
-	{
+	if (track > TrackList.size()) {
 		return;
 	}
 
 	// if user enters 1, decrement to 0 to align to array (enters 2, decrement to 1 etc)
-	if (track != 0)
-	{
+	if (track != 0) {
 		track--;
 	}
 
@@ -245,6 +243,9 @@ bool LoadVorbisTrackList()
 	{
 		LogErrorString("no music tracklist found - not using ogg vorbis music");
 		return false;
+	}
+	else {
+		LogString("music tracklist found - music playback is available");
 	}
 
 	std::string trackName;
@@ -288,4 +289,3 @@ void Vorbis_CloseSystem()
 	delete inGameMusic;
 	inGameMusic = NULL;
 }
-

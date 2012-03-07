@@ -94,7 +94,7 @@ void CreateGameSpecificConsoleVariables(void)
 	DrawFullBright=0;
 
 	#ifndef AVP_DEBUG_VERSION // allow debug commands without -debug
-	BOOL IsACheat = TRUE;
+	bool IsACheat = false;
 	#else
 	bool IsACheat = false;
 	#endif

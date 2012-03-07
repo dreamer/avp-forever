@@ -42,8 +42,8 @@ SmackerPlayback::~SmackerPlayback()
 	// wait for decode thread to finish
 	if (mDecodeThreadHandle)
 	{
-		WaitForSingleObject(mDecodeThreadHandle, INFINITE);
-		CloseHandle(mDecodeThreadHandle);
+		::WaitForSingleObject(mDecodeThreadHandle, INFINITE);
+		::CloseHandle(mDecodeThreadHandle);
 	}
 
 	delete[] frame;
@@ -53,8 +53,8 @@ SmackerPlayback::~SmackerPlayback()
 		// wait for audio thread to finish
 		if (mAudioThreadHandle)
 		{
-			WaitForSingleObject(mAudioThreadHandle, INFINITE);
-			CloseHandle(mAudioThreadHandle);
+			::WaitForSingleObject(mAudioThreadHandle, INFINITE);
+			::CloseHandle(mAudioThreadHandle);
 		}
 
 		delete audioStream;
@@ -65,7 +65,7 @@ SmackerPlayback::~SmackerPlayback()
 
 	if (mFrameCriticalSectionInited)
 	{
-		DeleteCriticalSection(&mFrameCriticalSection);
+		::DeleteCriticalSection(&mFrameCriticalSection);
 		mFrameCriticalSectionInited = false;
 	}
 }
@@ -113,21 +113,21 @@ int SmackerPlayback::Open(const std::string &fileName)
 		}
 
 		// we need some temporary mAudio data storage space and a ring buffer instance
-		mAudioData = new uint8_t[info.idealBufferSize];
+		mAudioData = new(std::nothrow) uint8_t[info.idealBufferSize];
 		if (mAudioData == NULL)
 		{
 			Con_PrintError("Failed to create mAudioData stream buffer for FMV playback");
 			return FMV_ERROR;
 		}
 
-		mRingBuffer = new RingBuffer(info.idealBufferSize * kAudioBufferCount);
+		mRingBuffer = new(std::nothrow) RingBuffer(info.idealBufferSize * kAudioBufferCount);
 		if (mRingBuffer == NULL)
 		{
 			Con_PrintError("Failed to create mRingBuffer for FMV playback");
 			return FMV_ERROR;
 		}
 
-		mAudioDataBuffer = new uint8_t[info.idealBufferSize];
+		mAudioDataBuffer = new(std::nothrow) uint8_t[info.idealBufferSize];
 		mAudioDataBufferSize = info.idealBufferSize;
 	}
 
@@ -136,7 +136,7 @@ int SmackerPlayback::Open(const std::string &fileName)
 	mFmvPlaying = true;
 	mAudioStarted = false;
 
-	InitializeCriticalSection(&mFrameCriticalSection);
+	::InitializeCriticalSection(&mFrameCriticalSection);
 	mFrameCriticalSectionInited = true;
 
 	// now start the threads
@@ -172,7 +172,7 @@ bool SmackerPlayback::ConvertFrame(uint32_t width, uint32_t height, uint8_t *buf
 	}
 
 	// critical section
-	EnterCriticalSection(&mFrameCriticalSection);
+	::EnterCriticalSection(&mFrameCriticalSection);
 
 	Smacker_GetPalette(handle, palette);
 	Smacker_GetFrame(handle, frame);
@@ -198,7 +198,7 @@ bool SmackerPlayback::ConvertFrame(uint32_t width, uint32_t height, uint8_t *buf
 
 	mFrameReady = false;
 
-	LeaveCriticalSection(&mFrameCriticalSection);
+	::LeaveCriticalSection(&mFrameCriticalSection);
 
 	return true;
 }
@@ -218,17 +218,17 @@ unsigned int __stdcall SmackerDecodeThread(void *args)
 			break;
 		}
 
-		uint32_t startTime = timeGetTime();
+		uint32_t startTime = ::timeGetTime();
 
 		// critical section
-		EnterCriticalSection(&fmv->mFrameCriticalSection);
+		::EnterCriticalSection(&fmv->mFrameCriticalSection);
 
 		Smacker_GetNextFrame(fmv->handle);
 
 		// we have a new frame and we're ready to use it
 		fmv->mFrameReady = true;
 
-		LeaveCriticalSection(&fmv->mFrameCriticalSection);
+		::LeaveCriticalSection(&fmv->mFrameCriticalSection);
 
 		uint32_t audioSize = Smacker_GetAudioData(fmv->handle, trackIndex, (int16_t*)fmv->mAudioDataBuffer);
 
@@ -247,22 +247,22 @@ unsigned int __stdcall SmackerDecodeThread(void *args)
 					}
 
 					// wait for the audio buffer to tell us it's just freed up another audio buffer for us to fill
-					WaitForSingleObject(fmv->audioStream->voiceContext->hBufferEndEvent, /*INFINITE*/20);
+					::WaitForSingleObject(fmv->audioStream->voiceContext->hBufferEndEvent, /*INFINITE*/20);
 				}
 			}
 
 			fmv->mRingBuffer->WriteData(fmv->mAudioDataBuffer, audioSize);
 		}
 
-		uint32_t endTime = timeGetTime();
+		uint32_t endTime = ::timeGetTime();
 
 		// sleep for frame time minus time to decode frame
-		int32_t timeToSleep = (1000 / fmv->frameRate) - (endTime - startTime);
+		int32_t timeToSleep = (1000 / (int32_t)fmv->frameRate) - (endTime - startTime);
 		if (timeToSleep < 0) {
 			timeToSleep = 1;
 		}
 		
-		Sleep(timeToSleep);
+		::Sleep(timeToSleep);
 
 		fmv->currentFrame++;
 	}
@@ -275,7 +275,7 @@ unsigned int __stdcall SmackerDecodeThread(void *args)
 unsigned int __stdcall SmackerAudioThread(void *args)
 {
 	#ifdef USE_XAUDIO2
-		CoInitializeEx(NULL, COINIT_MULTITHREADED);
+		::CoInitializeEx(NULL, COINIT_MULTITHREADED);
 	#endif
 
 	SmackerPlayback *fmv = static_cast<SmackerPlayback*>(args);
@@ -286,7 +286,7 @@ unsigned int __stdcall SmackerAudioThread(void *args)
 
 	while (fmv->mFmvPlaying)
 	{
-		startTime = timeGetTime();
+		startTime = ::timeGetTime();
 
 		uint32_t numBuffersFree = fmv->audioStream->GetNumFreeBuffers();
 
@@ -315,7 +315,7 @@ unsigned int __stdcall SmackerAudioThread(void *args)
 			fmv->mAudioStarted = true;
 		}
 
-		endTime = timeGetTime();
+		endTime = ::timeGetTime();
 
 		timetoSleep = endTime - startTime;
 		timetoSleep -= kQuantum;
@@ -324,7 +324,7 @@ unsigned int __stdcall SmackerAudioThread(void *args)
 			timetoSleep = 1;
 		}
 
-		Sleep(timetoSleep);
+		::Sleep(timetoSleep);
 	}
 
 	_endthreadex(0);

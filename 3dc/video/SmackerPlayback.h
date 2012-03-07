@@ -64,9 +64,9 @@ class SmackerPlayback
 
 		uint32_t currentFrame;
 		float frameRate;
-		bool mFmvPlaying;
+		volatile bool mFmvPlaying;
 		bool mAudioStarted;
-		bool mFrameReady;
+		volatile bool mFrameReady;
 
 		int	Open(const std::string &fileName);
 		void Close();

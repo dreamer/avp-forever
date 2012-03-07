@@ -44,8 +44,9 @@ bool Tex_Lock(texID_t textureID, uint8_t **data, uint32_t *pitch, enum TextureLo
 		return false;
 	}
 
-	if (!textureList[textureID].texture)
+	if (!textureList[textureID].texture) {
 		return false;
+	}
 
 	return R_LockTexture(textureList[textureID], data, pitch, lockType);
 }
@@ -53,13 +54,13 @@ bool Tex_Lock(texID_t textureID, uint8_t **data, uint32_t *pitch, enum TextureLo
 bool Tex_Unlock(texID_t textureID)
 {
 	// check if it's valid
-	if (textureList[textureID].isValid == false)
-	{
+	if (textureList[textureID].isValid == false) {
 		return false;
 	}
 
-	if (!textureList[textureID].texture)
+	if (!textureList[textureID].texture) {
 		return false;
+	}
 
 	return R_UnlockTexture(textureList[textureID]);
 }
@@ -70,8 +71,9 @@ void Tex_GetNamesVector(std::vector<std::string> &namesArray)
 	for (size_t i = 0; i < textureList.size(); i++)
 	{
 		// only add valid textures
-		if (textureList[i].isValid)
+		if (textureList[i].isValid) {
 			namesArray.push_back(textureList[i].name);
+		}
 	}
 }
 
@@ -93,8 +95,9 @@ texID_t Tex_CheckExists(const std::string &textureName)
 {
 	for (uint32_t i = 0; i < textureList.size(); i++)
 	{
-		if ((textureList[i].name == textureName) && (textureList[i].isValid))
+		if ((textureList[i].name == textureName) && (textureList[i].isValid)) {
 			return i;
+		}
 	}
 
 	return MISSING_TEXTURE;

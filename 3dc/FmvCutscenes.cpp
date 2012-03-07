@@ -131,7 +131,7 @@ void StartMenuBackgroundFmv()
 	MenuBackgroundFMV = false;
 
 	menuFMV = new BinkPlayback();
-	if (menuFMV->Open("fmvs/menubackground.bik") != FMV_OK)
+	if (menuFMV->Open("fmvs/menubackground.bik", true) != FMV_OK)
 	{
 		delete menuFMV;
 		menuFMV = NULL;

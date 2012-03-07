@@ -226,12 +226,14 @@ void Game_Has_Loaded()
 			}
 
 			f -= NormalFrameTime;
-			if (f < 0)
+			if (f < 0) {
 				f = 0;
+			}
 		}
 
-		if (!IsDemoVersion()) // demo doesn't show this
+		if (!IsDemoVersion()) { // demo doesn't show this
 			RenderStringCentred(GetTextString(TEXTSTRING_INGAME_PRESSANYKEYTOCONTINUE), ScreenDescriptorBlock.SDB_Width/2, ((ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset)*23)/24-9, 0xffffffff);
+		}
 
 		ThisFramesRenderingHasFinished();
 		FlipBuffers();

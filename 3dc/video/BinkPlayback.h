@@ -69,11 +69,11 @@ class BinkPlayback
 		uint32_t mFrameHeight;
 		uint8_t  mNumTextureBits;
 
-		bool mFmvPlaying;
-		bool mFrameReady;
+		volatile bool mFmvPlaying;
+		volatile bool mFrameReady;
 		bool mAudioStarted;
-		bool mTexturesReady;
-		bool isLooped;
+		volatile bool mTexturesReady;
+		bool mIsLooped;
 
 		float frameRate;
 
@@ -94,14 +94,14 @@ class BinkPlayback
 			mFrameReady(false),
 			mAudioStarted(false),
 			mTexturesReady(false),
-			isLooped(false),
+			mIsLooped(false),
 			mFrameCriticalSectionInited(false),
 			frameRate(0)
 			{}
 		~BinkPlayback();
 
 		// functions
-		int	Open(const std::string &fileName);
+		int	Open(const std::string &fileName, bool isLooped = false);
 		void Close();
 		bool IsPlaying();
 		bool ConvertFrame();

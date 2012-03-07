@@ -169,10 +169,10 @@ class TheoraPlayback
 		uint32_t mFrameHeight;
 		uint8_t  mNumTextureBits;
 
-		bool mFmvPlaying;
-		bool mFrameReady;
+		volatile bool mFmvPlaying;
+		volatile bool mFrameReady;
 		bool mAudioStarted;
-		bool mTexturesReady;
+		volatile bool mTexturesReady;
 
 		TheoraPlayback() :
 			mGranulePos(0),

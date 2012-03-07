@@ -2175,7 +2175,7 @@ static void ActUponUsersInput(void)
 				}
 			}
 
-			if(AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
+			if (AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
 			{
 				SetupNewMenu(AVPMENU_INGAME);
 			}

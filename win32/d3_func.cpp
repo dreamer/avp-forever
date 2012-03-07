@@ -184,14 +184,14 @@ bool ReleaseVolatileResources()
 	SAFE_DELETE(d3d.mainVB);
 	SAFE_DELETE(d3d.mainIB);
 
+	SAFE_DELETE(d3d.orthoVB);
+	SAFE_DELETE(d3d.orthoIB);
+
 	SAFE_DELETE(d3d.particleVB);
 	SAFE_DELETE(d3d.particleIB);
 
 	SAFE_DELETE(d3d.decalVB);
 	SAFE_DELETE(d3d.decalIB);
-
-	SAFE_DELETE(d3d.orthoVB);
-	SAFE_DELETE(d3d.orthoIB);
 
 	return true;
 }
@@ -796,18 +796,18 @@ void SetFov()
 
 void CheckWireFrameMode(int shouldBeOn)
 {
-	if (shouldBeOn)
+	if (shouldBeOn) {
 		shouldBeOn = 1;
+	}
 
 	if (CurrentRenderStates.WireFrameModeIsOn != shouldBeOn)
 	{
 		CurrentRenderStates.WireFrameModeIsOn = shouldBeOn;
-		if (shouldBeOn)
-		{
+
+		if (shouldBeOn) {
 			d3d.lpD3DDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_WIREFRAME);
 		}
-		else
-		{
+		else {
 			d3d.lpD3DDevice->SetRenderState(D3DRS_FILLMODE, D3DFILL_SOLID);
 		}
 	}
@@ -829,12 +829,10 @@ void ToggleFrustumCull()
 {
 	frustumCull = !frustumCull;
 
-	if (frustumCull)
-	{
+	if (frustumCull) {
 		Con_PrintMessage("Frustum culling is now ON");
 	}
-	else
-	{
+	else {
 		Con_PrintMessage("Frustum culling is now OFF");
 	}
 }
@@ -869,17 +867,16 @@ void CreateScreenShotImage()
 	//	creates filename from date and time, adding a prefix '0' to seconds value
 	//	otherwise 9 seconds appears as '9' instead of '09'
 	bool prefixSeconds = false;
-	if (systemTime.wYear < 10)
+	if (systemTime.wYear < 10) {
 		prefixSeconds = true;
+	}
 
 	fileName << "AvP_" << systemTime.wDay << "-" << systemTime.wMonth << "-" << systemTime.wYear << "_" << systemTime.wHour << "-" << systemTime.wMinute << "-";
 
-	if (systemTime.wSecond < 10)
-	{
+	if (systemTime.wSecond < 10) {
 		fileName << "0" << systemTime.wSecond;
 	}
-	else
-	{
+	else {
 		fileName << systemTime.wSecond;
 	}
 
@@ -2219,21 +2216,21 @@ bool InitialiseDirect3D()
 		D3DADAPTER_IDENTIFIER9 Identifier;
 		HRESULT Res;
 
-	Res = d3d.lpD3D->GetAdapterIdentifier(Adapter, 0, &Identifier);
+		Res = d3d.lpD3D->GetAdapterIdentifier(Adapter, 0, &Identifier);
 
-	if (strstr(Identifier.Description, "PerfHUD") != 0)
-	{
-		adapter_to_use = Adapter;
+		if (strstr(Identifier.Description, "PerfHUD") != 0)
+		{
+			adapter_to_use = Adapter;
 
-		d3d.lpD3D->CreateDevice(Adapter, D3DDEVTYPE_REF, hWndMain,
-		D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dpp, &d3d.lpD3DDevice);
+			d3d.lpD3D->CreateDevice(Adapter, D3DDEVTYPE_REF, hWndMain,
+			D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dpp, &d3d.lpD3DDevice);
+		}
+		else
+		{
+			LastError = d3d.lpD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWndMain,
+			D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dpp, &d3d.lpD3DDevice);
+		}
 	}
-	else
-	{
-		LastError = d3d.lpD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_HAL, hWndMain,
-		D3DCREATE_HARDWARE_VERTEXPROCESSING, &d3dpp, &d3d.lpD3DDevice);
-	}
-}
 #endif
 
 // #define USEREFDEVICE
@@ -2644,8 +2641,9 @@ void ReleaseDirect3D()
 
 void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
 {
-	if (CurrentRenderStates.TranslucencyMode == translucencyRequired)
+	if (CurrentRenderStates.TranslucencyMode == translucencyRequired) {
 		return;
+	}
 
 	CurrentRenderStates.TranslucencyMode = translucencyRequired;
 
@@ -2793,8 +2791,9 @@ void ChangeTranslucencyMode(enum TRANSLUCENCY_TYPE translucencyRequired)
 
 void ChangeZWriteEnable(enum ZWRITE_ENABLE zWriteEnable)
 {
-	if (CurrentRenderStates.ZWriteEnable == zWriteEnable)
+	if (CurrentRenderStates.ZWriteEnable == zWriteEnable) {
 		return;
+	}
 
 	if (zWriteEnable == ZWRITE_ENABLED)
 	{
@@ -2823,8 +2822,9 @@ void ChangeZWriteEnable(enum ZWRITE_ENABLE zWriteEnable)
 
 void ChangeTextureAddressMode(uint32_t samplerIndex, enum TEXTURE_ADDRESS_MODE textureAddressMode)
 {
-	if (CurrentRenderStates.TextureAddressMode[samplerIndex] == textureAddressMode)
+	if (CurrentRenderStates.TextureAddressMode[samplerIndex] == textureAddressMode) {
 		return;
+	}
 
 	CurrentRenderStates.TextureAddressMode[samplerIndex] = textureAddressMode;
 
@@ -2874,8 +2874,9 @@ void ChangeTextureAddressMode(uint32_t samplerIndex, enum TEXTURE_ADDRESS_MODE t
 
 void ChangeFilteringMode(uint32_t samplerIndex, enum FILTERING_MODE_ID filteringRequired)
 {
-	if (CurrentRenderStates.FilteringMode[samplerIndex] == filteringRequired)
+	if (CurrentRenderStates.FilteringMode[samplerIndex] == filteringRequired) {
 		return;
+	}
 
 	CurrentRenderStates.FilteringMode[samplerIndex] = filteringRequired;
 
@@ -2904,12 +2905,10 @@ void ChangeFilteringMode(uint32_t samplerIndex, enum FILTERING_MODE_ID filtering
 
 void ToggleWireframe()
 {
-	if (CurrentRenderStates.WireFrameModeIsOn)
-	{
+	if (CurrentRenderStates.WireFrameModeIsOn) {
 		CheckWireFrameMode(0);
 	}
-	else
-	{
+	else {
 		CheckWireFrameMode(1);
 	}
 }
