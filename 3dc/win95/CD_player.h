@@ -62,10 +62,8 @@ extern void CDDA_SwitchOff(void);
 /* Patrick 10/6/97 --------------------------------------------------------------
   These are provided to interrogate the state of the CDDA system.
   -----------------------------------------------------------------------------*/
-extern int CDDA_IsOn(void);
-extern int CDDA_IsPlaying(void);
-
-
+extern bool CDDA_IsOn();
+extern bool CDDA_IsPlaying();
 
 enum CDCOMMANDID
 {
