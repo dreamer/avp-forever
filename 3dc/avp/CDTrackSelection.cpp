@@ -23,6 +23,8 @@ List<int> MultiplayerCDTracks[3];
 static int LastTrackChosen=-1;
 static uint32_t TrackSelectCounter=0;
 
+const int kMultiplayerTracksCount = 3;
+
 void EmptyCDTrackList()
 {
 	for (int i = 0; i < AVP_ENVIRONMENT_END_OF_LIST; i++)
@@ -30,7 +32,7 @@ void EmptyCDTrackList()
 		while (LevelCDTracks[i].size()) LevelCDTracks[i].delete_first_entry();
 	}
 
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < kMultiplayerTracksCount; i++)
 	{
 		while (MultiplayerCDTracks[i].size()) MultiplayerCDTracks[i].delete_first_entry();
 	}
@@ -124,12 +126,12 @@ void LoadCDTrackList()
 	trackFile.ReadBytes((uint8_t*)buffer, fileSize);
 
 	// set null terminator to last character
-	buffer[fileSize] = '\0';
+	buffer[fileSize - 1] = '\0';
 
 	char *bufferptr = buffer;
 
 	// first extract the multiplayer tracks
-	for (int i = 0; i < 3; i++)
+	for (int i = 0; i < kMultiplayerTracksCount; i++)
 	{
 		ExtractTracksForLevel(bufferptr, MultiplayerCDTracks[i]);
 	}
@@ -195,25 +197,25 @@ void CheckCDAndChooseTrackIfNeeded()
 {
 	static enum playertypes lastPlayerType;
 
-	//are we bothering with cd tracks
+	// are we bothering with cd tracks
 	if (!CDDA_IsOn()) {
 		return;
 	}
 
-	//is our current track still playing
+	// is our current track still playing
 	if (CDDA_IsPlaying() || IsVorbisPlaying()) // check this is ok
 	{
-		//if in a multiplayer game see if we have changed character type
+		// if in a multiplayer game see if we have changed character type
 		if (AvP.Network == I_No_Network || AvP.PlayerType == lastPlayerType) {
 			return;
 		}
 
-		//have changed character type , is the current track in the list for this character type
+		// have changed character type , is the current track in the list for this character type
 		if (MultiplayerCDTracks[AvP.PlayerType].contains(LastTrackChosen)) {
 			return;
 		}
 
-		//Lets choose a new track then
+		// Lets choose a new track then
 	}
 
 	if (AvP.Network == I_No_Network)
@@ -246,7 +248,7 @@ void CheckCDAndChooseTrackIfNeeded()
 
 void ResetCDPlayForLevel()
 {
-	//check the number of tracks available while we're at it
+	// check the number of tracks available while we're at it
 	CDDA_CheckNumberOfTracks();
 
 	TrackSelectCounter = 0;
