@@ -262,10 +262,16 @@ bool Config_GetBool(const std::string &heading, const std::string &variable, boo
 		{
 			return false;
 		}
+		else
+		{
+			// invalid value
+			LogErrorString("Invalid bool value found in configuration file for " + heading + " - \'" + variable + "\'. setting to default value");
+			Config_SetBool(heading, variable, defaultValue);
+			return defaultValue;
+		}
 	}
 	else
 	{
-		// should we be adding this to the map if it doesn't exist using default value? i guess so..
 		MapValue &tempValue = AvPConfig[heading];
 
 		if (defaultValue == true)
@@ -296,7 +302,7 @@ void Config_SetBool(const std::string &heading, const std::string &variable, boo
 	}
 }
 
-// create a new config file if one doesn't exist, with defaults
+// create a new config file if one doesn't exist. defaults will be added when values are requested
 static bool Config_CreateDefault()
 {
 	std::string filePath(GetSaveFolderPath());
@@ -308,20 +314,7 @@ static bool Config_CreateDefault()
 		LogErrorString("Couldn't create default config file!");
 		return false;
 	}
-/*
-	file << "[VideoMode]\n";
-	file << "Width = 640\n";
-	file << "Height = 480\n";
-	file << "ColourDepth = 32\n";
-	file << "UseTripleBuffering = false\n";
-	file << "SafeZoneOffset = 0\n";
-	file << "\n";
-	file << "[Misc]\n";
-	file << "CommandLine = \"\"\n";
-	file << "\n";
-	file << "[Networking]\n";
-	file << "PortNumber = 1234\n";
-*/
+
 	file.close();
 
 	return true;
