@@ -18,6 +18,8 @@
 
 extern HWND hWndMain;
 
+void ChangeWindowsSize(uint32_t width, uint32_t height);
+
 static char EmptyString[]="";
 
 static char *TextStringPtr[MAX_NO_OF_TEXTSTRINGS]={EmptyString};
@@ -57,9 +59,11 @@ void InitTextStrings(void)
 
 	if (TextBufferPtr == NULL) 
 	{
-		/* have to quit if this file isn't available */
+		// have to quit if this file isn't available
 		char message[100];
 		sprintf(message, "Unable to load language file: %s\n", filenamePtr);
+
+		ChangeWindowsSize(1, 1);
 		avp_MessageBox(message, MB_OK);
 		avp_exit(1);
 	}
@@ -80,6 +84,8 @@ void InitTextStrings(void)
 	{
 		char message[100];
 		sprintf(message,"File %s is not compatible with Gold Edition\n",filenamePtr);
+
+		ChangeWindowsSize(1, 1);
 		avp_MessageBox(message, MB_OK+MB_SYSTEMMODAL);
 		avp_exit(1);
 	}
@@ -103,7 +109,7 @@ void InitTextStrings(void)
 		/* change quote mark to zero terminator */
 		*textPtr = 0;
 
-		AddToTable( TextStringPtr[i] );
+		AddToTable(TextStringPtr[i]);
 	}
 }
 

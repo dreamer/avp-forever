@@ -25,6 +25,9 @@ void SetupAnimatedTextures(Shape_Chunk* sc,SHAPEHEADER* shp,Animation_Chunk* ac,
 void SetupAnimOnTriangle(SHAPEHEADER* shp,TEXANIM* ta,int poly);
 void SetupAnimOnQuad(Shape_Chunk* sc,SHAPEHEADER* shp,TEXANIM* ta1,TEXANIM* ta2,int poly);
 
+
+void ChangeWindowsSize(uint32_t width, uint32_t height);
+
 // what we need to do for now is load shapes into the mainshapelist
 // and objects into the Mapheader - Map
 
@@ -465,6 +468,8 @@ RIFFHANDLE load_rif (const char * fname)
 		#endif
 		char message[200];
 		sprintf(message,"Error loading %s",fname);
+
+		ChangeWindowsSize(1, 1);
 		avp_MessageBox(message, MB_OK+MB_SYSTEMMODAL);
 		avp_exit(0x111);
 
@@ -498,6 +503,8 @@ RIFFHANDLE load_rif_non_env (const char * fname)
 		#endif
 		char message[200];
 		sprintf(message,"Error loading %s",fname);
+
+		ChangeWindowsSize(1, 1);
 		avp_MessageBox(message, MB_OK+MB_SYSTEMMODAL);
 		avp_exit(0x111);
 

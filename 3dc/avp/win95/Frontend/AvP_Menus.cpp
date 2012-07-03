@@ -37,6 +37,7 @@
 /* KJL 11:22:37 23/06/98 - Hopefully these will be the final menus! */
 
 // extern functions
+void ChangeWindowsSize(uint32_t width, uint32_t height);
 extern bool IDemandSelect();
 extern void MakeSelectSessionMenu(void);
 extern void MakeInGameMenu(void);
@@ -4340,6 +4341,8 @@ void CheckForCredits(void)
 	{
 		char message[100];
 		sprintf(message,"Unable to access credits.txt\n");
+
+		ChangeWindowsSize(1, 1);
 		avp_MessageBox(message, MB_OK+MB_SYSTEMMODAL);
 		avp_exit(0x111);
 		return;
