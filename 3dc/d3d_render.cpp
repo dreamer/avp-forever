@@ -354,12 +354,10 @@ static bool ExecuteBuffer()
 //	decalList->Sort();
 //	mainList->Sort();
 
-	// Melanikus 18/11/11 - Nvidia 3D Vision fix
-	// Setting the projection matrix to 
-	// the rhw shader so we can have a non
+	// Melanikus 18/11/11 - Nvidia 3D Vision fix. Setting the projection matrix to the rhw shader so we can have a non
 	// ortho projection
 	R_MATRIX projection;
-	D3DXMatrixPerspectiveFovRH(&projection,D3DXToRadian(90.0f),4.0f/3.0f,0.0f,1.0f);
+	D3DXMatrixPerspectiveFovRH(&projection, D3DXToRadian(90.0f), 4.0f/3.0f ,0.0f, 1.0f);
 	d3d.rhwDecl->Set();
 	d3d.effectSystem->SetActive(d3d.rhwEffect);
 	d3d.effectSystem->SetVertexShaderConstant(d3d.rhwEffect, 0, CONST_MATRIX, &d3d.matProjection);
@@ -611,8 +609,9 @@ void DrawProgressBar(const RECT &srcRect, const RECT &destRect, texID_t textureI
 void DrawTallFontCharacter(uint32_t topX, uint32_t topY, texID_t textureID, uint32_t texU, uint32_t texV, uint32_t charWidth, uint32_t charHeight, uint32_t alpha)
 {
 	alpha = (alpha / 256);
-	if (alpha > 255)
+	if (alpha > 255) {
 		alpha = 255;
+	}
 
 	RCOLOR colour = RCOLOR_ARGB(alpha, 255, 255, 255);
 
@@ -758,11 +757,11 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 {
 	assert(ftPtr);
 
-	if (!ftPtr)
+	if (!ftPtr) {
 		return;
+	}
 
-	if (!NextFMVTextureFrame(ftPtr))
-	{
+	if (!NextFMVTextureFrame(ftPtr)) {
 	 	return;
 	}
 
@@ -800,8 +799,9 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 void DrawFadeQuad(uint32_t topX, uint32_t topY, uint32_t alpha)
 {
 	alpha = alpha / 256;
-	if (alpha > 255)
+	if (alpha > 255) {
 		alpha = 255;
+	}
 
 	RCOLOR colour = RCOLOR_ARGB(alpha,0,0,0);
 
@@ -957,7 +957,6 @@ void DrawRHWquad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, texID_
 		LogDxError(LastError, __LINE__, __FILE__);
 		OutputDebugString("DrawPrimitiveUP failed\n");
 	}
-
 }
 
 void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, texID_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
@@ -1018,8 +1017,9 @@ void DrawAlphaMenuQuad(uint32_t topX, uint32_t topY, texID_t textureID, uint32_t
 	Tex_GetDimensions(textureID, textureWidth, textureHeight);
 
 	alpha = (alpha / 256);
-	if (alpha > 255)
+	if (alpha > 255) {
 		alpha = 255;
+	}
 
 	DrawQuad(topX, topY, textureWidth, textureHeight, textureID, RCOLOR_ARGB(alpha, 255, 255, 255), TRANSLUCENCY_GLOWING);
 }
@@ -1029,12 +1029,14 @@ void DrawMenuTextGlow(uint32_t topLeftX, uint32_t topLeftY, uint32_t size, uint3
 	uint32_t textureWidth  = 0;
 	uint32_t textureHeight = 0;
 
-	if (alpha > ONE_FIXED) // ONE_FIXED = 65536
+	if (alpha > ONE_FIXED) { // ONE_FIXED = 65536
 		alpha = ONE_FIXED;
+	}
 
 	alpha = (alpha / 256);
-	if (alpha > 255)
+	if (alpha > 255) {
 		alpha = 255;
+	}
 
 	// textures original resolution (if it's a non power of 2, these will be the non power of 2 values)
 	Tex_GetDimensions(AVPMENUGFX_GLOWY_LEFT, textureWidth, textureHeight);
@@ -1235,8 +1237,9 @@ void UpdateViewMatrix(float *viewMat)
 
 void DrawCoronas()
 {
-	if (coronaArray.size() == 0)
+	if (coronaArray.size() == 0) {
 		return;
+	}
 
 	uint32_t numVertsBackup = RenderPolygon.NumberOfVertices;
 
@@ -1364,8 +1367,9 @@ void DrawCoronas()
 
 void DrawParticles()
 {
-	if (!particleBucket.size())
+	if (!particleBucket.size()) {
 		return;
+	}
 
 	// loop particles and add them to vertex buffer
 	for (size_t i = 0; i < NUM_TRANSLUCENCY_TYPES; i++)

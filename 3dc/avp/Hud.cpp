@@ -46,6 +46,7 @@
 #include "Player.h"
 #include "language.h"
 #include "tables.h"
+#include "assert.h"
 
 #define DO_PREDATOR_OVERLAY FALSE
 #define DO_ALIEN_OVERLAY FALSE
@@ -2050,6 +2051,8 @@ void MaintainZoomingLevel(void)
 
 	i = 0;
 	while (CameraZoomScale<=ZoomLevels[++i]);
+
+	assert(i < 4);
 
 	deltaZoom = (ZoomLevels[i-1] - ZoomLevels[i])*(float)NormalFrameTime/32768.0f;
 //	textprint("deltaZoom %f, zone %d\n",deltaZoom,i);

@@ -65,8 +65,9 @@ int LowercaseAndChangeSlash(char c)
 		return c + 32;
 	}
 
-	if (c == '\\')
+	if (c == '\\') {
 		return '/';
+	}
 
 	return c;
 }
@@ -101,8 +102,9 @@ int StringToInt(const std::string &string)
 char *GetSaveFolderPath()
 {
 	// check if we've got the path previously and use it again
-	if (*saveFolder)
+	if (*saveFolder) {
 		return saveFolder;
+	}
 
 #ifdef _XBOX
 	// just blank the char array

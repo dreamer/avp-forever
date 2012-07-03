@@ -55,8 +55,9 @@ void RimLoader::GetDimensions(uint32_t &width, uint32_t &height)
 
 bool RimLoader::Decode(uint8_t *dest, uint32_t destPitch)
 {
-	if (!dest)
+	if (!dest) {
 		return false;
+	}
 
 	this->dest = dest;
 	this->destPitch = destPitch;
@@ -260,9 +261,9 @@ uint32_t RimLoader::GetScanLine()
 	}
 
 /*
-	after parsing and uncompacting if necessary, you will have N planes of pixel data.  Color register used for 
-	each pixel is specified by looking at each pixel thru the planes.  I.e., if you have 5 planes, and the bit for 
-	a particular pixel is set in planes 
+	after parsing and uncompacting if necessary, you will have N planes of pixel data.  Color register used for
+	each pixel is specified by looking at each pixel thru the planes.  I.e., if you have 5 planes, and the bit for
+	a particular pixel is set in planes
 	0 and 3:
 
 		   PLANE     4 3 2 1 0

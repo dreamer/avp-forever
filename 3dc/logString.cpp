@@ -103,15 +103,21 @@ void LogErrorString(const std::string &errorString)
 	lastError = temp;
 }
 
+void LogDebugString(const std::string &debugString, int LINE, const char* FILE)
+{
+	std::string temp = "Debug message: " + debugString + " Line: " + Util::IntToString(LINE) + " File: " + FILE + "\n";
+	WriteToLog("\t" + temp);
+}
+
+void LogDebugString(const std::string &debugString)
+{
+	// TODO - can specify a flag on cmd args to print these or not?
+	std::string temp = debugString + "\n";
+	WriteToLog(temp);
+}
+
 void LogString(const std::string &logString)
 {
 	std::string temp = logString + "\n";
 	WriteToLog(temp);
-}
-
-void LogDebugValue(int value)
-{
-	std::ostringstream stream;
-	stream << "\n value was: " << value;
-	OutputDebugString(stream.str().c_str());
 }

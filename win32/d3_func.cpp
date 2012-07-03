@@ -279,15 +279,15 @@ bool R_BeginScene()
 
 			if (D3DERR_DEVICENOTRESET == LastError)
 			{
-				OutputDebugString("Releasing resources for a device reset..\n");
+				LogDebugString("Releasing resources for a device reset...");
 
 				if (FAILED(d3d.lpD3DDevice->Reset(&d3d.d3dpp)))
 				{
-					OutputDebugString("Couldn't reset device\n");
+					LogDebugString("Couldn't reset device");
 				}
 				else
 				{
-					OutputDebugString("We have reset the device. recreating resources..\n");
+					LogDebugString("We have reset the device. recreating resources...");
 					CreateVolatileResources();
 
 					SetTransforms();
@@ -299,7 +299,7 @@ bool R_BeginScene()
 			}
 			else if (D3DERR_DEVICELOST == LastError)
 			{
-				OutputDebugString("D3D device lost\n");
+				LogDebugString("D3D device lost");
 			}
 			else if (D3DERR_DRIVERINTERNALERROR == LastError)
 			{
@@ -886,7 +886,7 @@ void CreateScreenShotImage()
 	if (FAILED(d3d.lpD3DDevice->CreateOffscreenPlainSurface(ScreenDescriptorBlock.SDB_Width, ScreenDescriptorBlock.SDB_Height, D3DFMT_A8R8G8B8, D3DPOOL_SCRATCH, &frontBuffer, NULL)))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
-		OutputDebugString("Couldn't create screenshot surface\n");
+		LogErrorString("Couldn't create screenshot surface");
 		return;
 	}
 
@@ -894,7 +894,7 @@ void CreateScreenShotImage()
 	if (FAILED(d3d.lpD3DDevice->GetFrontBufferData(0, frontBuffer)))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
-		OutputDebugString("Couldn't get a copy of the front buffer\n");
+		LogErrorString("Couldn't get a copy of the front buffer");
 		SAFE_RELEASE(frontBuffer);
 		return;
 	}
@@ -903,7 +903,7 @@ void CreateScreenShotImage()
 	if (FAILED(D3DXSaveSurfaceToFile(fileName.str().c_str(), D3DXIFF_JPG, frontBuffer, NULL, NULL)))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
-		OutputDebugString("Save Surface to file failed\n");
+		LogErrorString("Save Surface to file failed");
 	}
 
 	// release surface
@@ -1238,16 +1238,14 @@ bool R_CreateVertexShader(const std::string &fileName, r_VertexShader &vertexSha
 
 	if (FAILED(LastError))
 	{
-		OutputDebugString(DXGetErrorString(LastError));
-		OutputDebugString(DXGetErrorDescription(LastError));
-
 		LogErrorString("D3DXCompileShaderFromFile failed for '" + actualPath + "'", __LINE__, __FILE__);
+		LogErrorString("DX Error- " + std::string(DXGetErrorString(LastError)) + " " + std::string(DXGetErrorDescription(LastError)));
 
 		if (pErrors)
 		{
 			// shader didn't compile for some reason
 			LogErrorString("Shader compile errors found for '" + actualPath + "'", __LINE__, __FILE__);
-			LogErrorString("\n" + std::string((const char*)pErrors->GetBufferPointer()));
+			LogErrorString(std::string((const char*)pErrors->GetBufferPointer()));
 
 			pErrors->Release();
 		}
@@ -1279,7 +1277,7 @@ bool R_CreateVertexShader(const std::string &fileName, r_VertexShader &vertexSha
 
 	std::stringstream message;
 	message << "Processing constants for vertex shader '" << fileName << "' which has " << constantTableDesc.Constants << " constant(s)\n";
-	OutputDebugString(message.str().c_str());
+	LogDebugString(message.str());
 
 	D3DXCONSTANT_DESC constantDesc;
 
@@ -1296,7 +1294,7 @@ bool R_CreateVertexShader(const std::string &fileName, r_VertexShader &vertexSha
 
 		std::stringstream constantInfo;
 		constantInfo << "\t Name: " << constantDesc.Name << ", Register Index: " << constantDesc.RegisterIndex << /*", Register Index: " << constantDesc.RegisterIndex <<*/ "\n";
-		OutputDebugString(constantInfo.str().c_str());
+		LogDebugString(constantInfo.str());
 	}
 
 	return true;
@@ -1331,18 +1329,14 @@ bool R_CreatePixelShader(const std::string &fileName, r_PixelShader &pixelShader
 
 	if (FAILED(LastError))
 	{
-		OutputDebugString(DXGetErrorString(LastError));
-		OutputDebugString(DXGetErrorDescription(LastError));
-
 		LogErrorString("D3DXCompileShaderFromFile failed for '" + actualPath + "'", __LINE__, __FILE__);
+		LogErrorString("DX Error- " + std::string(DXGetErrorString(LastError)) + " " + std::string(DXGetErrorDescription(LastError)));
 
 		if (pErrors)
 		{
 			// shader didn't compile for some reason
-			OutputDebugString((const char*)pErrors->GetBufferPointer());
-
 			LogErrorString("Shader compile errors found for '" + actualPath + "'", __LINE__, __FILE__);
-			LogErrorString("\n" + std::string((const char*)pErrors->GetBufferPointer()));
+			LogErrorString(std::string((const char*)pErrors->GetBufferPointer()));
 
 			pErrors->Release();
 		}
@@ -1374,7 +1368,7 @@ bool R_CreatePixelShader(const std::string &fileName, r_PixelShader &pixelShader
 
 	std::stringstream message;
 	message << "Processing constants for pixel shader '" << fileName << "' which has " << constantTableDesc.Constants << " constant(s)\n";
-	OutputDebugString(message.str().c_str());
+	LogDebugString(message.str());
 
 	D3DXCONSTANT_DESC constantDesc;
 
@@ -1391,7 +1385,7 @@ bool R_CreatePixelShader(const std::string &fileName, r_PixelShader &pixelShader
 
 		std::stringstream constantInfo;
 		constantInfo << "\t Name: " << constantDesc.Name << ", Register Index: " << constantDesc.RegisterIndex << /*", Register Index: " << constantDesc.RegisterIndex <<*/ "\n";
-		OutputDebugString(constantInfo.str().c_str());
+		LogDebugString(constantInfo.str());
 	}
 
 	return true;
@@ -1883,10 +1877,6 @@ bool R_ChangeResolution(uint32_t width, uint32_t height)
 		sstream << "Can't set resolution " << width << " x " << height << ". Setting default safe values";
 		Con_PrintError(sstream.str());
 
-		OutputDebugString(DXGetErrorString(LastError));
-		OutputDebugString(DXGetErrorDescription(LastError));
-		OutputDebugString("\n");
-
 		// this'll occur if the resolution width and height passed aren't usable on this device
 		if (D3DERR_INVALIDCALL == LastError)
 		{
@@ -1972,8 +1962,9 @@ bool InitialiseDirect3D()
 	D3DFORMAT SelectedAdapterFormat = D3DFMT_X8R8G8B8;
 	D3DFORMAT SelectedBackbufferFormat = D3DFMT_X8R8G8B8; // back buffer format
 
-	if (WindowMode == WindowModeSubWindow)
+	if (WindowMode == WindowModeSubWindow) {
 		windowed = true;
+	}
 
 	// Zero d3d structure
 	ZeroMemory(&d3d, sizeof(D3DINFO));
@@ -2080,13 +2071,15 @@ bool InitialiseDirect3D()
 					// Check if the mode's format already exists
 					for (; f < numFomats; f++ )
 					{
-						if (DisplayMode.Format == d3d.Driver[thisDevice].Formats[f])
+						if (DisplayMode.Format == d3d.Driver[thisDevice].Formats[f]) {
 							break;
+						}
 					}
 
 					// If the format is new, add it to the list
-					if (f == numFomats)
+					if (f == numFomats) {
 						d3d.Driver[thisDevice].Formats[numFomats++] = DisplayMode.Format;
+					}
 				}
 			}
 		}
@@ -2800,7 +2793,7 @@ void ChangeZWriteEnable(enum ZWRITE_ENABLE zWriteEnable)
 		LastError = d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 		if (FAILED(LastError))
 		{
-			OutputDebugString("D3DRS_ZWRITEENABLE D3DZB_TRUE failed\n");
+			LogDebugString("D3DRS_ZWRITEENABLE D3DZB_TRUE failed\n");
 		}
 	}
 	else if (zWriteEnable == ZWRITE_DISABLED)
@@ -2808,8 +2801,8 @@ void ChangeZWriteEnable(enum ZWRITE_ENABLE zWriteEnable)
 		LastError = d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 		if (FAILED(LastError))
 		{
-			OutputDebugString("D3DRS_ZWRITEENABLE D3DZB_FALSE failed\n");
-			OutputDebugString("DISABLING Z WRITES\n");
+			LogDebugString("D3DRS_ZWRITEENABLE D3DZB_FALSE failed\n");
+			LogDebugString("DISABLING Z WRITES\n");
 		}
 	}
 	else
@@ -2834,19 +2827,19 @@ void ChangeTextureAddressMode(uint32_t samplerIndex, enum TEXTURE_ADDRESS_MODE t
 		LastError = d3d.lpD3DDevice->SetSamplerState(samplerIndex, D3DSAMP_ADDRESSU, D3DTADDRESS_WRAP);
 		if (FAILED(LastError))
 		{
-			OutputDebugString("D3DSAMP_ADDRESSU Wrap fail\n");
+			LogDebugString("D3DSAMP_ADDRESSU Wrap fail\n");
 		}
 
 		LastError = d3d.lpD3DDevice->SetSamplerState(samplerIndex, D3DSAMP_ADDRESSV, D3DTADDRESS_WRAP);
 		if (FAILED(LastError))
 		{
-			OutputDebugString("D3DSAMP_ADDRESSV Wrap fail\n");
+			LogDebugString("D3DSAMP_ADDRESSV Wrap fail\n");
 		}
 
 		LastError = d3d.lpD3DDevice->SetSamplerState(samplerIndex, D3DSAMP_ADDRESSW, D3DTADDRESS_WRAP);
 		if (FAILED(LastError))
 		{
-			OutputDebugString("D3DSAMP_ADDRESSW Wrap fail\n");
+			LogDebugString("D3DSAMP_ADDRESSW Wrap fail\n");
 		}
 	}
 	else if (textureAddressMode == TEXTURE_CLAMP)
@@ -2855,19 +2848,19 @@ void ChangeTextureAddressMode(uint32_t samplerIndex, enum TEXTURE_ADDRESS_MODE t
 		LastError = d3d.lpD3DDevice->SetSamplerState(samplerIndex, D3DSAMP_ADDRESSU, D3DTADDRESS_CLAMP);
 		if (FAILED(LastError))
 		{
-			OutputDebugString("D3DSAMP_ADDRESSU Clamp fail\n");
+			LogDebugString("D3DSAMP_ADDRESSU Clamp fail\n");
 		}
 
 		LastError = d3d.lpD3DDevice->SetSamplerState(samplerIndex, D3DSAMP_ADDRESSV, D3DTADDRESS_CLAMP);
 		if (FAILED(LastError))
 		{
-			OutputDebugString("D3DSAMP_ADDRESSV Clamp fail\n");
+			LogDebugString("D3DSAMP_ADDRESSV Clamp fail\n");
 		}
 
 		LastError = d3d.lpD3DDevice->SetSamplerState(samplerIndex, D3DSAMP_ADDRESSW, D3DTADDRESS_CLAMP);
 		if (FAILED(LastError))
 		{
-			OutputDebugString("D3DSAMP_ADDRESSW Clamp fail\n");
+			LogDebugString("D3DSAMP_ADDRESSW Clamp fail\n");
 		}
 	}
 }
@@ -2896,8 +2889,7 @@ void ChangeFilteringMode(uint32_t samplerIndex, enum FILTERING_MODE_ID filtering
 		}
 		default:
 		{
-			LOCALASSERT("Unrecognized filtering mode"==0);
-			OutputDebugString("Unrecognized filtering mode\n");
+			LogDebugString("Unrecognized filtering mode\n");
 			break;
 		}
 	}

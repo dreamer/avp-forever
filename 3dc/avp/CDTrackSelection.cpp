@@ -86,7 +86,7 @@ static void ExtractTracksForLevel(char* &buffer, List<int> &track_list)
 			}
 
 			// skip to the next non numerical character
-			while (*buffer>='0' && *buffer<='9') {
+			while (*buffer >= '0' && *buffer <= '9') {
 				buffer++;
 			}
 		}

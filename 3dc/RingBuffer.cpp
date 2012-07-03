@@ -105,8 +105,9 @@ uint32_t RingBuffer::GetReadableSize()
 	{
 		// standard logic - buffers have a gap, work out readable space between them
 		readableSpace = writePos - readPos;
-		if (readableSpace < 0)
+		if (readableSpace < 0) {
 			readableSpace += bufferCapacity;
+		}
 	}
 
 	LeaveCriticalSection(&mCriticalSection);
@@ -184,8 +185,9 @@ uint32_t RingBuffer::WriteData(uint8_t *srcData, uint32_t srcDataSize)
 	firstSize = bufferCapacity - writePos;
 
 	// is first size big enough to hold all our data?
-	if (firstSize > srcDataSize)
+	if (firstSize > srcDataSize) {
 		firstSize = srcDataSize;
+	}
 
 	// first part. from write cursor to end of buffer
 	memcpy(&buffer[writePos], &srcData[0], firstSize);

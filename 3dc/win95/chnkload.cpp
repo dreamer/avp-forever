@@ -31,16 +31,16 @@ void SetupAnimOnQuad(Shape_Chunk* sc,SHAPEHEADER* shp,TEXANIM* ta1,TEXANIM* ta2,
 
 double local_scale;
 
-File_Chunk * Env_Chunk = 0;
+File_Chunk *Env_Chunk = 0;
 
 RIFFHANDLE current_rif_handle;
 
-unsigned char const * PaletteMapTable;
+unsigned char const *PaletteMapTable;
 
 //////////////////////////////////////////////////////////
-extern LOADED_SOUND const * GetSoundForMainRif(const char* wav_name);
-extern char * extsounddir ;
-extern char * sounddir ;
+extern LOADED_SOUND const *GetSoundForMainRif(const char *wav_name);
+extern char *extsounddir;
+extern char *sounddir;
 
 struct Shape_Fragment_Type
 {

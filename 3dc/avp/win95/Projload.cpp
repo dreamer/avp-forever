@@ -77,34 +77,34 @@ extern void PurgeMSLShapeList();
 BOOL LevelHasStars;
 
 // these are to link with chnkimag.cpp
-const char * ToolsTex_Directory = "//Kate/Kate Share/avp/ToolsTex/";
-const char * GenTex_Directory = "//Kate/Kate Share/avp/GenG-Tex/";
-const char * SubShps_Directory = "SubShps/All/";
+const char *ToolsTex_Directory = "//Kate/Kate Share/avp/ToolsTex/";
+const char *GenTex_Directory = "//Kate/Kate Share/avp/GenG-Tex/";
+const char *SubShps_Directory = "SubShps/All/";
 // const char * GenTex_Directory = 0;
-const char * FixTex_Directory = "//Kate/Kate Share/avp/Fix-Tex/";
-const char * GameTex_Directory = "//Kate/Kate Share/avp/game-tex/";
+const char *FixTex_Directory = "//Kate/Kate Share/avp/Fix-Tex/";
+const char *GameTex_Directory = "//Kate/Kate Share/avp/game-tex/";
 // new directories for new-style graphics - to be determined properly
-char const * FirstTex_Directory = "Graphics"; // currently relative to cwd
-char const * SecondTex_Directory = 0; // will be the src safe shadow for development builds
+char const *FirstTex_Directory = "Graphics"; // currently relative to cwd
+char const *SecondTex_Directory = 0; // will be the src safe shadow for development builds
 								//used for cd graphics directory in final version
 
-char* Rif_Sound_Directory = 0;//set for the main level rif
+char *Rif_Sound_Directory = 0;//set for the main level rif
 
-static char * light_set_name = "NORMALLT";
+static char *light_set_name = "NORMALLT";
 
-static Object_Chunk * * o_chunk_array;
-static int * aimodule_indeces; //array parallel to o_chunk_array
+static Object_Chunk **o_chunk_array;
+static int *aimodule_indeces; //array parallel to o_chunk_array
 
 
-void setup_preplaced_decals(File_Chunk* fc,Environment_Data_Chunk* edc);
+void setup_preplaced_decals(File_Chunk *fc, Environment_Data_Chunk *edc);
 /////////////////////////////////////////
 // Functions which operate on RIFFHANDLEs
 /////////////////////////////////////////
 
 void setup_start_position(RIFFHANDLE h)
 {
-	Chunk * pChunk = h->envd->lookup_single_child("SPECLOBJ");
-	AVP_Player_Start_Chunk* start_chunk=0;
+	Chunk *pChunk = h->envd->lookup_single_child("SPECLOBJ");
+	AVP_Player_Start_Chunk *start_chunk = 0;
 	if (pChunk)
 	{
 		List<Chunk*> start_list;
@@ -275,7 +275,6 @@ int ConvertObjectIndexToPathIndex(int path_index,int object_index)
 		return -1; //object isn't a module
 	}
 	int aimodule_index=aimodule_indeces[module_index];
-
 
 	PATHHEADER* path=&PathArray[path_index];
 	

@@ -2,7 +2,7 @@
 ; SEE THE DOCUMENTATION FOR DETAILS ON CREATING INNO SETUP SCRIPT FILES!
 
 #define MyAppName "AvPx"
-#define MyAppVersion "1.0"
+#define MyAppVersion "0.1"
 #define MyAppPublisher "SirLemonhead"
 #define MyAppURL "http://homepage.eircom.net/~duncandsl/avp/"
 #define MyAppExeName "AvPx.exe"
@@ -19,11 +19,12 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName={pf}\Fox\Aliens versus Predator
+DefaultDirName={pf}
 DefaultGroupName={#MyAppName}
 OutputBaseFilename=setup
 Compression=lzma
 SolidCompression=yes
+UsePreviousAppDir=no
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"

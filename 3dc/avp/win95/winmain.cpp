@@ -211,8 +211,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		}
 	}
 
-	if (strstr(command_line, "-intro"))	
+	if (strstr(command_line, "-intro"))	{
 		WeWantAnIntro();
+	}
 
 	if (strstr(command_line, "-qm"))
 	{
@@ -297,8 +298,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	}
 
 	#if PLAY_INTRO//(MARINE_DEMO||ALIEN_DEMO||PREDATOR_DEMO)
-	if (!LobbiedGame)  // Edmond
+	if (!LobbiedGame) { // Edmond
 		WeWantAnIntro();
+	}
 	#endif
 	GetPathFromRegistry();
 
@@ -323,8 +325,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	#if debug && 1//!PREDATOR_DEMO
 
-	if (instr = strstr(command_line, "-s"))
+	if (instr = strstr(command_line, "-s")) {
 		sscanf(instr, "-s%d", &level_to_load);
+	}
 
 	#endif
 
@@ -466,7 +469,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			{
 				case I_GM_Playing:
 				{
-					if ((!menusActive || (AvP.Network!=I_No_Network && !netGameData.skirmishMode)) && !AvP.LevelCompleted)
+					if ((!menusActive || (AvP.Network != I_No_Network && !netGameData.skirmishMode)) && !AvP.LevelCompleted)
 					{
 						//#if MainTextPrint 		/* debugging stuff */
 						{
@@ -506,8 +509,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 						// check to see if we're pausing the game;
 						// if so kill off any sound effects
-						if (InGameMenusAreRunning() && ((AvP.Network != I_No_Network && netGameData.skirmishMode) || (AvP.Network == I_No_Network)))
+						if (InGameMenusAreRunning() && ((AvP.Network != I_No_Network && netGameData.skirmishMode) || (AvP.Network == I_No_Network))) {
 							SoundSys_StopAll();
+						}
 					}
 					else
 					{
@@ -565,7 +569,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 				FixCheatModesInUserProfile(UserProfilePtr);
 				RestartLevel();
 			}
-		}// end of main game loop
+		} // end of main game loop
 
 		AvP.LevelCompleted = thisLevelHasBeenCompleted;
 		mainMenu = true;
@@ -577,10 +581,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 		ReleaseAllFMVTextures();
 
-		/* DHM 8/4/98 */
 		CONSBIND_WriteKeyBindingsToConfigFile();
 
-		/* CDF 2/10/97 */
 		DeInitialisePlayer();
 
 		DeallocatePlayersMirrorImage();
@@ -594,11 +596,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		ExitGame();
 
 		#endif
-		/* Patrick 26/6/97
-		Stop and remove all game sounds here, since we are returning to the menus */
-//		SoundSys_StopAll();
+
 		ResetEaxEnvironment();
-		//make sure the volume gets reset for the menus
+
+		// make sure the volume gets reset for the menus
 		SoundSys_ResetFadeLevel();
 
 		CDDA_Stop();
@@ -616,7 +617,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		ClearMemoryPool();
 
 #if 0 //bjd - FIXME
-		if(LobbiedGame)
+		if (LobbiedGame)
 		{
 			/*
 			We have been playing a lobbied game , and have now diconnected.

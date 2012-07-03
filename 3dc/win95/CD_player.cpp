@@ -6,6 +6,7 @@
 #include "cd_player.h"
 #define UseLocalAssert TRUE
 #include "ourasert.h"
+#include "ConfigFile.h"
 
 /* KJL 12:40:35 07/05/98 - This is code derived from Patrick's original stuff & moved into it's own file. */
 
@@ -38,29 +39,32 @@ int CDPlayerVolume; // volume control from menus
 int CDTrackMax = -1; //highest track number on cd
 
 extern int SetStreamingMusicVolume(int volume);
-static void PlatGetCDDAVolumeControl(void);
+static void PlatGetCDDAVolumeControl();
 
-void CDDA_Start(void)
+bool useCD = true;
+
+void CDDA_Start()
 {
-	return; // bjd - revert
+	return;
+	useCD = Config_GetBool("[Music]", "UseCDaudio", true);
 
-	/* function should complete successfully even if no disc in drive */
+	// function should complete successfully even if no disc in drive
 	CDDAVolume = CDDA_VOLUME_DEFAULT;
 	CDPlayerVolume = CDDAVolume;
 	CDDAState = CDOp_Idle;
 	CDDAIsInitialised = false;
 
-	if (PlatStartCDDA() != SOUND_PLATFORMERROR)
+	if (PlatStartCDDA())
 	{
 		CDDAIsInitialised = true;
 		CDDA_SwitchOn();
-		CDDA_ChangeVolume(CDDAVolume); /* init the volume */
+		CDDA_ChangeVolume(CDDAVolume); // init the volume
 		CDDA_CheckNumberOfTracks();
 	}
 	LastCommandGiven = CDCOMMANDID_Start;
 }
 
-void CDDA_End(void)
+void CDDA_End()
 {
 	if (!CDDAIsInitialised) {
 		return;
@@ -75,7 +79,7 @@ void CDDA_End(void)
 	LastCommandGiven = CDCOMMANDID_End;
 }
 
-void CDDA_Management(void)
+void CDDA_Management()
 {
 	if (!CDDASwitchedOn) {
 		return; // CDDA is off
@@ -88,16 +92,15 @@ void CDDA_Management(void)
 void CDDA_Play(int CDDATrack)
 {
 	if (!CDDASwitchedOn)
-		return; /* CDDA is off */
+		return; // CDDA is off
 
 	if (CDDAState == CDOp_Playing)
-		return; /* already playing */
+		return; // already playing
 
-	if ((CDDATrack <= 0)||(CDDATrack >= CDTrackMax))
-		return; /* no such track */
+	if ((CDDATrack <= 0) || (CDDATrack >= CDTrackMax))
+		return; // no such track
 
-	int ok = PlatPlayCDDA((int)CDDATrack);
-	if (ok != SOUND_PLATFORMERROR)
+	if (PlatPlayCDDA(CDDATrack) != SOUND_PLATFORMERROR)
 	{
 		CDDAState = CDOp_Playing;
 		LastCommandGiven = CDCOMMANDID_Play;
@@ -117,8 +120,7 @@ void CDDA_PlayLoop(int CDDATrack)
 		return; // no such track
 	}
 
-	int ok = PlatPlayCDDA((int)CDDATrack);
-	if (ok != SOUND_PLATFORMERROR)
+	if (PlatPlayCDDA(CDDATrack) != SOUND_PLATFORMERROR)
 	{
 		CDDAState=CDOp_Playing;
 		LastCommandGiven = CDCOMMANDID_PlayLoop;
@@ -126,7 +128,7 @@ void CDDA_PlayLoop(int CDDATrack)
 	}
 }
 
-extern void CheckCDVolume(void)
+extern void CheckCDVolume()
 {
 	if (CDDAVolume != CDPlayerVolume) {
 		CDDA_ChangeVolume(CDPlayerVolume);
@@ -138,7 +140,7 @@ void CDDA_ChangeVolume(int volume)
 	// set vorbis volume here for now
 	if (SetStreamingMusicVolume(volume) == 0) // ok
 	{
-		CDDAVolume=volume;
+		CDDAVolume = volume;
 		CDPlayerVolume = volume;
 	}
 
@@ -161,7 +163,7 @@ void CDDA_ChangeVolume(int volume)
 	}
 }
 
-int CDDA_GetCurrentVolumeSetting(void)
+int CDDA_GetCurrentVolumeSetting()
 {
 	return CDDAVolume;
 }
@@ -171,10 +173,12 @@ void CDDA_Stop()
 	if (!CDDASwitchedOn) {
 		return; // CDDA is off
 	}
+
 	if (CDDAState != CDOp_Playing) {
 		return; // nothing playing
 	}
-	int ok = PlatStopCDDA();
+
+	PlatStopCDDA();
 	CDDAState = CDOp_Idle;
 	LastCommandGiven = CDCOMMANDID_Stop;
 }
@@ -192,6 +196,7 @@ void CDDA_SwitchOff()
 	if (!CDDASwitchedOn) {
 		return; // CDDA is off already
 	}
+
 	if (CDDA_IsPlaying()) {
 		CDDA_Stop();
 	}
@@ -215,11 +220,11 @@ bool CDDA_IsPlaying()
 
 int CDDA_CheckNumberOfTracks()
 {
-	int numTracks = 0;
+	uint32_t numTracks = 0;
 
 	if (CDDA_IsOn())
 	{
-		PlatGetNumberOfCDTracks(&numTracks);
+		PlatGetNumberOfCDTracks(numTracks);
 
 		// if there is only one track , then it probably can't be used anyway
 //		if(numTracks==1) numTracks=0;
@@ -228,16 +233,14 @@ int CDDA_CheckNumberOfTracks()
 		}
 
 		// store the maximum allowed track number
-		CDTrackMax=numTracks;
+		CDTrackMax = numTracks;
 	}
 	return numTracks;
 }
 
-
-
 // win32 specific
 
-int PlatStartCDDA(void)
+bool PlatStartCDDA()
 {
 	DWORD dwReturn;
 	MCI_OPEN_PARMS mciOpenParms;
@@ -253,16 +256,16 @@ int PlatStartCDDA(void)
 	if (dwReturn)
 	{
 		cdDeviceID = kNoDevice;
-		return SOUND_PLATFORMERROR;
+		return false;
 	}
 	cdDeviceID = mciOpenParms.wDeviceID;
 
 	// now try to get the cd volume control, by obtaining the auxiliary device id for the cd-audio player
 	PlatGetCDDAVolumeControl();
-	return 0;
+	return true;
 }
 
-static void PlatGetCDDAVolumeControl(void)
+static void PlatGetCDDAVolumeControl()
 {
 	uint32_t numDev = mixerGetNumDevs();
 
@@ -311,7 +314,6 @@ static void PlatGetCDDAVolumeControl(void)
 					{
 						PreGameCDVolume = detailValue.dwValue;
 						mixerClose(handle);
-
 						return; //success
 					}
 				}
@@ -321,7 +323,7 @@ static void PlatGetCDDAVolumeControl(void)
 	}
 }
 
-void PlatEndCDDA(void)
+void PlatEndCDDA()
 {
 	return;
 
@@ -344,14 +346,14 @@ int PlatPlayCDDA(int track)
 	MCI_STATUS_PARMS mciStatusParms = {0,0,0,0};
 
 	// check the cdDeviceId
-	if (cdDeviceID==kNoDevice)
+	if (cdDeviceID == kNoDevice) {
 		return SOUND_PLATFORMERROR;
+	}
 
 	// set the time format
 	mciSetParms.dwTimeFormat = MCI_FORMAT_MSF;
 	dwReturn = mciSendCommand(cdDeviceID, MCI_SET, MCI_SET_TIME_FORMAT, (DWORD_PTR) &mciSetParms);
-	if (dwReturn)
-	{
+	if (dwReturn) {
 //    	NewOnScreenMessage("CD ERROR - TIME FORMAT");
 		return SOUND_PLATFORMERROR;
 	}
@@ -360,8 +362,7 @@ int PlatPlayCDDA(int track)
 	mciStatusParms.dwItem = MCI_STATUS_LENGTH;
 	mciStatusParms.dwTrack = track;
 	dwReturn = mciSendCommand(cdDeviceID, MCI_STATUS, MCI_STATUS_ITEM|MCI_TRACK, (DWORD_PTR) &mciStatusParms);
-	if (dwReturn)
-	{
+	if (dwReturn) {
 //    	NewOnScreenMessage("CD ERROR - GET LENGTH");
 		return SOUND_PLATFORMERROR;
 	}
@@ -369,8 +370,7 @@ int PlatPlayCDDA(int track)
 	// set the time format
 	mciSetParms.dwTimeFormat = MCI_FORMAT_TMSF;
 	dwReturn = mciSendCommand(cdDeviceID, MCI_SET, MCI_SET_TIME_FORMAT, (DWORD_PTR) &mciSetParms);
-	if (dwReturn)
-	{
+	if (dwReturn) {
 //    	NewOnScreenMessage("CD ERROR - TIME FORMAT");
 		return SOUND_PLATFORMERROR;
 	}
@@ -380,52 +380,50 @@ int PlatPlayCDDA(int track)
 	mciPlayParms.dwTo = MCI_MAKE_TMSF(track, MCI_MSF_MINUTE(mciStatusParms.dwReturn), MCI_MSF_SECOND(mciStatusParms.dwReturn), MCI_MSF_FRAME(mciStatusParms.dwReturn));
 	mciPlayParms.dwCallback = (DWORD_PTR)hWndMain;
 	dwReturn = mciSendCommand(cdDeviceID, MCI_PLAY, MCI_FROM | MCI_TO | MCI_NOTIFY, (DWORD_PTR) &mciPlayParms);
-	if (dwReturn)
-	{
+	if (dwReturn) {
 //    	NewOnScreenMessage("CD ERROR - PLAY");
 		return SOUND_PLATFORMERROR;
 	}
 	return 0;
 }
 
-int PlatGetNumberOfCDTracks(int* numTracks)
+int PlatGetNumberOfCDTracks(uint32_t &numTracks)
 {
-	DWORD dwReturn;
 	MCI_STATUS_PARMS mciStatusParms = {0,0,0,0};
 
 	// check the cdDeviceId
-	if (cdDeviceID == kNoDevice)
+	if (cdDeviceID == kNoDevice) {
 		return SOUND_PLATFORMERROR;
+	}
 
-	if (!numTracks)
+	if (!numTracks) {
 		return SOUND_PLATFORMERROR;
+	}
 
 	// find the number tracks
 	mciStatusParms.dwItem = MCI_STATUS_NUMBER_OF_TRACKS ;
-	dwReturn = mciSendCommand(cdDeviceID, MCI_STATUS, MCI_STATUS_ITEM , (DWORD_PTR)&mciStatusParms);
+	DWORD dwReturn = mciSendCommand(cdDeviceID, MCI_STATUS, MCI_STATUS_ITEM , (DWORD_PTR)&mciStatusParms);
 	if (dwReturn)
 	{
 		return SOUND_PLATFORMERROR;
 	}
 
 	// number of tracks is in the dwReturn member
-	*numTracks = (int)mciStatusParms.dwReturn;
+	numTracks = (uint32_t)mciStatusParms.dwReturn;
 
 	return 0;
 }
 
-int PlatStopCDDA(void)
+int PlatStopCDDA()
 {
 	// check the cdDeviceId
-	if (cdDeviceID == kNoDevice)
-	{
+	if (cdDeviceID == kNoDevice) {
 		return SOUND_PLATFORMERROR;
 	}
 
 	// stop the cd player
 	DWORD dwReturn = mciSendCommand(cdDeviceID, MCI_STOP, MCI_WAIT, 0);
-	if (dwReturn)
-	{
+	if (dwReturn) {
 		return SOUND_PLATFORMERROR;
 	}
 
@@ -440,8 +438,9 @@ int PlatChangeCDDAVolume(int volume)
 	uint32_t numDev = mixerGetNumDevs();
 
 	// check the cdDeviceId
-	if (cdDeviceID == kNoDevice)
+	if (cdDeviceID == kNoDevice) {
 		return SOUND_PLATFORMERROR;
+	}
 
 	// go through the mixer devices searching for one that can deal with the cd volume
 	for (uint32_t i = 0; i < numDev; i++)
@@ -468,10 +467,9 @@ int PlatChangeCDDAVolume(int volume)
 
 				control.cbStruct = sizeof(MIXERCONTROL);
 
-				//try to get the volume control
+				// try to get the volume control
 				if (mixerGetLineControls((HMIXEROBJ)handle, &lineControls, MIXER_GETLINECONTROLSF_ONEBYTYPE) == MMSYSERR_NOERROR)
 				{
-
 					MIXERCONTROLDETAILS details;
 					MIXERCONTROLDETAILS_UNSIGNED detailValue;
 
@@ -531,7 +529,7 @@ void PlatCDDAManagementCallBack(WPARAM flags, LONG deviceId)
 	{
 		CDDAState = CDOp_Idle;
 		//NewOnScreenMessage("CD COMMAND RETURNED WITH SUCCESSFUL");
-		/* Play it again, sam */
+		// Play it again, sam
 		if (LastCommandGiven == CDCOMMANDID_PlayLoop)
 		{
 			CDDA_PlayLoop(TrackBeingPlayed);
@@ -539,7 +537,7 @@ void PlatCDDAManagementCallBack(WPARAM flags, LONG deviceId)
 	}
 	else if (flags & MCI_NOTIFY_FAILURE)
 	{
-		/* error while playing: abnormal termination */
+		// error while playing: abnormal termination
 		//NewOnScreenMessage("CD COMMAND FAILED");
 		CDDAState = CDOp_Idle;
 	}
@@ -549,7 +547,7 @@ void PlatCDDAManagementCallBack(WPARAM flags, LONG deviceId)
 	}
 	else if (flags & MCI_NOTIFY_ABORTED)
 	{
-		/* aborted or superceeded: try and stop the device */
+		// aborted or superceeded: try and stop the device
 		//NewOnScreenMessage("CD COMMAND ABORTED(?)");
 	  //	CDDA_Stop();
 	}

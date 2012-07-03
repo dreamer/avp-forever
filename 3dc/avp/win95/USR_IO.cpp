@@ -34,6 +34,27 @@ void BringDownConsoleWithSaySpeciesTypedIn();
 void MessageHistory_DisplayPrevious(void);
 void MaintainZoomingLevel(void);
 
+// Extern for global keyboard buffer
+extern unsigned char KeyboardInput[];
+extern unsigned char DebouncedKeyboardInput[];
+extern int GotJoystick;
+extern bool GotMouse;
+extern BOOL GotXPad;
+
+// XInput value externs
+extern int xPadLookX;
+extern int xPadLookY;
+extern int xPadMoveX;
+extern int xPadMoveY;
+
+extern int CameraZoomLevel;
+extern int MouseVelX;
+extern int MouseVelY;
+extern JOYINFOEX JoystickData;
+extern JOYCAPS JoystickCaps;
+
+extern void save_preplaced_decals();
+
 FIXED_INPUT_CONFIGURATION FixedInputConfig =
 {
 	KEY_1,				// Weapon1;
@@ -47,7 +68,6 @@ FIXED_INPUT_CONFIGURATION FixedInputConfig =
 	KEY_9,				// Weapon9;
 	KEY_0,				// Weapon10;
 	KEY_ESCAPE,			// PauseGame;
-
 };
 
 PLAYER_INPUT_CONFIGURATION MarineInputPrimaryConfig;
@@ -1015,28 +1035,14 @@ JOYSTICK_CONTROL_METHODS DefaultJoystickControlMethods =
 	DEFAULT_TRACKERBALL_VERTICAL_SENSITIVITY,//unsigned int JoystickTrackerBallVerticalSensitivity;
 };
 
-/* Extern for global keyboard buffer */
-extern unsigned char KeyboardInput[];
-extern unsigned char DebouncedKeyboardInput[];
-extern int GotJoystick;
-extern int GotMouse;
-extern BOOL GotXPad;
-
-/* XInput value externs */
-extern int xPadLookX;
-extern int xPadLookY;
-extern int xPadMoveX;
-extern int xPadMoveY;
-
 /* initialise the player input structure(s) in the player_status block */
 void InitPlayerGameInput(STRATEGYBLOCK* sbPtr)
 {
 	PLAYER_STATUS *playerStatusPtr;
 
-    /* get the player status block ... */
-    playerStatusPtr = (PLAYER_STATUS *) (sbPtr->SBdataptr);
-    LOCALASSERT(playerStatusPtr);
-	
+	/* get the player status block ... */
+	playerStatusPtr = (PLAYER_STATUS *) (sbPtr->SBdataptr);
+	LOCALASSERT(playerStatusPtr);
 
 	/* analogue type inputs */
 	playerStatusPtr->Mvt_MotionIncrement = 0;
@@ -1052,7 +1058,6 @@ void InitPlayerGameInput(STRATEGYBLOCK* sbPtr)
 
 	/* KJL 14:23:54 8/7/97 - default to run */
 	playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Faster = 1;
-
 }
 
 /* This function maps raw inputs onto the players movement attributes in
@@ -1065,9 +1070,9 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 	PLAYER_INPUT_CONFIGURATION *secondaryInput;
 	PLAYER_STATUS *playerStatusPtr;
 
-    /* get the player status block ... */
-    playerStatusPtr = (PLAYER_STATUS *) (sbPtr->SBdataptr);
-    LOCALASSERT(playerStatusPtr);
+	/* get the player status block ... */
+	playerStatusPtr = (PLAYER_STATUS *) (sbPtr->SBdataptr);
+	LOCALASSERT(playerStatusPtr);
 	
 	/* start off by initialising the inputs */
 	InitPlayerGameInput(sbPtr);
@@ -1096,15 +1101,15 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 
 	if (IOFOCUS_AcceptControls() && !InGameMenusAreRunning() && (!(IOFOCUS_Get() & IOFOCUS_NEWCONSOLE)))
 	{
-		/* now do forward,backward,left,right,up and down 
-		   IMPORTANT:  The request flag and the movement 
+		/* now do forward,backward,left,right,up and down
+		   IMPORTANT:  The request flag and the movement
 		   increment must BOTH be set!
 		*/
 		if (KeyboardInput[primaryInput->Forward] || KeyboardInput[secondaryInput->Forward])
 		{
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Forward = 1;
 			playerStatusPtr->Mvt_MotionIncrement = ONE_FIXED;
-		}	
+		}
 		if (KeyboardInput[primaryInput->Backward] || KeyboardInput[secondaryInput->Backward])
 		{
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Backward = 1;
@@ -1126,19 +1131,19 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 			playerStatusPtr->Mvt_SideStepIncrement = -ONE_FIXED;
 		}
 		if (KeyboardInput[primaryInput->StrafeRight] || KeyboardInput[secondaryInput->StrafeRight])
-		{	
+		{
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_SideStepRight = 1;
 			playerStatusPtr->Mvt_SideStepIncrement = ONE_FIXED;
 		}
 		if (KeyboardInput[primaryInput->Walk] || KeyboardInput[secondaryInput->Walk])
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Faster = 0;
-		
+
 		if (KeyboardInput[primaryInput->Strafe] || KeyboardInput[secondaryInput->Strafe])
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Strafe = 1;
 
 		if (KeyboardInput[primaryInput->Crouch] || KeyboardInput[secondaryInput->Crouch])
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Crouch = 1;
-		
+
 		if (KeyboardInput[primaryInput->Jump] || KeyboardInput[secondaryInput->Jump])
 			playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Jump = 1;
 
@@ -1151,65 +1156,63 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 		{
 			case I_Marine:
 			{
-				if(KeyboardInput[primaryInput->ImageIntensifier]
+				if (KeyboardInput[primaryInput->ImageIntensifier]
 				 ||KeyboardInput[secondaryInput->ImageIntensifier])
 					playerStatusPtr->Mvt_InputRequests.Flags.Rqst_ChangeVision = 1;
 
-				if(DebouncedKeyboardInput[primaryInput->ThrowFlare]
+				if (DebouncedKeyboardInput[primaryInput->ThrowFlare]
 				 ||DebouncedKeyboardInput[secondaryInput->ThrowFlare])
 					ThrowAFlare();
 
 				#if !(MARINE_DEMO||DEATHMATCH_DEMO)
-				if(KeyboardInput[primaryInput->Jetpack]
+				if (KeyboardInput[primaryInput->Jetpack]
 				 ||KeyboardInput[secondaryInput->Jetpack])
 					playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Jetpack = 1;
 				#endif
 
-				if(KeyboardInput[primaryInput->MarineTaunt]
+				if (KeyboardInput[primaryInput->MarineTaunt]
 				 ||KeyboardInput[secondaryInput->MarineTaunt])
 					StartPlayerTaunt();
 				
-				if(DebouncedKeyboardInput[primaryInput->Marine_MessageHistory]
+				if (DebouncedKeyboardInput[primaryInput->Marine_MessageHistory]
 				 ||DebouncedKeyboardInput[secondaryInput->Marine_MessageHistory])
 					MessageHistory_DisplayPrevious();
 					
-				if(DebouncedKeyboardInput[primaryInput->Marine_Say]
+				if (DebouncedKeyboardInput[primaryInput->Marine_Say]
 				 ||DebouncedKeyboardInput[secondaryInput->Marine_Say])
 					BringDownConsoleWithSayTypedIn();
 
-				if(DebouncedKeyboardInput[primaryInput->Marine_SpeciesSay]
+				if (DebouncedKeyboardInput[primaryInput->Marine_SpeciesSay]
 				 ||DebouncedKeyboardInput[secondaryInput->Marine_SpeciesSay])
 					BringDownConsoleWithSaySpeciesTypedIn();
 
-				if(KeyboardInput[primaryInput->Marine_ShowScores]
+				if (KeyboardInput[primaryInput->Marine_ShowScores]
 				 ||KeyboardInput[secondaryInput->Marine_ShowScores])
 					ShowMultiplayerScores();
 				break;
 			}
 			case I_Predator:
-			{
-				extern int CameraZoomLevel;
-				
-				if(KeyboardInput[primaryInput->Cloak]
+			{				
+				if (KeyboardInput[primaryInput->Cloak]
 				 ||KeyboardInput[secondaryInput->Cloak])
 					playerStatusPtr->Mvt_InputRequests.Flags.Rqst_ChangeVision = 1;
 				
-				if(DebouncedKeyboardInput[primaryInput->CycleVisionMode]
+				if (DebouncedKeyboardInput[primaryInput->CycleVisionMode]
 				 ||DebouncedKeyboardInput[secondaryInput->CycleVisionMode])
 					playerStatusPtr->Mvt_InputRequests.Flags.Rqst_CycleVisionMode = 1;
 
 				#if !(PREDATOR_DEMO||DEATHMATCH_DEMO)
-				if(DebouncedKeyboardInput[primaryInput->GrapplingHook]
+				if (DebouncedKeyboardInput[primaryInput->GrapplingHook]
 				 ||DebouncedKeyboardInput[secondaryInput->GrapplingHook])
 					playerStatusPtr->Mvt_InputRequests.Flags.Rqst_GrapplingHook = 1;
 				#endif
 
-				if(DebouncedKeyboardInput[primaryInput->ZoomIn]
+				if (DebouncedKeyboardInput[primaryInput->ZoomIn]
 				 ||DebouncedKeyboardInput[secondaryInput->ZoomIn])
 				{
 					if (CameraZoomLevel<3) CameraZoomLevel++;
 				}
-				if(DebouncedKeyboardInput[primaryInput->ZoomOut]
+				if (DebouncedKeyboardInput[primaryInput->ZoomOut]
 				 ||DebouncedKeyboardInput[secondaryInput->ZoomOut])
 				{
 					if (CameraZoomLevel>0) CameraZoomLevel--;
@@ -1217,27 +1220,27 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 				
 				MaintainZoomingLevel();
 				
-				if(KeyboardInput[primaryInput->PredatorTaunt]
+				if (KeyboardInput[primaryInput->PredatorTaunt]
 				 ||KeyboardInput[secondaryInput->PredatorTaunt])
 					StartPlayerTaunt();
 
-				if(KeyboardInput[primaryInput->RecallDisc]
+				if (KeyboardInput[primaryInput->RecallDisc]
 				 ||KeyboardInput[secondaryInput->RecallDisc])
 					Recall_Disc();
 					
-				if(DebouncedKeyboardInput[primaryInput->Predator_MessageHistory]
+				if (DebouncedKeyboardInput[primaryInput->Predator_MessageHistory]
 				 ||DebouncedKeyboardInput[secondaryInput->Predator_MessageHistory])
 					MessageHistory_DisplayPrevious();
 					
-				if(DebouncedKeyboardInput[primaryInput->Predator_Say]
+				if (DebouncedKeyboardInput[primaryInput->Predator_Say]
 				 ||DebouncedKeyboardInput[secondaryInput->Predator_Say])
 					BringDownConsoleWithSayTypedIn();
 
-				if(DebouncedKeyboardInput[primaryInput->Predator_SpeciesSay]
+				if (DebouncedKeyboardInput[primaryInput->Predator_SpeciesSay]
 				 ||DebouncedKeyboardInput[secondaryInput->Predator_SpeciesSay])
 					BringDownConsoleWithSaySpeciesTypedIn();
 
-				if(KeyboardInput[primaryInput->Predator_ShowScores]
+				if (KeyboardInput[primaryInput->Predator_ShowScores]
 				 ||KeyboardInput[secondaryInput->Predator_ShowScores])
 					ShowMultiplayerScores();
 
@@ -1253,7 +1256,7 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 				if(KeyboardInput[primaryInput->Taunt]
 				 ||KeyboardInput[secondaryInput->Taunt])
 					StartPlayerTaunt();
-	
+
 				if(DebouncedKeyboardInput[primaryInput->Alien_MessageHistory]
 				 ||DebouncedKeyboardInput[secondaryInput->Alien_MessageHistory])
 					MessageHistory_DisplayPrevious();
@@ -1429,7 +1432,6 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 
 			if(DebouncedKeyboardInput[FixedInputConfig.Weapon10])
 			{
-				extern void save_preplaced_decals();
 				save_preplaced_decals();
 			}
 
@@ -1453,9 +1455,6 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 
 	if (GotMouse)
 	{
-		extern int MouseVelX;
-		extern int MouseVelY;
-
 		if (ControlMethods.HAxisIsTurning)
 		{
 			if (MouseVelX < 0)
@@ -1540,10 +1539,9 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 		}
 	}
 
-	/* handle xbox controllers seperate from joysticks */
+	// handle xbox controllers seperate from joysticks
 	if (GotXPad)
 	{
-//		char buf[100];
 		#define JOYSTICK_DEAD_ZONE 12000
 		int yAxis = xPadMoveY * 2;
 		int xAxis = xPadMoveX * 2;
@@ -1615,8 +1613,6 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 	if (GotJoystick)
 	{
 		#define JOYSTICK_DEAD_ZONE 12000
-		extern JOYINFOEX JoystickData;
-		extern JOYCAPS JoystickCaps;
 
 		int yAxis = (32768-JoystickData.dwYpos)*2;
 		int xAxis = (JoystickData.dwXpos-32768)*2;
@@ -1893,8 +1889,9 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 	}
 	#endif
 
-	if (DebouncedKeyboardInput[KEY_GRAVE]) 
+	if (DebouncedKeyboardInput[KEY_GRAVE]) {
 		IOFOCUS_Toggle();
+	}
 }
 
 void LoadKeyConfiguration(void)
@@ -1904,7 +1901,6 @@ void LoadKeyConfiguration(void)
 	#else
 	LoadAKeyConfiguration("avpkey.cfg");
 	#endif
-
 }
 
 void SaveKeyConfiguration(void)

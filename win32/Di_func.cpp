@@ -58,7 +58,7 @@ static IDirectInputDevice2*		g_pJoystickDevice2  = NULL;  // needed to poll joys
 //extern HINSTANCE hInst;
 //extern HWND hWndMain;
 
-int GotMouse;
+bool GotMouse;
 int MouseVelX;
 int MouseVelY;
 int MouseX;
@@ -869,18 +869,18 @@ void DirectReadKeyboard(void)
 
 	if (Osk_IsActive())
 	{
-		if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_15])
+		if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_15]) {
 			Osk_MoveLeft();
-
-		else if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_16])
+		}
+		else if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_16]) {
 			Osk_MoveRight();
-
-		else if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_13])
+		}
+		else if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_13]) {
 			Osk_MoveUp();
-
-		else if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_14])
+		}
+		else if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_14]) {
 			Osk_MoveDown();
-
+		}
 		else if (DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_2])
 		{
 			KEYPRESS keyPress = Osk_HandleKeypress();
@@ -1015,10 +1015,11 @@ void DirectReadMouse(void)
 #if 1
 	int OldMouseX, OldMouseY;
 
-	GotMouse = FALSE;
+	GotMouse = false;
 
-	if (mouseMoved == false) 
+	if (mouseMoved == false) {
 		return;
+	}
 
 	MouseVelX = 0;
 	MouseVelY = 0;
@@ -1030,7 +1031,7 @@ void DirectReadMouse(void)
 	OldMouseX = MouseX;
 	OldMouseY = MouseY;
 
-	GotMouse = TRUE;
+	GotMouse = true;
 
 	MouseX += xPosRelative * 4;
 	MouseY += yPosRelative * 4;
@@ -1050,7 +1051,7 @@ void DirectReadMouse(void)
 	HRESULT hres;
 	int OldMouseX, OldMouseY, OldMouseZ;
 
- 	GotMouse = FALSE;
+ 	GotMouse = false;
 	MouseVelX = 0;
 	MouseVelY = 0;
 	MouseVelZ = 0;
@@ -1069,7 +1070,7 @@ void DirectReadMouse(void)
 	if (hres != DI_OK) return;
 
     // Check for any data being picked up
-	GotMouse = TRUE;
+	GotMouse = true;
 	if (dwElements == 0) return;
 
     // Save mouse x and y for velocity determination
@@ -1151,7 +1152,7 @@ void DirectReadMouse(void)
 	
     #if 0
 	textprint("MouseNormalFrameTime %d\n",MouseNormalFrameTime);
-	textprint("Got Mouse %d\n", GotMouse);
+//	textprint("Got Mouse %d\n", GotMouse);
 	textprint("Vel X %d\n", MouseVelX);
 	textprint("Vel Y %d\n", MouseVelY);
 	#endif

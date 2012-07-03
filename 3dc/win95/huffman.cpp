@@ -15,7 +15,7 @@ typedef struct
 typedef struct HuffNode // 16-byte node structure
 {
     union
-    { 		                        // the FIRST four bytes
+    {                               // the FIRST four bytes
         struct HuffNode *zero;      // points to the "zero" branch or...
         unsigned int       value;   // holds the value of an end node
     };
@@ -36,8 +36,8 @@ typedef struct HuffNode // 16-byte node structure
 
 typedef struct
 {
-    long wid;
-    long bits;
+	long wid;
+	long bits;
 
 } HuffEncode;
 
@@ -81,18 +81,19 @@ extern HuffmanPackage *HuffmanCompression(unsigned char *sourcePtr, int length)
 	outpackage = (HuffmanPackage*)AllocateMemory(sizeof(HuffmanPackage)+length);
 	strncpy(outpackage->Identifier,COMPRESSED_RIF_IDENTIFIER,8);
 	outpackage->CompressedDataSize = HuffEncodeBytes((int*)(outpackage+1), sourcePtr, length, EncodingTable);
-    outpackage->UncompressedDataSize = length;
-    for (int n = 0; n < MAX_DEPTH; n++)  
+	outpackage->UncompressedDataSize = length;
+
+	for (int n = 0; n < MAX_DEPTH; n++)
 	{
-    	outpackage->CodelengthCount[n] = Depths[n + 1];
+		outpackage->CodelengthCount[n] = Depths[n + 1];
 	}
-    for (int n = 0; n < 256; n++)
+	for (int n = 0; n < 256; n++)
 	{
-	   	outpackage->ByteAssignment[n]  = SymbolCensus[n + 1].Symbol;
+		outpackage->ByteAssignment[n] = SymbolCensus[n + 1].Symbol;
 	}
 	return outpackage;
 }
-			
+
 static void PerformSymbolCensus(unsigned char *sourcePtr, int length)
 {
 	// init array
@@ -108,14 +109,16 @@ static void PerformSymbolCensus(unsigned char *sourcePtr, int length)
 		SymbolCensus[*sourcePtr++].Count++;
 	}
 	while (--length);
-}			
+}
 
 static int __cdecl HuffItemsSortSub(const void *cmp1, const void *cmp2)
 {
-    if (((HuffItem *)cmp1)->Count > ((HuffItem *)cmp2)->Count)
+	if (((HuffItem *)cmp1)->Count > ((HuffItem *)cmp2)->Count) {
         return  1;
-    if (((HuffItem *)cmp1)->Count < ((HuffItem *)cmp2)->Count)
+	}
+    if (((HuffItem *)cmp1)->Count < ((HuffItem *)cmp2)->Count) {
         return -1;
+	}
     return 0;
 }
 static void SortCensusData(void)
@@ -134,21 +137,25 @@ static void MakeHuffTreeFromHuffItems(HuffNode *base, HuffItem *source, int coun
     int n, upperlim, lowerlim, index;
     unsigned int sum;
 
-    if (!count) return;
+    if (!count) {
+		return;
+	}
 
     movdest = base + 1;
     temp    = base + count;
     memset(temp, 0, count * sizeof(HuffNode));
     for (n = 0; n < count; n++)
     {
-    	temp[n].bits = source[n].Count;
+		temp[n].bits = source[n].Count;
 	}
     while ((upperlim = --count))
     {
-        if (temp[0].zero)
+        if (temp[0].zero) {
             temp[0].zero->parent = temp[0].one->parent = movdest;
-        if (temp[1].zero)
+		}
+        if (temp[1].zero) {
             temp[1].zero->parent = temp[1].one->parent = movdest + 1;
+		}
         movdest[0]   = *temp++;
         movdest[1]   = *temp;
         sum = movdest[0].bits + movdest[1].bits;
@@ -174,8 +181,10 @@ static void MakeHuffTreeFromHuffItems(HuffNode *base, HuffItem *source, int coun
         movdest         += 2;
     }
     base[0] = temp[0];
-    if (base[0].zero)
+
+    if (base[0].zero) {
         base[0].zero->parent = base[0].one->parent = base;
+	}
 }
 
 static void MakeCodeLengthsFromHuffTree(int *dest, HuffNode *source, int maxdepth)
@@ -183,9 +192,12 @@ static void MakeCodeLengthsFromHuffTree(int *dest, HuffNode *source, int maxdept
     int n, depth;
     HuffNode *back;
 
-    for (n = 0; n < maxdepth + 1; n++)
+    for (n = 0; n < maxdepth + 1; n++) {
         dest[n] = 0;
+	}
+
     depth = 0;
+
     while (1)
     {
         while (source->one)
@@ -194,20 +206,25 @@ static void MakeCodeLengthsFromHuffTree(int *dest, HuffNode *source, int maxdept
             depth++;
         }
         
-        if (depth > maxdepth) dest[maxdepth]++;
-        else dest[depth]++;
+        if (depth > maxdepth) {
+			dest[maxdepth]++;
+		}
+        else { 
+			dest[depth]++;
+		}
 
         do
         {
             back   = source;
             source = source->parent;
-            if (!depth--)
+            if (!depth--) {
                 return;
+			}
         }
         while (back == source->zero);
 
         source = source->zero;
-	    depth++;
+		depth++;
     }
 }
 
@@ -217,13 +234,17 @@ static int HuffDepthsAdjust(int *depth, int maxdepth)
     unsigned int promotions, excess, hi;
 
     goal = 1 << maxdepth;
+
     for (n = 0, sum = 0, items = 0; n <= (unsigned int)maxdepth; n++)
     {
         items += depth[n];
         sum   += (goal >> n) * depth[n];
     }
-    if (items > goal)
+
+    if (items > goal) {
         return -1;                              // failure
+	}
+
     for (n = maxdepth - 1; sum > goal; n--)
     {
         if (depth[n])
@@ -243,8 +264,11 @@ static int HuffDepthsAdjust(int *depth, int maxdepth)
         for (m = n + 1; m <= (unsigned int)maxdepth; m++)
         {
             gain = hi - (1 << (maxdepth - m));
-            if (excess < gain)
+
+            if (excess < gain) {
                 break;
+			}
+
             if (depth[m])
             {
                 promotions  = excess / gain;
@@ -255,7 +279,7 @@ static int HuffDepthsAdjust(int *depth, int maxdepth)
             }
         }
     }
-    return 0;                           // success
+    return 0;    // success
 }
 
 static void MakeHuffmanEncodeTable(HuffEncode *encodetable, HuffItem *item, int *depths)
@@ -284,8 +308,9 @@ static void MakeHuffmanEncodeTable(HuffEncode *encodetable, HuffItem *item, int 
             while (1)
             {
                 cur  ^= bt;                     // do an add modulo 1
-                if ((cur & bt) || !bt)          // break if now a 1
+                if ((cur & bt) || !bt) {         // break if now a 1
                     break;                      // or out of bits
+				}
                 bt  >>=  1;                     // do next bit position
             }
         }
@@ -300,7 +325,9 @@ static int HuffEncodeBytes(int *dest, unsigned char *source, int count, HuffEnco
     unsigned int  accum, bits;
     unsigned char *sourcelim, *sourceend;
 
-    if (!count) return 0;
+    if (!count) {
+		return 0;
+	}
 
 	accum = 0;
     start = dest;
@@ -329,7 +356,9 @@ lpstart:        val  = *source++;
             while ((available -= wid) >= 0);
            
             wid       += available;
-            if (wid) accum = (accum >> wid) | (bits << (32 - wid));
+            if (wid) {
+				accum = (accum >> wid) | (bits << (32 - wid));
+			}
             *dest++    = accum;
             wid       -= available;
             accum      = bits << (32 - wid);
@@ -356,8 +385,9 @@ lpstart:        val  = *source++;
         if ((available -= wid) < 0)
         {
             wid       += available;
-            if (wid)
+            if (wid) {
                 accum  = (accum >> wid) | (bits << (32 - wid));
+			}
             *dest++    = accum;
             wid       -= available;
             accum      = bits << (32 - wid);
@@ -367,7 +397,7 @@ lpstart:        val  = *source++;
 		{
             accum = (accum >> wid) | (bits << (32 - wid));
 		}
-    }    
+    }
     *dest++ = accum >> available;
     return (int)((dest - start) * 4);
 }

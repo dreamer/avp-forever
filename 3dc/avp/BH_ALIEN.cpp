@@ -1947,7 +1947,7 @@ int GetAlienSpeedFactor_ForSequence(STRATEGYBLOCK *sbPtr, HMODEL_SEQUENCE_TYPES 
 		case 2:
 			{
 				/* More complex.  Affected by alien type and health. */
-				NPC_DATA *NpcData;
+				NPC_DATA *NpcData = 0;
 				int prefactor;
 
 				switch (alienStatusPointer->Type) {
