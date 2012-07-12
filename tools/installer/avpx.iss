@@ -11,7 +11,7 @@
 ; NOTE: The value of AppId uniquely identifies this application.
 ; Do not use the same AppId value in installers for other applications.
 ; (To generate a new GUID, click Tools | Generate GUID inside the IDE.)
-AppId={{6214FDEA-8101-434C-86C0-6CBF1380D025}
+AppID={{6214FDEA-8101-434C-86C0-6CBF1380D025}
 AppName={#MyAppName}
 AppVersion={#MyAppVersion}
 ;AppVerName={#MyAppName} {#MyAppVersion}
@@ -19,12 +19,15 @@ AppPublisher={#MyAppPublisher}
 AppPublisherURL={#MyAppURL}
 AppSupportURL={#MyAppURL}
 AppUpdatesURL={#MyAppURL}
-DefaultDirName={pf}
+DefaultDirName={pf}\Fox\Aliens versus Predator
 DefaultGroupName={#MyAppName}
-OutputBaseFilename=setup
-Compression=lzma
-SolidCompression=yes
-UsePreviousAppDir=no
+OutputBaseFilename=AvPx
+Compression=lzma/Max
+SolidCompression=true
+UsePreviousAppDir=false
+EnableDirDoesntExistWarning=true
+AppendDefaultDirName=false
+DirExistsWarning=no
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
