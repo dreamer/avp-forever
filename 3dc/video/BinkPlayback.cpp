@@ -36,6 +36,10 @@ static const int kQuantum = 1000 / 60;
 unsigned int __stdcall BinkDecodeThread(void *args);
 unsigned int __stdcall BinkAudioThread(void *args);
 
+#ifdef _XBOX
+	#include <algorithm>
+#endif
+
 int BinkPlayback::Open(const std::string &fileName, bool isLooped)
 {
 #ifdef _XBOX
@@ -48,7 +52,7 @@ int BinkPlayback::Open(const std::string &fileName, bool isLooped)
 	mIsLooped = isLooped;
 
 #ifdef _XBOX
-	
+
 	// change forwardslashes in path to backslashes
 	std::replace(mFileName.begin(), mFileName.end(), '/', '\\');
 
@@ -198,7 +202,7 @@ BinkPlayback::~BinkPlayback()
 
 	if (mFrameCriticalSectionInited)
 	{
-		::DeleteCriticalSection(&mFrameCriticalSection);
+		DeleteCriticalSection(&mFrameCriticalSection);
 		mFrameCriticalSectionInited = false;
 	}
 }

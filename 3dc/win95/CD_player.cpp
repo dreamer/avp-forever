@@ -328,8 +328,9 @@ void PlatEndCDDA()
 	return;
 
 	// check the cdDeviceId
-	if (cdDeviceID == kNoDevice)
+	if (cdDeviceID == kNoDevice) {
 		return;
+	}
 
 	DWORD dwReturn = mciSendCommand(cdDeviceID, MCI_CLOSE, MCI_WAIT, 0);
 	cdDeviceID = kNoDevice;

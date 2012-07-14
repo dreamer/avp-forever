@@ -35,6 +35,20 @@ struct SoundConfigTag
 	uint32_t	env_index;
 };
 
+struct EngineContext : public IXAudio2EngineCallback
+{
+	STDMETHOD_(void, OnCriticalError)(HRESULT)
+	{
+		OutputDebugString("critical sound error!");
+	}
+	STDMETHOD_(void, OnProcessingPassEnd)()
+	{
+	}
+	STDMETHOD_(void, OnProcessingPassStart)()
+	{
+	}
+};
+
 /* Patrick 5/6/97 -------------------------------------------------------------
   Sound system globals
   ----------------------------------------------------------------------------*/
@@ -53,6 +67,9 @@ X3DAUDIO_HANDLE			x3DInstance = {0};
 X3DAUDIO_LISTENER		XA2Listener = {0};
 X3DAUDIO_DSP_SETTINGS	XA2DSPSettings = {0};
 IUnknown				*pReverbEffect = NULL;
+
+EngineContext			engineContext;
+
 static uint32_t			numOutputChannels = 0;
 static DWORD			channelMask = 0;
 static uint32_t			SoundMinBufferFree = 0;
@@ -464,6 +481,14 @@ int PlatStartSoundSys()
 			}
 		}
 		Con_PrintError("Couldn't initialise XAudio2");
+		LogDxError (LastError, __LINE__, __FILE__);
+		PlatEndSoundSys();
+		return 0;
+	}
+
+	LastError = pXAudio2->RegisterForCallbacks(&engineContext);
+	if (FAILED(LastError)) {
+		Con_PrintError("Can't register XAudio2 engine callbacks");
 		LogDxError (LastError, __LINE__, __FILE__);
 		PlatEndSoundSys();
 		return 0;

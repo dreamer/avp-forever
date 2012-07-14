@@ -65,7 +65,7 @@ extern void KeyboardEntryQueue_Add(char c);
 extern HINSTANCE hInst;
 extern HWND hWndMain;
 
-int GotMouse;
+bool GotMouse;
 unsigned int MouseButton;
 int MouseVelX;
 int MouseVelY;

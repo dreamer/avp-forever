@@ -176,6 +176,55 @@ bool CheckPointIsInFrustum(D3DXVECTOR3 *point)
 	return true;
 }
 
+// call per frame after we've updated view and projection matrixes
+void BuildFrustum()
+{
+	D3DXMATRIX viewProjection;
+	D3DXMatrixMultiply(&viewProjection, &d3d.matView, &d3d.matProjection);
+
+	// Left plane
+	d3d.frustumPlanes[0].a = viewProjection._14 + viewProjection._11;
+	d3d.frustumPlanes[0].b = viewProjection._24 + viewProjection._21;
+	d3d.frustumPlanes[0].c = viewProjection._34 + viewProjection._31;
+	d3d.frustumPlanes[0].d = viewProjection._44 + viewProjection._41;
+
+	// Right plane
+	d3d.frustumPlanes[1].a = viewProjection._14 - viewProjection._11;
+	d3d.frustumPlanes[1].b = viewProjection._24 - viewProjection._21;
+	d3d.frustumPlanes[1].c = viewProjection._34 - viewProjection._31;
+	d3d.frustumPlanes[1].d = viewProjection._44 - viewProjection._41;
+
+	// Top plane
+	d3d.frustumPlanes[2].a = viewProjection._14 - viewProjection._12;
+	d3d.frustumPlanes[2].b = viewProjection._24 - viewProjection._22;
+	d3d.frustumPlanes[2].c = viewProjection._34 - viewProjection._32;
+	d3d.frustumPlanes[2].d = viewProjection._44 - viewProjection._42;
+
+	// Bottom plane
+	d3d.frustumPlanes[3].a = viewProjection._14 + viewProjection._12;
+	d3d.frustumPlanes[3].b = viewProjection._24 + viewProjection._22;
+	d3d.frustumPlanes[3].c = viewProjection._34 + viewProjection._32;
+	d3d.frustumPlanes[3].d = viewProjection._44 + viewProjection._42;
+
+	// Near plane
+	d3d.frustumPlanes[4].a = viewProjection._13;
+	d3d.frustumPlanes[4].b = viewProjection._23;
+	d3d.frustumPlanes[4].c = viewProjection._33;
+	d3d.frustumPlanes[4].d = viewProjection._43;
+
+	// Far plane
+	d3d.frustumPlanes[5].a = viewProjection._14 - viewProjection._13;
+	d3d.frustumPlanes[5].b = viewProjection._24 - viewProjection._23;
+	d3d.frustumPlanes[5].c = viewProjection._34 - viewProjection._33;
+	d3d.frustumPlanes[5].d = viewProjection._44 - viewProjection._43;
+
+	// Normalize planes
+	for (int i = 0; i < 6; i++)
+	{
+		D3DXPlaneNormalize(&d3d.frustumPlanes[i], &d3d.frustumPlanes[i]);
+	}
+}
+
 bool R_BeginScene()
 {
 	LastError = d3d.lpD3DDevice->BeginScene();
@@ -458,7 +507,7 @@ static uint32_t currentVertexStride = 0;
 /*
 	numVerts - number of vertices in the VB (not how many we actually end up rendering due to indexing
 */
-bool R_DrawIndexedPrimitive(uint32_t numVerts, uint32_t startIndex, uint32_t numPrimitives)
+bool R_DrawIndexedPrimitive(uint32_t baseVertexIndex, uint32_t minIndex, uint32_t numVerts, uint32_t startIndex, uint32_t numPrimitives)
 {
 	if (!currentVBPointer && !currentIBPointer)
 	{
@@ -1241,6 +1290,64 @@ bool R_UnsetVertexShader()
 	}
 
 	return true;
+}
+
+bool R_SetPixelShaderConstant(r_PixelShader &pixelShader, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData)
+{
+	uint32_t numConstants = 0;
+
+	XGMATRIX tempMatrix;
+
+	switch (type)
+	{
+		case CONST_INT:
+			numConstants = 1;
+			break;
+
+		case CONST_FLOAT:
+			numConstants = 1;
+			break;
+
+		case CONST_VECTOR3:
+			numConstants = 3;
+			break;
+
+		case CONST_VECTOR4:
+			numConstants = 4;
+			break;
+
+		case CONST_MATRIX:
+			numConstants = 4;
+
+			// we need to transpose the matrix before sending to SetVertexShaderConstant
+			memcpy(&tempMatrix, constantData, sizeof(XGMATRIX));
+			XGMatrixTranspose(&tempMatrix, &tempMatrix);
+			break;
+
+		default:
+			LogErrorString("Unknown shader constant type");
+			return false;
+			break;
+	}
+
+	if (type == CONST_MATRIX)
+	{
+		LastError = d3d.lpD3DDevice->SetPixelShaderConstant(registerIndex, &tempMatrix, numConstants);
+	}
+	else
+	{
+		LastError = d3d.lpD3DDevice->SetPixelShaderConstant(registerIndex, constantData, numConstants);
+	}
+
+	if (FAILED(LastError))
+	{
+		Con_PrintError("Can't SetPixelShaderConstant for pixel shader " + pixelShader.shaderName);
+		LogDxError(LastError, __LINE__, __FILE__);
+		return false;
+	}
+
+	return true;
+
 }
 
 bool R_SetVertexShaderConstant(r_VertexShader &vertexShader, uint32_t registerIndex, enum SHADER_CONSTANT type, const void *constantData)

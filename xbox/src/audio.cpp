@@ -22,6 +22,8 @@
 
 #define SAFE_RELEASE(p) { if ( (p) ) { (p)->Release(); (p) = 0; } }
 
+static uint32_t SOUND_3DHW = 1;
+
 struct SoundConfigTag
 {
 	uint32_t	flags;
@@ -1545,8 +1547,9 @@ AudioStream::AudioStream()
 
 bool AudioStream::Init(uint32_t channels, uint32_t rate, uint32_t bitsPerSample, uint32_t bufferSize, uint32_t numBuffers)
 {
-	if (!soundEnabled)
+	if (!soundEnabled) {
 		return false;
+	}
 
 	WAVEFORMATEX waveFormat;
 	memset(&waveFormat, 0, sizeof(waveFormat));
@@ -1602,6 +1605,8 @@ bool AudioStream::Init(uint32_t channels, uint32_t rate, uint32_t bitsPerSample,
 	this->bytesPerSample = waveFormat.wBitsPerSample / 8;
 	this->totalBytesPlayed = 0;
 	this->totalSamplesWritten = 0;
+
+	return true;
 }
 
 uint32_t AudioStream::WriteData(uint8_t *audioData, uint32_t size)

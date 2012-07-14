@@ -85,7 +85,7 @@ class FileStream
 		uint32_t GetUint32LE();
 		uint32_t GetUint32BE();
 		uint64_t GetUint64LE();
-		uint64_t GetUint64BE();
+//		uint64_t GetUint64BE();
 
 		uint8_t PeekByte();
 

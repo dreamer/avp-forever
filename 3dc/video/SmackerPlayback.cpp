@@ -65,7 +65,7 @@ SmackerPlayback::~SmackerPlayback()
 
 	if (mFrameCriticalSectionInited)
 	{
-		::DeleteCriticalSection(&mFrameCriticalSection);
+		DeleteCriticalSection(&mFrameCriticalSection);
 		mFrameCriticalSectionInited = false;
 	}
 }

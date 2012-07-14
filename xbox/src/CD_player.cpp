@@ -12,74 +12,68 @@ moved into it's own file. */
 /* Patrick 10/6/97 -------------------------------------------------------------
   CDDA Support
   ----------------------------------------------------------------------------*/
-#define NO_DEVICE -1
-int cdDeviceID = NO_DEVICE;
-int cdAuxDeviceID = NO_DEVICE;
+const int kNoDevice = -1;
+int cdDeviceID    = kNoDevice;
+int cdAuxDeviceID = kNoDevice;
 
 /* Patrick 9/6/97 -------------------------------------------------------------
    ----------------------------------------------------------------------------
   CDDA Support
   -----------------------------------------------------------------------------
   -----------------------------------------------------------------------------*/
-static int CDDASwitchedOn = 0;
-static int CDDAIsInitialised = 0;
+static bool CDDASwitchedOn = false;
+static bool CDDAIsInitialised = false;
 static int CDDAVolume = CDDA_VOLUME_DEFAULT;
-//CDOPERATIONSTATES CDDAState;
 
 static DWORD PreGameCDVolume;//windows cd volume before the game started
 
 static CDTRACKID TrackBeingPlayed;
 static enum CDCOMMANDID LastCommandGiven;
 
-//extern HWND hWndMain;
-
 int CDPlayerVolume; // volume control from menus
-
 int CDTrackMax = -1; //highest track number on cd
 
 extern int SetStreamingMusicVolume(int volume);
 
-void CDDA_Start(void)
+void CDDA_Start()
 {
 	CDDAIsInitialised = 1; 
 	CDDA_SwitchOn();
-	CDDA_ChangeVolume(CDDAVolume); /* init the volume */
+	CDDA_ChangeVolume(CDDAVolume); // init the volume
 	CDDA_CheckNumberOfTracks();
 }
 
-void CDDA_End(void)
+void CDDA_End()
 {
-	if (!CDDAIsInitialised) 
+	if (!CDDAIsInitialised) {
 		return;
+	}
 
-	CDDAIsInitialised = 0;
+	CDDAIsInitialised = false;
 }
 
-void CDDA_Management(void)
+void CDDA_Management()
 {
-
 }
 
 void CDDA_Play(int CDDATrack)
 {
-
 }
+
 void CDDA_PlayLoop(int CDDATrack)
 {
-
 }
 
-extern void CheckCDVolume(void)
+extern void CheckCDVolume()
 {
-	if (CDDAVolume != CDPlayerVolume)
-	{
+	if (CDDAVolume != CDPlayerVolume) {
 		CDDA_ChangeVolume(CDPlayerVolume);
 	}
 }
 
 void CDDA_ChangeVolume(int volume)
 {
-	/* set vorbis volume here for now */
+	// set vorbis volume here for now
 	if (SetStreamingMusicVolume(volume))
 	{
 		CDDAVolume = volume;
@@ -87,9 +81,13 @@ void CDDA_ChangeVolume(int volume)
 		return;
 	}
 
-	if (!CDDASwitchedOn) return; /* CDDA is off */
-	if (volume < CDDA_VOLUME_MIN) return;
-	if (volume > CDDA_VOLUME_MAX) return;
+	if (!CDDASwitchedOn) {
+		return; // CDDA is off
+	}
+
+	if ((volume < CDDA_VOLUME_MIN) || (volume > CDDA_VOLUME_MAX)) {
+		return;
+	}
 
 	if (CDDA_IsOn()) 
 	{
@@ -102,62 +100,59 @@ void CDDA_ChangeVolume(int volume)
 	}
 }
 
-int CDDA_GetCurrentVolumeSetting(void)
+int CDDA_GetCurrentVolumeSetting()
 {
 	return CDDAVolume;
 }
 
 void CDDA_Stop()
 {
-
 }
 
 void CDDA_SwitchOn()
 {
-	if (CDDAIsInitialised) CDDASwitchedOn = 1;
+	if (CDDAIsInitialised) {
+		CDDASwitchedOn = true;
+	}
 }
 
 void CDDA_SwitchOff()
 {
-
 }
 
-int CDDA_IsOn()
+bool CDDA_IsOn()
 {
 	return CDDASwitchedOn;
 }
 
-int CDDA_IsPlaying()
+bool CDDA_IsPlaying()
 {
-
-	return 0;
+	return false;
 }
 
 int CDDA_CheckNumberOfTracks()
 {
-	int numTracks=0;
+	int numTracks = 0;
 
 	return numTracks;
 }
 
 
 
-/* win95 specific */
+// win32 specific
 
-int PlatStartCDDA(void)
+bool PlatStartCDDA()
 {
-	return 0;
+	return false;
 }
 
-static void PlatGetCDDAVolumeControl(void)
+static void PlatGetCDDAVolumeControl()
 {
 	return;
 }
 
-
-void PlatEndCDDA(void)
+void PlatEndCDDA()
 {
-
 }
 
 int PlatPlayCDDA(int track)
@@ -170,7 +165,7 @@ int PlatGetNumberOfCDTracks(int* numTracks)
 	return 0;
 }
 
-int PlatStopCDDA(void)
+int PlatStopCDDA()
 {
     return 0;
 }
@@ -180,8 +175,7 @@ int PlatChangeCDDAVolume(int volume)
 	return 1;
 }
 
-
-void PlatCDDAManagement(void)
+void PlatCDDAManagement()
 {
 	/* does nothing for Win95: use call back instead */
 }

@@ -25,6 +25,12 @@
 #include "FileStream.h"
 #include "FastFile.h"
 
+#if (_MSC_VER == 1310)
+	#ifdef _MT
+		
+	#endif
+#endif
+
 FileStream::~FileStream()
 {
 	Close();
@@ -247,14 +253,14 @@ uint64_t FileStream::GetUint64LE()
 	ReadBytes(reinterpret_cast<uint8_t*>(&ret), sizeof(ret));
 	return ret;
 }
-
+/*
 uint64_t FileStream::GetUint64BE()
 {
 	uint64_t ret;
 	ReadBytes(reinterpret_cast<uint8_t*>(&ret), sizeof(ret));
 	return _byteswap_uint64(ret);
 }
-
+*/
 uint8_t FileStream::PeekByte()
 {
 	uint8_t ret;

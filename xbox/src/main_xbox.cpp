@@ -13,14 +13,9 @@
 #include "npcsetup.h" /* JH 30/4/97 */
 #include "pldnet.h"
 #include "avpview.h"
-#include "scrshot.hpp"
-#include "language.h"
-#include "huddefs.h"
 #include "vision.h"
 #include "avp_menus.h"
-#include "kshape.h"
-//#define UseLocalAssert TRUE
-#include "ourasert.h"
+#include "ourasert.h" 
 #include "ffstdio.h" // fast file stdio
 #include "davehook.h"
 #include "showcmds.h"
@@ -35,11 +30,14 @@
 #include "AvP_UserProfile.h"
 #include "avp_menus.h"
 #include "configFile.h"
-#include "vorbisPlayer.h"
+#include "VorbisPlayer.h"
 #include "networking.h"
 #include "avpview.h"
 #include "renderer.h"
 #include "AvP_MP_Config.h"
+#include "logString.h"
+#include "FastFile.h"
+#include "console.h"
 
 #if debug
 #define MainTextPrint 1
@@ -117,7 +115,6 @@ void exit_break_point_fucntion()
 
 void _cdecl main()
 {
-	char command_line[200 + 1];
 	char * instr;
 	I_AVP_ENVIRONMENTS level_to_load = I_Num_Environments;
 
@@ -133,6 +130,7 @@ void _cdecl main()
 
 	SetFastRandom();
 
+	char command_line[200 + 1];
 	avp_GetCommandLineArgs(command_line, 200);
 
 	/****
@@ -267,15 +265,7 @@ void _cdecl main()
 	#endif
 	GetPathFromRegistry();
 
-	/* JH 28/5/97 */
-	/* Initialise 'fast' file system */
-	#if MARINE_DEMO
-	ffInit("fastfile/mffinfo.txt", "fastfile/");
-	#elif ALIEN_DEMO
-	ffInit("alienfastfile/ffinfo.txt", "alienfastfile/");
-	#else
-	ffInit("fastfile/ffinfo.txt", "fastfile/");
-	#endif
+	FF_Init();
 
 	InitGame();
 
@@ -284,8 +274,9 @@ void _cdecl main()
 
 	#if debug && 1//!PREDATOR_DEMO
 
-	if (instr = strstr(command_line, "-s"))
+	if (instr = strstr(command_line, "-s")) {
 		sscanf(instr, "-s%d", &level_to_load);
+	}
 
 	#endif
 
@@ -304,12 +295,11 @@ void _cdecl main()
 		ReleaseDirect3D();
 	}
 
-	LoadKeyConfiguration();
+	Con_Init();
 
-	/********** Grab The Video mode **********/
-	/* JH - nope, not yet; not until we start the menus
-		(or if debugging, start the game), do we need to
-		set the initial video mode */
+	Net_Initialise();
+
+	LoadKeyConfiguration();
 
 	/*-------------------Patrick 2/6/97-----------------------
 	Start the sound system
@@ -332,30 +322,23 @@ void _cdecl main()
 	// support removing limit on number of game saves
 	unlimitedSaves = Config_GetBool("[Misc]", "UnlimitedSaves", false);
 
-	while (AvP_MainMenus())
+	while (AvP_MainMenus() && bRunning)
 	#endif
 	{
 		BOOL menusActive = FALSE;
 		int thisLevelHasBeenCompleted = 0;
 
-		mainMenu = FALSE;
+		mainMenu = false;
 
 		#if !(PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO)
-/*
-		if(instr = strstr(command_line, "-n"))
+		if (instr = strstr(command_line, "-n"))
 		{
 			sscanf(instr, "-n %s", &LevelName);
 		}
-*/
 		#endif
 
 		/* turn off any special effects */
 		d3d_light_ctrl.ctrl = LCCM_NORMAL;
-
-		/* JH 20/5/97
-			The video mode is no longer set when exiting the menus
-			(not necessary if user selects EXIT)
-			So it is set here */
 
 		// Load precompiled shapes
 	    start_of_loaded_shapes = load_precompiled_shapes();
@@ -364,17 +347,11 @@ void _cdecl main()
 		InitCharacter();
 
 		LoadRifFile(); /* sets up a map*/
-		#if debug
-		DebugFontLoaded = 1;
-		#endif
 
 		/*********** Process the data ************/
 		AssignAllSBNames();
 		StartGame();
 
-		/* JH 28/5/97 */
-		/* remove resident loaded 'fast' files */
-		ffcloseall();
 		/*********** Play the game ***************/
 
 		/* KJL 15:43:25 03/11/97 - run until this boolean is set to 0 */
@@ -397,7 +374,7 @@ void _cdecl main()
 
 		IngameKeyboardInput_ClearBuffer();
 
-		while (AvP.MainLoopRunning)
+		while (AvP.MainLoopRunning && bRunning) 
 		{
 		 	CheckForWindowsMessages();
 			CursorHome();
@@ -422,7 +399,6 @@ void _cdecl main()
 							if (ShowDebuggingText.FPS) ReleasePrintDebuggingText("FrameRate = %d fps\n",FrameRate);
 							if (ShowDebuggingText.Environment) ReleasePrintDebuggingText("Environment %s\n", Env_List[AvP.CurrentEnv]->main);
 							if (ShowDebuggingText.Coords) ReleasePrintDebuggingText("Player World Coords: %d,%d,%d\n",Player->ObWorld.vx,Player->ObWorld.vy,Player->ObWorld.vz);
-
 							{
 								PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 								PLAYER_WEAPON_DATA *weaponPtr = &(playerStatusPtr->WeaponSlot[playerStatusPtr->SelectedWeaponSlot]);
@@ -445,17 +421,16 @@ void _cdecl main()
 
 						MaintainHUD();
 
-						#if debug
 						FlushTextprintBuffer();
-						#endif
 
 						//check cd status
 						CheckCDAndChooseTrackIfNeeded();
 
 						// check to see if we're pausing the game;
 						// if so kill off any sound effects
-						if (InGameMenusAreRunning() && ( (AvP.Network!=I_No_Network && netGameData.skirmishMode) || (AvP.Network==I_No_Network))	)
+						if (InGameMenusAreRunning() && ((AvP.Network != I_No_Network && netGameData.skirmishMode) || (AvP.Network == I_No_Network))) {
 							SoundSys_StopAll();
+						}
 					}
 					else
 					{
@@ -465,10 +440,9 @@ void _cdecl main()
 						ThisFramesRenderingHasBegun();
 					}
 
-					{
-						menusActive = AvP_InGameMenus();
-						if (AvP.RestartLevel) menusActive = FALSE;
-					}
+					menusActive = AvP_InGameMenus();
+					if (AvP.RestartLevel) menusActive = FALSE;
+
 					if (AvP.LevelCompleted)
 					{
 						SoundSys_FadeOutFast();
@@ -476,11 +450,9 @@ void _cdecl main()
 						thisLevelHasBeenCompleted = 1;
 					}
 
-					{
-						/* after this call, no more graphics can be drawn until the next frame */
-						//extern void ThisFramesRenderingHasFinished(void);
-						ThisFramesRenderingHasFinished();
-					}
+					/* after this call, no more graphics can be drawn until the next frame */
+					//extern void ThisFramesRenderingHasFinished(void);
+					ThisFramesRenderingHasFinished();
 
 					FlipBuffers();
 
@@ -498,9 +470,7 @@ void _cdecl main()
 				case I_GM_Menus:
 				{
 					AvP.GameMode = I_GM_Playing;
-					//StartGameMenus();
 					LOCALASSERT(AvP.Network == I_No_Network);
-					//AccessDatabase(0);
 					break;
 				}
 
@@ -521,7 +491,7 @@ void _cdecl main()
 		}// end of main game loop
 
 		AvP.LevelCompleted = thisLevelHasBeenCompleted;
-		mainMenu = TRUE;
+		mainMenu = true;
 
 		FixCheatModesInUserProfile(UserProfilePtr);
 
@@ -544,13 +514,10 @@ void _cdecl main()
 		Destroy_CurrentEnvironment();
 
 		EndNPCs(); /* JH 30/4/97 - unload npc rifs */
-
 		ExitGame();
 
 		#endif
-		/* Patrick 26/6/97
-		Stop and remove all game sounds here, since we are returning to the menus */
-//		SoundSys_StopAll();
+
 		ResetEaxEnvironment();
 		//make sure the volume gets reset for the menus
 		SoundSys_ResetFadeLevel();
@@ -613,12 +580,26 @@ BOOL ExitWindowsSystem(void)
 	return TRUE;
 }
 
+void exit_break_point_function()
+{
+	#if debug
+	if (WindowMode == WindowModeSubWindow)
+	{
+		__debugbreak();
+	}
+	#endif
+}
+
+void ChangeWindowsSize(uint32_t width, uint32_t height)
+{
+}
+
 void CheckForWindowsMessages()
 {
 	DirectSoundDoWork();
 }
 
-BOOL InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
+bool InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 {
-	return 1;
+	return true;
 }

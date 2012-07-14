@@ -50,8 +50,11 @@ extern int xPadMoveY;
 extern int CameraZoomLevel;
 extern int MouseVelX;
 extern int MouseVelY;
+
+#ifdef WIN32
 extern JOYINFOEX JoystickData;
 extern JOYCAPS JoystickCaps;
+#endif
 
 extern void save_preplaced_decals();
 

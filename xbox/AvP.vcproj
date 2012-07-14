@@ -88,7 +88,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				InlineFunctionExpansion="0"
-				AdditionalIncludeDirectories="..\3dc;..\3dc\avp;..\3dc\avp\support;..\3dc\avp\win95;..\3dc\avp\win95\frontend;..\3dc\avp\win95\gadgets;..\3dc\include;..\3dc\win95;..\xbox\src;&quot;..\xbox\enet\include&quot;"
+				AdditionalIncludeDirectories="..\3dc;..\3dc\avp;..\3dc\avp\support;..\3dc\avp\win95;..\3dc\avp\win95\frontend;..\3dc\avp\win95\gadgets;..\3dc\include;..\3dc\video;..\3dc\win95;..\xbox\src;..\xbox\enet\include;$(NOINHERIT)"
 				PreprocessorDefinitions="_XBOX;USE_D3D_XBOX;_DEBUG;AVP_DEBUG_VERSION;USE_D3DVIEWTRANSFORM;DB_NOWINDOWS"
 				StringPooling="FALSE"
 				MinimalRebuild="TRUE"
@@ -111,7 +111,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="xapilibd.lib d3d8d.lib d3dx8d.lib xgraphicsd.lib dsoundd.lib enet_debug.lib libogg_static.lib libvorbis_static.lib libvorbisfile_static.lib libtheora_static.lib xnetd.lib xboxkrnl.lib xbdm.lib"
+				AdditionalDependencies="xapilibd.lib d3d8d.lib d3dx8d.lib xgraphicsd.lib dsoundd.lib enet_debug.lib libogg_static.lib libvorbis_static.lib libvorbisfile_static.lib libbinkdec_xbox.lib libsmackerdec_xbox.lib xnetd.lib xboxkrnl.lib xbdm.lib"
 				AdditionalLibraryDirectories="..\xbox\enet\lib"
 				IgnoreDefaultLibraryNames="libcmt.lib"
 				ProgramDatabaseFile=".\Debug/debug_AvP.pdb"
@@ -219,7 +219,7 @@
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="TRUE"
 				EnableFiberSafeOptimizations="FALSE"
-				AdditionalIncludeDirectories="..\3dc;..\3dc\avp;..\3dc\avp\support;..\3dc\avp\win95;..\3dc\avp\win95\frontend;..\3dc\avp\win95\gadgets;..\3dc\include;..\3dc\win95;..\xbox\src;&quot;..\xbox\enet\include&quot;"
+				AdditionalIncludeDirectories="..\3dc;..\3dc\avp;..\3dc\avp\support;..\3dc\avp\win95;..\3dc\avp\win95\frontend;..\3dc\avp\win95\gadgets;..\3dc\include;..\3dc\video;..\3dc\win95;..\xbox\src;..\xbox\enet\include"
 				PreprocessorDefinitions="_XBOX;USE_D3D_XBOX;_WINDOWS;DB_NOWINDOWS;_SECURE_SCL=0;_HAS_ITERATOR_DEBUGGING=0"
 				StringPooling="TRUE"
 				MinimalRebuild="FALSE"
@@ -1839,6 +1839,9 @@
 			</File>
 			<File
 				RelativePath="..\3dc\fmvPlayback.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\Fonts.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\win95\fragchnk.cpp">
@@ -4082,6 +4085,9 @@
 			</File>
 			<File
 				RelativePath="..\3dc\font2.h">
+			</File>
+			<File
+				RelativePath="..\3dc\Fonts.h">
 			</File>
 			<File
 				RelativePath="..\3dc\win95\fragchnk.hpp">
