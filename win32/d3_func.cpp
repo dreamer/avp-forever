@@ -636,7 +636,7 @@ bool R_SetIndexBuffer(class IndexBuffer &indexBuffer)
 
 bool R_UnlockVertexBuffer(class VertexBuffer &vertexBuffer)
 {
-	if (vertexBuffer.isLocked = false) {
+	if (vertexBuffer.isLocked == false) {
 		Con_PrintError("Vertex buffer is already unlocked!");
 		assert(0);
 		return false;
@@ -657,7 +657,7 @@ bool R_UnlockVertexBuffer(class VertexBuffer &vertexBuffer)
 
 bool R_UnlockIndexBuffer(class IndexBuffer &indexBuffer)
 {
-	if (indexBuffer.isLocked = false) {
+	if (indexBuffer.isLocked == false) {
 		Con_PrintError("Index buffer is already unlocked!");
 		assert(0);
 		return false;
@@ -1158,12 +1158,13 @@ bool R_CreateVertexDeclaration(class VertexDeclaration *vertexDeclaration)
 
 	for (size_t i = 0; i < elementsSize; i++)
 	{
-		d3dElement[i].Stream = vertexDeclaration->elements[i].stream;
-		d3dElement[i].Offset = vertexDeclaration->elements[i].offset;
-		d3dElement[i].Type   = VD_TYPEtoD3DDECLTYPE(vertexDeclaration->elements[i].type);
+		vertexElement &thisElement = vertexDeclaration->elements[i];
+		d3dElement[i].Stream = thisElement.stream;
+		d3dElement[i].Offset = thisElement.offset;
+		d3dElement[i].Type   = VD_TYPEtoD3DDECLTYPE(thisElement.type);
 		d3dElement[i].Method = D3DDECLMETHOD_DEFAULT; // TODO
-		d3dElement[i].Usage  = VD_USAGEtoD3DDECLUSAGE(vertexDeclaration->elements[i].usage);
-		d3dElement[i].UsageIndex = vertexDeclaration->elements[i].usageIndex;
+		d3dElement[i].Usage  = VD_USAGEtoD3DDECLUSAGE(thisElement.usage);
+		d3dElement[i].UsageIndex = thisElement.usageIndex;
 	}
 
 	// add D3DDECL_END() which is {0xFF,0,D3DDECLTYPE_UNUSED,0,0,0}

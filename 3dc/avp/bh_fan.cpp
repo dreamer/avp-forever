@@ -153,7 +153,6 @@ void FanBehaveFun(STRATEGYBLOCK* sbptr)
 					   hit_sbptr->I_SBtype==I_BehaviourMarine ||
 					   hit_sbptr->I_SBtype==I_BehaviourSeal ||
 					   hit_sbptr->I_SBtype==I_BehaviourPredatorAlien ||
-					   hit_sbptr->I_SBtype==I_BehaviourAlien ||
 					   hit_sbptr->I_SBtype==I_BehaviourMarinePlayer ||
 					   hit_sbptr->I_SBtype==I_BehaviourPredatorPlayer || 
 					   hit_sbptr->I_SBtype==I_BehaviourAlienPlayer) 

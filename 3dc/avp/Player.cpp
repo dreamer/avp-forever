@@ -700,10 +700,6 @@ void MaintainPlayer(void)
 			}
 
 			/* Wave the head around? */
-			ex=0;
-			ey=0;
-			ez=0;
-
 			ex=MUL_FIXED(64,GetSin(((playerStatusPtr->tauntTimer>>6)&wrap360)));
 			ey=MUL_FIXED(128,GetSin(((playerStatusPtr->tauntTimer>>5)&wrap360)));
 			ez=MUL_FIXED(-64,GetSin(((playerStatusPtr->tauntTimer>>5)&wrap360)));

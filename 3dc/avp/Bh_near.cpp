@@ -1811,11 +1811,7 @@ static void AlienNearState_Hunt(STRATEGYBLOCK *sbPtr)
 	if (alienStatusPointer->huntingModule==NULL) {
 		AIMODULE *targetModule;
 
-		if (alienStatusPointer->Mission==AM_GlobalHunt) {
-			targetModule = FarNPC_GetTargetAIModuleForGlobalHunt(sbPtr);
-		} else {
-			targetModule = FarNPC_GetTargetAIModuleForGlobalHunt(sbPtr);
-		}
+		targetModule = FarNPC_GetTargetAIModuleForGlobalHunt(sbPtr);
 
 		if (targetModule) {
 			//textprint("Target module is %s\n",targetModule->name);

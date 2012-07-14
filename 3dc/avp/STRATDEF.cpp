@@ -347,9 +347,7 @@ void PreserveStBlocksInModule(MODULE* containing_mod)
 							if(obj_world.vy > min_y)
 								{
 									// copy name into somthing
-									if(sbptr->I_SBtype == I_BehaviourMarinePlayer ||
-											sbptr->I_SBtype == I_BehaviourMarinePlayer ||
-											sbptr->I_SBtype == I_BehaviourMarinePlayer)
+									if(sbptr->I_SBtype == I_BehaviourMarinePlayer)
 										{
 											SB_Preserved[Num_SB_Preserved] = *sbptr;
 
@@ -398,11 +396,7 @@ void AddPreservedSBsToActiveList()
 
 			*new_sbptr = SB_Preserved[i];
 
-			
-			if(new_sbptr->I_SBtype == I_BehaviourMarinePlayer ||
-					new_sbptr->I_SBtype == I_BehaviourMarinePlayer ||
-					new_sbptr->I_SBtype == I_BehaviourMarinePlayer)
-
+			if(new_sbptr->I_SBtype == I_BehaviourMarinePlayer)
 				{
 					DYNAMICSBLOCK *playerDynPtr;
 
@@ -717,8 +711,7 @@ void AssignNewSBName(STRATEGYBLOCK *sbPtr)
 	{
 		//modify name to ensure uniqueness between players
 		extern DPID AvPNetID;
-		sbPtr->SBname[SB_NAME_LENGTH-1]=+10+PlayerIdInPlayerList(AvPNetID); /* Just to make sure... */
-
+		sbPtr->SBname[SB_NAME_LENGTH-1]=+10 + PlayerIdInPlayerList(AvPNetID); /* Just to make sure... */
 	}
 	else
 	{

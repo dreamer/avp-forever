@@ -43,17 +43,17 @@ const char* Dummy_Object_Chunk::get_text()
 
 void Dummy_Object_Chunk::set_text(const char* text)
 {
-	//find the text chunk
+	// find the text chunk
 	Dummy_Object_Text_Chunk* text_chunk = (Dummy_Object_Text_Chunk*) lookup_single_child("DUMOBJTX");
 
-	if(!text || strlen(text)==0)
+	if (!text || text[0] == '\0')
 	{
 		//delete the text chunk if it exists
 		delete text_chunk;
 	}
 	else
 	{
-		if(text_chunk)
+		if (text_chunk)
 		{
 			//alter the existing text
 			text_chunk->set_text(text);
@@ -61,7 +61,7 @@ void Dummy_Object_Chunk::set_text(const char* text)
 		else
 		{
 			//create a new text chunk
-			new Dummy_Object_Text_Chunk(this,text);
+			new Dummy_Object_Text_Chunk(this, text);
 		}
 	}
 }

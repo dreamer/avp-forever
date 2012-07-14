@@ -52,7 +52,7 @@ R2PosDaemon::R2PosDaemon
 
 }
 
-void R2PosDaemon::SetPos_Int(const r2pos R2Pos_Int_New)
+void R2PosDaemon::SetPos_Int(const r2pos &R2Pos_Int_New)
 {
 	R2Pos_Int_Current = R2Pos_Int_New;
 	R2Pos_FixP_Current = r2pos
@@ -62,7 +62,7 @@ void R2PosDaemon::SetPos_Int(const r2pos R2Pos_Int_New)
 	);
 }
 
-void R2PosDaemon::SetPos_FixP(const r2pos R2Pos_FixP_New)
+void R2PosDaemon::SetPos_FixP(const r2pos &R2Pos_FixP_New)
 {
 	R2Pos_FixP_Current = R2Pos_FixP_New;
 	R2Pos_Int_Current = r2pos

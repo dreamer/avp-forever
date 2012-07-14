@@ -74,7 +74,6 @@ void SelfDestructBehaveFun(STRATEGYBLOCK* sbptr)
 				   sbPtr->I_SBtype==I_BehaviourMarine ||
 				   sbPtr->I_SBtype==I_BehaviourSeal ||
 				   sbPtr->I_SBtype==I_BehaviourPredatorAlien ||
-				   sbPtr->I_SBtype==I_BehaviourAlien ||
 				   sbPtr->I_SBtype==I_BehaviourMarinePlayer ||
 				   sbPtr->I_SBtype==I_BehaviourPredatorPlayer || 
 				   sbPtr->I_SBtype==I_BehaviourAlienPlayer) 

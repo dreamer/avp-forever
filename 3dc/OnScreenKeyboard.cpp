@@ -224,29 +224,31 @@ void Osk_Draw()
 
 		while (widthCount)
 		{
+			ButtonStruct &thisButton = keyVector.at(index);
+
 			// only draw keys not marked as blank keys
-			if (!keyVector.at(index).isBlank)
+			if (!thisButton.isBlank)
 			{
-				DrawQuad(pos_x, pos_y, keyVector.at(index).width, keyVector.at(index).height, NO_TEXTURE, RCOLOR_ARGB(200, 255, 255, 255), TRANSLUCENCY_NORMAL);
+				DrawQuad(pos_x, pos_y, thisButton.width, thisButton.height, NO_TEXTURE, RCOLOR_ARGB(200, 255, 255, 255), TRANSLUCENCY_NORMAL);
 
 				if (Osk_GetCurrentLocation() == index) // draw the selected item differently (highlight it)
 				{
-					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, NO_TEXTURE, RCOLOR_ARGB(220, 0, 128, 0), TRANSLUCENCY_OFF);
+					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, thisButton.width - outline_border_size * 2, thisButton.height - outline_border_size * 2, NO_TEXTURE, RCOLOR_ARGB(220, 0, 128, 0), TRANSLUCENCY_OFF);
 				}
 				else
 				{
-					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, keyVector.at(index).width - outline_border_size * 2, keyVector.at(index).height - outline_border_size * 2, NO_TEXTURE, RCOLOR_ARGB(220, 38, 80, 145), TRANSLUCENCY_OFF);
+					DrawQuad(pos_x + outline_border_size, pos_y + outline_border_size, thisButton.width - outline_border_size * 2, thisButton.height - outline_border_size * 2, NO_TEXTURE, RCOLOR_ARGB(220, 38, 80, 145), TRANSLUCENCY_OFF);
 				}
 
-//				int positionX = pos_x + ((keyVector.at(index).width - 16) / 2);
+//				int positionX = pos_x + ((thisButton.width - 16) / 2);
 
-				Font_DrawText(Osk_GetKeyLabel(index), pos_x + (keyVector.at(index).width / 2), pos_y + space_between_keys, RCOLOR_ARGB(255, 255, 255, 0), kFontSmall);
+				Font_DrawText(Osk_GetKeyLabel(index), pos_x + (thisButton.width / 2), pos_y + space_between_keys, RCOLOR_ARGB(255, 255, 255, 0), kFontSmall);
 			}
 
-			pos_x += (keyVector.at(index).width + space_between_keys);
-			widthCount -= keyVector.at(index).numWidthBlocks;
+			pos_x += (thisButton.width + space_between_keys);
+			widthCount -= thisButton.numWidthBlocks;
 
-			index += keyVector.at(index).numWidthBlocks;
+			index += thisButton.numWidthBlocks;
 		}
 		pos_y += (keyHeight + space_between_keys);
 	}
@@ -416,28 +418,32 @@ void Osk_MoveRight()
 	// where are we now?
 	int currentPosition = (currentRow * numHorizontalKeys) + currentColumn;
 
-	int buttonOffset = keyVector.at(currentPosition).positionOffset;
-	int width = keyVector.at(currentPosition).numWidthBlocks;
+	ButtonStruct &thisButton = keyVector.at(currentPosition);
+
+	int buttonOffset = thisButton.positionOffset;
+	int width		 = thisButton.numWidthBlocks;
 
 	currentColumn += width - buttonOffset;
 
 	// wrap?
-	if (currentColumn >= numHorizontalKeys) // add some sort of numColumns?
+	if (currentColumn >= numHorizontalKeys) { // add some sort of numColumns?
 		currentColumn = 0;
+	}
 
 	// where are we now?
 	currentPosition = (currentRow * numHorizontalKeys) + currentColumn;
 
 	// handle moving over any blank keys
-	while (keyVector.at(currentPosition).isBlank)
+	while (thisButton.isBlank)
 	{
 		buttonOffset = keyVector.at(currentPosition).positionOffset;
 
 		currentColumn += width - buttonOffset;
 
 		// wrap?
-		if (currentColumn >= numHorizontalKeys) // add some sort of numColumns?
+		if (currentColumn >= numHorizontalKeys) { // add some sort of numColumns?
 			currentColumn = 0;
+		}
 
 		// where are we now?
 		currentPosition = (currentRow * numHorizontalKeys) + currentColumn;

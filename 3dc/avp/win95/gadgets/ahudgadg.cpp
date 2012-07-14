@@ -69,9 +69,9 @@ void AlienHUDGadget :: Render
 	);
 	#endif
 
-	pTextReportGadg -> UpdateLineTimes();
+	pTextReportGadg->UpdateLineTimes();
 
-	struct r2pos R2Pos_TextReport = pTextReportGadg -> GetPos_Rel( R2Rect_Clip );
+	struct r2pos R2Pos_TextReport = pTextReportGadg->GetPos_Rel( R2Rect_Clip );
 
 //	char buf[100];
 //	sprintf(buf, "x: %d y: %d clip %d %d %d %d\n", R2Pos_TextReport.x, R2Pos_TextReport.y, R2Rect_Clip . x0, R2Rect_Clip . y0, R2Rect_Clip . x1, R2Rect_Clip . y1);

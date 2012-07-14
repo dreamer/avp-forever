@@ -2697,13 +2697,7 @@ void KillQueen(STRATEGYBLOCK *sbPtr,DAMAGE_PROFILE *damage, int multiple,SECTION
 	/* Deal with sequence. */
 	RemoveAllDeltas(&queenStatusPointer->HModelController);
 
-	if (tkd>200) {
-		//SetQueenShapeAnimSequence_Core(sbPtr,HMSQT_QueenGeneral,QGSS_Explode_Death,(ONE_FIXED),(ONE_FIXED>>2));
-		/* That death doesn't work. */
-		SetQueenShapeAnimSequence_Core(sbPtr,HMSQT_QueenGeneral,QGSS_FaceDeath,(ONE_FIXED),(ONE_FIXED>>2));
-	} else {
-		SetQueenShapeAnimSequence_Core(sbPtr,HMSQT_QueenGeneral,QGSS_FaceDeath,(ONE_FIXED),(ONE_FIXED>>2));
-	}
+	SetQueenShapeAnimSequence_Core(sbPtr,HMSQT_QueenGeneral,QGSS_FaceDeath,(ONE_FIXED),(ONE_FIXED>>2));
 
 	//if the queen is carrying an object , release it and reset gravity on it
 	if(queenStatusPointer->QueenState==QBS_CarryingObject)

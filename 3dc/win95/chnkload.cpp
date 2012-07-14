@@ -2017,7 +2017,7 @@ void SetupAnimatedTextures(Shape_Chunk* sc, SHAPEHEADER* shp, Animation_Chunk* a
 }									  
 
 
-void SetupAnimatingShape(Shape_Chunk* sc,SHAPEHEADER* shp, Shape_Merge_Data_Chunk* smdc)
+void SetupAnimatingShape(Shape_Chunk* sc, SHAPEHEADER* shp, Shape_Merge_Data_Chunk* smdc)
 {
 	//create conversion between unmerged poly nos and merged poly nos
 	int* PolyConv=0;

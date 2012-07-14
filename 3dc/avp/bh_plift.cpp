@@ -589,7 +589,7 @@ void NetworkPeerChangePlatformLiftState(STRATEGYBLOCK* sbPtr,PLATFORMLIFT_STATES
 
 	}
 	
-	if((new_state==PLBS_GoingUp || new_state==PLBS_GoingUp) &&
+	if(new_state==PLBS_GoingUp &&
 	   !(platformliftdata->state==PLBS_GoingUp || platformliftdata->state==PLBS_GoingDown))
 	{
 		//platform lift has started moving

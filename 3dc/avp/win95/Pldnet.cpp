@@ -6438,7 +6438,7 @@ static void ProcessNetMsg_LocalObjectState(NETMESSAGE_LOBSTATE *messagePtr, DPID
 static int GetSizeOfLocalObjectDamagedMessage(char *messagePtr)
 {
 	int size=sizeof(NETMESSAGE_LOBDAMAGED_HEADER);
-	NETMESSAGE_LOBDAMAGED_HEADER *messageHeader = (NETMESSAGE_LOBDAMAGED_HEADER*) messagePtr;(NETMESSAGE_LOBDAMAGED_HEADER*) messagePtr;
+	NETMESSAGE_LOBDAMAGED_HEADER *messageHeader = (NETMESSAGE_LOBDAMAGED_HEADER*) messagePtr;
 
 	if(messageHeader->damageProfile) size+=sizeof(NETMESSAGE_DAMAGE_PROFILE);	
 	if(messageHeader->multiple) size+=sizeof(NETMESSAGE_DAMAGE_MULTIPLE);	

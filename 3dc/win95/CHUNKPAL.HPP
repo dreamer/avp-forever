@@ -532,12 +532,12 @@ public:
 	// no empty constructor -- p must always be valid
 
 	// equavalence based on contents of pointer, not addresses being the same
-	inline BOOL operator == (Environment_Game_Mode_Chunk_Pointer const m) const
+	inline BOOL operator == (Environment_Game_Mode_Chunk_Pointer const &m) const
 	{
 		if (!p || !m.p) return 0;
 		return *p == *m.p;
 	}
-	inline BOOL operator != (Environment_Game_Mode_Chunk_Pointer const m) const
+	inline BOOL operator != (Environment_Game_Mode_Chunk_Pointer const &m) const
 	{
 		if (!p || !m.p) return 1;
 		return *p != *m.p;

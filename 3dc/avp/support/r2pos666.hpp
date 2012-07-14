@@ -39,8 +39,8 @@
 		r2pos GetPos_Int(void) const;
 		r2pos GetPos_FixP(void) const;
 
-		void SetPos_Int(const r2pos R2Pos_Int_New );
-		void SetPos_FixP(const r2pos R2Pos_FixP_New );
+		void SetPos_Int(const r2pos &R2Pos_Int_New );
+		void SetPos_FixP(const r2pos &R2Pos_FixP_New );
 
 		// Activity remains pure virtual...
 

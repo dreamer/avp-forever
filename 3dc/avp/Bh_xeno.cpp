@@ -244,7 +244,7 @@ void CreateXenoborg(VECTORCH *Position,int type)
 		{
 			/* Pull out my_orientdir_therin. */
 			xenoStatus->my_orientdir_therin.vx=0;
-			xenoStatus->my_orientdir_therin.vx=0;
+			xenoStatus->my_orientdir_therin.vy=0;
 			xenoStatus->my_orientdir_therin.vz=1000;
 
 			RotateVector(&xenoStatus->my_orientdir_therin,&sbPtr->DynPtr->OrientMat);
@@ -534,7 +534,7 @@ void InitXenoborgBehaviour(void* bhdata, STRATEGYBLOCK *sbPtr)
 		{
 			/* Pull out my_orientdir_therin. */
 			xenoStatus->my_orientdir_therin.vx=0;
-			xenoStatus->my_orientdir_therin.vx=0;
+			xenoStatus->my_orientdir_therin.vy=0;
 			xenoStatus->my_orientdir_therin.vz=1000;
 
 			RotateVector(&xenoStatus->my_orientdir_therin,&sbPtr->DynPtr->OrientMat);
@@ -880,11 +880,7 @@ void XenoborgBehaviour(STRATEGYBLOCK *sbPtr)
 			Execute_Xeno_Dying(sbPtr);
 			break;
 		case XS_ShootingTheRoof:
-			if (xenoStatusPointer->IAmFar) {
-				Execute_Xeno_ShootTheRoof(sbPtr);
-			} else {
-				Execute_Xeno_ShootTheRoof(sbPtr);
-			}
+			Execute_Xeno_ShootTheRoof(sbPtr);
 			break;
 		default:
 			/* No action? */

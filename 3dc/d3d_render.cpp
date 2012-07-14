@@ -1255,19 +1255,21 @@ void DrawCoronas()
 	{
 		PARTICLE_DESC *particleDescPtr = &ParticleDescription[coronaArray[i].particle.ParticleID];
 
-		assert (coronaArray[i].numVerts == 4);
+		renderCorona &thisCorona = coronaArray[i];
 
-		if (particleDescPtr->IsLit && !(coronaArray[i].particle.ParticleID == PARTICLE_ALIEN_BLOOD && CurrentVisionMode == VISION_MODE_PRED_SEEALIENS))
+		assert (thisCorona.numVerts == 4);
+
+		if (particleDescPtr->IsLit && !(thisCorona.particle.ParticleID == PARTICLE_ALIEN_BLOOD && CurrentVisionMode == VISION_MODE_PRED_SEEALIENS))
 		{
-			int intensity = LightIntensityAtPoint(&coronaArray[i].particle.Position);
-			if (coronaArray[i].particle.ParticleID == PARTICLE_SMOKECLOUD || coronaArray[i].particle.ParticleID == PARTICLE_ANDROID_BLOOD)
+			int intensity = LightIntensityAtPoint(&thisCorona.particle.Position);
+			if (thisCorona.particle.ParticleID == PARTICLE_SMOKECLOUD || thisCorona.particle.ParticleID == PARTICLE_ANDROID_BLOOD)
 			{
 				colour = RGBA_MAKE
 						(
-							MUL_FIXED(intensity, coronaArray[i].particle.ColourComponents.Red),
-							MUL_FIXED(intensity, coronaArray[i].particle.ColourComponents.Green),
-							MUL_FIXED(intensity, coronaArray[i].particle.ColourComponents.Blue),
-							coronaArray[i].particle.ColourComponents.Alpha
+							MUL_FIXED(intensity, thisCorona.particle.ColourComponents.Red),
+							MUL_FIXED(intensity, thisCorona.particle.ColourComponents.Green),
+							MUL_FIXED(intensity, thisCorona.particle.ColourComponents.Blue),
+							thisCorona.particle.ColourComponents.Alpha
 						);
 			}
 			else
@@ -1283,7 +1285,7 @@ void DrawCoronas()
 		}
 		else
 		{
-			colour = coronaArray[i].particle.Colour;
+			colour = thisCorona.particle.Colour;
 		}
 
 		if (RAINBOWBLOOD_CHEATMODE)
@@ -1300,9 +1302,9 @@ void DrawCoronas()
 		// transform our coronas worldview position into projection then viewport space
 		D3DXVECTOR3 transformedPoint;
 
-		transformedPoint.x = coronaArray[i].coronaPoint.vx;
-		transformedPoint.y = coronaArray[i].coronaPoint.vy;
-		transformedPoint.z = coronaArray[i].coronaPoint.vz;
+		transformedPoint.x = thisCorona.coronaPoint.vx;
+		transformedPoint.y = thisCorona.coronaPoint.vy;
+		transformedPoint.z = thisCorona.coronaPoint.vz;
 
 		float centreX = transformedPoint.x / transformedPoint.z;
 		float centreY = transformedPoint.y / transformedPoint.z;

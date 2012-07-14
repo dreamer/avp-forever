@@ -4508,11 +4508,7 @@ void LoiterMission_Control(STRATEGYBLOCK *sbPtr) {
 					PrintDebuggingText("Noncombatant dying in %s\n",sbPtr->containingModule->name);
 				}
 
-				if (marineIsNear) {
-					Execute_Dying(sbPtr);
-				} else {
-					Execute_Dying(sbPtr);
-				}
+				Execute_Dying(sbPtr);
 				break;
 			}
 			case MBS_Returning:
@@ -13605,11 +13601,7 @@ void RunAroundOnFireMission_Control(STRATEGYBLOCK *sbPtr) {
 					PrintDebuggingText("RAOF marine dying in %s\n",sbPtr->containingModule->name);
 				}
 
-				if (marineIsNear) {
-					Execute_Dying(sbPtr);
-				} else {
-					Execute_Dying(sbPtr);
-				}
+				Execute_Dying(sbPtr);
 				break;
 			}
 			default:
