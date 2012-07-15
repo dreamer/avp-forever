@@ -28,6 +28,8 @@ UsePreviousAppDir=false
 EnableDirDoesntExistWarning=true
 AppendDefaultDirName=false
 DirExistsWarning=no
+SetupIconFile=D:\Development\AvP-Branch\trunk\3dc\avp.ico
+UninstallDisplayIcon={app}\AvPx.exe
 
 [Languages]
 Name: "english"; MessagesFile: "compiler:Default.isl"
@@ -52,3 +54,17 @@ Filename: "{app}\redist\vc\vcredist_x86.exe"; Description: "Install Visual Studi
 Filename: "{app}\redist\directx\DXSETUP.exe"; Description: "Install DirectX Runtimes";
 Filename: "{app}\{#MyAppExeName}"; Description: "{cm:LaunchProgram,{#StringChange(MyAppName, "&", "&&")}}"; Flags: nowait postinstall skipifsilent
 
+
+[UninstallRun]
+
+[UninstallDelete]
+Name: {app}\shaders\; Type: filesandordirs; 
+Name: {app}\redist\; Type: filesandordirs;
+Name: {app}\AvPx.exe; Type: files;
+Name: {app}\enet.dll; Type: files;
+Name: {app}\libbinkdec.dll; Type: files;
+Name: {app}\libogg.dll; Type: files;
+Name: {app}\libsmackerdec.dll; Type: files;
+Name: {app}\libtheora.dll; Type: files;
+Name: {app}\libvorbis.dll; Type: files;
+Name: {app}\libvorbisfile.dll; Type: files;
