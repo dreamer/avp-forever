@@ -446,6 +446,12 @@ int PlatStartSoundSys()
 
 #ifdef _DEBUG
 	flags |= XAUDIO2_DEBUG_ENGINE;
+
+	XAUDIO2_DEBUG_CONFIGURATION debugConfig;
+	debugConfig.TraceMask = XAUDIO2_LOG_WARNINGS & XAUDIO2_LOG_DETAIL;
+	debugConfig.BreakMask = 0;
+	debugConfig.LogFileline = TRUE;
+
 #endif
 
 	// Initialise XAudio2
@@ -486,6 +492,10 @@ int PlatStartSoundSys()
 		return 0;
 	}
 
+#ifdef _DEBUG
+	pXAudio2->SetDebugConfiguration(&debugConfig);
+#endif
+
 	LastError = pXAudio2->RegisterForCallbacks(&engineContext);
 	if (FAILED(LastError)) {
 		Con_PrintError("Can't register XAudio2 engine callbacks");
@@ -498,28 +508,32 @@ int PlatStartSoundSys()
 	UINT32 deviceCount;
 	pXAudio2->GetDeviceCount(&deviceCount);
 
-	if (deviceCount == 0)
+	XAUDIO2_DEVICE_DETAILS deviceDetails;
+	uint32_t preferredDevice = 0;
+	bool gotValidDevice = false;
+
+	for (uint32_t i = 0; i < deviceCount; i++)
+	{
+		pXAudio2->GetDeviceDetails(i, &deviceDetails);
+		if (deviceDetails.OutputFormat.Format.nChannels >= 2)
+		{
+			preferredDevice = i;
+			gotValidDevice = true;
+			std::wstring ws(deviceDetails.DisplayName);
+			Con_PrintMessage("Using device \"" + std::string(ws.begin(), ws.end()) + "\" for audio playback");
+			break;
+		}
+	}
+
+	if (!gotValidDevice)
 	{
 		Con_PrintError("No audio device available for XAudio2");
 		PlatEndSoundSys();
 		return 0;
 	}
-#if 0
-	XAUDIO2_DEVICE_DETAILS deviceDetails;
-	int preferredDevice = 0;
-	for (unsigned int i = 0; i < deviceCount; i++)
-	{
-		pXAudio2->GetDeviceDetails(i, &deviceDetails);
-		if (deviceDetails.OutputFormat.Format.nChannels > 2)
-		{
-			preferredDevice = i;
-			Con_PrintMessage("Using device \"" + std::string(deviceDetails.DisplayName) + "\" for audio playback");
-			break;
-		}
-	}
-#endif
+
 	// Create a mastering voice
-	LastError = pXAudio2->CreateMasteringVoice(&pMasteringVoice);//, XAUDIO2_DEFAULT_CHANNELS, sampleRate, 0, 0, 0);
+	LastError = pXAudio2->CreateMasteringVoice(&pMasteringVoice, XAUDIO2_DEFAULT_CHANNELS, sampleRate, 0, preferredDevice, 0);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Couldn't create XAudio2 Mastering Voice");
@@ -535,7 +549,7 @@ int PlatStartSoundSys()
 	Con_PrintMessage("\t Created Master Voice with " + Util::IntToString(voiceDetails.InputChannels) + " channel(s) and sample rate of " + Util::IntToString(voiceDetails.InputSampleRate));
 
 	// Get the device details
-	XAUDIO2_DEVICE_DETAILS deviceDetails;
+//	XAUDIO2_DEVICE_DETAILS deviceDetails;
 	LastError = pXAudio2->GetDeviceDetails(0, &deviceDetails);
 	if (FAILED(LastError))
 	{
@@ -601,7 +615,7 @@ int PlatStartSoundSys()
 	XA2Listener.pCone = NULL;
 
 	FLOAT32 *matrix = new FLOAT32[deviceDetails.OutputFormat.Format.nChannels];
-	for (int i = 0; i < deviceDetails.OutputFormat.Format.nChannels; i++)
+	for (int16_t i = 0; i < deviceDetails.OutputFormat.Format.nChannels; i++)
 	{
 		matrix[i] = 1.0f;
 	}
