@@ -2299,7 +2299,7 @@ bool InitialiseDirect3D()
 		Con_PrintError("Device requires square textures");
 	}
 
-	if (d3dCaps.TextureCaps & D3DPTEXTURECAPS_SQUAREONLY)
+	if (d3dCaps.TextureCaps & D3DPTEXTURECAPS_POW2)
 	{
 		Con_PrintError("Device requires power of two textures");
 
