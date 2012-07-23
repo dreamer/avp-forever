@@ -1410,6 +1410,10 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 		mainVertex[vb].y = (float)-vertices->Y;
 		mainVertex[vb].z = (float)vertices->Z;
 
+		// gamma testing
+//		mainVertex[vb].color = RGBA_MAKE(vertices->R, vertices->G, vertices->B, vertices->A);
+//		mainVertex[vb].specular = RGBA_MAKE(vertices->SpecularR, vertices->SpecularG, vertices->SpecularB, /*255*/0);
+
 		mainVertex[vb].color = RGBA_MAKE(GammaValues[vertices->R], GammaValues[vertices->G], GammaValues[vertices->B], vertices->A);
 		mainVertex[vb].specular = RGBA_MAKE(GammaValues[vertices->SpecularR], GammaValues[vertices->SpecularG], GammaValues[vertices->SpecularB], /*255*/0);
 
@@ -2572,8 +2576,9 @@ extern void D3D_DrawSliderBar(int x, int y, int alpha)
 	uint32_t sliderHeight = 11;
 	uint32_t colour = alpha >> 8;
 
-	if (colour > 255)
+	if (colour > 255) {
 		colour = 255;
+	}
 
 	colour = (colour << 24) + 0xffffff;
 
@@ -2605,7 +2610,7 @@ extern void D3D_DrawSliderBar(int x, int y, int alpha)
 			HUDFontsImageNumber,
 			quadVertices,
 			colour,
-			FILTERING_BILINEAR_ON
+			FILTERING_BILINEAR_OFF
 		);
 	}
 	{
@@ -2631,7 +2636,7 @@ extern void D3D_DrawSliderBar(int x, int y, int alpha)
 			HUDFontsImageNumber,
 			quadVertices,
 			colour,
-			FILTERING_BILINEAR_ON
+			FILTERING_BILINEAR_OFF
 		);
 	}
 	quadVertices[2].Y = y + 2;
@@ -2660,7 +2665,7 @@ extern void D3D_DrawSliderBar(int x, int y, int alpha)
 			HUDFontsImageNumber,
 			quadVertices,
 			colour,
-			FILTERING_BILINEAR_ON
+			FILTERING_BILINEAR_OFF
 		);
 	}
 	quadVertices[0].Y = y + 9;
@@ -2691,7 +2696,7 @@ extern void D3D_DrawSliderBar(int x, int y, int alpha)
 			HUDFontsImageNumber,
 			quadVertices,
 			colour,
-			FILTERING_BILINEAR_ON
+			FILTERING_BILINEAR_OFF
 		);
 	}
 }
@@ -2703,8 +2708,7 @@ extern void D3D_DrawSlider(int x, int y, int alpha)
 	uint32_t sliderHeight = 5;
 	uint32_t colour = alpha >> 8;
 
-	if (colour > 255)
-	{
+	if (colour > 255) {
 		colour = 255;
 	}
 

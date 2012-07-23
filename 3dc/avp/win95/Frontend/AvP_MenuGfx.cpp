@@ -957,18 +957,18 @@ extern void DrawAvPMenuGfx(texID_t textureID, int topleftX, int topleftY, int al
 	}
 
 	int32_t width = texWidth;
-	if (640 - topleftX < width)
-	{
+
+	if (640 - topleftX < width) {
 		width = 640 - topleftX;
 	}
 
-	if (width <= 0) 
-	{
+	if (width <= 0) {
 		return;
 	}
 
-	if (alpha > ONE_FIXED) // ONE_FIXED = 65536
-			alpha = ONE_FIXED;
+	if (alpha > ONE_FIXED) { // ONE_FIXED = 65536
+		alpha = ONE_FIXED;
+	}
 
 	DrawAlphaMenuQuad(topleftX, topleftY, textureID, alpha);
 }
@@ -1004,13 +1004,14 @@ extern void DrawAvPMenuGfx_Faded(texID_t textureID, int topleftX, int topleftY, 
 	if (/*ScreenDescriptorBlock.SDB_Width*/640 - topleftX < length) {
 		length = /*ScreenDescriptorBlock.SDB_Width*/640 - topleftX;
 	}
-	if (length <= 0) 
-	{
+
+	if (length <= 0) {
 		return;
 	}
 
-	if (alpha > ONE_FIXED) // ONE_FIXED = 65536
+	if (alpha > ONE_FIXED) { // ONE_FIXED = 65536
 		alpha = ONE_FIXED;
+	}
 
 	DrawAlphaMenuQuad(topleftX, topleftY, textureID, alpha);
 }
@@ -1043,17 +1044,17 @@ extern void DrawAvPMenuGfx_Clipped(texID_t textureID, int topleftX, int topleftY
 
 	int32_t length = texWidth;
 
-	if (/*ScreenDescriptorBlock.SDB_Width*/640 - topleftX < length) 
-	{
+	if (/*ScreenDescriptorBlock.SDB_Width*/640 - topleftX < length) {
 		length = /*ScreenDescriptorBlock.SDB_Width*/640 - topleftX;
 	}
-	if (length <= 0)
-	{	
+
+	if (length <= 0) {	
 		return;
 	}
 
-	if (alpha > ONE_FIXED) // ONE_FIXED = 65536
+	if (alpha > ONE_FIXED) { // ONE_FIXED = 65536
 		alpha = ONE_FIXED;
+	}
 
 	DrawAlphaMenuQuad(topleftX, topleftY, textureID, alpha);
 }
@@ -1128,12 +1129,10 @@ static void CalculateWidthsOfAAFont(void)
 				}
 			}
 
-			if (blank)
-			{
+			if (blank) {
 				AAFontWidths[c]--;
 			}
-			else
-			{
+			else {
 				break;
 			}
 		}

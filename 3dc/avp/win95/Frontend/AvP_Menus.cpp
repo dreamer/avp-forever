@@ -624,16 +624,17 @@ extern void AvP_UpdateMenus(void)
 
 			RenderMenuText(profilePtr->Name,MENU_CENTREX,MENU_CENTREY-100,ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
 			{
-				char buffer[100];
 				char buffer2[100];
 				int nLen = 80;
 
 #ifdef WIN32
-				nLen = GetDateFormat(GetThreadLocale(), DATE_LONGDATE, &profilePtr->TimeLastUpdated, NULL, buffer, nLen);
-				nLen = GetTimeFormat(GetThreadLocale(), 0, &profilePtr->TimeLastUpdated,NULL, buffer2, 100);
+				char buffer[100];
 
-				strcat(buffer2,"  ");
-				strcat(buffer2,buffer);
+				nLen = GetDateFormat(GetThreadLocale(), DATE_LONGDATE, &profilePtr->TimeLastUpdated, NULL, buffer, nLen);
+				nLen = GetTimeFormat(GetThreadLocale(), 0, &profilePtr->TimeLastUpdated, NULL, buffer2, 100);
+
+				strcat(buffer2, "  ");
+				strcat(buffer2, buffer);
 #endif
 #ifdef _XBOX
 				// manually format the string as we don't have either GetDateFormat or GetTimeFormat
@@ -857,7 +858,7 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 			break;
 		}
 
-		case AVPMENU_MULTIPLAYER_SKIRMISH :
+		case AVPMENU_MULTIPLAYER_SKIRMISH:
 		{
 			netGameData.skirmishMode = TRUE;
 			LoadMultiplayerConfiguration(GetTextString(TEXTSTRING_PREVIOUSGAME_FILENAME));
@@ -950,7 +951,7 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 			break;
 		}
 
-		case AVPMENU_MULTIPLAYER :
+		case AVPMENU_MULTIPLAYER:
 		{
 			//skirmishMode must be false
 			netGameData.skirmishMode = FALSE;
@@ -974,7 +975,7 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 			break;
 		}
 
-		case AVPMENU_MULTIPLAYER_LOADCONFIG :
+		case AVPMENU_MULTIPLAYER_LOADCONFIG:
 		{
 			if (!BuildLoadMPConfigMenu())
 			{
@@ -985,7 +986,7 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 			break;
 		}
 
-		case AVPMENU_MULTIPLAYER_CONFIG :
+		case AVPMENU_MULTIPLAYER_CONFIG:
 		{
 			//need to set the menu we return to , according to whether this is
 			//a lobbied game or not.
@@ -1006,7 +1007,7 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 			break;
 		}
 
-		case AVPMENU_MULTIPLAYER_CONFIG_JOIN :
+		case AVPMENU_MULTIPLAYER_CONFIG_JOIN:
 		{
 			//need to set the menu we return to , according to whether this is
 			//a lobbied game or not.
@@ -1021,14 +1022,14 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 			break;
 		}
 
-		case AVPMENU_MULTIPLAYER_LOADIPADDRESS :
+		case AVPMENU_MULTIPLAYER_LOADIPADDRESS:
 		{
 
 			AvPMenus.MenuElements = AvPMenu_Multiplayer_LoadIPAddress;
 			break;
 		}
 
-		case AVPMENU_MULTIPLAYEROPENADDRESS :
+		case AVPMENU_MULTIPLAYEROPENADDRESS:
 		{
 
 			MakeOpenIPAddressMenu();
@@ -1060,7 +1061,7 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 			AvPMenus.NumberOfElementsInMenu++;
 			elementPtr++;
 		}
-		while(elementPtr->ElementID != AVPMENU_ELEMENT_ENDOFMENU);
+		while (elementPtr->ElementID != AVPMENU_ELEMENT_ENDOFMENU);
 	}
 
 	switch (menuID)
@@ -1149,7 +1150,7 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 static void RenderMenu(void)
 {
 	AVPMENU_ELEMENT *elementPtr = AvPMenus.MenuElements;
-	int e;
+
 	int y;
 	
 	if (AvPMenus.MenusState == MENUSSTATE_MAINMENUS)
@@ -1173,7 +1174,7 @@ static void RenderMenu(void)
 		y = (ScreenDescriptorBlock.SDB_Height - AvPMenus.MenuHeight) / 2;
 	}
 
-	for (e = 0; e<AvPMenus.NumberOfElementsInMenu; e++, elementPtr++)
+	for (int e = 0; e < AvPMenus.NumberOfElementsInMenu; e++, elementPtr++)
 	{
 		int targetBrightness;
 
@@ -1188,16 +1189,16 @@ static void RenderMenu(void)
 
 		if (targetBrightness > elementPtr->Brightness)
 		{
-			elementPtr->Brightness+=BRIGHTNESS_CHANGE_SPEED;
-			if(elementPtr->Brightness>targetBrightness)
+			elementPtr->Brightness += BRIGHTNESS_CHANGE_SPEED;
+			if (elementPtr->Brightness>targetBrightness)
 			{
 				elementPtr->Brightness = targetBrightness;
 			}
 		}
 		else
 		{
-			elementPtr->Brightness-=BRIGHTNESS_CHANGE_SPEED;
-			if(elementPtr->Brightness<targetBrightness)
+			elementPtr->Brightness -= BRIGHTNESS_CHANGE_SPEED;
+			if (elementPtr->Brightness < targetBrightness)
 			{
 				elementPtr->Brightness = targetBrightness;
 			}
@@ -1207,7 +1208,7 @@ static void RenderMenu(void)
 		y += HeightOfMenuElement(elementPtr);
 	}
 
-	/* Render Menu Title */
+	// Render Menu Title
 	if (AvPMenus.MenusState == MENUSSTATE_MAINMENUS)
 	{
 		char *textPtr = GetTextString(AvPMenusData[AvPMenus.CurrentMenu].MenuTitle);
@@ -3540,19 +3541,20 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 		}
 		case AVPMENU_ELEMENT_SLIDER:
 		{
-			int x = MENU_CENTREX+MENU_ELEMENT_SPACING+3;
-			x+=(201*(*elementPtr->SliderValuePtr))/elementPtr->MaxSliderValue;
+			int x = MENU_CENTREX + MENU_ELEMENT_SPACING + 3;
+			x += (201 * (*elementPtr->SliderValuePtr)) / elementPtr->MaxSliderValue;
+
 			RenderText(GetTextString(static_cast<enum TEXTSTRING_ID>(elementPtr->TextDescription)),MENU_CENTREX-MENU_ELEMENT_SPACING,y,elementPtr->Brightness,AVPMENUFORMAT_RIGHTJUSTIFIED);
 
 			if (AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
 			{
-				D3D_DrawSliderBar(/*MENU_CENTREX*/(ScreenDescriptorBlock.SDB_Width/2)+MENU_ELEMENT_SPACING, y+1, elementPtr->Brightness);
-				D3D_DrawSlider(x,y+4,elementPtr->Brightness);
+				D3D_DrawSliderBar(/*MENU_CENTREX*/(/*ScreenDescriptorBlock.SDB_Width*/640/2)+MENU_ELEMENT_SPACING, y+1, elementPtr->Brightness);
+				D3D_DrawSlider(x, y+4, elementPtr->Brightness);
 			}
 			else
 			{
-				DrawAvPMenuGfx(AVPMENUGFX_SLIDERBAR,MENU_CENTREX+MENU_ELEMENT_SPACING,y+1,elementPtr->Brightness,AVPMENUFORMAT_LEFTJUSTIFIED);
-				DrawAvPMenuGfx(AVPMENUGFX_SLIDER,x,y+4,elementPtr->Brightness,AVPMENUFORMAT_LEFTJUSTIFIED);
+				DrawAvPMenuGfx(AVPMENUGFX_SLIDERBAR, MENU_CENTREX+MENU_ELEMENT_SPACING, y+1, elementPtr->Brightness, AVPMENUFORMAT_LEFTJUSTIFIED);
+				DrawAvPMenuGfx(AVPMENUGFX_SLIDER, x, y+4, elementPtr->Brightness, AVPMENUFORMAT_LEFTJUSTIFIED);
 			}
 
 			break;
@@ -3744,13 +3746,6 @@ static int HeightOfMenuElement(AVPMENU_ELEMENT *elementPtr)
 			h += HeightOfMenuGfx(elementPtr->textureID);
 			break;
 		}
-#if 0
-		case AVPMENU_ELEMENT_SLIDER:
-		{
-			h += HeightOfMenuGfx(AVPMENUGFX_SLIDER);
-			break;
-		}
-#endif
 	}
 	return h;
 }
