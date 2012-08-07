@@ -236,7 +236,6 @@ void SetupMarineOVision(void)
 	d3d_light_ctrl.ctrl = LCCM_NORMAL;
 }
 
-
 void HandleMarineOVision(void)
 {
 	PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);

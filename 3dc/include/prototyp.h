@@ -783,9 +783,9 @@ typedef struct displayblock
 
 	struct sfxblock *SfxPtr;
 
-	SHAPEHEADER* ObShapeData;
+	SHAPEHEADER *ObShapeData;
 
-	char * name;
+	char *name;
 
 	#if (SupportMorphing && LazyEvaluationForMorphing)
 	VECTORCH *ObMorphedPts;
@@ -835,9 +835,9 @@ typedef struct displayblock
 	/* The Strategy Block Pointer */
 	struct strategyblock *ObStrategyBlock;  /* Defined in stratdef.h */
 
-	SHAPEANIMATIONCONTROLLER * ShapeAnimControlBlock;
+	SHAPEANIMATIONCONTROLLER *ShapeAnimControlBlock;
 
-	struct hmodelcontroller * HModelControlBlock;
+	struct hmodelcontroller *HModelControlBlock;
 	
 	unsigned int SpecialFXFlags;
 

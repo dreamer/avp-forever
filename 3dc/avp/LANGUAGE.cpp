@@ -41,9 +41,8 @@ void InitTextStrings(void)
 	char *textPtr;
 	char *filenamePtr;
 
-	/* language select here! */
-	GLOBALASSERT(AvP.Language>=0);
-	GLOBALASSERT(AvP.Language<I_MAX_NO_OF_LANGUAGES);
+	GLOBALASSERT(AvP.Language >= 0);
+	GLOBALASSERT(AvP.Language < I_MAX_NO_OF_LANGUAGES);
 	
 	#if MARINE_DEMO
 	filenamePtr = "menglish.txt";
@@ -94,19 +93,19 @@ void InitTextStrings(void)
 
 	for (int i = 1; i < MAX_NO_OF_TEXTSTRINGS; i++)
 	{
-		/* scan for a quote mark */
+		// scan for a quote mark
 		while (*textPtr++ != '"');
 
-		/* now pointing to a text string after quote mark*/
+		// now pointing to a text string after quote mark
 		TextStringPtr[i] = textPtr;
 
-		/* scan for a quote mark */
+		// scan for a quote mark
 		while (*textPtr != '"')
 		{
 			textPtr++;
 		}
 
-		/* change quote mark to zero terminator */
+		// change quote mark to zero terminator
 		*textPtr = 0;
 
 		AddToTable(TextStringPtr[i]);

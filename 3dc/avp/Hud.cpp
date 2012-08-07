@@ -147,7 +147,7 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed);
 void RenderBriefingText(int centreY, int brightness);
 int GetLoadedShapeMSL(char const * shapename);
 extern void D3D_PlayerDamagedOverlay(int intensity);
-void FlushD3DZBuffer();
+void R_ClearZBuffer();
 void RenderPredatorPlasmaCasterCharge(int value, VECTORCH *worldOffsetPtr, MATRIXCH *orientationPtr);
 
 static void InitPredatorHUD();
@@ -250,6 +250,10 @@ void ReInitHUD(void)
 	InitialiseGrapplingHook();
 }
 
+#include "RenderList.h"
+
+extern RenderList *mainList;
+
 /* KJL 16:27:39 09/20/96 - routine which handles all HUD activity */
 void MaintainHUD(void)
 {
@@ -260,6 +264,9 @@ void MaintainHUD(void)
 	HandleDecalSystem();
 
 	RenderGrapplingHook();
+
+	mainList->SetLayer(2);
+	mainList->AddCommand(kCommandZClear);
 
 #if 0
 	D3DPERF_BeginEvent(D3DCOLOR_XRGB(255, 0, 255), L"MaintainHUD - FlushD3DZBuffer() call");
@@ -369,9 +376,10 @@ void MaintainHUD(void)
 				if (AlienTongueOffset)
 				{
 					RenderInsideAlienTongue(AlienTongueOffset);
-					AlienTongueOffset-=NormalFrameTime;
-					if (AlienTongueOffset<0)
+					AlienTongueOffset -= NormalFrameTime;
+					if (AlienTongueOffset < 0) {
 						AlienTongueOffset = 0;
+					}
 				}
 				SetFrustumType(FRUSTUM_TYPE_NORMAL);
 
@@ -427,6 +435,8 @@ void MaintainHUD(void)
 		}
 	}
 
+	mainList->SetLayer(1);
+
 	CheckWireFrameMode(0);
 
 	{
@@ -441,9 +451,9 @@ void MaintainHUD(void)
 		  		HandleMarineOVision();
 				break;
 			}
-	       	case I_Predator:
+			case I_Predator:
 			{
-  	//			HandlePredOVision();
+	//			HandlePredOVision();
 				break;
 			}
 			default:
@@ -458,8 +468,10 @@ void MaintainHUD(void)
 				//f2i(b,CameraZoomScale*65536.0f);
 				int b = static_cast<int>(CameraZoomScale * 65536.0f);
 
-				if (b < 32768) 
+				if (b < 32768) {
 					b = 32768;
+				}
+
 				D3D_FadeDownScreen(b,0xff0000);
 			}
 		}
@@ -1003,8 +1015,9 @@ static void HandleMarineWeapon(void)
 	PositionPlayersWeapon();
 
 	// if there is no shape name then return
-	if (twPtr->WeaponShapeName == NULL)
+	if (twPtr->WeaponShapeName == NULL) {
 		return;
+	}
 
 	RenderThisDisplayblock(&PlayersWeapon);
 
@@ -1508,9 +1521,10 @@ static void HandlePredatorWeapon(void)
 	  &&(weaponPtr->CurrentState == WEAPONSTATE_FIRING_PRIMARY) )
 		RenderThisDisplayblock(&PlayersWeaponMuzzleFlash);
 
-	/* draw 3d weapon */
-	if (twPtr->WeaponShapeName != NULL)
+	// draw 3d weapon
+	if (twPtr->WeaponShapeName != NULL) {
 		RenderThisDisplayblock(&PlayersWeapon);
+	}
 
 	if (twPtr->PrimaryIsMeleeWeapon)
 	{
@@ -1783,8 +1797,9 @@ static void HandleAlienWeapon(void)
 
 	/* draw 3d weapon */
 	/* if there is no shape name then return */
-	if (twPtr->WeaponShapeName == NULL)
+	if (twPtr->WeaponShapeName == NULL) {
 		return;
+	}
 
 	RenderThisDisplayblock(&PlayersWeapon);
 

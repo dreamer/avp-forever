@@ -2675,7 +2675,6 @@ static void AlienNearState_Jump(STRATEGYBLOCK *sbPtr)
 		alienStatusPointer->NearStateTimer = 0;
 		alienStatusPointer->CurveTimeOut = 0;
 		return;
-
 	}
 }
 

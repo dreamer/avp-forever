@@ -27,8 +27,36 @@
 #include <algorithm>
 #include <assert.h>
 #include "console.h"
+#include <assert.h>
 
 extern uint32_t GetNumIndices(uint32_t numVerts);
+
+// bit getters
+#define get_unused(src)			((src & 4278190080) >> 24)
+#define get_commandType(src)	((src & 16711680) >> 16)
+#define get_sequenceNumber(src)	((src & 65472) >> 6)
+#define get_command(src)		((src & 32) >> 5)
+#define get_transType1(src)		((src & 24) >> 3)
+#define get_layerID(src)		(src & 7)
+
+#define get_texID(src)			((src & 4294443008) >> 19)
+#define get_transType(src)		((src & 522240) >> 11)
+#define get_filterType(src)		((src & 1792) >> 8)
+#define get_texAddressType(src)	((src & 192) >> 6)
+
+// bit setters
+#define set_unused(out, in)			out |= (in << 24)
+#define set_commandType(out, in)	out |= (in << 16)
+#define set_sequenceNumber(out, in)	out |= (in << 6)
+
+#define set_command(out, in)		out |= (in << 5)
+#define set_transType1(out, in)		out |= (in << 3)
+#define set_layerID(out, in)		out |= in
+
+#define set_texID(out, in)			out |= (in << 19)
+#define set_transType(out, in)		out |= (in << 11)
+#define set_filterType(out, in)		out |= (in << 8)
+#define set_texAddressType(out, in)	out |= (in << 6)
 
 RenderList::RenderList(size_t size)
 {
@@ -36,6 +64,8 @@ RenderList::RenderList(size_t size)
 	listIndex   = 0;
 	vertexCount = 0;
 	indexCount  = 0;
+
+	layer = 1;
 
 	useIndicesOffset = false;
 
@@ -144,9 +174,24 @@ void RenderList::AddIndices(uint16_t *indexArray, uint32_t a, uint32_t b, uint32
 	this->indexCount+=3;
 }
 
-void RenderList::AddItem(uint32_t numVerts, texID_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode, enum TEXTURE_ADDRESS_MODE textureAddress, enum ZWRITE_ENABLE zWriteEnable)
+void RenderList::AddCommand(int commandType)
+{
+	Items[listIndex].sortKey = 0;
+	set_command     (Items[listIndex].sortKey, 1);
+	set_commandType (Items[listIndex].sortKey, commandType);
+	listIndex++;
+}
+
+void RenderList::SetLayer(int layer)
+{
+	this->layer = layer;
+//	Items[listIndex].layerID = layer;
+}
+
+void RenderList::AddItem(uint32_t numVerts, texID_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode, enum TEXTURE_ADDRESS_MODE textureAddress)
 {
 	assert(numVerts != 0);
+	assert(textureID < 8191);
 
 	if (GetSize()+1 >= GetCapacity())
 	{
@@ -159,11 +204,11 @@ void RenderList::AddItem(uint32_t numVerts, texID_t textureID, enum TRANSLUCENCY
 
 	Items[listIndex].sortKey = 0; // zero it out
 
-	Items[listIndex].texID          = textureID;
-	Items[listIndex].transType      = translucencyMode;
-	Items[listIndex].filterType     = filteringMode;
-	Items[listIndex].texAddressType = textureAddress;
-	Items[listIndex].zWrite         = zWriteEnable;
+	set_layerID        (Items[listIndex].sortKey, layer);
+	set_texID          (Items[listIndex].sortKey, textureID);
+	set_transType      (Items[listIndex].sortKey, translucencyMode);
+	set_filterType     (Items[listIndex].sortKey, filteringMode);
+	set_texAddressType (Items[listIndex].sortKey, textureAddress);
 
 	// lets see if we can merge this item with the previous item
 	if ((listIndex != 0) &&		// only do this check if we're not adding the first item
@@ -175,7 +220,7 @@ void RenderList::AddItem(uint32_t numVerts, texID_t textureID, enum TRANSLUCENCY
 	else
 	{
 		// we need to add a new item
-		Items[listIndex].vertStart = vertexCount;
+		Items[listIndex].vertStart  = vertexCount;
 		Items[listIndex].indexStart = indexCount;
 	}
 
@@ -205,33 +250,39 @@ void RenderList::Reset()
 
 void RenderList::Draw()
 {
-//	for (std::vector<RenderItem>::iterator it = Items.begin(); it != Items.begin() + listIndex; ++it)
-
 	uint32_t baseIndexValue = 0;
 
 	for (size_t i = 0; i < listIndex; i++)
 	{
 		RenderItem *it = &Items[i];
 
-		uint32_t numPrimitives = (it->indexEnd - it->indexStart) / 3;
-
-		if (this->useIndicesOffset)
-		{
-//			baseIndexValue += 4; // this correct?
-
-//			assert(numPrimitives == 2);
+		if (get_command(it->sortKey)) {
+			switch (get_commandType(it->sortKey)) {
+				case kCommandZClear:
+					R_ClearZBuffer();
+					break;
+				case kCommandZWriteEnable:
+					ChangeZWriteEnable(ZWRITE_ENABLED);
+					break;
+				case kCommandZWriteDisable:
+					ChangeZWriteEnable(ZWRITE_DISABLED);
+					break;
+			}
 		}
-
-		if (numPrimitives)
+		else
 		{
-			// set texture
-			R_SetTexture(0, it->texID);
-			ChangeTranslucencyMode   ((enum TRANSLUCENCY_TYPE)       it->transType);
-			ChangeFilteringMode      (0, (enum FILTERING_MODE_ID)    it->filterType);
-			ChangeTextureAddressMode (0, (enum TEXTURE_ADDRESS_MODE) it->texAddressType);
-			ChangeZWriteEnable       ((enum ZWRITE_ENABLE)           it->zWrite);
+			uint32_t numPrimitives = (it->indexEnd - it->indexStart) / 3;
 
-			R_DrawIndexedPrimitive(baseIndexValue, 0, this->vertexCount, it->indexStart, numPrimitives);
+			if (numPrimitives)
+			{
+				// set texture
+				R_SetTexture(0, get_texID(it->sortKey));
+				ChangeTranslucencyMode((enum TRANSLUCENCY_TYPE)			get_transType(it->sortKey));
+				ChangeFilteringMode(0, (enum FILTERING_MODE_ID)			get_filterType(it->sortKey));
+				ChangeTextureAddressMode(0, (enum TEXTURE_ADDRESS_MODE) get_texAddressType(it->sortKey));
+
+				R_DrawIndexedPrimitive(baseIndexValue, 0, this->vertexCount, it->indexStart, numPrimitives);
+			}
 		}
 	}
 }

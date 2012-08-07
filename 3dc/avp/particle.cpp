@@ -39,6 +39,7 @@
 #include "pheromon.h"
 #include "d3d_hud.h"
 #include "tables.h"
+#include "d3d_render.h"
 
 #define RGBALIGHT_MAKE(r,g,b,a) RGBA_MAKE(r,g,b,a)
 
@@ -83,16 +84,8 @@ int GetLoadedShapeMSL(char const * shapename);
 void RenderThisDisplayblock(DISPLAYBLOCK *dbPtr);
 void MakeMatrixFromDirection(VECTORCH *directionPtr, MATRIXCH *matrixPtr);
 void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr);
-void RenderDecal(DECAL *decalPtr);
 extern void RenderFlechetteParticle(PARTICLE *particlePtr);
 int PrintDebuggingText(const char* t, ...);
-
-void InitForceField();
-void D3D_DecalSystem_Setup();
-void D3D_DecalSystem_End();
-void PostLandscapeRendering();
-void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr);
-void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr);
 
 PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 {
@@ -161,7 +154,6 @@ PARTICLE_DESC ParticleDescription[MAX_NO_OF_PARTICLE_IDS] =
 		0,
 		//IsDrawnAtBack:1;
 		0,
-
 	},
 	/* PARTICLE_HUMAN_BLOOD */
 	{

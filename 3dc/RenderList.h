@@ -27,6 +27,10 @@
 #include "renderStates.h"
 #include "renderer.h"
 
+const int kCommandZClear = 0;
+const int kCommandZWriteEnable = 1;
+const int kCommandZWriteDisable = 2;
+
 struct RenderItem
 {
 	uint32_t	vertStart;
@@ -34,25 +38,14 @@ struct RenderItem
 
 	uint32_t	indexStart;
 	uint32_t	indexEnd;
+	
+	/* 
+	 * our various rendering states and properties (texture ID, filtering mode etc) are stored in the
+	 * below value and are accessed and set using bit masks.
+	 */
+	uint32_t sortKey;
 
-	// various render states can be set with the below struct members
-	// and then this render item can be sorted with the sortKey member
-	union
-	{
-		struct
-		{
-			// should be equal in size to sortKey
-			unsigned texID          : 16;
-			unsigned transType      : 8;
-			unsigned filterType     : 3;
-			unsigned texAddressType : 2;
-			unsigned zWrite         : 2;
-			unsigned unused         : 1;
-		};
-
-		uint32_t sortKey;
-	};
-
+	// for std::sort - sort on the above sortKey value to allow sorting render states
 	bool operator < (const RenderItem& rhs) const {return sortKey < rhs.sortKey;}
 };
 
@@ -65,33 +58,38 @@ class RenderList
 		uint32_t	vertexCount;
 		uint32_t	indexCount;
 
+		int layer;
+
 		std::vector<RenderItem> Items;
 
 		bool useIndicesOffset;
 
-		void RenderList::AddIndices(uint16_t *indexArray, uint32_t a, uint32_t b, uint32_t c, uint32_t n);
+		void AddIndices(uint16_t *indexArray, uint32_t a, uint32_t b, uint32_t c, uint32_t n);
 
 	public:
 		RenderList(size_t size);
 		~RenderList();
 
-	void Reset();
-	void RenderList::Init(size_t size);
+		void Reset();
+		void Init(size_t size);
 
-	size_t RenderList::GetCapacity() const { return capacity; }
-	size_t RenderList::GetSize()     const { return listIndex; }
+		size_t GetCapacity() const { return capacity; }
+		size_t GetSize()     const { return listIndex; }
 
-	uint32_t RenderList::GetVertexCount() const { return vertexCount; }
-	uint32_t RenderList::GetIndexCount()  const { return indexCount; }
+		uint32_t GetVertexCount() const { return vertexCount; }
+		uint32_t GetIndexCount()  const { return indexCount; }
 	
-	void RenderList::Sort();
-	void RenderList::AddTriangle(uint16_t *indexArray, uint32_t a, uint32_t b, uint32_t c, uint32_t n);
-	void RenderList::AddItem(uint32_t numVerts, texID_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON, enum TEXTURE_ADDRESS_MODE textureAddress = TEXTURE_WRAP, enum ZWRITE_ENABLE = ZWRITE_ENABLED);
-	void RenderList::CreateIndices(uint16_t *indexArray, uint32_t numVerts);
-	void RenderList::CreateOrthoIndices(uint16_t *indexArray);
-	void RenderList::Draw();
+		void AddCommand(int commandType);
+		void SetLayer(int layer);
 
-	// test
-	void RenderList::EnableIndicesOffset();
-	void RenderList::IncrementIndexCount(uint32_t nI);
+		void Sort();
+		void AddTriangle(uint16_t *indexArray, uint32_t a, uint32_t b, uint32_t c, uint32_t n);
+		void AddItem(uint32_t numVerts, texID_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON, enum TEXTURE_ADDRESS_MODE textureAddress = TEXTURE_WRAP);
+		void CreateIndices(uint16_t *indexArray, uint32_t numVerts);
+		void CreateOrthoIndices(uint16_t *indexArray);
+		void Draw();
+
+		// test
+		void EnableIndicesOffset();
+		void IncrementIndexCount(uint32_t nI);
 };

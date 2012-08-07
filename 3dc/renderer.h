@@ -109,6 +109,8 @@ void ChangeTextureAddressMode (uint32_t samplerIndex, enum TEXTURE_ADDRESS_MODE 
 void ChangeFilteringMode      (uint32_t samplerIndex, enum FILTERING_MODE_ID filteringRequired);
 void ChangeZWriteEnable       (enum ZWRITE_ENABLE zWriteEnable);
 
+void R_ClearZBuffer();
+
 bool InitialiseDirect3D();
 bool R_ChangeResolution		(uint32_t width, uint32_t height);
 void DrawAlphaMenuQuad		(uint32_t topX, uint32_t topY, texID_t textureID, uint32_t alpha);

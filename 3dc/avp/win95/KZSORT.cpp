@@ -14,10 +14,12 @@
 
 extern int *ItemPointers[maxpolyptrs];
 extern int ItemCount;
-
+extern int NumOnScreenBlocks;
 extern int NumVertices;
 extern int WireFrameMode;
 extern int DrawingAReflection;
+extern DISPLAYBLOCK *OnScreenBlockList[];
+extern DISPLAYBLOCK *Player;
 
 struct KItem KItemList[maxpolyptrs];
 
@@ -41,8 +43,7 @@ int *MorphedObjectPointsPtr=0;
 static void MergeItems(struct KItem *src1, int n1, struct KItem *src2, int n2, struct KItem *dest)
 {
 	/* merge the 2 sorted lists: at src1, length n1, and at src2, length n2, into dest */
-
-	while (n1>0 && n2>0) /* until one list is exhausted */
+	while (n1 > 0 && n2 > 0) /* until one list is exhausted */
 	{
 		if (src1->SortKey < src2->SortKey)
 		{
@@ -61,7 +62,7 @@ static void MergeItems(struct KItem *src1, int n1, struct KItem *src2, int n2, s
 	if (n1==0)
 	{
 	   /* remainder in srce2 goes into dest */
-	   while (n2>0)
+	   while (n2 > 0)
 	   {
 			*dest++ = *src2++;
 			n2--;
@@ -70,7 +71,7 @@ static void MergeItems(struct KItem *src1, int n1, struct KItem *src2, int n2, s
 	else
 	{
 	   /* remainder in srce1 goes into dest */
-	   while (n1>0)
+	   while (n1 > 0)
 	   {
 			*dest++ = *src1++;
 			n1--;
@@ -81,8 +82,7 @@ static void MergeItems(struct KItem *src1, int n1, struct KItem *src2, int n2, s
 static void MergeObjects(struct KObject *src1, int n1, struct KObject *src2, int n2, struct KObject *dest)
 {
 	/* merge the 2 sorted lists: at src1, length n1, and at src2, length n2, into dest */
-
-	while (n1>0 && n2>0) /* until one list is exhausted */
+	while (n1 > 0 && n2 > 0) /* until one list is exhausted */
 	{
 		if (src1->SortKey < src2->SortKey)
 		{
@@ -101,7 +101,7 @@ static void MergeObjects(struct KObject *src1, int n1, struct KObject *src2, int
 	if (n1==0)
 	{
 	   /* remainder in srce2 goes into dest */
-	   while (n2>0)
+	   while (n2 > 0)
 	   {
 			*dest++ = *src2++;
 			n2--;
@@ -110,7 +110,7 @@ static void MergeObjects(struct KObject *src1, int n1, struct KObject *src2, int
 	else
 	{
 	   /* remainder in srce1 goes into dest */
-	   while (n1>0)
+	   while (n1 > 0)
 	   {
 			*dest++ = *src1++;
 			n1--;
@@ -139,14 +139,14 @@ void SortModules(unsigned int noOfItems)
 
 		/* do merges for this partition size,
 		omitting the last merge if the second partition is incomplete  */
-		while((offSet+(partitionSize*2)) <= noOfItems)
+		while ((offSet+(partitionSize*2)) <= noOfItems)
 		{
 			MergeObjects(
 				(mergeFrom+offSet),
 				partitionSize,
 				(mergeFrom+offSet+partitionSize),
 				partitionSize,
-				(mergeTo+offSet) );
+				(mergeTo+offSet));
 
 			offSet += partitionSize*2;
 		}
@@ -160,10 +160,9 @@ void SortModules(unsigned int noOfItems)
 		partial partition.  If there's less than a full partition, just copy
 		it across (via the MergeObjects fn): it will be merged in again during a
 		later pass.
-
 		*/
 
-		if((offSet+partitionSize) < noOfItems)
+		if ((offSet+partitionSize) < noOfItems)
 		{
 			/* merge full partition against a partial partition */
 			MergeObjects(
@@ -171,9 +170,9 @@ void SortModules(unsigned int noOfItems)
 				partitionSize,
 				(mergeFrom+offSet+partitionSize),
 				(noOfItems - (offSet+partitionSize)),
-				(mergeTo+offSet) );
+				(mergeTo+offSet));
 		}
-		else if(offSet < noOfItems)
+		else if (offSet < noOfItems)
 		{
 			/* pass the incomplete partition thro' the merge fn
 			   to copy it across */
@@ -182,7 +181,7 @@ void SortModules(unsigned int noOfItems)
 				(noOfItems-offSet),
 				(mergeFrom+offSet),	/* this is a dummy parameter ... */
 				0,
-				(mergeTo+offSet) );
+				(mergeTo+offSet));
 		}
 
 		/* count number of passes */
@@ -205,21 +204,15 @@ void SortModules(unsigned int noOfItems)
 	}
 }
 
-
-
 /* KJL 12:21:51 02/11/97 - This routine is too big and ugly. Split & clean up required! */
 void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 {
-	extern int NumOnScreenBlocks;
-	extern DISPLAYBLOCK *OnScreenBlockList[];
 	int numOfObjects = NumOnScreenBlocks;
 	int numVisMods=0;
 	int numVisObjs=0;
 
 	while (numOfObjects)
 	{
-		extern DISPLAYBLOCK *Player;
-
 		DISPLAYBLOCK *objectPtr = OnScreenBlockList[--numOfObjects];
 		MODULE *modulePtr = objectPtr->ObMyModule;
 
@@ -245,11 +238,11 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 					int minX = modulePtr->m_minx + position.vx;
 					int maxX = modulePtr->m_maxx + position.vx;
 
-					if (maxX<0) /* outside maxX side */
+					if (maxX < 0) /* outside maxX side */
 					{
 						dist.vx = maxX;
 					}
-					else if (minX>0) /* outside minX faces */
+					else if (minX > 0) /* outside minX faces */
 					{
 						dist.vx = minX;
 					}
@@ -262,11 +255,11 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 					int minY = modulePtr->m_miny + position.vy;
 					int maxY = modulePtr->m_maxy + position.vy;
 
-					if (maxY<0) /* outside maxY side */
+					if (maxY < 0) /* outside maxY side */
 					{
 						dist.vy = maxY;
 					}
-					else if (minY>0) /* outside minY faces */
+					else if (minY > 0) /* outside minY faces */
 					{
 						dist.vy = minY;
 					}
@@ -279,11 +272,11 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 					int minZ = modulePtr->m_minz + position.vz;
 					int maxZ = modulePtr->m_maxz + position.vz;
 
-					if (maxZ<0) /* outside maxZ side */
+					if (maxZ < 0) /* outside maxZ side */
 					{
 						dist.vz = maxZ;
 					}
-					else if (minZ>0) /* outside minZ faces */
+					else if (minZ > 0) /* outside minZ faces */
 					{
 						dist.vz = minZ;
 					}
@@ -298,7 +291,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 				VisibleModules[numVisMods].SortKey = Magnitude(&dist);
 			}
 
-			if(numVisMods>MAX_NUMBER_OF_VISIBLE_MODULES)
+			if (numVisMods>MAX_NUMBER_OF_VISIBLE_MODULES)
 			{
 				/* outside the environment! */
 				textprint("MAX_NUMBER_OF_VISIBLE_MODULES (%d) exceeded!\n",MAX_NUMBER_OF_VISIBLE_MODULES);
@@ -312,6 +305,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 		else /* it's just an object */
 		{
 			VisibleObjects[numVisObjs].DispPtr = objectPtr;
+
 			/* this sort key defaults to the object not being drawn, ie. a grenade
 			behind a closed door (so there is no module behind door) would still be
 			in the OnScreenBlockList but need not be drawn. */
@@ -324,14 +318,14 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 	{
 		int numMods = numVisMods;
 
-		while(numMods)
+		while (numMods)
 		{
 			int n = numMods;
 
 			int furthestModule=0;
 			int furthestDistance=0;
 
-			while(n)
+			while (n)
 			{
 				n--;
 				if (furthestDistance < VisibleModules[n].SortKey)
@@ -352,7 +346,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 		int fogDistance = 0x7f000000;
 
 		int o = numVisObjs;
-		while(o--)
+		while (o--)
 		{
 			DISPLAYBLOCK *objectPtr = VisibleObjects[o].DispPtr;
 			int maxX = objectPtr->ObWorld.vx + objectPtr->ObRadius;
@@ -363,7 +357,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 			int minY = objectPtr->ObWorld.vy - objectPtr->ObRadius;
 
 			int numMods = 0;
-			while(numMods<numVisMods)
+			while (numMods<numVisMods)
 			{
 				MODULE *modulePtr = SortedModules[numMods].DispPtr->ObMyModule;
 
@@ -398,7 +392,6 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 	DrawingAReflection=0;
 	{
 		int numMods = numVisMods;
-		#if 1
 		{
 			int o = numVisObjs;
 			CheckWireFrameMode(WireFrameMode&2);
@@ -545,7 +538,6 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 			}
 		}
 //	 			OutputTranslucentPolyList();
-		#endif
 
 		/* KJL 12:51:00 13/08/98 - scan for hierarchical objects which aren't going to be drawn,
 		and update their timers */
@@ -576,28 +568,6 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 	}
 }
 
-#if 0
-static int ObjectIsInModule(DISPLAYBLOCK *objectPtr,MODULE *modulePtr)
-{
-	int objectSize = objectPtr->ObRadius;
-	VECTORCH position = objectPtr->ObWorld;
-
-	position.vx -= modulePtr->m_world.vx;
-	position.vy -= modulePtr->m_world.vy;
-	position.vz -= modulePtr->m_world.vz;
-
-	if (position.vx + objectSize >= modulePtr->m_minx)
-		if (position.vx - objectSize <= modulePtr->m_maxx)
-			if (position.vz + objectSize >= modulePtr->m_minz)
-				if (position.vz - objectSize <= modulePtr->m_maxz)
-					if (position.vy + objectSize >= modulePtr->m_miny)
-						if (position.vy - objectSize <= modulePtr->m_maxy)
-							return 1;
-
-	return 0;
-}
-#endif
-
 static int PointIsInModule(VECTORCH *pointPtr,MODULE *modulePtr)
 {
 	VECTORCH position = *pointPtr;
@@ -614,8 +584,6 @@ static int PointIsInModule(VECTORCH *pointPtr,MODULE *modulePtr)
 							return 1;
 	return 0;
 }
-
-
 
 void RenderThisDisplayblock(DISPLAYBLOCK *dbPtr)
 {

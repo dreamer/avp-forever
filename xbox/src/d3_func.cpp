@@ -837,7 +837,7 @@ void R_SetFov(uint32_t fov)
 	d3d.fieldOfView = fov;
 }
 
-void FlushD3DZBuffer()
+void R_ClearZBuffer()
 {
 	d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0,0,0), 1.0f, 0);
 }
@@ -1979,7 +1979,7 @@ bool InitialiseDirect3D()
 		// we only want D3DFMT_LIN_X8R8G8B8 format
 		if (tempMode.Format == D3DFMT_X8R8G8B8) //D3DFMT_LIN_X8R8G8B8)
 		{
-			int j = 0;
+			uint32_t j = 0;
 			// check if the mode already exists
 			for (; j < d3d.Driver[defaultDevice].NumModes; j++)
 			{

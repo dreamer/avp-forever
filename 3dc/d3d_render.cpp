@@ -344,23 +344,12 @@ float cot(float in)
 	return 1.0f / tan(in);
 }
 
-// REMOVE ME 
-void DrawRHWquad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, texID_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType);
-
 static bool ExecuteBuffer()
 {
 	// sort the list of render objects
 //	particleList->Sort();
 //	decalList->Sort();
-//	mainList->Sort();
-
-	// Melanikus 18/11/11 - Nvidia 3D Vision fix. Setting the projection matrix to the rhw shader so we can have a non
-	// ortho projection
-	R_MATRIX projection;
-	D3DXMatrixPerspectiveFovRH(&projection, D3DXToRadian(90.0f), 4.0f/3.0f ,0.0f, 1.0f);
-	d3d.rhwDecl->Set();
-	d3d.effectSystem->SetActive(d3d.rhwEffect);
-	d3d.effectSystem->SetVertexShaderConstant(d3d.rhwEffect, 0, CONST_MATRIX, &d3d.matProjection);
+	mainList->Sort();
 
 	// these two just add the vertex data to the below lists (they dont draw anything themselves
 	// and they HAVE to be called before the below code)
@@ -405,8 +394,12 @@ static bool ExecuteBuffer()
 		// pass the projection matrix to the vertex shader
 		d3d.effectSystem->SetVertexShaderConstant(d3d.decalEffect, 0, CONST_MATRIX, &matWorldViewProj);
 
+		ChangeZWriteEnable(ZWRITE_DISABLED);
+
 		// daw the ortho list
 		decalList->Draw();
+
+		ChangeZWriteEnable(ZWRITE_ENABLED);
 	}
 
 	// render any particles
@@ -895,70 +888,6 @@ void DrawFontQuad(uint32_t x, uint32_t y, uint32_t charWidth, uint32_t charHeigh
 	orthoList->CreateOrthoIndices(orthoIndex);
 }
 
-void DrawRHWquad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, texID_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
-{
-	RHW_VERTEX rhw[4];
-
-	Texture tempTexture  = Tex_GetTextureDetails(textureID);
-
-	// bottom left
-	rhw[0].x = x;
-	rhw[0].y = y + height;
-	rhw[0].z = 1.0f;
-	rhw[0].rhw = 1.0f;
-	rhw[0].color = colour;
-	rhw[0].u = 0.0f;
-	rhw[0].v = (1.0f / tempTexture.realHeight) * tempTexture.height;
-
-	// top left
-	rhw[1].x = x;
-	rhw[1].y = y;
-	rhw[1].z = 1.0f;
-	rhw[1].rhw = 1.0f;
-	rhw[1].color = colour;
-	rhw[1].u = 0.0f;
-	rhw[1].v = 0.0f;
-
-	// bottom right
-	rhw[2].x = x + width;
-	rhw[2].y = y + height;
-	rhw[2].z = 1.0f;
-	rhw[2].rhw = 1.0f;
-	rhw[2].color = colour;
-	rhw[2].u = (1.0f / tempTexture.realWidth) * tempTexture.width;
-	rhw[2].v = (1.0f / tempTexture.realHeight) * tempTexture.height;
-
-	// top right
-	rhw[3].x = x + width;
-	rhw[3].y = y;
-	rhw[3].z = 1.0f;
-	rhw[3].rhw = 1.0f;
-	rhw[3].color = colour;
-	rhw[3].u = (1.0f / tempTexture.realWidth) * tempTexture.width;
-	rhw[3].v = 0.0f;
-
-	d3d.rhwDecl->Set();
-
-	// set the YUV FMV shader
-	d3d.effectSystem->SetActive(d3d.rhwEffect);
-
-	// set orthographic projection
-//	d3d.effectSystem->SetVertexShaderConstant(d3d.rhwEffect, 0, CONST_MATRIX, &d3d.matOrtho);
-
-	R_SetTexture(0, textureID);
-
-	ChangeTextureAddressMode(0, TEXTURE_CLAMP);
-	ChangeFilteringMode(0, FILTERING_BILINEAR_OFF);
-	ChangeTranslucencyMode(TRANSLUCENCY_OFF);
-
-	LastError = d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLESTRIP, 2, &rhw[0], sizeof(RHW_VERTEX));
-	if (FAILED(LastError))
-	{
-		LogDxError(LastError, __LINE__, __FILE__);
-		OutputDebugString("DrawPrimitiveUP failed\n");
-	}
-}
-
 void DrawQuad(uint32_t x, uint32_t y, uint32_t width, uint32_t height, texID_t textureID, uint32_t colour, enum TRANSLUCENCY_TYPE translucencyType)
 {
 	float x1 = WPos2DC(x);
@@ -1251,6 +1180,9 @@ void DrawCoronas()
 	float RecipW = 1.0f / (float) texWidth;
 	float RecipH = 1.0f / (float) texHeight;
 
+	// set a command to disable z-writes
+	orthoList->AddCommand(kCommandZWriteDisable);
+
 	for (size_t i = 0; i < coronaArray.size(); i++)
 	{
 		PARTICLE_DESC *particleDescPtr = &ParticleDescription[coronaArray[i].particle.ParticleID];
@@ -1320,7 +1252,7 @@ void DrawCoronas()
 		uint32_t sizeX = (ScreenDescriptorBlock.SDB_Width / 100) * 10;
 		uint32_t sizeY = sizeX;//(ScreenDescriptorBlock.SDB_Height / 100) * 11;
 
-		orthoList->AddItem(4, SpecialFXImageNumber, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP, ZWRITE_DISABLED);
+		orthoList->AddItem(4, SpecialFXImageNumber, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
 
 		// bottom left
 		orthoVertex[orthoVBOffset].x = WPos2DC(transformedPoint.x - sizeX);
@@ -1363,6 +1295,9 @@ void DrawCoronas()
 
 	coronaArray.clear();
 
+	// set a command to enable z-writes
+	orthoList->AddCommand(kCommandZWriteEnable);
+
 	// restore RenderPolygon.NumberOfVertices value...
 	RenderPolygon.NumberOfVertices = numVertsBackup;
 }
@@ -1373,6 +1308,9 @@ void DrawParticles()
 		return;
 	}
 
+	// set command to disable z-writes
+	particleList->AddCommand(kCommandZWriteDisable);
+
 	// loop particles and add them to vertex buffer
 	for (size_t i = 0; i < NUM_TRANSLUCENCY_TYPES; i++)
 	{
@@ -1381,6 +1319,9 @@ void DrawParticles()
 			D3D_Particle_Output(&particleBucket[i][j].particle, &particleBucket[i][j].vertices[0]);
 		}
 	}
+
+	// set command to disable z-writes
+	particleList->AddCommand(kCommandZWriteEnable);
 
 	for (size_t i = 0; i < NUM_TRANSLUCENCY_TYPES; i++)
 	{
@@ -1750,7 +1691,7 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 				);
 	}
 
-	decalList->AddItem(RenderPolygon.NumberOfVertices, textureID, decalDescPtr->TranslucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP, ZWRITE_DISABLED);
+	decalList->AddItem(RenderPolygon.NumberOfVertices, textureID, decalDescPtr->TranslucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{
@@ -1826,7 +1767,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, PARTICLEVERTEX *renderVerticesPt
 	float RecipW = 1.0f / (float) texWidth;
 	float RecipH = 1.0f / (float) texHeight;
 
-	particleList->AddItem(4, SpecialFXImageNumber, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP, ZWRITE_DISABLED);
+	particleList->AddItem(4, SpecialFXImageNumber, (enum TRANSLUCENCY_TYPE)particleDescPtr->TranslucencyType, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
 
 	RCOLOR colour;
 
@@ -2461,7 +2402,7 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVertice
 	float RecipW = 1.0f / (float) texWidth;
 	float RecipH = 1.0f / (float) texHeight;
 
-	mainList->AddItem(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode, FILTERING_BILINEAR_ON, TEXTURE_WRAP, ZWRITE_DISABLED);
+	mainList->AddItem(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode, FILTERING_BILINEAR_ON, TEXTURE_WRAP);
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{

@@ -818,7 +818,7 @@ void R_SetFov(uint32_t fov)
 	d3d.fieldOfView = fov;
 }
 
-void FlushD3DZBuffer()
+void R_ClearZBuffer()
 {
 	d3d.lpD3DDevice->Clear(0, NULL, D3DCLEAR_ZBUFFER, D3DCOLOR_XRGB(0,0,0), 1.0f, 0);
 }
@@ -2794,7 +2794,7 @@ void ChangeZWriteEnable(enum ZWRITE_ENABLE zWriteEnable)
 		LastError = d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, TRUE);
 		if (FAILED(LastError))
 		{
-			LogDebugString("D3DRS_ZWRITEENABLE D3DZB_TRUE failed\n");
+			LogDebugString("D3DRS_ZWRITEENABLE D3DZB_TRUE failed");
 		}
 	}
 	else if (zWriteEnable == ZWRITE_DISABLED)
@@ -2802,8 +2802,8 @@ void ChangeZWriteEnable(enum ZWRITE_ENABLE zWriteEnable)
 		LastError = d3d.lpD3DDevice->SetRenderState(D3DRS_ZWRITEENABLE, FALSE);
 		if (FAILED(LastError))
 		{
-			LogDebugString("D3DRS_ZWRITEENABLE D3DZB_FALSE failed\n");
-			LogDebugString("DISABLING Z WRITES\n");
+			LogDebugString("D3DRS_ZWRITEENABLE D3DZB_FALSE failed");
+			LogDebugString("DISABLING Z WRITES");
 		}
 	}
 	else

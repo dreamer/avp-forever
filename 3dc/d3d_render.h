@@ -4,8 +4,8 @@
 #include "kshape.h"
 #include "d3_func.h"
 
-extern void D3D_DrawBackdrop(void);
-extern void PostLandscapeRendering(void);
+extern void D3D_DrawBackdrop();
+extern void PostLandscapeRendering();
 extern void D3D_DrawWaterTest(MODULE *testModulePtr);
 
 extern void D3D_ZBufferedCloakedPolygon_Output         (POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr);
@@ -23,16 +23,16 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a);
 extern void DrawMenuTextGlow(uint32_t topLeftX, uint32_t topLeftY, uint32_t size, uint32_t alpha);
 extern void D3D_RenderHUDString(char *stringPtr, int x, int y, int colour);
 
-extern void D3D_DecalSystem_Setup(void);
-extern void D3D_DecalSystem_End(void);
+extern void D3D_DecalSystem_Setup();
+extern void D3D_DecalSystem_End();
 
 extern void D3D_FadeDownScreen(int brightness, int colour);
-extern void D3D_PlayerOnFireOverlay(void);
+extern void D3D_PlayerOnFireOverlay();
 
 void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin);
 void D3D_DrawWaterFall(int xOrigin, int yOrigin, int zOrigin);
-void D3D_DrawMoltenMetalMesh_Unclipped(void);
-static void D3D_OutputTriangles(void);
+void D3D_DrawMoltenMetalMesh_Unclipped();
+static void D3D_OutputTriangles();
 
 void ThisFramesRenderingHasBegun();
 void ThisFramesRenderingHasFinished();
@@ -44,6 +44,6 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a);
 
 /*extern*/ void CheckWireFrameMode(int shouldBeOn);
 
-extern void InitForceField(void);
+extern void InitForceField();
 
 #endif

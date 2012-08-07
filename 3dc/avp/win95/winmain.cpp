@@ -412,7 +412,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		d3d_light_ctrl.ctrl = LCCM_NORMAL;
 
 		/* Check Gamma Settings are correct after video mode change */
-//bjd		InitialiseGammaSettings(RequestedGammaSetting);
+		InitialiseGammaSettings(RequestedGammaSetting);
 
 		// Load precompiled shapes 
 		start_of_loaded_shapes = load_precompiled_shapes();

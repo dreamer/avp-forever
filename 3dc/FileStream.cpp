@@ -31,6 +31,23 @@
 	#endif
 #endif
 
+template <class T>
+T swapBytes(T a) {
+	
+	T result;
+	int32_t nBytes = sizeof(a);
+
+	uint8_t *src  = reinterpret_cast<uint8_t*>(&a) + (nBytes - 1);
+	uint8_t *dest = reinterpret_cast<uint8_t*>(&result);
+
+	while (nBytes) {
+		*dest++ = *src--;
+		nBytes--;
+	}
+
+	return result;
+}
+
 FileStream::~FileStream()
 {
 	Close();
@@ -230,7 +247,8 @@ uint16_t FileStream::GetUint16BE()
 {
 	uint16_t ret;
 	ReadBytes(reinterpret_cast<uint8_t*>(&ret), sizeof(ret));
-	return _byteswap_ushort(ret);
+//	return _byteswap_ushort(ret);
+	return swapBytes<uint16_t>(ret);
 }
 
 uint32_t FileStream::GetUint32LE()
@@ -244,7 +262,8 @@ uint32_t FileStream::GetUint32BE()
 {
 	uint32_t ret;
 	ReadBytes(reinterpret_cast<uint8_t*>(&ret), sizeof(ret));
-	return _byteswap_ulong(ret);
+//	return _byteswap_ulong(ret);
+	return swapBytes<uint32_t>(ret);
 }
 
 uint64_t FileStream::GetUint64LE()
@@ -287,7 +306,8 @@ void FileStream::PutUint16LE(uint16_t value)
 
 void FileStream::PutUint16BE(uint16_t value)
 {
-	value = _byteswap_ushort(value);
+//	value = _byteswap_ushort(value);
+	value = swapBytes<uint16_t>(value);
 	WriteBytes(reinterpret_cast<uint8_t*>(&value), sizeof(value));
 }
 
@@ -298,7 +318,8 @@ void FileStream::PutUint32LE(uint32_t value)
 
 void FileStream::PutUint32BE(uint32_t value)
 {
-	value = _byteswap_ulong(value);
+//	value = _byteswap_ulong(value);
+	value = swapBytes<uint32_t>(value);
 	WriteBytes(reinterpret_cast<uint8_t*>(&value), sizeof(value));
 }
 
@@ -309,7 +330,8 @@ void FileStream::PutUint64LE(uint64_t value)
 
 void FileStream::PutUint64BE(uint64_t value)
 {
-	value = _byteswap_uint64(value);
+//	value = _byteswap_uint64(value);
+	value = swapBytes<uint64_t>(value);
 	WriteBytes(reinterpret_cast<uint8_t*>(&value), sizeof(value));
 }
 
