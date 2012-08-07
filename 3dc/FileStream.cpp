@@ -24,12 +24,7 @@
 
 #include "FileStream.h"
 #include "FastFile.h"
-
-#if (_MSC_VER == 1310)
-	#ifdef _MT
-		
-	#endif
-#endif
+#include "utilities.h"
 
 template <class T>
 T swapBytes(T a) {
@@ -60,8 +55,8 @@ bool FileStream::IsGood()
 
 bool FileStream::Open(const std::string &fileName, eAccess accessType, bool skipFastFileCheck)
 {
-	DWORD desiredAccess;       // GENERIC_READ, GENERIC_WRITE, or both (GENERIC_READ | GENERIC_WRITE). 
-	DWORD creationDisposition; // An action to take on a file or device that exists or does not exist.
+//	DWORD desiredAccess;       // GENERIC_READ, GENERIC_WRITE, or both (GENERIC_READ | GENERIC_WRITE). 
+//	DWORD creationDisposition; // An action to take on a file or device that exists or does not exist.
 
 	std::string realFileName;
 
@@ -87,7 +82,7 @@ bool FileStream::Open(const std::string &fileName, eAccess accessType, bool skip
 			realFileName = fileName;
 		}
 	}
-
+/*
 	switch (accessType)
 	{
 		case FileRead:
@@ -114,6 +109,11 @@ bool FileStream::Open(const std::string &fileName, eAccess accessType, bool skip
 		fileHandle = 0;
 		return false;
 	}
+*/
+	if (!OpenActual(realFileName, accessType)) {
+		fileHandle = 0;
+		return false;
+	}
 
 	if (fromFastFile)
 	{
@@ -124,6 +124,51 @@ bool FileStream::Open(const std::string &fileName, eAccess accessType, bool skip
 	// set flag to indicate read/write is now ok to do
 	isGood = true;
 	
+	return true;
+}
+
+bool FileStream::OpenActual(const std::string &fileName, eAccess accessType)
+{
+	DWORD desiredAccess;       // GENERIC_READ, GENERIC_WRITE, or both (GENERIC_READ | GENERIC_WRITE). 
+	DWORD creationDisposition; // An action to take on a file or device that exists or does not exist.
+
+	switch (accessType)
+	{
+		case FileRead:
+			desiredAccess = GENERIC_READ;
+			creationDisposition = OPEN_EXISTING;
+			break;
+		case FileWrite:
+			desiredAccess = GENERIC_WRITE;
+			creationDisposition = CREATE_ALWAYS;
+			break;
+		case FileReadWrite:
+			desiredAccess = GENERIC_READ | GENERIC_WRITE;
+			creationDisposition = CREATE_ALWAYS;
+			break;
+		default:
+			return false;
+			break;
+	}
+
+#ifdef _XBOX
+	std::string tempString("D:\\");
+	tempString += fileName;
+	Util::FtoBslash(tempString);
+
+	fileHandle = ::CreateFile(tempString.c_str(), desiredAccess, 0, NULL, creationDisposition, FILE_ATTRIBUTE_NORMAL, NULL);
+
+#else
+	// try open the file
+	fileHandle = ::CreateFile(fileName.c_str(), desiredAccess, 0, NULL, creationDisposition, FILE_ATTRIBUTE_NORMAL, NULL);
+#endif
+
+	if (INVALID_HANDLE_VALUE == fileHandle)
+	{
+		fileHandle = 0;
+		return false;
+	}
+
 	return true;
 }
 
@@ -351,7 +396,17 @@ bool FindFiles(const std::string &fileName, std::vector<std::string> &filesFound
 	WIN32_FIND_DATA findData;
 	HANDLE searchHandle;
 
+#ifdef _XBOX
+	std::string tempString("D:\\");
+	tempString += fileName;
+	Util::FtoBslash(tempString);
+
+	searchHandle = ::FindFirstFile(tempString.c_str(), &findData);
+
+#else
 	searchHandle = ::FindFirstFile(fileName.c_str(), &findData);
+#endif
+
 	if (INVALID_HANDLE_VALUE == searchHandle)
 	{
 		// no files found?

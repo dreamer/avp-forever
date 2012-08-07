@@ -51,6 +51,12 @@ void ChangeSlashes(std::string &theString)
 	std::replace(theString.begin(), theString.end(), '\\', '/');
 }
 
+void FtoBslash(std::string &theString)
+{
+	// change forwardslashes in path to backslashes
+	std::replace(theString.begin(), theString.end(), '/', '\\');
+}
+
 /* 
  *	For passing to std::transform.
  *  Changes c to lowercase if is an uppercase letter

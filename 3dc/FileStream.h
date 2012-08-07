@@ -112,6 +112,8 @@ class FileStream
 		bool fromFastFile;
 		uint32_t fileOffset;
 		uint32_t fileSize;
+
+		bool OpenActual(const std::string &fileName, eAccess accessType);
 };
 
 bool DoesFileExist(const std::string &fileName);

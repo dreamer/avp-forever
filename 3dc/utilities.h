@@ -37,6 +37,7 @@
 
 namespace Util {
 	void ChangeSlashes(std::string &theString);
+	void FtoBslash(std::string &theString);
 	int LowercaseAndChangeSlash(char c);
 	std::string IntToString(const int value);
 	int StringToInt(const std::string &string);
