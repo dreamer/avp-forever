@@ -241,7 +241,6 @@
     <ClCompile Include="..\..\3dc\avp\Bh_xeno.cpp" />
     <ClCompile Include="..\..\3dc\avp\BonusAbilities.cpp" />
     <ClCompile Include="..\..\3dc\avp\cconvars.cpp" />
-    <ClCompile Include="..\..\3dc\avp\CDTrackSelection.cpp" />
     <ClCompile Include="..\..\3dc\avp\CheatModes.cpp" />
     <ClCompile Include="..\..\3dc\avp\comp_map.cpp" />
     <ClCompile Include="..\..\3dc\avp\COMP_SHP.cpp" />
@@ -398,7 +397,6 @@
     <ClCompile Include="..\..\3dc\win95\ANIMCHNK.CPP" />
     <ClCompile Include="..\..\3dc\win95\animobs.cpp" />
     <ClCompile Include="..\..\3dc\win95\BMPNAMES.CPP" />
-    <ClCompile Include="..\..\3dc\win95\CD_player.cpp" />
     <ClCompile Include="..\..\3dc\win95\chnkload.cpp" />
     <ClCompile Include="..\..\3dc\win95\CHNKTEXI.CPP" />
     <ClCompile Include="..\..\3dc\win95\CHNKTYPE.CPP" />
@@ -480,7 +478,6 @@
     <ClInclude Include="..\..\3dc\avp\bh_weap.h" />
     <ClInclude Include="..\..\3dc\avp\BH_XENO.H" />
     <ClInclude Include="..\..\3dc\avp\BonusAbilities.h" />
-    <ClInclude Include="..\..\3dc\avp\CDTrackSelection.h" />
     <ClInclude Include="..\..\3dc\avp\COMP_SHP.H" />
     <ClInclude Include="..\..\3dc\avp\ConsoleLog.hpp" />
     <ClInclude Include="..\..\3dc\avp\davehook.h" />
@@ -641,7 +638,6 @@
     <ClInclude Include="..\..\3dc\win95\animobs.hpp" />
     <ClInclude Include="..\..\3dc\win95\aw.h" />
     <ClInclude Include="..\..\3dc\win95\BMPNAMES.HPP" />
-    <ClInclude Include="..\..\3dc\win95\CD_player.h" />
     <ClInclude Include="..\..\3dc\win95\CHNKLOAD.H" />
     <ClInclude Include="..\..\3dc\win95\CHNKLOAD.HPP" />
     <ClInclude Include="..\..\3dc\win95\CHNKTEXI.H" />

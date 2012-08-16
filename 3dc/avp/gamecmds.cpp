@@ -17,7 +17,6 @@
 #include "version.h"
 #include "equipmnt.h"
 #include "cheat.h"
-#include "cd_player.h"
 #include "dynblock.h"
 #include "bh_RubberDuck.h"
 #include "pvisible.h"
