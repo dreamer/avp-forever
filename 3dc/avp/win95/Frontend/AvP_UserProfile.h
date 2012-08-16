@@ -79,7 +79,7 @@ typedef struct
 	unsigned char SpareBits : 7; //not used
 	char Padding[74];
 
-	int CDPlayerVolume;
+	int MusicVolume;
 
 	char MultiplayerCallsign[16];
 

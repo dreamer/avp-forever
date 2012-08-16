@@ -64,9 +64,9 @@ struct Texture
 	{
 		usage = TextureUsage_Normal;
 		isValid = false;
-		width = 0;
+		width  = 0;
 		height = 0;
-		realWidth = 1;
+		realWidth  = 1;
 		realHeight = 1;
 		bitsPerPixel = 0;
 		texture = 0;
@@ -85,14 +85,16 @@ const Texture& Tex_GetTextureDetails(texID_t textureID);
 texID_t Tex_CreateFromAvPTexture  (const std::string &textureName, AVPTEXTURE &AvPTexure, enum TextureUsage usageType);
 texID_t Tex_CreateTallFontTexture (const std::string &textureName, AVPTEXTURE &AvPTexure, enum TextureUsage usageType);
 
-std::string& Tex_GetName(texID_t textureID);
-void Tex_GetNamesVector(std::vector<std::string> &namesArray);
-void Tex_GetDimensions(texID_t textureID, uint32_t &width, uint32_t &height);
-bool Tex_Lock(texID_t textureID, uint8_t **data, uint32_t *pitch, enum TextureLock lockType = TextureLock_Normal);
-bool Tex_Unlock(texID_t textureID);
-const r_Texture& Tex_GetTexture(texID_t textureID);
-void Tex_DeInit();
+std::string& Tex_GetName	(texID_t textureID);
+const r_Texture& Tex_GetTexture	(texID_t textureID);
+void Tex_GetNamesVector		(std::vector<std::string> &namesArray);
+void Tex_GetDimensions		(texID_t textureID, uint32_t &width, uint32_t &height);
+
+bool Tex_Lock	(texID_t textureID, uint8_t **data, uint32_t *pitch, enum TextureLock lockType = TextureLock_Normal);
+bool Tex_Unlock	(texID_t textureID);
+
 void Tex_Release(texID_t textureID);
+void Tex_DeInit();
 void Tex_ReleaseDynamicTextures();
 void Tex_ReloadDynamicTextures();
 void Tex_CheckMemoryUsage();

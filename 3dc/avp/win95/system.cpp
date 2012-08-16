@@ -30,7 +30,7 @@ New sound system
 #include "progress_bar.h"
 #include "bh_rubberduck.h"
 #include "game_statistics.h"
-#include "CDTrackSelection.h"
+#include "MusicPlayer.h"
 
 
 // EXTERNS
@@ -62,7 +62,6 @@ extern SCENEMODULE *MainSceneArray[];
 extern int Resolution;
 extern void SetupVision(void);
 extern void ReInitHUD(void);
-extern void CheckCDStatus(void);
 void InitSquad(void);
 void InitialiseParticleSystem(void);
 void InitialiseSfxBlocks(void);
@@ -70,18 +69,12 @@ void InitialiseLightElementSystem(void);
 extern void InitialiseTriggeredFMVs();
 void MessageHistory_Initialise(void);
 void TeleportNetPlayerToAStartingPosition(STRATEGYBLOCK *playerSbPtr, int startOfGame);
-void CDDA_Stop();
 void TimeStampedMessage(char *stringPtr);
 
 extern void DeallocateSoundsAndPoolAllocatedMemory();
 
 
 /*Globals */
-
-int WindowRequestMode;
-int VideoRequestMode;
-int RasterisationRequestMode;
-int SoftwareScanDrawRequestMode;
 WINSCALEXY TopLeftSubWindow;
 WINSCALEXY ExtentXYSubWindow;
 
@@ -218,8 +211,8 @@ void InitCharacter()
 
 void RestartLevel()
 {
-	//get the cd to start again at the beginning of the play list.
-	ResetCDPlayForLevel();
+	//get the music to start again at the beginning of the play list.
+	Music_ResetForLevel();
 
 	CleanUpPheromoneSystem();
 	// now deallocate the module vis array
@@ -295,7 +288,7 @@ void RestartLevel()
 	CreateRubberDucks();
 	InitialiseTriggeredFMVs();
 
-	CheckCDStatus();
+//	CheckCDStatus(); // CHECKME
 
 	/*Make sure we don't get a slow frame when we restart , since this can cause problems*/
 	ResetFrameCounter();
@@ -418,7 +411,8 @@ void ChangeEnvironmentToEnv(I_AVP_ENVIRONMENTS env_to_load)
 	Stop and remove all sounds here */
 	SoundSys_StopAll();
 	SoundSys_RemoveAll(); 
-	CDDA_Stop();
+
+	Music_Stop();
 
 	// Loading functions
 	AvP.CurrentEnv = env_to_load;

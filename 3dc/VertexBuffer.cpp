@@ -62,3 +62,8 @@ bool VertexBuffer::Create(uint32_t capacity, uint32_t stride, enum R_USAGE usage
 
 	return R_CreateVertexBuffer(*this);
 }
+
+void VertexBuffer::SetSize(uint32_t size)
+{
+	this->nVerts = size;
+}

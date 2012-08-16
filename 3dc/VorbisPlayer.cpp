@@ -44,7 +44,7 @@ static DWORD kQuantum = 1000 / 60;
 unsigned int __stdcall VorbisUpdateThread(void *args);
 
 extern int SetStreamingMusicVolume(int volume);
-extern int CDPlayerVolume; // volume control from menus
+extern int musicVolume; // volume control from menus
 
 std::vector<std::string> TrackList;
 
@@ -53,8 +53,8 @@ std::vector<std::string> TrackList;
 	const std::string musicFolderName = "Music/";
 #endif
 #ifdef _XBOX
-	const std::string tracklistFilename = "d:/Music/ogg_tracks.txt";
-	const std::string musicFolderName = "d:/Music/";
+	const std::string tracklistFilename = "d:\\Music\\ogg_tracks.txt";
+	const std::string musicFolderName = "d:\\Music\\";
 #endif
 
 static VorbisPlayback *inGameMusic = NULL;
@@ -103,7 +103,7 @@ bool VorbisPlayback::Open(const std::string &fileName)
 	if (this->audioStream->Play() == AUDIOSTREAM_OK)
 	{
 		mIsPlaying = true;
-		this->audioStream->SetVolume(CDPlayerVolume);
+		this->audioStream->SetVolume(musicVolume);
 		mPlaybackThreadFinished = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, VorbisUpdateThread, static_cast<void*>(this), 0, NULL));
 	}
 	else
@@ -272,6 +272,16 @@ bool IsVorbisPlaying()
 	}
 	
 	return false;
+}
+
+int GetStreamingMusicVolume()
+{
+	if (inGameMusic) // hack to stop this call before the audio stream is initialised
+	{
+		return inGameMusic->audioStream->GetVolume();
+	}
+
+	return 0;
 }
 
 int SetStreamingMusicVolume(int volume)

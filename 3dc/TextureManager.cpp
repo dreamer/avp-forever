@@ -36,15 +36,18 @@ void Tex_CheckMemoryUsage();
 
 bool Tex_Lock(texID_t textureID, uint8_t **data, uint32_t *pitch, enum TextureLock lockType)
 {
-	// check if it's valid
+	// return if texture isn't valid
 	if (textureList[textureID].isValid == false)
 	{
-		data = 0;
+		*data = 0;
 		pitch = 0;
 		return false;
 	}
 
+	// return if we have no actual texture data to read
 	if (!textureList[textureID].texture) {
+		*data = 0;
+		pitch = 0;
 		return false;
 	}
 

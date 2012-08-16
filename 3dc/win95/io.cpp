@@ -42,8 +42,6 @@ extern int WinRightX;
 extern int WinTopY;
 extern int WinBotY;
 
-extern int WindowRequestMode;
-extern int VideoRequestMode;
 extern int NumAvailableVideoModes;
 
 void InitialiseRawInput();
@@ -164,14 +162,6 @@ void PlatformSpecificShowViewExit(VIEWDESCRIPTORBLOCK *vdb, SCREENDESCRIPTORBLOC
 
 void InitialiseSystem(HINSTANCE hInstance, int nCmdShow)
 {
-	/*
-		Copy initial requests to current variables,
-		subject to later modification.
-	*/
-
-	VideoMode = VideoRequestMode;
-	WindowMode = WindowRequestMode;
-
     /* Initialise main window, windows procedure etc */
 	bool rc = InitialiseWindowsSystem(hInstance, nCmdShow, WinInitFull);
 

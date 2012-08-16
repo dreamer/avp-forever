@@ -374,6 +374,7 @@
     <ClCompile Include="..\..\3dc\MORPH.cpp" />
     <ClCompile Include="..\..\3dc\MSLHAND.cpp" />
     <ClCompile Include="..\..\3dc\MurmurHash3.cpp" />
+    <ClCompile Include="..\..\3dc\MusicPlayer.cpp" />
     <ClCompile Include="..\..\3dc\networking.cpp" />
     <ClCompile Include="..\..\3dc\OBJECT.cpp" />
     <ClCompile Include="..\..\3dc\OnScreenKeyboard.cpp" />

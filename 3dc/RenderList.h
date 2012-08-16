@@ -27,6 +27,10 @@
 #include "renderStates.h"
 #include "renderer.h"
 
+const int kLayerWorld = 0;
+const int kLayerWeapon = 1;
+const int kLayerHUD = 2;
+
 const int kCommandZClear = 0;
 const int kCommandZWriteEnable = 1;
 const int kCommandZWriteDisable = 2;
@@ -52,11 +56,13 @@ struct RenderItem
 class RenderList
 {
 	private:
-		size_t		capacity;
+		std::string listName;
+
+//		size_t		capacity;
 		size_t		listIndex;	// used as list size
 
-		uint32_t	vertexCount;
-		uint32_t	indexCount;
+//		uint32_t	vertexCount;
+//		uint32_t	indexCount;
 
 		int layer;
 
@@ -66,18 +72,25 @@ class RenderList
 
 		void AddIndices(uint16_t *indexArray, uint32_t a, uint32_t b, uint32_t c, uint32_t n);
 
+		// associated vertex, index and declaration
+		VertexBuffer *vb;
+		IndexBuffer  *ib;
+		VertexDeclaration *decl;
+
 	public:
-		RenderList(size_t size);
+		RenderList(const std::string &listName, size_t size, VertexBuffer *vb, IndexBuffer *ib, VertexDeclaration *decl);
 		~RenderList();
 
 		void Reset();
 		void Init(size_t size);
 
-		size_t GetCapacity() const { return capacity; }
+//		size_t GetCapacity() const { return capacity; }
 		size_t GetSize()     const { return listIndex; }
 
-		uint32_t GetVertexCount() const { return vertexCount; }
-		uint32_t GetIndexCount()  const { return indexCount; }
+		uint32_t GetVertexCount() const { return vb->GetSize(); }
+		uint32_t GetIndexCount()  const { return ib->GetSize(); }
+
+		int GetCurrentLayer() const { return layer; }
 	
 		void AddCommand(int commandType);
 		void SetLayer(int layer);

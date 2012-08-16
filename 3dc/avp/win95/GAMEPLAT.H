@@ -10,7 +10,5 @@
 extern void LoadRifFile();
 
 extern int WindowMode;
-extern int WindowRequestMode;
-extern int VideoRequestMode;
 
 #endif

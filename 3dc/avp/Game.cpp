@@ -29,7 +29,7 @@
 #include "avp_menus.h"
 #include "avp_userprofile.h"
 #include "davehook.h"
-#include "CDTrackSelection.h"
+#include "MusicPlayer.h"
 #include "savegame.h"
 // Added 18/11/97 by DHM: all hooks for my code
 #define UseLocalAssert TRUE
@@ -221,8 +221,8 @@ void StartGame(void)
 	*/
 	InitSquad();
 
-	//get the cd to start again at the beginning of the play list.
-	ResetCDPlayForLevel();
+	//get the music to start again at the beginning of the play list.
+	Music_ResetForLevel();
 
 	ProcessSystemObjects();
 	

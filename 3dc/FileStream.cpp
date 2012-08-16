@@ -53,7 +53,7 @@ bool FileStream::IsGood()
 	return isGood;
 }
 
-bool FileStream::Open(const std::string &fileName, eAccess accessType, bool skipFastFileCheck)
+bool FileStream::Open(const std::string &fileName, eAccess accessType, eFastFileCheck skipFastFileCheck)
 {
 //	DWORD desiredAccess;       // GENERIC_READ, GENERIC_WRITE, or both (GENERIC_READ | GENERIC_WRITE). 
 //	DWORD creationDisposition; // An action to take on a file or device that exists or does not exist.
@@ -61,7 +61,7 @@ bool FileStream::Open(const std::string &fileName, eAccess accessType, bool skip
 	std::string realFileName;
 
 	// check if the file is in a fast file first (unless we were asked to skip this check)
-	if (skipFastFileCheck)
+	if (SkipFastFileCheck == skipFastFileCheck)
 	{
 		realFileName = fileName;
 	}

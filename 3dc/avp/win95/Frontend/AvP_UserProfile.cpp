@@ -8,7 +8,7 @@
 #include "language.h"
 #include "GammaControl.h"
 #include "psnd.h"
-#include "cd_player.h"
+#include "MusicPlayer.h"
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "pldnet.h"
@@ -335,7 +335,7 @@ static void SetDefaultProfileOptions(AVP_USER_PROFILE *profilePtr)
 
 	FmvSoundVolume     = ONE_FIXED/512;
 	EffectsSoundVolume = VOLUME_DEFAULT;
-	CDPlayerVolume     = CDDA_VOLUME_DEFAULT;
+	musicVolume        = CDDA_VOLUME_DEFAULT;
 	MoviesAreActive    = 1;
 	AutoWeaponChangeOn = TRUE;
 	IntroOutroMoviesAreActive = 1;
@@ -370,7 +370,7 @@ extern void GetSettingsFromUserProfile(void)
 	MenuDetailLevelOptions        = UserProfilePtr->DetailLevelSettings;
 	FmvSoundVolume                = UserProfilePtr->FmvSoundVolume;
 	EffectsSoundVolume            = UserProfilePtr->EffectsSoundVolume;
-	CDPlayerVolume                = UserProfilePtr->CDPlayerVolume;
+	musicVolume                   = UserProfilePtr->MusicVolume;
 	MoviesAreActive               = UserProfilePtr->MoviesAreActive;
 	IntroOutroMoviesAreActive     = UserProfilePtr->IntroOutroMoviesAreActive;
 	AutoWeaponChangeOn            = !UserProfilePtr->AutoWeaponChangeDisabled;
@@ -395,7 +395,7 @@ extern void SaveSettingsToUserProfile(AVP_USER_PROFILE *profilePtr)
 	profilePtr->DetailLevelSettings          = MenuDetailLevelOptions;
 	profilePtr->FmvSoundVolume               = FmvSoundVolume;
 	profilePtr->EffectsSoundVolume           = EffectsSoundVolume;
-	profilePtr->CDPlayerVolume               = CDPlayerVolume;
+	profilePtr->MusicVolume                  = musicVolume;
 	profilePtr->MoviesAreActive              = MoviesAreActive;
 	profilePtr->IntroOutroMoviesAreActive    = IntroOutroMoviesAreActive;
 	profilePtr->AutoWeaponChangeDisabled     = !AutoWeaponChangeOn;

@@ -568,7 +568,7 @@ bool R_DrawIndexedPrimitive(uint32_t baseVertexIndex, uint32_t minIndex, uint32_
 	LastError = d3d.lpD3DDevice->DrawIndexedPrimitive(D3DPT_TRIANGLELIST,
 			baseVertexIndex,    // BaseVertexIndex - Offset from the start of the vertex buffer to the first vertex
 			minIndex,           // MinIndex - Minimum vertex index for vertices used during this call. This is a zero based index relative to BaseVertexIndex.
-			numVerts,           // total num verts in VB
+			numVerts,           // total num vertices in VB
 			startIndex,
 			numPrimitives);
 

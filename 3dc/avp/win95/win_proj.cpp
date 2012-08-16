@@ -395,11 +395,12 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 			::EndPaint(hWnd, &ps);
 			return TRUE;
 
+#if 0
 		/* Patrick 11/6/97: this to detects the end of a cdda track */
 		case MM_MCINOTIFY:
 			PlatCDDAManagementCallBack(wParam, (LONG)lParam);
 			break;
-
+#endif
 		case WM_CLOSE:
 		{
 			bRunning = false;

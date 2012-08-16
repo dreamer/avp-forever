@@ -223,26 +223,33 @@ static void ForceAssertionFailure(void)
 		
 static void CDCommand_Play(int track)
 {
+/* FIXME
 	if(!CDDA_IsOn()) CDDA_SwitchOn();
 
 	CDDA_Stop();
 	CDDA_Play(track);
+*/
 }
 void CDCommand_PlayLoop(int track)
 {
+/* FIXME
 	if(!CDDA_IsOn()) CDDA_SwitchOn();
 
 	CDDA_Stop();
 	CDDA_PlayLoop(track);
+*/
 }
 
 static void CDCommand_Stop(void)
 {
+/* FIXME
 	CDDA_Stop();
+*/
 }
 
 static void CDCommand_Volume(int volume)
 {
+/* FIXME
 	if (volume>=0 && volume<=127)
 	{
 		CDDA_ChangeVolume(volume);
@@ -251,6 +258,7 @@ static void CDCommand_Volume(int volume)
 	{
 		// say the volume setting is incorrect
 	}
+*/
 }
 
 
@@ -667,7 +675,6 @@ void CreateGameSpecificConsoleCommands(void)
 		"BROADCAST MESSAGE",
 		DoMultiplayerSaySpecies
 	);
-
  	ConsoleCommand::Make
 	(
 		"CDSTOP",

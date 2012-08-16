@@ -1658,6 +1658,7 @@ AudioStream::AudioStream()
 	buffers  = 0;
 	pSourceVoice = 0;
 	voiceContext = 0;
+	volume = 0;
 }
 
 bool AudioStream::Init(uint32_t channels, uint32_t rate, uint32_t bitsPerSample, uint32_t bufferSize, uint32_t numBuffers)
@@ -1776,7 +1777,13 @@ int32_t AudioStream::SetVolume(uint32_t volume)
 		return AUDIOSTREAM_ERROR;
 	}
 	
+	this->volume = volume;
 	return AUDIOSTREAM_OK;
+}
+
+uint32_t AudioStream::GetVolume()
+{
+	return volume;
 }
 
 int32_t AudioStream::SetPan(uint32_t pan)

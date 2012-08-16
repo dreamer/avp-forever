@@ -53,3 +53,8 @@ bool IndexBuffer::Unlock()
 {
 	return R_UnlockIndexBuffer(*this);
 }
+
+void IndexBuffer::SetSize(uint32_t size)
+{
+	this->nIndices = size;
+}

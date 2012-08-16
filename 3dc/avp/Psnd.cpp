@@ -16,7 +16,7 @@
 #include "db.h"
 #include "showcmds.h"
 #include "avp_userprofile.h"
-#include "CD_player.h"
+#include "MusicPlayer.h"
 
 /* Patrick 5/6/97 -------------------------------------------------------------
   Internal globals
@@ -133,7 +133,8 @@ void SoundSys_Management(void)
 			SoundSys_ChangeVolume(requestedVolume);
 		}
 	}
-	CheckCDVolume();
+
+	Music_CheckVolume();
 
 	PlatUpdatePlayer();
 	if (ShowDebuggingText.Sounds)

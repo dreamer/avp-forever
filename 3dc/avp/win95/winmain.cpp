@@ -25,8 +25,7 @@
 #include "mempool.h"
 #include "GammaControl.h"
 #include "avp_intro.h"
-#include "CDTrackSelection.h"
-#include "CD_Player.h"
+#include "MusicPlayer.h"
 #include "psndplat.h"
 #include "AvP_UserProfile.h"
 #include "avp_menus.h"
@@ -49,7 +48,6 @@ extern int ItemCount;
 #endif
 
 extern int PrintDebuggingText(const char* t, ...);
-extern int WindowRequestMode;
 extern int FrameRate;
 extern BOOL ForceLoad_Alien;
 extern BOOL ForceLoad_Marine;
@@ -151,7 +149,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	// load AliensVsPredator.cfg
 	Config_Load();
 
-	LoadCDTrackList(); //load list of cd tracks assigned to levels , from a text file
+	Music_Init(); //load list of music tracks assigned to levels , from a text file
 	LoadVorbisTrackList(); // do the same for any user ogg vorbis music files
 
 	SetFastRandom();
@@ -247,7 +245,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	// windowed mode?
 	if (strstr(command_line, "-w"))
 	{
-		WindowRequestMode = WindowModeSubWindow;
+		WindowMode = WindowModeSubWindow;
 
 		// will stop mouse cursor moving outside game window
 		//UseMouseCentreing = TRUE;
@@ -372,7 +370,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	Start the sound system
 	----------------------------------------------------------*/
 	SoundSys_Start();
-	CDDA_Start();
+	Music_Start();
 
 	// get rid of the mouse cursor
 	SetCursor(NULL);
@@ -504,8 +502,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 						FlushTextprintBuffer();
 
-						//check cd status
-						CheckCDAndChooseTrackIfNeeded();
+						// check music status
+						Music_Check();
 
 						// check to see if we're pausing the game;
 						// if so kill off any sound effects
@@ -602,7 +600,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		// make sure the volume gets reset for the menus
 		SoundSys_ResetFadeLevel();
 
-		CDDA_Stop();
+		Music_Stop();
 		Vorbis_CloseSystem(); // stop ogg vorbis player
 
 		// netgame support
@@ -658,7 +656,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	dx_log_close();
 #endif
 
-	CDDA_End();
+	Music_Deinit();
 	ClearMemoryPool();
 
 	// restore stickey keys setting

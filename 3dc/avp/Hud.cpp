@@ -252,7 +252,7 @@ void ReInitHUD(void)
 
 #include "RenderList.h"
 
-extern RenderList *mainList;
+extern bool gunLayer;
 
 /* KJL 16:27:39 09/20/96 - routine which handles all HUD activity */
 void MaintainHUD(void)
@@ -265,17 +265,7 @@ void MaintainHUD(void)
 
 	RenderGrapplingHook();
 
-	mainList->SetLayer(2);
-	mainList->AddCommand(kCommandZClear);
-
-#if 0
-	D3DPERF_BeginEvent(D3DCOLOR_XRGB(255, 0, 255), L"MaintainHUD - FlushD3DZBuffer() call");
-
-	// stops player weapon sinking into walls
-	FlushD3DZBuffer();
-
-	D3DPERF_EndEvent();
-#endif
+	gunLayer = true;
 
 	if (Observer)
 	{
@@ -435,7 +425,7 @@ void MaintainHUD(void)
 		}
 	}
 
-	mainList->SetLayer(1);
+	gunLayer = false;
 
 	CheckWireFrameMode(0);
 

@@ -28,6 +28,7 @@
 #include <assert.h>
 #include "console.h"
 #include <assert.h>
+#include "logString.h"
 
 extern uint32_t GetNumIndices(uint32_t numVerts);
 
@@ -58,20 +59,23 @@ extern uint32_t GetNumIndices(uint32_t numVerts);
 #define set_filterType(out, in)		out |= (in << 8)
 #define set_texAddressType(out, in)	out |= (in << 6)
 
-RenderList::RenderList(size_t size)
-{
-	capacity = size;
-	listIndex   = 0;
-	vertexCount = 0;
-	indexCount  = 0;
 
-	layer = 1;
+RenderList::RenderList(const std::string &listName, size_t size, VertexBuffer *vb, IndexBuffer *ib, VertexDeclaration *decl)
+{
+	this->listName = listName;
+	listIndex   = 0;
+
+	layer = kLayerWorld;
 
 	useIndicesOffset = false;
 
 	// treat the vector as an array so resize it to desired size
 	Items.reserve(size);
 	Items.resize(size);
+
+	this->vb = vb;
+	this->ib = ib;
+	this->decl = decl;
 }
 
 void RenderList::EnableIndicesOffset()
@@ -81,7 +85,8 @@ void RenderList::EnableIndicesOffset()
 
 void RenderList::IncrementIndexCount(uint32_t nI)
 {
-	this->indexCount += nI;
+	uint32_t iCount = ib->GetSize();
+	ib->SetSize(iCount + nI);
 }
 
 RenderList::~RenderList()
@@ -168,10 +173,13 @@ void RenderList::CreateIndices(uint16_t *indexArray, uint32_t numVerts)
 // where a, b and c are the index order, and n is the number of verts we've just added to the VB
 void RenderList::AddIndices(uint16_t *indexArray, uint32_t a, uint32_t b, uint32_t c, uint32_t n)
 {
-	indexArray[this->indexCount]   = (vertexCount - (n) + (a));
-	indexArray[this->indexCount+1] = (vertexCount - (n) + (b));
-	indexArray[this->indexCount+2] = (vertexCount - (n) + (c));
-	this->indexCount+=3;
+	uint32_t vCount = vb->GetSize();
+	uint32_t iCount = ib->GetSize();
+
+	indexArray[iCount]   = (vCount - (n) + (a));
+	indexArray[iCount+1] = (vCount - (n) + (b));
+	indexArray[iCount+2] = (vCount - (n) + (c));
+	ib->SetSize(iCount + 3);
 }
 
 void RenderList::AddCommand(int commandType)
@@ -193,11 +201,11 @@ void RenderList::AddItem(uint32_t numVerts, texID_t textureID, enum TRANSLUCENCY
 	assert(numVerts != 0);
 	assert(textureID < 8191);
 
-	if (GetSize()+1 >= GetCapacity())
+	if (GetSize()+1 >= Items.capacity())
 	{
-		// list is full
-		OutputDebugString("List full\n");
-		return;
+		// list is full. let's just resize it
+		LogString("Resizing list " + listName);
+		Items.resize(Items.capacity() * 2);
 	}
 
 	uint32_t numIndices = GetNumIndices(numVerts);
@@ -220,15 +228,18 @@ void RenderList::AddItem(uint32_t numVerts, texID_t textureID, enum TRANSLUCENCY
 	else
 	{
 		// we need to add a new item
-		Items[listIndex].vertStart  = vertexCount;
-		Items[listIndex].indexStart = indexCount;
+		Items[listIndex].vertStart  = vb->GetSize();
+		Items[listIndex].indexStart = ib->GetSize();
 	}
 
-	Items[listIndex].vertEnd = vertexCount + numVerts;
-	Items[listIndex].indexEnd = indexCount + numIndices;
+	Items[listIndex].vertEnd = vb->GetSize() + numVerts;
+	Items[listIndex].indexEnd = ib->GetSize() + numIndices;
+
 	listIndex++;
 
-	vertexCount += numVerts;
+	// update the vertex buffer object with how many items it's holding
+	uint32_t currentSize = vb->GetSize();
+	vb->SetSize(currentSize + numVerts);
 }
 
 void RenderList::Sort()
@@ -244,13 +255,21 @@ void RenderList::Reset()
 	// reset our index back to the first item
 	listIndex = 0;
 
-	vertexCount = 0;
-	indexCount  = 0;
+	// lets specify that the VB and IB are now empty
+	vb->SetSize(0);
+	ib->SetSize(0);
 }
 
 void RenderList::Draw()
 {
 	uint32_t baseIndexValue = 0;
+
+	// set vertex declaration
+	decl->Set();
+
+	// set vb and ibs to active
+	vb->Set();
+	ib->Set();
 
 	for (size_t i = 0; i < listIndex; i++)
 	{
@@ -281,7 +300,7 @@ void RenderList::Draw()
 				ChangeFilteringMode(0, (enum FILTERING_MODE_ID)			get_filterType(it->sortKey));
 				ChangeTextureAddressMode(0, (enum TEXTURE_ADDRESS_MODE) get_texAddressType(it->sortKey));
 
-				R_DrawIndexedPrimitive(baseIndexValue, 0, this->vertexCount, it->indexStart, numPrimitives);
+				R_DrawIndexedPrimitive(baseIndexValue, 0, vb->GetSize(), it->indexStart, numPrimitives);
 			}
 		}
 	}

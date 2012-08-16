@@ -93,7 +93,6 @@ EULER deathTargetOrientation = {0,0,0};
 
 void CheckIfMirroringIsRequired(void);
 static void ModifyHeadOrientation(void);
-void FlushD3DZBuffer();
 void UpdateAllFMVTextures();
 void D3D_DrawBackdrop(void);
 int AVPViewVolumePlaneTest(CLIPPLANEBLOCK *cpb, DISPLAYBLOCK *dblockptr, int or);

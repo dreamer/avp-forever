@@ -61,6 +61,12 @@ class FileStream
 			SeekEnd
 		};
 
+		enum eFastFileCheck
+		{
+			DoFastFileCheck,
+			SkipFastFileCheck
+		};
+
 		FileStream()
 		{
 			fileHandle = 0;
@@ -72,7 +78,7 @@ class FileStream
 		~FileStream();
 
 		// pass true for skipFastFileCheck to skip fast file check, for accessing files we know aren't in a fast file
-		bool FileStream::Open(const std::string &fileName, eAccess accessType, bool skipFastFileCheck = false);
+		bool FileStream::Open(const std::string &fileName, eAccess accessType, eFastFileCheck skipFastFileCheck = DoFastFileCheck);
 		void Close();
 		bool IsGood();
 

@@ -34,6 +34,7 @@
 #include "bh_types.h"
 
 bool frustumCull = false;
+bool gunLayer = false;
 
 #define FMV_ON 0
 #define FMV_SIZE 128
@@ -131,16 +132,18 @@ RenderList *particleList = 0;
 RenderList *mainList = 0;
 RenderList *orthoList = 0;
 RenderList *decalList = 0;
+RenderList *weaponList = 0;
 
 static HRESULT LastError; // remove me eventually (when no more D3D calls exist in this file)
 
 // set our std::vectors capacity allowing us to use them as regular arrays
 void RenderListInit()
 {
-	particleList = new RenderList(400);
-	mainList     = new RenderList(800);
-	orthoList    = new RenderList(50);
-	decalList    = new RenderList(400);
+	mainList     = new RenderList("mainList", 400, d3d.mainVB,  d3d.mainIB,  d3d.mainDecl);
+	orthoList    = new RenderList("orthoList", 50,  d3d.orthoVB, d3d.orthoIB, d3d.orthoDecl);
+	particleList = new RenderList("particleList", 200, d3d.particleVB, d3d.particleIB, d3d.particleDecl);
+	decalList    = new RenderList("decalList", 200, d3d.decalVB, d3d.decalIB, d3d.decalDecl);
+	weaponList   = new RenderList("weaponList", 80,  d3d.mainVB,  d3d.mainIB,  d3d.mainDecl);
 }
 
 void RenderListDeInit()
@@ -156,15 +159,15 @@ void RenderListDeInit()
 
 	delete decalList;
 	decalList = 0;
+
+	delete weaponList;
+	weaponList = 0;
 }
 
 struct renderParticle
 {
 	PARTICLE		particle;
 	PARTICLEVERTEX	vertices[4];
-//	int				translucency;
-
-//	inline bool operator<(const renderParticle& rhs) const {return translucency < rhs.translucency;}
 };
 
 // particle buckets
@@ -303,6 +306,7 @@ static bool LockExecuteBuffer()
 	mainList->Reset();
 	orthoList->Reset();
 	decalList->Reset();
+	weaponList->Reset();
 
 	// reset counters and indexes
 	vb = 0;
@@ -347,8 +351,8 @@ float cot(float in)
 static bool ExecuteBuffer()
 {
 	// sort the list of render objects
-//	particleList->Sort();
-//	decalList->Sort();
+	particleList->Sort();
+	decalList->Sort();
 	mainList->Sort();
 
 	// these two just add the vertex data to the below lists (they dont draw anything themselves
@@ -358,13 +362,6 @@ static bool ExecuteBuffer()
 
 	if (mainList->GetSize())
 	{
-		// set vertex declaration
-		d3d.mainDecl->Set();
-
-		// set main rendering vb and ibs to active
-		d3d.mainVB->Set();
-		d3d.mainIB->Set();
-
 		// set main shaders to active
 		d3d.effectSystem->SetActive(d3d.mainEffect);
 
@@ -380,12 +377,6 @@ static bool ExecuteBuffer()
 	// render any decals
 	if (decalList->GetSize())
 	{
-		// set vertex declaration
-		d3d.decalDecl->Set();
-
-		d3d.decalVB->Set();
-		d3d.decalIB->Set();
-
 		// set decal shaders as active
 		d3d.effectSystem->SetActive(d3d.decalEffect);
 
@@ -405,13 +396,6 @@ static bool ExecuteBuffer()
 	// render any particles
 	if (particleList->GetSize())
 	{
-		// set vertex declaration
-		d3d.particleDecl->Set();
-
-		// set the particle VB and IBs as active
-		d3d.particleVB->Set();
-		d3d.particleIB->Set();
-
 		// set main shaders to active
 		d3d.effectSystem->SetActive(d3d.particleEffect);
 
@@ -421,15 +405,26 @@ static bool ExecuteBuffer()
 		particleList->Draw();
 	}
 
+	// draw player weapon
+	if (weaponList->GetSize())
+	{
+		// set main shaders to active
+		d3d.effectSystem->SetActive(d3d.mainEffect);
+
+		// we don't need world matrix here as avp has done all the world transforms itself
+		R_MATRIX matWorldViewProj = d3d.matView * d3d.matProjection;
+
+		d3d.effectSystem->SetVertexShaderConstant(d3d.mainEffect, 0, CONST_MATRIX, &matWorldViewProj);
+
+		R_ClearZBuffer();
+
+		// draw our main list (level geometry, player weapon etc)
+		weaponList->Draw();
+	}
+
 	// render any orthographic quads
 	if (orthoList->GetSize())
 	{
-		// set vertex declaration
-		d3d.orthoDecl->Set();
-
-		d3d.orthoVB->Set();
-		d3d.orthoIB->Set();
-
 		// set orthographic projection shaders as active
 		d3d.effectSystem->SetActive(d3d.orthoEffect);
 
@@ -1341,7 +1336,11 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 	float RecipW = 1.0f / (float) texWidth;
 	float RecipH = 1.0f / (float) texHeight;
 
-	mainList->AddItem(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode);
+	if (gunLayer) {
+		weaponList->AddItem(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode);
+	} else {
+		mainList->AddItem(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode);
+	}
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{
@@ -1363,7 +1362,11 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 		vb++;
 	}
 
-	mainList->CreateIndices(mainIndex, RenderPolygon.NumberOfVertices);
+	if (gunLayer) {
+		weaponList->CreateIndices(mainIndex, RenderPolygon.NumberOfVertices);
+	} else {
+		mainList->CreateIndices(mainIndex, RenderPolygon.NumberOfVertices);
+	}
 }
 
 void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)

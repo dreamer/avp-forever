@@ -149,7 +149,7 @@ bool FF_Init()
 static bool FF_Open(const std::string &fastFileName, int32_t fastFileIndex)
 {
 	FileStream file;
-	file.Open(fastFileName, FileStream::FileRead, true);
+	file.Open(fastFileName, FileStream::FileRead, FileStream::SkipFastFileCheck);
 
 	if (!file.IsGood())
 	{

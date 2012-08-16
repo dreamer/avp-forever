@@ -77,5 +77,7 @@ extern void LoadVorbisTrack(size_t track);
 extern bool LoadVorbisTrackList();
 bool IsVorbisPlaying();
 size_t CheckNumberOfVorbisTracks();
+int SetStreamingMusicVolume(int volume);
+int GetStreamingMusicVolume();
 
 #endif
