@@ -271,6 +271,13 @@ typedef struct D3DInfo
 
 extern D3DINFO d3d;
 
+// frustum cull test
+struct Sphere_t
+{
+	D3DXVECTOR3 position;
+	float radius;
+};
+
 uint32_t XPercentToScreen(float percent);
 uint32_t YPercentToScreen(float percent);
 

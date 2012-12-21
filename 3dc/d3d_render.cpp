@@ -103,8 +103,8 @@ extern void RenderSky(void);
 extern void RenderStarfield(void);
 extern void ScanImagesForFMVs();
 extern bool CheckPointIsInFrustum(D3DXVECTOR3 *point);
-bool CreateVolatileResources();
-bool ReleaseVolatileResources();
+extern bool CreateVolatileResources();
+extern bool ReleaseVolatileResources();
 void ColourFillBackBuffer(int FillColour);
 
 int LightIntensityAtPoint(VECTORCH *pointPtr);
@@ -139,11 +139,11 @@ static HRESULT LastError; // remove me eventually (when no more D3D calls exist 
 // set our std::vectors capacity allowing us to use them as regular arrays
 void RenderListInit()
 {
-	mainList     = new RenderList("mainList", 400, d3d.mainVB,  d3d.mainIB,  d3d.mainDecl);
-	orthoList    = new RenderList("orthoList", 50,  d3d.orthoVB, d3d.orthoIB, d3d.orthoDecl);
-	particleList = new RenderList("particleList", 200, d3d.particleVB, d3d.particleIB, d3d.particleDecl);
-	decalList    = new RenderList("decalList", 200, d3d.decalVB, d3d.decalIB, d3d.decalDecl);
-	weaponList   = new RenderList("weaponList", 80,  d3d.mainVB,  d3d.mainIB,  d3d.mainDecl);
+	mainList     = new RenderList("mainList", 400, &d3d.mainVB,  &d3d.mainIB,  &d3d.mainDecl);
+	orthoList    = new RenderList("orthoList", 50,  &d3d.orthoVB, &d3d.orthoIB, &d3d.orthoDecl);
+	particleList = new RenderList("particleList", 200, &d3d.particleVB, &d3d.particleIB, &d3d.particleDecl);
+	decalList    = new RenderList("decalList", 200, &d3d.decalVB, &d3d.decalIB, &d3d.decalDecl);
+	weaponList   = new RenderList("weaponList", 80,  &d3d.mainVB,  &d3d.mainIB,  &d3d.mainDecl);
 }
 
 void RenderListDeInit()
@@ -215,7 +215,7 @@ inline float HPos2DC(int32_t pos)
 
 // AvP uses numVerts to represent the actual number of polygon vertices we're passing to the backend.
 // we then use the OUTPUT_TRIANGLE function to generate the indices required to represent those
-// polygons. This function calculates the number of indices required based on the number of verts.
+// polygons. This function calculates the number of indices required based on the number of vertices.
 // AvP code defined these, so hence the magic numbers.
 
 uint32_t GetNumIndices(uint32_t numVerts)
@@ -1327,6 +1327,11 @@ void DrawParticles()
 void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
 {
 	// bjd - This is the function responsible for drawing level geometry and the players weapon
+	if (!mainList->Check(RenderPolygon.NumberOfVertices)) {
+		UnlockExecuteBufferAndPrepareForUse();
+		ExecuteBuffer();
+		LockExecuteBuffer();
+	}
 
 	texID_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
 
@@ -1372,6 +1377,11 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
 {
 	// responsible for drawing predators lock on triangle, for one
+	if (!mainList->Check(RenderPolygon.NumberOfVertices)) {
+		UnlockExecuteBufferAndPrepareForUse();
+		ExecuteBuffer();
+		LockExecuteBuffer();
+	}
 
 	// Take header information
 	int32_t flags = inputPolyPtr->PolyFlags;
@@ -1406,6 +1416,12 @@ void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 
 void D3D_PredatorThermalVisionPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
 {
+	if (!mainList->Check(RenderPolygon.NumberOfVertices)) {
+		UnlockExecuteBufferAndPrepareForUse();
+		ExecuteBuffer();
+		LockExecuteBuffer();
+	}
+
 	mainList->AddItem(RenderPolygon.NumberOfVertices, NO_TEXTURE, TRANSLUCENCY_OFF);
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
@@ -1428,6 +1444,12 @@ void D3D_PredatorThermalVisionPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVER
 
 void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
 {
+	if (!mainList->Check(RenderPolygon.NumberOfVertices)) {
+		UnlockExecuteBufferAndPrepareForUse();
+		ExecuteBuffer();
+		LockExecuteBuffer();
+	}
+
 	// We assume bit 15 (TxLocal) HAS been
 	// properly cleared this time...
 	texID_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
@@ -2395,6 +2417,12 @@ void DrawScanlinesOverlay(float level)
 
 void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr)
 {
+	if (!mainList->Check(RenderPolygon.NumberOfVertices)) {
+		UnlockExecuteBufferAndPrepareForUse();
+		ExecuteBuffer();
+		LockExecuteBuffer();
+	}
+
 	// We assume bit 15 (TxLocal) HAS been
 	// properly cleared this time...
 	texID_t textureID = (inputPolyPtr->PolyColour & ClrTxDefn);
@@ -2431,6 +2459,12 @@ void D3D_DrawMoltenMetalMesh_Unclipped()
 {
 	VECTORCH *point = MeshVertex;
 	VECTORCH *pointWS = MeshWorldVertex;
+
+	if (!mainList->Check(kNumMeshVerts)) {
+		UnlockExecuteBufferAndPrepareForUse();
+		ExecuteBuffer();
+		LockExecuteBuffer();
+	}
 
 	mainList->AddItem(kNumMeshVerts, currentWaterTexture, TRANSLUCENCY_NORMAL);
 

@@ -42,12 +42,13 @@ enum /* flags, etc */
 extern int NumImages;
 
 /* directories used with the LIO_RIFFPATH flag */
+/*
 extern char const * GameTex_Directory;
 extern char const * SubShps_Directory;
 extern char const * GenTex_Directory;
 extern char const * FixTex_Directory;
 extern char const * ToolsTex_Directory;
-
+*/
 /* game mode for use with the above */
 extern char const * cl_pszGameMode;
 

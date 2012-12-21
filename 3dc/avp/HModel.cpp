@@ -2172,190 +2172,189 @@ void DoHModel(HMODELCONTROLLER *controller, DISPLAYBLOCK *dptr)
 	controller->Computed_Position = dptr->ObWorld;
 }
 
-	void DoHModelTimer_Recursion(HMODELCONTROLLER *controller, SECTION_DATA *this_section_data, int frame_timer, int sequence_type, int subsequence)
+void DoHModelTimer_Recursion(HMODELCONTROLLER *controller, SECTION_DATA *this_section_data, int frame_timer, int sequence_type, int subsequence)
+{
+	KEYFRAME_DATA *sequence_start;
+	SECTION *this_section;
+	SEQUENCE *this_sequence;
+	/* Cut down Process_Section. */
+	this_section = this_section_data->sempai;
+
+	if (controller->FrameStamp != GlobalFrameCounter)
 	{
-		KEYFRAME_DATA *sequence_start;
-		SECTION *this_section;
-		SEQUENCE *this_sequence;
-		/* Cut down Process_Section. */
-		this_section = this_section_data->sempai;
+		/* Positions not computed yet this frame. */
+		this_sequence = GetSequencePointer(sequence_type, subsequence, this_section);
+		sequence_start = this_sequence->first_frame;
 
-		if (controller->FrameStamp != GlobalFrameCounter)
+		/* For this section, find the interpolated offset and eulers. */
+
+		if (this_section_data->Tweening)
 		{
-			/* Positions not computed yet this frame. */
-			this_sequence = GetSequencePointer(sequence_type, subsequence, this_section);
-			sequence_start = this_sequence->first_frame;
-
-			/* For this section, find the interpolated offset and eulers. */
-
-			if (this_section_data->Tweening)
-			{
-				/* Err... do nothing. */
-			}
-			else
-			{
-				int working_timer;
-				Handle_Section_Timer(controller, this_section_data, sequence_start, frame_timer, &working_timer);
-			}
+			/* Err... do nothing. */
 		}
-
-		/* Now call recursion... */
-
-		if ((this_section_data->First_Child != NULL)
-		    && ((this_section_data->flags & section_data_terminate_here) == 0))
+		else
 		{
-			SECTION_DATA *child_ptr;
-			child_ptr = this_section_data->First_Child;
-
-			while (child_ptr != NULL)
-			{
-				LOCALASSERT(child_ptr->My_Parent == this_section_data);
-				DoHModelTimer_Recursion(controller, child_ptr, frame_timer, sequence_type, subsequence);
-				child_ptr = child_ptr->Next_Sibling;
-			}
+			int working_timer;
+			Handle_Section_Timer(controller, this_section_data, sequence_start, frame_timer, &working_timer);
 		}
 	}
 
-	void DoHModelTimer(HMODELCONTROLLER *controller)
-	{
-		/* Be VERY careful with this function - it can put the timer and the
-		position computations out of step.  Once you've called this, call NO
-		OTHER HMODEL FUNCTIONS on this model until the next frame! */
-		GLOBALASSERT(controller);
+	/* Now call recursion... */
 
-		if (controller->FrameStamp == GlobalFrameCounter)
+	if ((this_section_data->First_Child != NULL)
+		&& ((this_section_data->flags & section_data_terminate_here) == 0))
+	{
+		SECTION_DATA *child_ptr;
+		child_ptr = this_section_data->First_Child;
+
+		while (child_ptr != NULL)
 		{
-			/* Done a timer this frame already! */
-			return;
+			LOCALASSERT(child_ptr->My_Parent == this_section_data);
+			DoHModelTimer_Recursion(controller, child_ptr, frame_timer, sequence_type, subsequence);
+			child_ptr = child_ptr->Next_Sibling;
+		}
+	}
+}
+
+void DoHModelTimer(HMODELCONTROLLER *controller)
+{
+	/* Be VERY careful with this function - it can put the timer and the
+	position computations out of step.  Once you've called this, call NO
+	OTHER HMODEL FUNCTIONS on this model until the next frame! */
+	GLOBALASSERT(controller);
+
+	if (controller->FrameStamp == GlobalFrameCounter)
+	{
+		/* Done a timer this frame already! */
+		return;
+	}
+
+	controller->keyframe_flags = 0;
+	HMTimer_Kernel(controller);
+	/* That handled the timer.  No rendering this time. */
+	DoHModelTimer_Recursion(controller, controller->section_data, controller->sequence_timer, controller->Sequence_Type, controller->Sub_Sequence);
+}
+
+void ProveHModel(HMODELCONTROLLER *controller, DISPLAYBLOCK *dptr)
+{
+	/* Simply to verify a new hmodel, and remove junk. */
+	GLOBALASSERT(controller);
+	GLOBALASSERT(dptr);
+	Global_HModel_Sptr = dptr->ObStrategyBlock;
+
+	/* Check the object is in a sensible place. */
+	if (!((dptr->ObWorld.vx < 1000000 && dptr->ObWorld.vx > -1000000)
+		    && (dptr->ObWorld.vy < 1000000 && dptr->ObWorld.vy > -1000000)
+		    && (dptr->ObWorld.vz < 1000000 && dptr->ObWorld.vz > -1000000)
+		    ))
+	{
+		LOGDXFMT(("Tests in PROVEHMODEL.\n"));
+
+		if (Global_HModel_Sptr)
+		{
+			LOGDXFMT(("Misplaced object is of type %d\n", Global_HModel_Sptr->I_SBtype));
+		}
+		else
+		{
+			LOGDXFMT(("Misplaced object has no SBptr.\n"));
 		}
 
+		LOGDXFMT(("It was playing sequence: %d,%d\n", controller->Sequence_Type, controller->Sub_Sequence));
+		LOCALASSERT(dptr->ObWorld.vx < 1000000 && dptr->ObWorld.vx > -1000000);
+		LOCALASSERT(dptr->ObWorld.vy < 1000000 && dptr->ObWorld.vy > -1000000);
+		LOCALASSERT(dptr->ObWorld.vz < 1000000 && dptr->ObWorld.vz > -1000000);
+	}
+
+	GLOBALASSERT(controller->section_data->my_controller == controller);
+
+	if (controller->FrameStamp == GlobalFrameCounter)
+	{
+		VECTORCH offset;
+		/* Want to budge? */
+		offset.vx = dptr->ObWorld.vx - controller->Computed_Position.vx;
+		offset.vy = dptr->ObWorld.vy - controller->Computed_Position.vy;
+		offset.vz = dptr->ObWorld.vz - controller->Computed_Position.vz;
+
+		if ((offset.vx != 0) || (offset.vy != 0) || (offset.vz != 0))
+		{
+			/* I reckon you'd be better off taking the budge. */
+			Budge_HModel(controller, &offset);
+		}
+	}
+
+	if (controller->FrameStamp != GlobalFrameCounter)
+	{
 		controller->keyframe_flags = 0;
 		HMTimer_Kernel(controller);
-		/* That handled the timer.  No rendering this time. */
-		DoHModelTimer_Recursion(controller, controller->section_data, controller->sequence_timer, controller->Sequence_Type, controller->Sub_Sequence);
 	}
 
-	void ProveHModel(HMODELCONTROLLER *controller, DISPLAYBLOCK *dptr)
+	/* That handled the timer.  Now update positions. */
+	Process_Section(controller, controller->section_data, &dptr->ObWorld, &dptr->ObMat, controller->sequence_timer, controller->Sequence_Type, controller->Sub_Sequence, 0);
+	controller->FrameStamp = GlobalFrameCounter;
+	controller->Computed_Position = dptr->ObWorld;
+	GLOBALASSERT(controller->section_data->flags & section_data_initialised);
+}
+
+void ProveHModel_Far(HMODELCONTROLLER *controller, STRATEGYBLOCK *sbPtr)
+{
+	/* Simply to verify a new hmodel, and remove junk. */
+	GLOBALASSERT(controller);
+	GLOBALASSERT(sbPtr);
+	Global_HModel_Sptr = sbPtr;
+	GLOBALASSERT(sbPtr->DynPtr);
+
+	/* Check the object is in a sensible place. */
+	if (!((sbPtr->DynPtr->Position.vx < 1000000 && sbPtr->DynPtr->Position.vx > -1000000)
+		    && (sbPtr->DynPtr->Position.vy < 1000000 && sbPtr->DynPtr->Position.vy > -1000000)
+		    && (sbPtr->DynPtr->Position.vz < 1000000 && sbPtr->DynPtr->Position.vz > -1000000)
+		    ))
 	{
-		/* Simply to verify a new hmodel, and remove junk. */
-		GLOBALASSERT(controller);
-		GLOBALASSERT(dptr);
-		Global_HModel_Sptr = dptr->ObStrategyBlock;
+		LOGDXFMT(("Tests in PROVEHMODEL_FAR.\n"));
 
-		/* Check the object is in a sensible place. */
-		if (!((dptr->ObWorld.vx < 1000000 && dptr->ObWorld.vx > -1000000)
-		      && (dptr->ObWorld.vy < 1000000 && dptr->ObWorld.vy > -1000000)
-		      && (dptr->ObWorld.vz < 1000000 && dptr->ObWorld.vz > -1000000)
-		     ))
+		if (Global_HModel_Sptr)
 		{
-			LOGDXFMT(("Tests in PROVEHMODEL.\n"));
-
-			if (Global_HModel_Sptr)
-			{
-				LOGDXFMT(("Misplaced object is of type %d\n", Global_HModel_Sptr->I_SBtype));
-			}
-			else
-			{
-				LOGDXFMT(("Misplaced object has no SBptr.\n"));
-			}
-
-			LOGDXFMT(("It was playing sequence: %d,%d\n", controller->Sequence_Type, controller->Sub_Sequence));
-			LOCALASSERT(dptr->ObWorld.vx < 1000000 && dptr->ObWorld.vx > -1000000);
-			LOCALASSERT(dptr->ObWorld.vy < 1000000 && dptr->ObWorld.vy > -1000000);
-			LOCALASSERT(dptr->ObWorld.vz < 1000000 && dptr->ObWorld.vz > -1000000);
+			LOGDXFMT(("Misplaced object is of type %d\n", Global_HModel_Sptr->I_SBtype));
+		}
+		else
+		{
+			LOGDXFMT(("Misplaced object has no SBptr.\n"));
 		}
 
-		GLOBALASSERT(controller->section_data->my_controller == controller);
-
-		if (controller->FrameStamp == GlobalFrameCounter)
-		{
-			VECTORCH offset;
-			/* Want to budge? */
-			offset.vx = dptr->ObWorld.vx - controller->Computed_Position.vx;
-			offset.vy = dptr->ObWorld.vy - controller->Computed_Position.vy;
-			offset.vz = dptr->ObWorld.vz - controller->Computed_Position.vz;
-
-			if ((offset.vx != 0) || (offset.vy != 0) || (offset.vz != 0))
-			{
-				/* I reckon you'd be better off taking the budge. */
-				Budge_HModel(controller, &offset);
-			}
-		}
-
-		if (controller->FrameStamp != GlobalFrameCounter)
-		{
-			controller->keyframe_flags = 0;
-			HMTimer_Kernel(controller);
-		}
-
-		/* That handled the timer.  Now update positions. */
-		Process_Section(controller, controller->section_data, &dptr->ObWorld, &dptr->ObMat, controller->sequence_timer, controller->Sequence_Type, controller->Sub_Sequence, 0);
-		controller->FrameStamp = GlobalFrameCounter;
-		controller->Computed_Position = dptr->ObWorld;
-		GLOBALASSERT(controller->section_data->flags & section_data_initialised);
+		LOGDXFMT(("It was playing sequence: %d,%d\n", controller->Sequence_Type, controller->Sub_Sequence));
+		LOCALASSERT(sbPtr->DynPtr->Position.vx < 1000000 && sbPtr->DynPtr->Position.vx > -1000000);
+		LOCALASSERT(sbPtr->DynPtr->Position.vy < 1000000 && sbPtr->DynPtr->Position.vy > -1000000);
+		LOCALASSERT(sbPtr->DynPtr->Position.vz < 1000000 && sbPtr->DynPtr->Position.vz > -1000000);
 	}
 
-	void ProveHModel_Far(HMODELCONTROLLER *controller, STRATEGYBLOCK *sbPtr)
+	GLOBALASSERT(controller->section_data->my_controller == controller);
+
+	if (controller->FrameStamp == GlobalFrameCounter)
 	{
-		/* Simply to verify a new hmodel, and remove junk. */
-		GLOBALASSERT(controller);
-		GLOBALASSERT(sbPtr);
-		Global_HModel_Sptr = sbPtr;
-		GLOBALASSERT(sbPtr->DynPtr);
+		VECTORCH offset;
+		/* Want to budge? */
+		offset.vx = controller->Computed_Position.vx - sbPtr->DynPtr->Position.vx;
+		offset.vy = controller->Computed_Position.vy - sbPtr->DynPtr->Position.vy;
+		offset.vz = controller->Computed_Position.vz - sbPtr->DynPtr->Position.vz;
 
-		/* Check the object is in a sensible place. */
-		if (!((sbPtr->DynPtr->Position.vx < 1000000 && sbPtr->DynPtr->Position.vx > -1000000)
-		      && (sbPtr->DynPtr->Position.vy < 1000000 && sbPtr->DynPtr->Position.vy > -1000000)
-		      && (sbPtr->DynPtr->Position.vz < 1000000 && sbPtr->DynPtr->Position.vz > -1000000)
-		     ))
+		if ((offset.vx != 0) || (offset.vy != 0) || (offset.vz != 0))
 		{
-			LOGDXFMT(("Tests in PROVEHMODEL_FAR.\n"));
-
-			if (Global_HModel_Sptr)
-			{
-				LOGDXFMT(("Misplaced object is of type %d\n", Global_HModel_Sptr->I_SBtype));
-			}
-			else
-			{
-				LOGDXFMT(("Misplaced object has no SBptr.\n"));
-			}
-
-			LOGDXFMT(("It was playing sequence: %d,%d\n", controller->Sequence_Type, controller->Sub_Sequence));
-			LOCALASSERT(sbPtr->DynPtr->Position.vx < 1000000 && sbPtr->DynPtr->Position.vx > -1000000);
-			LOCALASSERT(sbPtr->DynPtr->Position.vy < 1000000 && sbPtr->DynPtr->Position.vy > -1000000);
-			LOCALASSERT(sbPtr->DynPtr->Position.vz < 1000000 && sbPtr->DynPtr->Position.vz > -1000000);
+			/* I reckon you'd be better off taking the budge. */
+			Budge_HModel(controller, &offset);
 		}
-
-		GLOBALASSERT(controller->section_data->my_controller == controller);
-
-		if (controller->FrameStamp == GlobalFrameCounter)
-		{
-			VECTORCH offset;
-			/* Want to budge? */
-			offset.vx = controller->Computed_Position.vx - sbPtr->DynPtr->Position.vx;
-			offset.vy = controller->Computed_Position.vy - sbPtr->DynPtr->Position.vy;
-			offset.vz = controller->Computed_Position.vz - sbPtr->DynPtr->Position.vz;
-
-			if ((offset.vx != 0) || (offset.vy != 0) || (offset.vz != 0))
-			{
-				/* I reckon you'd be better off taking the budge. */
-				Budge_HModel(controller, &offset);
-			}
-		}
-
-		if (controller->FrameStamp != GlobalFrameCounter)
-		{
-			controller->keyframe_flags = 0;
-			HMTimer_Kernel(controller);
-		}
-
-		/* That handled the timer.  Now update positions. */
-		Process_Section(controller, controller->section_data, &sbPtr->DynPtr->Position, &sbPtr->DynPtr->OrientMat, controller->sequence_timer, controller->Sequence_Type, controller->Sub_Sequence, 0);
-		controller->FrameStamp = GlobalFrameCounter;
-		controller->Computed_Position = sbPtr->DynPtr->Position;
-		GLOBALASSERT(controller->section_data->flags & section_data_initialised);
 	}
 
+	if (controller->FrameStamp != GlobalFrameCounter)
+	{
+		controller->keyframe_flags = 0;
+		HMTimer_Kernel(controller);
+	}
+
+	/* That handled the timer.  Now update positions. */
+	Process_Section(controller, controller->section_data, &sbPtr->DynPtr->Position, &sbPtr->DynPtr->OrientMat, controller->sequence_timer, controller->Sequence_Type, controller->Sub_Sequence, 0);
+	controller->FrameStamp = GlobalFrameCounter;
+	controller->Computed_Position = sbPtr->DynPtr->Position;
+	GLOBALASSERT(controller->section_data->flags & section_data_initialised);
+}
 
 int Prune_Recursion_Virtual(SECTION_DATA *this_section_data)
 {

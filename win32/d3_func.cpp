@@ -81,6 +81,8 @@ std::vector<texID_t> setTextureArray;
 // Marine & Predator FOV - 77
 const int kDefaultFOV = 77;
 
+uint32_t nDrawIndexedPrimCalls = 0;
+
 // byte order macros for A8R8G8B8 d3d texture
 enum
 {
@@ -195,7 +197,23 @@ bool ReleaseVolatileResources()
 
 	return true;
 }
+/*
+bool IsSphereInFrustum(Sphere_t &sphere)
+{
+	// calculate our distances to each of the planes
+	for (int i = 0; i < 6; ++i) 
+	{
+		if (D3DXPlaneDotCoord(&d3d.frustumPlanes[i], &sphere.position) + sphere.radius < 0)
+		{
+			// Outside the frustum, reject it!
+			return false;
+		}
+	}
 
+	// otherwise we are fully in view
+	return true;
+}
+*/
 bool CheckPointIsInFrustum(D3DXVECTOR3 *point)
 {
 	// check if point is in front of each plane
@@ -325,6 +343,8 @@ bool R_BeginScene()
 		return false;
 	}
 
+	nDrawIndexedPrimCalls = 0;
+
 	return true;
 }
 
@@ -336,7 +356,11 @@ bool R_EndScene()
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
-
+/*
+	char buf[100];
+	sprintf(buf, "nDrawIndexedPrimCalls: %d\n", nDrawIndexedPrimCalls);
+	OutputDebugString(buf);
+*/
 	return true;
 }
 
@@ -579,6 +603,8 @@ bool R_DrawIndexedPrimitive(uint32_t baseVertexIndex, uint32_t minIndex, uint32_
 		return false;
 	}
 
+	nDrawIndexedPrimCalls++;
+
 	return true;
 }
 
@@ -637,8 +663,6 @@ bool R_SetIndexBuffer(class IndexBuffer &indexBuffer)
 bool R_UnlockVertexBuffer(class VertexBuffer &vertexBuffer)
 {
 	if (vertexBuffer.isLocked == false) {
-		Con_PrintError("Vertex buffer is already unlocked!");
-		assert(0);
 		return false;
 	}
 
@@ -658,8 +682,6 @@ bool R_UnlockVertexBuffer(class VertexBuffer &vertexBuffer)
 bool R_UnlockIndexBuffer(class IndexBuffer &indexBuffer)
 {
 	if (indexBuffer.isLocked == false) {
-		Con_PrintError("Index buffer is already unlocked!");
-		assert(0);
 		return false;
 	}
 

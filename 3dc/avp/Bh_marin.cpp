@@ -8580,9 +8580,7 @@ void NPC_GetBimbleTarget(STRATEGYBLOCK *sbPtr,VECTORCH *output) {
 			/* Success! */
 			success=1;
 		}
-
 	}
-
 }
 
 static void HandleFidgetAnimations(STRATEGYBLOCK *sbPtr) {

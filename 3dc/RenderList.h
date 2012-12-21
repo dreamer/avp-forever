@@ -73,12 +73,12 @@ class RenderList
 		void AddIndices(uint16_t *indexArray, uint32_t a, uint32_t b, uint32_t c, uint32_t n);
 
 		// associated vertex, index and declaration
-		VertexBuffer *vb;
-		IndexBuffer  *ib;
-		VertexDeclaration *decl;
+		VertexBuffer **vb;
+		IndexBuffer  **ib;
+		VertexDeclaration **decl;
 
 	public:
-		RenderList(const std::string &listName, size_t size, VertexBuffer *vb, IndexBuffer *ib, VertexDeclaration *decl);
+		RenderList(const std::string &listName, size_t size, VertexBuffer **vb, IndexBuffer **ib, VertexDeclaration **decl);
 		~RenderList();
 
 		void Reset();
@@ -87,14 +87,15 @@ class RenderList
 //		size_t GetCapacity() const { return capacity; }
 		size_t GetSize()     const { return listIndex; }
 
-		uint32_t GetVertexCount() const { return vb->GetSize(); }
-		uint32_t GetIndexCount()  const { return ib->GetSize(); }
+		uint32_t GetVertexCount() const { return (**vb).GetSize(); }
+		uint32_t GetIndexCount()  const { return (**ib).GetSize(); }
 
 		int GetCurrentLayer() const { return layer; }
 	
 		void AddCommand(int commandType);
 		void SetLayer(int layer);
 
+		bool Check(uint32_t numVerts);
 		void Sort();
 		void AddTriangle(uint16_t *indexArray, uint32_t a, uint32_t b, uint32_t c, uint32_t n);
 		void AddItem(uint32_t numVerts, texID_t textureID, enum TRANSLUCENCY_TYPE translucencyMode, enum FILTERING_MODE_ID filteringMode = FILTERING_BILINEAR_ON, enum TEXTURE_ADDRESS_MODE textureAddress = TEXTURE_WRAP);

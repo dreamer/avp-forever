@@ -54,7 +54,7 @@ extern POLYHEADER *PolyheaderPtr;
     (polyPtr)->PolyPoint[1] = *(ShapePointsPtr + *vertexNumberPtr++);\
     (polyPtr)->PolyPoint[2] = *(ShapePointsPtr + *vertexNumberPtr++);\
     \
-	if (*vertexNumberPtr != Term)\
+	if (*vertexNumberPtr != kTerminationMarker)\
 	{\
 	    (polyPtr)->PolyPoint[3] = *(ShapePointsPtr + *vertexNumberPtr);\
 	   	(polyPtr)->NumberOfVertices=4; \
@@ -64,6 +64,7 @@ extern POLYHEADER *PolyheaderPtr;
 	   	(polyPtr)->NumberOfVertices=3; \
 	}\
 }
+
 #define GetPolygonNormal(polyPtr)\
 {	  \
 	if (ShapeIsMorphed)\

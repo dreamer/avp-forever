@@ -35,6 +35,16 @@ extern VECTORCH LocalView;
 #define FAR_Z_CLIP 0
 #define FAR_Z_CLIP_RANGE 49000
 
+/* clipping code macros - these are used as building blocks to assemble
+clipping fns for different polygon types with the minimum of fuss */
+#define ZCLIPPINGVALUE 4
+//64
+#define Clip_Z_Test(v) (ZCLIPPINGVALUE <= (v)->Z)
+#define Clip_NX_Test(v) (-(v)->X <= (v)->Z)
+#define Clip_PX_Test(v) ((v)->X <= (v)->Z)
+#define Clip_NY_Test(v) (-(v)->Y <= (v)->Z)
+#define Clip_PY_Test(v) ((v)->Y <= (v)->Z)
+
 /*KJL****************************************************************************************
 *                                    P R O T O T Y P E S                                    *
 ****************************************************************************************KJL*/
@@ -166,17 +176,6 @@ void SetFrustumType(enum FrustumType frustumType)
 		}
 	}
 }
-
-/* clipping code macros - these are used as building blocks to assemble
-clipping fns for different polygon types with the minimum of fuss */
-#define ZCLIPPINGVALUE 4
-//64
-#define Clip_Z_Test(v) (ZCLIPPINGVALUE <= (v)->Z)
-#define Clip_NX_Test(v) (-(v)->X <= (v)->Z)
-#define Clip_PX_Test(v) ((v)->X <= (v)->Z)
-#define Clip_NY_Test(v) (-(v)->Y <= (v)->Z)
-#define Clip_PY_Test(v) ((v)->Y <= (v)->Z)
-
 
 #define Clip_LoopStart(b) \
 	do \
@@ -980,7 +979,7 @@ int PolygonWithinFrustum(POLYHEADER *polyPtr)
 
 	RenderPolygon.NumberOfVertices = 0;
 
-	while (*vertexNumberPtr != Term)
+	while (*vertexNumberPtr != kTerminationMarker)
 	{
 		int vertexNumber = *vertexNumberPtr++;
 
@@ -1006,8 +1005,8 @@ int PolygonWithinFrustum(POLYHEADER *polyPtr)
 
 		if (Global_ODB_Ptr->ObMorphCtrl)
 		{
-		   	SHAPEHEADER *shape1Ptr;
-		   	VECTORCH *shape1PointsPtr;
+			SHAPEHEADER *shape1Ptr;
+			VECTORCH *shape1PointsPtr;
 			VECTORCH *shape2PointsPtr;
 
 			/* Set up the morph data */
@@ -1034,40 +1033,40 @@ int PolygonWithinFrustum(POLYHEADER *polyPtr)
 				shape1PointsPtr = (VECTORCH *)(*shape1Ptr->points);
 				shape2PointsPtr = (VECTORCH *)(*shape2Ptr->points);
 
-				{
-				   	VECTORCH vertex1 = shape1PointsPtr[polyPtr->Poly1stPt];
-				   	VECTORCH vertex2 = shape2PointsPtr[polyPtr->Poly1stPt];
+				VECTORCH vertex1 = shape1PointsPtr[polyPtr->Poly1stPt];
+				VECTORCH vertex2 = shape2PointsPtr[polyPtr->Poly1stPt];
 
-					if ((vertex1.vx == vertex2.vx && vertex1.vy == vertex2.vy && vertex1.vz == vertex2.vz))
-					{
-						pop = vertex1;
-					}
-					else
-					{
-						/* KJL 15:27:20 05/22/97 - I've changed this to speed things up, If a vertex
-						component has a magnitude greater than 32768 things will go wrong. */
-						pop.vx = vertex1.vx + (((vertex2.vx-vertex1.vx)*MorphDisplay.md_lerp)>>16);
-						pop.vy = vertex1.vy + (((vertex2.vy-vertex1.vy)*MorphDisplay.md_lerp)>>16);
-						pop.vz = vertex1.vz + (((vertex2.vz-vertex1.vz)*MorphDisplay.md_lerp)>>16);
-					}
+				if ((vertex1.vx == vertex2.vx && vertex1.vy == vertex2.vy && vertex1.vz == vertex2.vz))
+				{
+					pop = vertex1;
+				}
+				else
+				{
+					/* KJL 15:27:20 05/22/97 - I've changed this to speed things up, If a vertex
+					component has a magnitude greater than 32768 things will go wrong. */
+					pop.vx = vertex1.vx + (((vertex2.vx-vertex1.vx)*MorphDisplay.md_lerp)>>16);
+					pop.vy = vertex1.vy + (((vertex2.vy-vertex1.vy)*MorphDisplay.md_lerp)>>16);
+					pop.vz = vertex1.vz + (((vertex2.vz-vertex1.vz)*MorphDisplay.md_lerp)>>16);
 				}
 			}
- 		}
-		{
-			/* Get the 1st polygon point as the POP */
-			VECTORCH *pointsArray = (VECTORCH*)(Global_ShapePoints);
-			pop = pointsArray[polyPtr->Poly1stPt];
 		}
+
+		/* Get the 1st polygon point as the POP */
+		VECTORCH *pointsArray = (VECTORCH*)(Global_ShapePoints);
+		pop = pointsArray[polyPtr->Poly1stPt];
+	
 		pop.vx -= LocalView.vx;
 		pop.vy -= LocalView.vy;
 		pop.vz -= LocalView.vz;
 
-		if (Dot(&pop, normalPtr) > 0)
+		if (Dot(&pop, normalPtr) > 0) {
 			return 0;
+		}
 	}
 
-	if (noClippingFlag == INSIDE_FRUSTUM)
+	if (noClippingFlag == INSIDE_FRUSTUM) {
 		return 2;
+	}
 
 	/* yes, we need to draw poly */
 	return 1;
@@ -1214,15 +1213,13 @@ static int ObjectWithin_Norm_Frustum(DISPLAYBLOCK *dbPtr)
 	return 1; // bjd
 #endif
 
- //	LOCALASSERT(dbPtr->ObShapeData->shaperadius);
-
 #if FAR_Z_CLIP
-	if(dbPtr->ObView.vz-dbPtr->ObShapeData->shaperadius<=FAR_Z_CLIP_RANGE)
+	if (dbPtr->ObView.vz - dbPtr->ObShapeData->shaperadius <= FAR_Z_CLIP_RANGE)
 #endif
-	if (dbPtr->ObView.vz+dbPtr->ObShapeData->shaperadius>=ZCLIPPINGVALUE)
+	if (dbPtr->ObView.vz + dbPtr->ObShapeData->shaperadius >= ZCLIPPINGVALUE)
 	{
 		/* scale radius by square root of 2 */
-		int radius = MUL_FIXED(92682,dbPtr->ObShapeData->shaperadius);
+		int radius = MUL_FIXED(92682, dbPtr->ObShapeData->shaperadius);
 
 		if ((dbPtr->ObView.vx-dbPtr->ObView.vz)<=radius)
 			if ((-dbPtr->ObView.vx-dbPtr->ObView.vz)<=radius)

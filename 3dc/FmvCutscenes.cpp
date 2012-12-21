@@ -407,6 +407,7 @@ void ReleaseAllFMVTextures()
 void StartMenuMusic()
 {
 	menuMusic = new SmackerPlayback;
+
 	if (menuMusic->Open("FMVs/IntroSound.smk") != FMV_OK)
 	{
 		Con_PrintError("Can't open file IntroSound.smk");

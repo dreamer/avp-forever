@@ -15,7 +15,6 @@ extern unsigned char KeyboardInput[256];
 
 #include "3dc.h"
 #include "inline.h"
-#include "cd_player.h"
 #include "psndplat.h"
 #include "onscreenKeyboard.h"
 

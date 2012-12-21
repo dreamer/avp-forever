@@ -38,11 +38,11 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "C:\Users\Barry\Desktop\avp_redist\AvPx.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "C:\Users\Barry\Desktop\avp_redist\directx\*"; DestDir: "{app}\redist\directx\"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "C:\Users\Barry\Desktop\avp_redist\vcredist_x86.exe"; DestDir: "{app}\redist\vc\"; Flags: ignoreversion
-Source: "C:\Users\Barry\Desktop\avp_redist\shaders\*"; DestDir: "{app}\shaders\"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "C:\Users\Barry\Desktop\avp_redist\dlls\*"; DestDir: "{app}";
+Source: "D:\Development\avp_redist\AvPx.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "D:\Development\avp_redist\directx\*"; DestDir: "{app}\redist\directx\"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "D:\Development\avp_redist\vcredist_x86.exe"; DestDir: "{app}\redist\vc\"; Flags: ignoreversion
+Source: "D:\Development\avp_redist\shaders\*"; DestDir: "{app}\shaders\"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "D:\Development\avp_redist\dlls\*"; DestDir: "{app}";
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]

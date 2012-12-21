@@ -21,7 +21,7 @@
 	#define debug TRUE
 #endif
 
-#define Term -1
+const int kTerminationMarker = -1;
 
 
 

@@ -436,6 +436,7 @@ std::string& Con_GetArgument(int argNum)
 	return cmdArgs.at(argNum);
 }
 
+// can be used to check if any arguments were specified - can print help message if not
 size_t Con_GetNumArguments()
 {
 	return cmdArgs.size();

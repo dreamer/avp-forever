@@ -2402,7 +2402,7 @@ void PolyAveragePoint(POLYHEADER *pheader, int *spts, VECTORCH *apt)
 
 	numpolypts = 0;
 
-	while(*mypolystart != Term)
+	while(*mypolystart != kTerminationMarker)
 	{
 		x = *(spts + *mypolystart + ix);
 		y = *(spts + *mypolystart + iy);

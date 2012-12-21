@@ -77,12 +77,12 @@ extern void PurgeMSLShapeList();
 BOOL LevelHasStars;
 
 // these are to link with chnkimag.cpp
-const char *ToolsTex_Directory = "//Kate/Kate Share/avp/ToolsTex/";
-const char *GenTex_Directory = "//Kate/Kate Share/avp/GenG-Tex/";
-const char *SubShps_Directory = "SubShps/All/";
+//const char *ToolsTex_Directory = "//Kate/Kate Share/avp/ToolsTex/";
+//const char *GenTex_Directory = "//Kate/Kate Share/avp/GenG-Tex/";
+//const char *SubShps_Directory = "SubShps/All/";
 // const char * GenTex_Directory = 0;
-const char *FixTex_Directory = "//Kate/Kate Share/avp/Fix-Tex/";
-const char *GameTex_Directory = "//Kate/Kate Share/avp/game-tex/";
+//const char *FixTex_Directory = "//Kate/Kate Share/avp/Fix-Tex/";
+//const char *GameTex_Directory = "//Kate/Kate Share/avp/game-tex/";
 // new directories for new-style graphics - to be determined properly
 char const *FirstTex_Directory = "Graphics"; // currently relative to cwd
 char const *SecondTex_Directory = 0; // will be the src safe shadow for development builds
@@ -110,24 +110,24 @@ void setup_start_position(RIFFHANDLE h)
 		List<Chunk*> start_list;
 		((Chunk_With_Children*)pChunk)->lookup_child("AVPSTART",start_list);
 
-		if(start_list.size())
+		if (start_list.size())
 			start_chunk=(AVP_Player_Start_Chunk*)start_list.first_entry();
 	}
 	if (start_chunk)
 	{
-		PlayerStartLocation.vx = (int)(start_chunk->location.x*local_scale);
-		PlayerStartLocation.vy = (int)(start_chunk->location.y*local_scale);
-		PlayerStartLocation.vz = (int)(start_chunk->location.z*local_scale);
+		PlayerStartLocation.vx = (int)(start_chunk->location.x * local_scale);
+		PlayerStartLocation.vy = (int)(start_chunk->location.y * local_scale);
+		PlayerStartLocation.vz = (int)(start_chunk->location.z * local_scale);
 
-		PlayerStartMat.mat11=start_chunk->orientation.mat11;
-		PlayerStartMat.mat12=start_chunk->orientation.mat12;
-		PlayerStartMat.mat13=start_chunk->orientation.mat13;
-		PlayerStartMat.mat21=start_chunk->orientation.mat21;
-		PlayerStartMat.mat22=start_chunk->orientation.mat22;
-		PlayerStartMat.mat23=start_chunk->orientation.mat23;
-		PlayerStartMat.mat31=start_chunk->orientation.mat31;
-		PlayerStartMat.mat32=start_chunk->orientation.mat32;
-		PlayerStartMat.mat33=start_chunk->orientation.mat33;
+		PlayerStartMat.mat11 = start_chunk->orientation.mat11;
+		PlayerStartMat.mat12 = start_chunk->orientation.mat12;
+		PlayerStartMat.mat13 = start_chunk->orientation.mat13;
+		PlayerStartMat.mat21 = start_chunk->orientation.mat21;
+		PlayerStartMat.mat22 = start_chunk->orientation.mat22;
+		PlayerStartMat.mat23 = start_chunk->orientation.mat23;
+		PlayerStartMat.mat31 = start_chunk->orientation.mat31;
+		PlayerStartMat.mat32 = start_chunk->orientation.mat32;
+		PlayerStartMat.mat33 = start_chunk->orientation.mat33;
 	}
 	else
 	{
@@ -294,14 +294,14 @@ void pre_process_shape (RIFFHANDLE, ChunkShape & cs, Chunk_With_Children * shape
 {
 	Shape_Merge_Data_Chunk * smdc = 0;
 
-	Chunk * pChunk = shape_chunk->lookup_single_child("SHPMRGDT");
-	if (pChunk)
-	{
+	Chunk *pChunk = shape_chunk->lookup_single_child("SHPMRGDT");
+	if (pChunk) {
 		smdc = (Shape_Merge_Data_Chunk *) pChunk;
 	}
 
-	if (smdc)
-		merge_polygons_in_chunkshape (cs,smdc);
+	if (smdc) {
+		merge_polygons_in_chunkshape(cs, smdc);
+	}
 }
 
 void set_local_scale(RIFFHANDLE h, int /*flags*/)
@@ -311,8 +311,9 @@ void set_local_scale(RIFFHANDLE h, int /*flags*/)
 	if (h->envd)
 	{
 		Chunk * pChunk = h->envd->lookup_single_child ("ENVSDSCL");
-		if (pChunk)
+		if (pChunk) {
 			local_scale *= ((Environment_Scale_Chunk *)pChunk)->scale;
+		}
 	}
 }
 

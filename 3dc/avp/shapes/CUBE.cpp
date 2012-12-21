@@ -145,42 +145,42 @@ int CUBE_item0[] =
 {
 	CUBE_PolyType,0*3,0,CUBE_colour1,
 	0*1,1*1,5*1,4*1,
-	Term
+	kTerminationMarker
 };
 
 int CUBE_item1[] =
 {
 	CUBE_PolyType,1*3,0,CUBE_colour1,
 	1*1,2*1,6*1,5*1,
-	Term
+	kTerminationMarker
 };
 
 int CUBE_item2[] =
 {
 	CUBE_PolyType,2*3,0,CUBE_colour1,
 	2*1,3*1,7*1,6*1,
-	Term
+	kTerminationMarker
 };
 
 int CUBE_item3[] =
 {
 	CUBE_PolyType,3*3,0,CUBE_colour1,
 	3*1,0*1,4*1,7*1,
-	Term
+	kTerminationMarker
 };
 
 int CUBE_item4[] =
 {
 	CUBE_PolyType,4*3,0,CUBE_colour1,
 	6*1,7*1,4*1,5*1,
-	Term
+	kTerminationMarker
 };
 
 int CUBE_item5[] =
 {
 	CUBE_PolyType,5*3,0,CUBE_colour1,
 	2*1,1*1,0*1,3*1,
-	Term
+	kTerminationMarker
 };
 
 #endif

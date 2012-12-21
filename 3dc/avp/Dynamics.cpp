@@ -74,7 +74,7 @@ void PlayerPheromoneTrail(DYNAMICSBLOCK *dynPtr);
     (polyPtr)->PolyPoint[1] = *(ShapePointsPtr + *vertexNumberPtr++);\
     (polyPtr)->PolyPoint[2] = *(ShapePointsPtr + *vertexNumberPtr++);\
     \
-	if (*vertexNumberPtr != Term)\
+	if (*vertexNumberPtr != kTerminationMarker)\
 	{\
 	    (polyPtr)->PolyPoint[3] = *(ShapePointsPtr + *vertexNumberPtr);\
 	   	(polyPtr)->NumberOfVertices=4; \
@@ -6076,26 +6076,26 @@ static void FindLandscapePolygonsInParticlesPath(PARTICLE *particlePtr, VECTORCH
 	CollisionPolysPtr = &CollisionPolysArray[0];
     NumberOfCollisionPolys=0;
 
-   	/* scan through ActiveBlockList for modules */
+	/* scan through ActiveBlockList for modules */
 	{
-	   	int numberOfObjects = NumActiveBlocks;
-	   	while(numberOfObjects)
-	   	{
-	   		DISPLAYBLOCK* objectPtr = ActiveBlockList[--numberOfObjects];
-	   		char isStaticObject=0;
+		int numberOfObjects = NumActiveBlocks;
+		while(numberOfObjects)
+		{
+			DISPLAYBLOCK* objectPtr = ActiveBlockList[--numberOfObjects];
+			char isStaticObject=0;
 
-	   		GLOBALASSERT(objectPtr);
+			GLOBALASSERT(objectPtr);
 			if(objectPtr->ObStrategyBlock)
 				if(objectPtr->ObStrategyBlock->DynPtr)
 				{
 					if(((objectPtr->ObStrategyBlock->DynPtr->IsStatic)
 					||(objectPtr->ObStrategyBlock->DynPtr->OnlyCollideWithObjects))
-			  		&&(!objectPtr->ObStrategyBlock->DynPtr->OnlyCollideWithEnvironment))
+					&&(!objectPtr->ObStrategyBlock->DynPtr->OnlyCollideWithEnvironment))
 						isStaticObject=1;
 				}
 
-	   		if (objectPtr->ObMyModule) /* is object a module or static? */
-	    	{
+			if (objectPtr->ObMyModule) /* is object a module or static? */
+			{
 				{
 					DBBMaxX = particlePtr->Position.vx - objectPtr->ObWorld.vx + COLLISION_GRANULARITY; 
 					DBBMinX = particlePtr->Position.vx - objectPtr->ObWorld.vx - COLLISION_GRANULARITY;
@@ -6187,13 +6187,13 @@ static void FindLandscapePolygonsInParticlesPath(PARTICLE *particlePtr, VECTORCH
 				/* if the bounding box intersects with the object, investigate */
 			   	if (( (DBBMaxX >= -objectPtr->ObRadius) && (DBBMinX <= objectPtr->ObRadius) )
 			      &&( (DBBMaxY >= -objectPtr->ObRadius) && (DBBMinY <= objectPtr->ObRadius) )
- 			      &&( (DBBMaxZ >= -objectPtr->ObRadius) && (DBBMinZ <= objectPtr->ObRadius) ))
+			      &&( (DBBMaxZ >= -objectPtr->ObRadius) && (DBBMinZ <= objectPtr->ObRadius) ))
 			       	TestShapeWithParticlesDynamicBoundingBox(objectPtr);
 				
 			}
-	    }
-  	}
-}   
+		}
+	}
+}
 
 static signed int DistanceMovedBeforeParticleHitsPolygon(PARTICLE *particlePtr, struct ColPolyTag *polyPtr, int distanceToMove)
 {

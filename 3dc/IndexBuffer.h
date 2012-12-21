@@ -33,7 +33,7 @@ class IndexBuffer
 	public:
 		// members
 		r_IndexBuffer	indexBuffer;
-		uint32_t		capacity; // number of indices we can hold
+		
 		uint32_t		sizeInBytes;
 		enum R_USAGE	usage;
 		bool			isLocked;
@@ -64,7 +64,8 @@ class IndexBuffer
 		void IndexBuffer::SetSize(uint32_t size);
 
 	private:
-		size_t nIndices; // number of indices in the buffer
+		uint32_t capacity;    // number of indices we can hold
+		uint32_t nIndices;    // number of indices in the buffer
 };
 
 #endif

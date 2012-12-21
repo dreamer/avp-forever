@@ -26,6 +26,7 @@
 #include "FmvPlayback.h"
 #include "console.h"
 #include <process.h>
+#include <assert.h>
 #include <new>
 
 static const int kAudioBufferSize  = 4096;
@@ -106,6 +107,9 @@ int SmackerPlayback::Open(const std::string &fileName)
 
 		// create mAudio streaming buffer
 		this->audioStream = new AudioStream();
+
+		assert(info.bitsPerSample != 0);
+
 		if (!this->audioStream->Init(info.nChannels, info.sampleRate, info.bitsPerSample, kAudioBufferSize, kAudioBufferCount))
 		{
 			Con_PrintError("Failed to create mAudio stream buffer for FMV playback");

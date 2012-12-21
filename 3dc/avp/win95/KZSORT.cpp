@@ -208,8 +208,8 @@ void SortModules(unsigned int noOfItems)
 void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 {
 	int numOfObjects = NumOnScreenBlocks;
-	int numVisMods=0;
-	int numVisObjs=0;
+	int numVisMods = 0;
+	int numVisObjs = 0;
 
 	while (numOfObjects)
 	{
@@ -357,18 +357,18 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 			int minY = objectPtr->ObWorld.vy - objectPtr->ObRadius;
 
 			int numMods = 0;
-			while (numMods<numVisMods)
+			while (numMods < numVisMods)
 			{
 				MODULE *modulePtr = SortedModules[numMods].DispPtr->ObMyModule;
 
-				if (maxX >= modulePtr->m_minx+modulePtr->m_world.vx)
-				if (minX <= modulePtr->m_maxx+modulePtr->m_world.vx)
-				if (maxZ >= modulePtr->m_minz+modulePtr->m_world.vz)
-				if (minZ <= modulePtr->m_maxz+modulePtr->m_world.vz)
-				if (maxY >= modulePtr->m_miny+modulePtr->m_world.vy)
-				if (minY <= modulePtr->m_maxy+modulePtr->m_world.vy)
+				if (maxX >= modulePtr->m_minx + modulePtr->m_world.vx)
+				if (minX <= modulePtr->m_maxx + modulePtr->m_world.vx)
+				if (maxZ >= modulePtr->m_minz + modulePtr->m_world.vz)
+				if (minZ <= modulePtr->m_maxz + modulePtr->m_world.vz)
+				if (maxY >= modulePtr->m_miny + modulePtr->m_world.vy)
+				if (minY <= modulePtr->m_maxy + modulePtr->m_world.vy)
 				{
-					VisibleObjects[o].SortKey=numMods;
+					VisibleObjects[o].SortKey = numMods;
 					break;
 				}
 				numMods++;

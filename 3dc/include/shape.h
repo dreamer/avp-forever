@@ -172,8 +172,8 @@ typedef struct	Adaptive_Degradation_Desc
 
 typedef struct shapeheader 
 {
-	int numpoints;								/* Total #points in shape */
-	int numitems;								/* Total #items in shape */
+	int numpoints;							/* Total #points in shape */
+	int numitems;							/* Total #items in shape */
 
 	int shapeflags;							/* Various Display Options */
 
@@ -190,9 +190,8 @@ typedef struct shapeheader
 
 	EXTRAITEMDATA *sh_extraitemdata;
 
-	int sh_num_subshapes;					/* General use - NEVER use as test for
-														the data being present */
-	int shaperadius;							/* max(sqr(x^2+y^2+z^2)) */
+	int sh_num_subshapes;					/* General use - NEVER use as test for the data being present */
+	int shaperadius;						/* max(sqr(x^2+y^2+z^2)) */
 	int shapemaxx;
 	int shapeminx;
 	int shapemaxy;
@@ -200,18 +199,18 @@ typedef struct shapeheader
 	int shapemaxz;
 	int shapeminz;
 
-	SHAPEINSTR *sh_instruction;			/* ptr to shape instr struct */
+	SHAPEINSTR *sh_instruction;				/* ptr to shape instr struct */
 
-	char * sh_name;
+	char *sh_name;
 
 	ZSPHEADER *sh_zsp_header;				/* ptr to zsp header structure */
 
-	SHAPEANIMATIONHEADER * animation_header;
+	SHAPEANIMATIONHEADER *animation_header;
 
 	/*if shape_degradation_array is not null then it is terminated with an entry whose distance is 0
 	 and whose shape is this shapeheader*/
 	 /*the shapes are listed in ascending order of complexity*/
-	ADAPTIVE_DEGRADATION_DESC* shape_degradation_array;
+	ADAPTIVE_DEGRADATION_DESC *shape_degradation_array;
 
 } SHAPEHEADER;
 
@@ -242,7 +241,7 @@ typedef struct shapeheader
 #define ShapeFlag_MultiViewSprite	0x00010000		/* See "c7.doc" */
 
 #define ShapeFlag_UnrotatedPoints	0x00020000		/* Ignores "ObMat" */
-#define ShapeFlag_HasTextureAnimation 0x00040000 /*at least one of the polygons has texture animation*/
+#define ShapeFlag_HasTextureAnimation 0x00040000	/*at least one of the polygons has texture animation*/
 
 
 

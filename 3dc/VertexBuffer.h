@@ -31,7 +31,7 @@ class VertexBuffer
 {
 	public:
 		r_VertexBuffer	vertexBuffer;
-		uint32_t		capacity;      // number of vertices we can hold
+		
 		uint32_t		sizeInBytes;
 		enum R_USAGE	usage;
 		uint32_t		stride;
@@ -65,7 +65,8 @@ class VertexBuffer
 		void VertexBuffer::SetSize(uint32_t size);
 
 	private:
-		size_t nVerts; // number of vertices in the buffer
+		uint32_t capacity;    // number of vertices we can hold
+		uint32_t nVerts;      // number of vertices in the buffer
 };
 
 #endif

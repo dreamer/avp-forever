@@ -74,7 +74,7 @@ extern int GlobalAmbience;
 extern int NumActiveBlocks;
 
 extern DISPLAYBLOCK *ActiveBlockList[];
-extern SHAPEHEADER **mainshapelist;
+//extern SHAPEHEADER **mainshapelist;
 
 bool MirroringActive = false;
 
@@ -321,6 +321,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 {
 	int numitems = shapePtr->numitems;
 	int **itemArrayPtr = shapePtr->items;
+
 	LOCALASSERT(numitems);
 	bool isCulled = false;
 
@@ -529,8 +530,6 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 			break;
 	}
 
-	//  if((Global_ODB_Ptr->ObStrategyBlock)&&(Global_ODB_Ptr->ObStrategyBlock->I_SBtype == I_BehaviourAlien))
-	//textprint("shape alien\n");
 	extern bool frustumCull;
 	extern bool CheckPointIsInFrustum(D3DXVECTOR3 * point);
 	TestVerticesWithFrustum();
@@ -563,7 +562,6 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 				int pif = PolygonWithinFrustum(polyPtr);
 
 				if (pif)
-					//if (1)
 				{
 					switch (polyPtr->PolyItemType) {
 						case I_ZB_Gouraud3dTexturedPolygon:
@@ -602,8 +600,6 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 		PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *)(Player->ObStrategyBlock->SBdataptr);
 
 		if (playerStatusPtr->cloakOn || playerStatusPtr->CloakingEffectiveness != 0) {
-			//          int a = GetSin(CloakingPhase&4095);
-			//          a = MUL_FIXED(a,a);
 			CloakingMode = ONE_FIXED * 5 / 4 - playerStatusPtr->CloakingEffectiveness; //32768;
 
 			do {
@@ -611,7 +607,6 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 				int pif = PolygonWithinFrustum(polyPtr);
 
 				if (pif)
-					//if (1)
 				{
 					switch (polyPtr->PolyItemType) {
 						case I_ZB_Gouraud3dTexturedPolygon:
@@ -728,7 +723,7 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 							VertexNumberPtr++;
 							D3DXVECTOR3 point;
 							point.x = (float)vertices->vx;
-							point.y = (float) - vertices->vy;
+							point.y = (float)-vertices->vy;
 							point.z = (float)vertices->vz;
 
 							if (CheckPointIsInFrustum(&point) == true) {
@@ -864,7 +859,6 @@ void PredatorThermalVision_ShapePipeline(SHAPEHEADER *shapePtr)
 		int pif = PolygonWithinFrustum(polyPtr);
 
 		if (pif)
-			//      if (1)
 		{
 			PredatorThermalVisionPolygon_Construct(polyPtr);
 
@@ -926,7 +920,6 @@ void PredatorSeeAliensVision_ShapePipeline(SHAPEHEADER *shapePtr)
 				int pif = PolygonWithinFrustum(polyPtr);
 
 				if (pif)
-					//if (1)
 				{
 					PredatorSeeAliensVisionPolygon_Construct(polyPtr);
 					//                  if (pif!=2)
@@ -1229,7 +1222,9 @@ static void GouraudPolygon_Construct(POLYHEADER *polyPtr)
 		renderVerticesPtr->X = RotatedPts[*VertexNumberPtr].vx;
 		renderVerticesPtr->Y = RotatedPts[*VertexNumberPtr].vy;
 		renderVerticesPtr->Z = RotatedPts[*VertexNumberPtr].vz;
+
 		VertexIntensity(renderVerticesPtr);
+
 		int colour = (renderVerticesPtr->B + renderVerticesPtr->R + renderVerticesPtr->G) / 3;
 		renderVerticesPtr->R = colour;
 		renderVerticesPtr->G = colour;
@@ -2862,6 +2857,9 @@ void ShapeSpritePointsInstr(SHAPEINSTR *shapeinstrptr)
 	}
 }
 
+// FIXME
+//bool IsSphereInFrustum(Sphere_t &sphere);
+
 void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 {
 	SHAPEHEADER *shapeheaderptr;
@@ -2921,6 +2919,21 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 
 	// Shape Language Specific Setup
 	SetupShapePipeline();
+
+#if 0
+	// frustum test?
+	Sphere_t testSphere;
+	testSphere.position.x = dptr->ObWorld.vx;//(dptr->ObWorld.vx + dptr->ObMaxX) / 2;
+	testSphere.position.y = -dptr->ObWorld.vy;//(dptr->ObWorld.vy + dptr->ObMaxY) / 2;
+	testSphere.position.z = dptr->ObWorld.vz;//(dptr->ObWorld.vz + dptr->ObMaxZ) / 2;
+	testSphere.radius = (float)dptr->ObRadius;
+
+	if (!IsSphereInFrustum(testSphere)) {
+		OutputDebugString("culling object...");
+		OutputDebugString(dptr->name); OutputDebugString("\n");
+		return;
+	}
+#endif
 
 	/*
 		Create the Local -> View Matrix

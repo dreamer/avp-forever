@@ -890,7 +890,7 @@ CTM_ReturnType copy_to_mainshapelist(RIFFHANDLE h, Shape_Chunk *tmpshp, int flag
 
 	if (tmpshp->count_children("ANIMSEQU"))
 	{
-		//look for alternate texture mappings
+		// look for alternate texture mappings
 		pChunk = tmpshp->lookup_single_child("ASALTTEX");
 
 		if (pChunk)
@@ -924,6 +924,7 @@ CTM_ReturnType copy_to_mainshapelist(RIFFHANDLE h, Shape_Chunk *tmpshp, int flag
 	}
 
 	Shape_Fragments_Chunk *sfc = 0;
+
 	pChunk = tmpshp->lookup_single_child("SHPFRAGS");
 
 	if (pChunk)

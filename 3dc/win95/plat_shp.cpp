@@ -156,7 +156,7 @@ void GetPolygonVertices(struct ColPolyTag *polyPtr)
     polyPtr->PolyPoint[1] = *(ShapePointsPtr + *vertexNumberPtr++);
     polyPtr->PolyPoint[2] = *(ShapePointsPtr + *vertexNumberPtr++);
     
-	if (*vertexNumberPtr != Term)
+	if (*vertexNumberPtr != kTerminationMarker)
 	{
 	    polyPtr->PolyPoint[3] = *(ShapePointsPtr + *vertexNumberPtr);
 	   	polyPtr->NumberOfVertices=4; 
@@ -301,7 +301,7 @@ void ReplaceVertexInPolygon(int polyIndex, int oldVertex, int newVertex)
 	
 	vertexNumberPtr = &PolyheaderPtr->Poly1stPt;
 
-    while(*vertexNumberPtr != Term)
+    while(*vertexNumberPtr != kTerminationMarker)
 	{
     	if (*vertexNumberPtr == oldVertex)
 		{
@@ -341,7 +341,7 @@ int *GetPolygonVertexIndices(void)
 
     patPolyVertexIndices[3]	= -1;
 
-    while(*vertexNumberPtr != Term)
+    while(*vertexNumberPtr != kTerminationMarker)
 	{
     	patPolyVertexIndices[numberOfVertices++] = (*vertexNumberPtr);
 		vertexNumberPtr++; 
