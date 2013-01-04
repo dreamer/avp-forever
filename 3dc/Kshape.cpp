@@ -4955,7 +4955,7 @@ void RenderInsideAlienTongue(int offset)
 	for (polyNumber = 0; polyNumber < 4; polyNumber++) {
 		for (int i = 0; i < 4; i++) {
 			int v = TonguePolyVertexList[polyNumber][i];
-			VerticesBuffer[i].A = 255;
+
 			VerticesBuffer[i].X = translatedPts[v].vx;
 			VerticesBuffer[i].Y = translatedPts[v].vy;
 			VerticesBuffer[i].Z = translatedPts[v].vz;
@@ -4964,6 +4964,7 @@ void RenderInsideAlienTongue(int offset)
 			VerticesBuffer[i].R = offset / 2048;
 			VerticesBuffer[i].G = offset / 2048;
 			VerticesBuffer[i].B = offset / 2048;
+			VerticesBuffer[i].A = 255;
 			VerticesBuffer[i].SpecularR = 0;
 			VerticesBuffer[i].SpecularG = 0;
 			VerticesBuffer[i].SpecularB = 0;
