@@ -129,9 +129,9 @@ static uint32_t orthoVBOffset = 0;
 static uint32_t NumberOfRenderedTriangles = 0;
 
 RenderList *particleList = 0;
-RenderList *mainList = 0;
+RenderList *mainList  = 0;
 RenderList *orthoList = 0;
-RenderList *decalList = 0;
+RenderList *decalList  = 0;
 RenderList *weaponList = 0;
 
 static HRESULT LastError; // remove me eventually (when no more D3D calls exist in this file)
@@ -139,11 +139,11 @@ static HRESULT LastError; // remove me eventually (when no more D3D calls exist 
 // set our std::vectors capacity allowing us to use them as regular arrays
 void RenderListInit()
 {
-	mainList     = new RenderList("mainList", 400, &d3d.mainVB,  &d3d.mainIB,  &d3d.mainDecl);
-	orthoList    = new RenderList("orthoList", 50,  &d3d.orthoVB, &d3d.orthoIB, &d3d.orthoDecl);
+	mainList     = new RenderList("mainList",     400, &d3d.mainVB,  &d3d.mainIB,  &d3d.mainDecl);
+	orthoList    = new RenderList("orthoList",    50,  &d3d.orthoVB, &d3d.orthoIB, &d3d.orthoDecl);
 	particleList = new RenderList("particleList", 200, &d3d.particleVB, &d3d.particleIB, &d3d.particleDecl);
-	decalList    = new RenderList("decalList", 200, &d3d.decalVB, &d3d.decalIB, &d3d.decalDecl);
-	weaponList   = new RenderList("weaponList", 80,  &d3d.mainVB,  &d3d.mainIB,  &d3d.mainDecl);
+	decalList    = new RenderList("decalList",    200, &d3d.decalVB, &d3d.decalIB, &d3d.decalDecl);
+	weaponList   = new RenderList("weaponList",   80,  &d3d.mainVB,  &d3d.mainIB,  &d3d.mainDecl);
 }
 
 void RenderListDeInit()
@@ -353,7 +353,7 @@ static bool ExecuteBuffer()
 	// sort the list of render objects
 	particleList->Sort();
 	decalList->Sort();
-	mainList->Sort();
+//	mainList->Sort();
 
 	// these two just add the vertex data to the below lists (they dont draw anything themselves
 	// and they HAVE to be called before the below code)
