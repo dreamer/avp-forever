@@ -133,7 +133,6 @@ void TranslateShapeVertices(SHAPEINSTR *shapeinstrptr);
 static void ParticlePolygon_Construct(PARTICLE *particlePtr);
 void RenderMirroredDecal(DECAL *decalPtr);
 static void DecalPolygon_Construct(DECAL *decalPtr);
-void RenderShaftOfLight2(MODULE *modulePtr);
 void FindIntersectionWithYPlane(VECTORCH *startPtr, VECTORCH *directionPtr, VECTORCH *intersectionPtr);
 void FindZFromXYIntersection(VECTORCH *startPtr, VECTORCH *directionPtr, VECTORCH *intersectionPtr);
 void AddToTranslucentPolyList(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVerticesPtr);
@@ -221,20 +220,6 @@ extern void InitialiseLightIntensityStamps(void)
 
 void SetupShapePipeline(void)
 {
-#if VOLUMETRIC_FOG
-	{
-		//      VECTORCH v = {-30399, -1792, 1050}; // genshd1
-		//      VECTORCH v = {49937,-4000,-37709};      // hangar
-		//      VECTORCH v = {-185,0,642};
-		//      VECTORCH v = {6894,469,-13203};
-		VECTORCH v = {73608, 3582, 56211};
-		TranslatePointIntoViewspace(&v);
-		FogPosition.vx = v.vx;
-		FogPosition.vy = v.vy;
-		FogPosition.vz = v.vz;
-		FogMagnitude = FogPosition.vx * FogPosition.vx + FogPosition.vy * FogPosition.vy + FogPosition.vz * FogPosition.vz;
-	}
-#endif
 	/* Set up these global pointers */
 	Global_ShapePoints    = *(Global_ShapeHeaderPtr->points);
 	Global_ShapeTextures  = Global_ShapeHeaderPtr->sh_textures;
@@ -530,8 +515,6 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 			break;
 	}
 
-	extern bool frustumCull;
-	extern bool CheckPointIsInFrustum(D3DXVECTOR3 * point);
 	TestVerticesWithFrustum();
 
 	/* interesting hack for predator cloaking */
@@ -586,12 +569,10 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 							break;
 
 						default:
-							//                          textprint("found polygon of type %d\n",polyPtr->PolyItemType);
+							// textprint("found polygon of type %d\n",polyPtr->PolyItemType);
 							break;
 					}
 				}
-
-				isCulled = false; // ?
 			} while (--numitems);
 
 			return;
@@ -711,35 +692,6 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 
 				case I_ZB_Gouraud3dTexturedPolygon:
 				case I_ZB_Gouraud2dTexturedPolygon: {
-					// cull test
-					if (frustumCull) {
-						bool valid = false;
-						int *VertexNumberPtrStart = VertexNumberPtr;
-
-						// test frustum culling for each point
-						for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++) {
-							VertexNumberPtr = &polyPtr->Poly1stPt;
-							VECTORCH *vertices = &RotatedPts[*VertexNumberPtr];
-							VertexNumberPtr++;
-							D3DXVECTOR3 point;
-							point.x = (float)vertices->vx;
-							point.y = (float)-vertices->vy;
-							point.z = (float)vertices->vz;
-
-							if (CheckPointIsInFrustum(&point) == true) {
-								valid = true;
-								break;
-							}
-						}
-
-						// restore pointer
-						VertexNumberPtr = VertexNumberPtrStart;
-
-						// lets bail out of this function and not draw this poly if none of the points are inside the view frustum
-						if (valid == false) {
-							break;
-						}
-					}
 
 					GouraudTexturedPolygon_Construct(polyPtr);
 
@@ -957,6 +909,7 @@ static void CloakedPolygon_Construct(POLYHEADER *polyPtr)
 	int *texture_defn_ptr;
 	RENDERVERTEX *renderVerticesPtr = VerticesBuffer;
 	int i = RenderPolygon.NumberOfVertices;
+
 	/* get ptr to uv coords for this polygon */
 	int texture_defn_index = (polyPtr->PolyColour >> TxDefn);
 	texture_defn_ptr = Global_ShapeTextures[texture_defn_index];
@@ -2865,7 +2818,6 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 	SHAPEHEADER *shapeheaderptr;
 
 	if (!dptr->ObShape && dptr->SfxPtr) {
-		//      DrawSfxObject(dptr);
 		return;
 	}
 
@@ -2919,21 +2871,6 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 
 	// Shape Language Specific Setup
 	SetupShapePipeline();
-
-#if 0
-	// frustum test?
-	Sphere_t testSphere;
-	testSphere.position.x = dptr->ObWorld.vx;//(dptr->ObWorld.vx + dptr->ObMaxX) / 2;
-	testSphere.position.y = -dptr->ObWorld.vy;//(dptr->ObWorld.vy + dptr->ObMaxY) / 2;
-	testSphere.position.z = dptr->ObWorld.vz;//(dptr->ObWorld.vz + dptr->ObMaxZ) / 2;
-	testSphere.radius = (float)dptr->ObRadius;
-
-	if (!IsSphereInFrustum(testSphere)) {
-		OutputDebugString("culling object...");
-		OutputDebugString(dptr->name); OutputDebugString("\n");
-		return;
-	}
-#endif
 
 	/*
 		Create the Local -> View Matrix
@@ -3524,7 +3461,7 @@ void TranslateShapeVertices(SHAPEINSTR *shapeinstrptr)
 
 void RenderDecal(DECAL *decalPtr)
 {
-#if 0
+#ifndef USE_D3DVIEWTRANSFORM
 	VECTORCH translatedPosition;
 	/* translate decal into view space */
 	translatedPosition = decalPtr->Vertices[0];
@@ -3610,16 +3547,22 @@ void RenderDecal(DECAL *decalPtr)
 void RenderParticle(PARTICLE *particlePtr)
 {
 	int particleSize = particlePtr->Size;
+
 	VECTORCHF tempVector;
 	VECTORCH translatedPosition = particlePtr->Position;
+
 	// do view transform
+	TranslatePointIntoViewspace(&translatedPosition);
+#if 0
 	tempVector.vx = (float)particlePtr->Position.vx;
-	tempVector.vy = (float) - particlePtr->Position.vy;
+	tempVector.vy = (float) -particlePtr->Position.vy;
 	tempVector.vz = (float)particlePtr->Position.vz;
+
 	TransformToViewspace(&tempVector);
 	translatedPosition.vx = (int)tempVector.vx;
 	translatedPosition.vy = (int)tempVector.vy;
 	translatedPosition.vz = (int)tempVector.vz;
+#endif
 	VerticesBuffer[0].X = translatedPosition.vx;
 	VerticesBuffer[3].X = translatedPosition.vx;
 	VerticesBuffer[0].Y = translatedPosition.vy;
@@ -3643,16 +3586,18 @@ void RenderParticle(PARTICLE *particlePtr)
 	    || (particlePtr->ParticleID == PARTICLE_PREDPISTOL_FLECHETTE_NONDAMAGING)
 	   ) {
 		VECTORCH translatedPosition = particlePtr->Offset;
-		//bjd - replaced        TranslatePointIntoViewspace(&translatedPosition);
+		TranslatePointIntoViewspace(&translatedPosition);
+#if 0
 		{
 			tempVector.vx = (float)particlePtr->Offset.vx;
-			tempVector.vy = (float) - particlePtr->Offset.vy;
+			tempVector.vy = (float)-particlePtr->Offset.vy;
 			tempVector.vz = (float)particlePtr->Offset.vz;
 			TransformToViewspace(&tempVector);
 			translatedPosition.vx = (int)tempVector.vx;
 			translatedPosition.vy = (int)tempVector.vy;
 			translatedPosition.vz = (int)tempVector.vz;
 		}
+#endif
 		VerticesBuffer[1].X = translatedPosition.vx;
 		VerticesBuffer[2].X = translatedPosition.vx;
 		VerticesBuffer[1].Y = translatedPosition.vy;
@@ -3830,6 +3775,7 @@ extern void RenderFlechetteParticle(PARTICLE *particlePtr)
 	vertices[4].vx = particlePtr->Position.vx - mat.mat31 - mat.mat21;
 	vertices[4].vy = particlePtr->Position.vy - mat.mat32 - mat.mat22;
 	vertices[4].vz = particlePtr->Position.vz - mat.mat33 - mat.mat23;
+
 	TranslatePointIntoViewspace(&vertices[0]);
 	TranslatePointIntoViewspace(&vertices[1]);
 	TranslatePointIntoViewspace(&vertices[2]);
@@ -3968,28 +3914,29 @@ void RenderMirroredDecal(DECAL *decalPtr)
 	/* translate decal into view space */
 	translatedPosition = decalPtr->Vertices[0];
 	translatedPosition.vx = MirroringAxis - translatedPosition.vx;
-	//  TranslatePointIntoViewspace(&translatedPosition);
+	TranslatePointIntoViewspace(&translatedPosition);
 	VerticesBuffer[0].X = translatedPosition.vx;
 	VerticesBuffer[0].Y = translatedPosition.vy;
 	VerticesBuffer[0].Z = translatedPosition.vz;
 	translatedPosition = decalPtr->Vertices[1];
 	translatedPosition.vx = MirroringAxis - translatedPosition.vx;
-	//  TranslatePointIntoViewspace(&translatedPosition);
+	TranslatePointIntoViewspace(&translatedPosition);
 	VerticesBuffer[1].X = translatedPosition.vx;
 	VerticesBuffer[1].Y = translatedPosition.vy;
 	VerticesBuffer[1].Z = translatedPosition.vz;
 	translatedPosition = decalPtr->Vertices[2];
 	translatedPosition.vx = MirroringAxis - translatedPosition.vx;
-	//  TranslatePointIntoViewspace(&translatedPosition);
+	TranslatePointIntoViewspace(&translatedPosition);
 	VerticesBuffer[2].X = translatedPosition.vx;
 	VerticesBuffer[2].Y = translatedPosition.vy;
 	VerticesBuffer[2].Z = translatedPosition.vz;
 	translatedPosition = decalPtr->Vertices[3];
 	translatedPosition.vx = MirroringAxis - translatedPosition.vx;
-	//  TranslatePointIntoViewspace(&translatedPosition);
+	TranslatePointIntoViewspace(&translatedPosition);
 	VerticesBuffer[3].X = translatedPosition.vx;
 	VerticesBuffer[3].Y = translatedPosition.vy;
 	VerticesBuffer[3].Z = translatedPosition.vz;
+
 	//  int outcode = DecalWithinFrustum(decalPtr);
 	//  if (outcode) // bjd
 	{
@@ -4084,7 +4031,7 @@ void AddToTranslucentPolyList(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVert
 	TranslucentPolygons[CurrentNumberOfTranslucentPolygons].NumberOfVertices = i;
 
 	do {
-#if 1 // bjd - temp fix to get glass to render correctly. should I need to view transform these?
+#ifdef USE_D3DVIEWTRANSFORM // bjd - temp fix to get glass to render correctly. should I need to view transform these?
 		VECTORCHF test;
 		test.vx = renderVerticesPtr->X;
 		test.vy = renderVerticesPtr->Y;
@@ -4105,11 +4052,9 @@ void AddToTranslucentPolyList(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVert
 		*vertexPtr++ = *renderVerticesPtr++;
 	} while (--i);
 
-	//  sprintf(buf, "maxZ is :%d\n", maxZ);
-	//  OutputDebugString(buf);
 	TranslucentPolygons[CurrentNumberOfTranslucentPolygons].MaxZ = maxZ;
 	TranslucentPolygonHeaders[CurrentNumberOfTranslucentPolygons] = *inputPolyPtr;
-	/* increment counter */
+
 	CurrentNumberOfTranslucentPolygons++;
 	LOCALASSERT(CurrentNumberOfTranslucentPolygons < MAX_NO_OF_TRANSLUCENT_POLYGONS);
 }
@@ -4175,7 +4120,7 @@ void RenderMirrorSurface(void)
 	fakeHeader.PolyColour = CloudyImageNumber;
 
 	for (int i = 0; i < 4; i++) {
-		//      TranslatePointIntoViewspace(&translatedPts[i]);
+		TranslatePointIntoViewspace(&translatedPts[i]);
 		VerticesBuffer[i].X = translatedPts[i].vx;
 		VerticesBuffer[i].Y = translatedPts[i].vy;
 		VerticesBuffer[i].Z = translatedPts[i].vz;
@@ -4225,7 +4170,7 @@ void RenderMirrorSurface2(void)
 	fakeHeader.PolyColour = CloudyImageNumber;
 
 	for (int i = 0; i < 4; i++) {
-		//      TranslatePointIntoViewspace(&translatedPts[i]);
+		TranslatePointIntoViewspace(&translatedPts[i]);
 		VerticesBuffer[i].X = translatedPts[i].vx;
 		VerticesBuffer[i].Y = translatedPts[i].vy;
 		VerticesBuffer[i].Z = translatedPts[i].vz;
@@ -4608,12 +4553,63 @@ void RenderPredatorPlasmaCasterCharge(int value, VECTORCH *worldOffsetPtr, MATRI
 
 void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 {
+#if 0//#ifndef USE_D3DVIEWTRANSFORM
+
+	int centreX, centreY, sizeX, sizeY, z;
+	PARTICLE particle;
+	VECTORCH point = *positionPtr;
+
+	TranslatePointIntoViewspace(&point);
+	if (point.vz < 64) return;
+
+	particle.ParticleID = PARTICLE_LIGHTFLARE;
+	particle.Colour = colour;
+
+	z = ONE_FIXED;
+
+	centreX = DIV_FIXED(point.vx,point.vz);
+	centreY = DIV_FIXED(point.vy,point.vz);
+	sizeX = (ScreenDescriptorBlock.SDB_Width<<13) / Global_VDB_Ptr->VDB_ProjX;
+	sizeY = /*MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13, 87381)*/(ScreenDescriptorBlock.SDB_Height<<13) / Global_VDB_Ptr->VDB_ProjY;
+
+	VerticesBuffer[0].X = centreX - sizeX;
+	VerticesBuffer[0].Y = centreY - sizeY;
+	VerticesBuffer[0].Z = z;
+	VerticesBuffer[1].X = centreX + sizeX;
+	VerticesBuffer[1].Y = centreY - sizeY;
+	VerticesBuffer[1].Z = z;
+	VerticesBuffer[2].X = centreX + sizeX;
+	VerticesBuffer[2].Y = centreY + sizeY;
+	VerticesBuffer[2].Z = z;
+	VerticesBuffer[3].X = centreX - sizeX;
+	VerticesBuffer[3].Y = centreY + sizeY;
+	VerticesBuffer[3].Z = z;
+
+	// Frustum cull?
+
+	RenderPolygon.NumberOfVertices = 4;
+
+	VerticesBuffer[0].U = 192;
+	VerticesBuffer[0].V = 0;
+
+	VerticesBuffer[1].U = 255;
+	VerticesBuffer[1].V = 0;
+
+	VerticesBuffer[2].U = 255;
+	VerticesBuffer[2].V = 63;
+
+	VerticesBuffer[3].U = 192;
+	VerticesBuffer[3].V = 63;
+
+	AddParticle(&particle, VerticesBuffer);
+
+#else
 	int /*centreX, centreY, sizeX, sizeY,*/ z;
 	PARTICLE particle;
 	VECTORCH point = *positionPtr;
 	VECTORCHF tempVector;
 	tempVector.vx = (float)point.vx;
-	tempVector.vy = (float) - point.vy;
+	tempVector.vy = (float)-point.vy;
 	tempVector.vz = (float)point.vz;
 	TransformToViewspace(&tempVector);
 
@@ -4666,6 +4662,7 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 			AddCorona(&particle, &tempVector);
 		}
 	}
+#endif
 }
 
 #if VOLUMETRIC_FOG
@@ -4943,7 +4940,6 @@ void RenderInsideAlienTongue(int offset)
 		do {
 			translatedPts[i] = vertices[i];
 			translatedPts[i].vz -= (ONE_FIXED - offset) / 16;
-			//          TranslatePointIntoViewspace(&translatedPts[i]);
 		} while (i--);
 	}
 	{
@@ -4995,7 +4991,8 @@ int u[OCTAVES];
 int v[OCTAVES];
 int du[OCTAVES];
 int dv[OCTAVES];
-BOOL skySetup = FALSE;
+
+bool skySetup = false;
 
 int SkyColour_R = 200;
 int SkyColour_G = 200;
@@ -5009,13 +5006,19 @@ void RenderSky(void)
 	// if this is our first time in the function, initialise some values just the once
 	if (!skySetup) {
 		for (i = 0; i < OCTAVES; i++) {
+/* broken version fix
 			u[i] = (FastRandom() & 65535); //*128;
 			v[i] = (FastRandom() & 65535); //*128;
 			du[i] = (((FastRandom() & 65535) - 32768) * (i + 1)); //*8;
 			dv[i] = (((FastRandom() & 65535) - 32768) * (i + 1)); //*8;
+*/
+			u[i] = (FastRandom() & 65535) * 128;
+			v[i] = (FastRandom() & 65535) * 128;
+			du[i] = (((FastRandom() & 65535) - 32768) * (i + 1)) * 8;
+			dv[i] = (((FastRandom() & 65535) - 32768) * (i + 1)) * 8;
 		}
 
-		skySetup = TRUE;
+		skySetup = true;
 	}
 
 	// disable z-writes
@@ -5030,29 +5033,44 @@ void RenderSky(void)
 		// makes the sky clouds move
 		//u[o] += MUL_FIXED(du[o], GetTestTimer() * 0.1f);//0x0000001);
 		//v[o] += MUL_FIXED(dv[o], GetTestTimer() * 0.1f);//0x0000001);
+
+		u[o] += MUL_FIXED(du[o], NormalFrameTime);
+		v[o] += MUL_FIXED(dv[o], NormalFrameTime);
 	}
 
 	for (x = -10; x <= 10; x++) {
 		for (z = -10; z <= 10; z++) {
 			int t = 255;
-			int size = /*65536*/128;
+//old			int size = /*65536*/128;
+			int size = /*65536 **/ 128;
 
 			for (o = 0; o < OCTAVES; o++) {
 				VECTORCH translatedPts[4] = {
 					// x   // y  // z
+					{-1024,-1000,-1024},
+					{-1024,-1000, 1024},
+					{ 1024,-1000, 1024},
+					{ 1024,-1000,-1024},
+/* old
 					{ -16384, -11000, -16384},
 					{ -16384, -11000, 16384},
 					{ 16384, -11000, 16384},
 					{ 16384, -11000, -16384},
+*/
 				};
 
 				for (i = 0; i < 4; i++) {
+/* old
 					translatedPts[i].vx += 32768 * x;
 					translatedPts[i].vz += 32768 * z;
+*/
+					translatedPts[i].vx += 2048 * x;
+					translatedPts[i].vz += 2048 * z;
+
 					translatedPts[i].vx += Global_VDB_Ptr->VDB_World.vx;
-					translatedPts[i].vy += Global_VDB_Ptr->VDB_World.vy + 1000;
+					translatedPts[i].vy += Global_VDB_Ptr->VDB_World.vy;// old + 1000;
 					translatedPts[i].vz += Global_VDB_Ptr->VDB_World.vz;
-					//                  TranslatePointIntoViewspace(&translatedPts[i]);
+					TranslatePointIntoViewspace(&translatedPts[i]);
 					VerticesBuffer[i].X = translatedPts[i].vx;
 					VerticesBuffer[i].Y = translatedPts[i].vy;
 					VerticesBuffer[i].Z = translatedPts[i].vz;
@@ -5296,6 +5314,7 @@ void RenderStarfield()
 	}
 }
 
+#if 0 // unused
 signed int ForceFieldPointDisplacement[15 * 3 + 1][16];
 signed int ForceFieldPointDisplacement2[15 * 3 + 1][16];
 signed int ForceFieldPointVelocity[15 * 3 + 1][16];
@@ -5312,6 +5331,7 @@ void InitForceField()
 		}
 	}
 }
+#endif
 
 int LightIntensityAtPoint(VECTORCH *pointPtr)
 {

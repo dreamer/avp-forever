@@ -1358,7 +1358,7 @@ void InitialiseParticleSystem(void)
 	InitialiseVolumetricExplosions();
 	InitialiseRainDrops();
 	InitialiseDecalSystem();
-	InitForceField();
+//	InitForceField();
 	Generate_Sphere();
 
 	NumberOfFlaresActive=0;

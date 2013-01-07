@@ -916,7 +916,6 @@ void DrawPredatorEnergyBar(void)
 			ScreenDescriptorBlock.SDB_Height-h,
 			ScreenDescriptorBlock.SDB_Width+HUDLayout_RightmostTextCentre/2,
 			ScreenDescriptorBlock.SDB_Height
-			
 		);
 
 		rectangle.AlphaFill
@@ -937,7 +936,6 @@ void DrawPredatorEnergyBar(void)
 			ScreenDescriptorBlock.SDB_Height-h,
 			ScreenDescriptorBlock.SDB_Width+HUDLayout_RightmostTextCentre*2,
 			ScreenDescriptorBlock.SDB_Height
-			
 		);
 
 		rectangle.AlphaFill

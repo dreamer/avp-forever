@@ -351,8 +351,8 @@ float cot(float in)
 static bool ExecuteBuffer()
 {
 	// sort the list of render objects
-	particleList->Sort();
-	decalList->Sort();
+//	particleList->Sort();
+//	decalList->Sort();
 //	mainList->Sort();
 
 	// these two just add the vertex data to the below lists (they dont draw anything themselves
@@ -366,7 +366,7 @@ static bool ExecuteBuffer()
 		d3d.effectSystem->SetActive(d3d.mainEffect);
 
 		// we don't need world matrix here as avp has done all the world transforms itself
-		R_MATRIX matWorldViewProj = d3d.matView * d3d.matProjection;
+		R_MATRIX matWorldViewProj = /*d3d.matView **/ d3d.matProjection;
 
 		d3d.effectSystem->SetVertexShaderConstant(d3d.mainEffect, 0, CONST_MATRIX, &matWorldViewProj);
 
@@ -412,7 +412,7 @@ static bool ExecuteBuffer()
 		d3d.effectSystem->SetActive(d3d.mainEffect);
 
 		// we don't need world matrix here as avp has done all the world transforms itself
-		R_MATRIX matWorldViewProj = d3d.matView * d3d.matProjection;
+		R_MATRIX matWorldViewProj = /*d3d.matView **/ d3d.matProjection;
 
 		d3d.effectSystem->SetVertexShaderConstant(d3d.mainEffect, 0, CONST_MATRIX, &matWorldViewProj);
 
@@ -490,13 +490,13 @@ void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, const std::vector<t
 	fmvVerts[2].x = x2;
 	fmvVerts[2].y = y2;
 	fmvVerts[2].z = 1.0f;
-	fmvVerts[2].u1 = (1.0f / tempTexture.realWidth) * tempTexture.width;
+	fmvVerts[2].u1 = (1.0f / tempTexture.realWidth)  * tempTexture.width;
 	fmvVerts[2].v1 = (1.0f / tempTexture.realHeight) * tempTexture.height;
 
-	fmvVerts[2].u2 = (1.0f / tempTexture2.realWidth) * tempTexture2.width;
+	fmvVerts[2].u2 = (1.0f / tempTexture2.realWidth)  * tempTexture2.width;
 	fmvVerts[2].v2 = (1.0f / tempTexture2.realHeight) * tempTexture2.height;
 
-	fmvVerts[2].u3 = (1.0f / tempTexture2.realWidth) * tempTexture2.width;
+	fmvVerts[2].u3 = (1.0f / tempTexture2.realWidth)  * tempTexture2.width;
 	fmvVerts[2].v3 = (1.0f / tempTexture2.realHeight) * tempTexture2.height;
 
 	// top right
@@ -1161,7 +1161,7 @@ void UpdateViewMatrix(float *viewMat)
 
 void DrawCoronas()
 {
-	if (coronaArray.size() == 0) {
+	if (!coronaArray.size()) {
 		return;
 	}
 
@@ -1460,7 +1460,12 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 	float RecipW = 1.0f / (float) texWidth;
 	float RecipH = 1.0f / (float) texHeight;
 
-	mainList->AddItem(RenderPolygon.NumberOfVertices, textureID, TRANSLUCENCY_NORMAL);
+//	mainList->AddItem(RenderPolygon.NumberOfVertices, textureID, TRANSLUCENCY_NORMAL);
+	if (gunLayer) {
+		weaponList->AddItem(RenderPolygon.NumberOfVertices, textureID, TRANSLUCENCY_NORMAL);
+	} else {
+		mainList->AddItem(RenderPolygon.NumberOfVertices, textureID, TRANSLUCENCY_NORMAL);
+	}
 
 	for (uint32_t i = 0; i < RenderPolygon.NumberOfVertices; i++)
 	{
@@ -1470,15 +1475,21 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 		mainVertex[vb].y = (float)-vertices->Y;
 		mainVertex[vb].z = (float)vertices->Z;
 
-	   	mainVertex[vb].color = RGBA_MAKE(vertices->R,vertices->G,vertices->B,vertices->A);
-		mainVertex[vb].specular = RGBA_MAKE(0,0,0,255);
+	   	mainVertex[vb].color = RGBA_MAKE(vertices->R, vertices->G, vertices->B, vertices->A);
+		mainVertex[vb].specular = RGBA_MAKE(0,0,0,/*255*/0);
 
 		mainVertex[vb].u = (float)(vertices->U) * RecipW;
 		mainVertex[vb].v = (float)(vertices->V) * RecipH;
 		vb++;
 	}
 
-	mainList->CreateIndices(mainIndex, RenderPolygon.NumberOfVertices);
+//	mainList->CreateIndices(mainIndex, RenderPolygon.NumberOfVertices);
+
+	if (gunLayer) {
+		weaponList->CreateIndices(mainIndex, RenderPolygon.NumberOfVertices);
+	} else {
+		mainList->CreateIndices(mainIndex, RenderPolygon.NumberOfVertices);
+	}
 }
 
 void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
@@ -1733,10 +1744,8 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 		decalVb++;
 	}
 
-	decalList->EnableIndicesOffset();
-
-	decalList->IncrementIndexCount(6);
-
+//	decalList->EnableIndicesOffset();
+//	decalList->IncrementIndexCount(6);
 //	decalList->CreateIndices(decalIndex, RenderPolygon.NumberOfVertices);
 }
 
@@ -1781,7 +1790,7 @@ void AddParticle(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 	particleBucket[transID].push_back(newParticle);
 }
 
-void D3D_Particle_Output(PARTICLE *particlePtr, PARTICLEVERTEX *renderVerticesPtr)
+static void D3D_Particle_Output(PARTICLE *particlePtr, PARTICLEVERTEX *renderVerticesPtr)
 {
 	// steam jets, pulse rifle muzzle flash, wall lights, fire (inc aliens on fire) etc
 	PARTICLE_DESC *particleDescPtr = &ParticleDescription[particlePtr->ParticleID];
@@ -1856,7 +1865,7 @@ void D3D_Particle_Output(PARTICLE *particlePtr, PARTICLEVERTEX *renderVerticesPt
 		}
 
 		particleVertex[pVb].x = vertices->x;
-		particleVertex[pVb].y = vertices->y;
+		particleVertex[pVb].y = -vertices->y;
 		particleVertex[pVb].z = vertices->z;
 
 		particleVertex[pVb].colour = colour;

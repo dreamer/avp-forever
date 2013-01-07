@@ -1768,16 +1768,12 @@ static void HandleAlienWeapon(void)
 	PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
     GLOBALASSERT(playerStatusPtr);
 
-	{
-		/* player's current weapon */
-    	GLOBALASSERT(playerStatusPtr->SelectedWeaponSlot<MAX_NO_OF_WEAPON_SLOTS);
+	/* player's current weapon */
+    GLOBALASSERT(playerStatusPtr->SelectedWeaponSlot<MAX_NO_OF_WEAPON_SLOTS);
 
-        /* init a pointer to the weapon's data */
-        weaponPtr = &(playerStatusPtr->WeaponSlot[playerStatusPtr->SelectedWeaponSlot]);
-        twPtr = &TemplateWeapon[weaponPtr->WeaponIDNumber];
-    }
-
-	//PositionPlayersWeapon();
+    /* init a pointer to the weapon's data */
+    weaponPtr = &(playerStatusPtr->WeaponSlot[playerStatusPtr->SelectedWeaponSlot]);
+    twPtr = &TemplateWeapon[weaponPtr->WeaponIDNumber];
 
 	/* draw 3d muzzle flash */
 	if ((twPtr->MuzzleFlashShapeName != NULL)
@@ -1793,7 +1789,6 @@ static void HandleAlienWeapon(void)
 
 	RenderThisDisplayblock(&PlayersWeapon);
 
-	//if ((twPtr->PrimaryIsMeleeWeapon)&&
 	if ((weaponPtr->WeaponIDNumber == WEAPON_ALIEN_CLAW)&&(Alien_Visible_Weapon==0))
 	{
 		GunMuzzleSightX = (ScreenDescriptorBlock.SDB_Width<<15);
@@ -1863,7 +1858,7 @@ static void DrawAlienTeeth(void)
 
 	   	DISPLAYBLOCK displayblock;
 
-	   	displayblock.ObMat=Global_VDB_Ptr->VDB_Mat;
+	   	displayblock.ObMat = Global_VDB_Ptr->VDB_Mat;
 		TransposeMatrixCH(&displayblock.ObMat);
 	   	displayblock.name=NULL;
 	   	displayblock.ObEuler.EulerX=0;
