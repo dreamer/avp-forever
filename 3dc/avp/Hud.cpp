@@ -371,26 +371,27 @@ void MaintainHUD(void)
 						AlienTongueOffset = 0;
 					}
 				}
+
 				SetFrustumType(FRUSTUM_TYPE_NORMAL);
 
-				Global_VDB_Ptr->VDB_ProjX = (Global_VDB_Ptr->VDB_ClipRight - Global_VDB_Ptr->VDB_ClipLeft)/2;
-				Global_VDB_Ptr->VDB_ProjY = (Global_VDB_Ptr->VDB_ClipDown - Global_VDB_Ptr->VDB_ClipUp)/2;
+				Global_VDB_Ptr->VDB_ProjX = (Global_VDB_Ptr->VDB_ClipRight - Global_VDB_Ptr->VDB_ClipLeft) / 2;
+				Global_VDB_Ptr->VDB_ProjY = (Global_VDB_Ptr->VDB_ClipDown - Global_VDB_Ptr->VDB_ClipUp)    / 2;
 
 				HandleAlienWeapon();
 				HandleAlienOVision();
 
 				SetFrustumType(FRUSTUM_TYPE_WIDE);
-				Global_VDB_Ptr->VDB_ProjX = (Global_VDB_Ptr->VDB_ClipRight - Global_VDB_Ptr->VDB_ClipLeft)/4;
-				Global_VDB_Ptr->VDB_ProjY = (Global_VDB_Ptr->VDB_ClipDown - Global_VDB_Ptr->VDB_ClipUp)/4;
+				Global_VDB_Ptr->VDB_ProjX = (Global_VDB_Ptr->VDB_ClipRight - Global_VDB_Ptr->VDB_ClipLeft) / 4;
+				Global_VDB_Ptr->VDB_ProjY = (Global_VDB_Ptr->VDB_ClipDown - Global_VDB_Ptr->VDB_ClipUp)    / 4;
 
 				CheckWireFrameMode(0);
 
-				//flash health if invulnerable
+				// flash health if invulnerable
 				if ((playerStatusPtr->invulnerabilityTimer/12000 %2)==0)
 				{
 					DisplayHealthAndArmour();
 				}
-				/* Paranoia check. */
+				// Paranoia check.
 		  		if (predHUDSoundHandle != SOUND_NOACTIVEINDEX)
 				{
 		       		Sound_Stop(predHUDSoundHandle);
@@ -429,43 +430,41 @@ void MaintainHUD(void)
 
 	CheckWireFrameMode(0);
 
-	{
-		#if 1 || !PREDATOR_DEMO
-			GADGET_Render();
-		#endif
+	#if 1 || !PREDATOR_DEMO
+		GADGET_Render();
+	#endif
 
-		switch (AvP.PlayerType)
+	switch (AvP.PlayerType)
+	{
+		case I_Marine:
 		{
-			case I_Marine:
-			{
-		  		HandleMarineOVision();
-				break;
+			HandleMarineOVision();
+			break;
+		}
+		case I_Predator:
+		{
+//			HandlePredOVision();
+			break;
+		}
+		default:
+			break;
+	}
+	
+
+	if (AlienBiteAttackInProgress)
+	{
+		if (CameraZoomScale != 0.25f)
+		{
+			int b = static_cast<int>(CameraZoomScale * 65536.0f);
+
+			if (b < 32768) {
+				b = 32768;
 			}
-			case I_Predator:
-			{
-	//			HandlePredOVision();
-				break;
-			}
-			default:
-				break;
+
+			D3D_FadeDownScreen(b, 0xff0000);
 		}
 	}
-	{
-		if (AlienBiteAttackInProgress)
-		{
-			if (CameraZoomScale != 0.25f)
-			{
-				//f2i(b,CameraZoomScale*65536.0f);
-				int b = static_cast<int>(CameraZoomScale * 65536.0f);
 
-				if (b < 32768) {
-					b = 32768;
-				}
-
-				D3D_FadeDownScreen(b,0xff0000);
-			}
-		}
-	}
 	// burn baby burn?
 	if (Player->ObStrategyBlock->SBDamageBlock.IsOnFire)
 	{
@@ -487,19 +486,19 @@ void MaintainHUD(void)
 		if (PlayerDamagedOverlayIntensity < 0) 
 			PlayerDamagedOverlayIntensity = 0;
 	}
+	
+	if (FadingGameInAfterLoading)
 	{
-		if (FadingGameInAfterLoading)
-		{
-			D3D_FadeDownScreen(ONE_FIXED-FadingGameInAfterLoading, 0);
+		D3D_FadeDownScreen(ONE_FIXED-FadingGameInAfterLoading, 0);
 
-			RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, FadingGameInAfterLoading);
+		RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, FadingGameInAfterLoading);
 
-			FadingGameInAfterLoading -= RealFrameTime/2;
+		FadingGameInAfterLoading -= RealFrameTime/2;
 
-			if (FadingGameInAfterLoading < 0) 
-				FadingGameInAfterLoading = 0;
-		}
+		if (FadingGameInAfterLoading < 0) 
+			FadingGameInAfterLoading = 0;
 	}
+	
 	if (!playerStatusPtr->IsAlive)
 	{
 		if (AvP.Network == I_No_Network)
@@ -2057,7 +2056,7 @@ void MaintainZoomingLevel(void)
 	deltaZoom = (ZoomLevels[i-1] - ZoomLevels[i])*(float)NormalFrameTime/32768.0f;
 //	textprint("deltaZoom %f, zone %d\n",deltaZoom,i);
 
-   	requestedZoomScale = ZoomLevels[CameraZoomLevel];
+	requestedZoomScale = ZoomLevels[CameraZoomLevel];
 
 	if (requestedZoomScale < CameraZoomScale)
 	{

@@ -3230,9 +3230,9 @@ extern void TranslationSetup(void)
 #endif
 	// position
 #ifndef USE_D3DVIEWTRANSFORM // negate values
-	ViewMatrix[3] = ((float) - v.vx) * o;
-	ViewMatrix[7] = ((float) - v.vy) * p;
-	ViewMatrix[11] = ((float) - v.vz) * CameraZoomScale;
+	ViewMatrix[3] = ((float) -v.vx);// * o;
+	ViewMatrix[7] = ((float) -v.vy);// * p;
+	ViewMatrix[11] = ((float)-v.vz);// * CameraZoomScale;
 #else
 	ViewMatrix[3]  = ((float)v.vx);//*o;
 	ViewMatrix[7]  = ((float)v.vy);//*p;

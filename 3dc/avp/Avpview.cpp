@@ -619,7 +619,7 @@ void AvpShowViews(void)
 
 	if (AlienBiteAttackInProgress)
 	{
-		CameraZoomScale += (float)NormalFrameTime/65536.0f;
+		CameraZoomScale += (float)NormalFrameTime / 65536.0f;
 		if (CameraZoomScale > 1.0f)
 		{
 			AlienBiteAttackInProgress = false;
