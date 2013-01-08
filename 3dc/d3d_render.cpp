@@ -380,7 +380,7 @@ static bool ExecuteBuffer()
 		// set decal shaders as active
 		d3d.effectSystem->SetActive(d3d.decalEffect);
 
-		R_MATRIX matWorldViewProj = d3d.matView * d3d.matProjection;
+		R_MATRIX matWorldViewProj = /*d3d.matView **/ d3d.matProjection;
 
 		// pass the projection matrix to the vertex shader
 		d3d.effectSystem->SetVertexShaderConstant(d3d.decalEffect, 0, CONST_MATRIX, &matWorldViewProj);
@@ -1744,9 +1744,7 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 		decalVb++;
 	}
 
-//	decalList->EnableIndicesOffset();
-//	decalList->IncrementIndexCount(6);
-//	decalList->CreateIndices(decalIndex, RenderPolygon.NumberOfVertices);
+	decalList->CreateIndices(decalIndex, RenderPolygon.NumberOfVertices);
 }
 
 void AddCorona(PARTICLE *particlePtr, VECTORCHF *coronaPoint)

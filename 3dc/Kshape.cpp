@@ -3466,19 +3466,23 @@ void RenderDecal(DECAL *decalPtr)
 	/* translate decal into view space */
 	translatedPosition = decalPtr->Vertices[0];
 	TranslatePointIntoViewspace2(&translatedPosition);
+
 	VerticesBuffer[0].X = translatedPosition.vx;
 	VerticesBuffer[0].Y = translatedPosition.vy;
 	VerticesBuffer[0].Z = translatedPosition.vz;
+
 	translatedPosition = decalPtr->Vertices[1];
 	TranslatePointIntoViewspace2(&translatedPosition);
 	VerticesBuffer[1].X = translatedPosition.vx;
 	VerticesBuffer[1].Y = translatedPosition.vy;
 	VerticesBuffer[1].Z = translatedPosition.vz;
+
 	translatedPosition = decalPtr->Vertices[2];
 	TranslatePointIntoViewspace2(&translatedPosition);
 	VerticesBuffer[2].X = translatedPosition.vx;
 	VerticesBuffer[2].Y = translatedPosition.vy;
 	VerticesBuffer[2].Z = translatedPosition.vz;
+
 	translatedPosition = decalPtr->Vertices[3];
 	TranslatePointIntoViewspace2(&translatedPosition);
 	VerticesBuffer[3].X = translatedPosition.vx;
