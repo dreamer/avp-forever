@@ -4553,74 +4553,25 @@ void RenderPredatorPlasmaCasterCharge(int value, VECTORCH *worldOffsetPtr, MATRI
 
 void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 {
-#if 0//#ifndef USE_D3DVIEWTRANSFORM
-
-	int centreX, centreY, sizeX, sizeY, z;
-	PARTICLE particle;
-	VECTORCH point = *positionPtr;
-
-	TranslatePointIntoViewspace(&point);
-	if (point.vz < 64) return;
-
-	particle.ParticleID = PARTICLE_LIGHTFLARE;
-	particle.Colour = colour;
-
-	z = ONE_FIXED;
-
-	centreX = DIV_FIXED(point.vx,point.vz);
-	centreY = DIV_FIXED(point.vy,point.vz);
-	sizeX = (ScreenDescriptorBlock.SDB_Width<<13) / Global_VDB_Ptr->VDB_ProjX;
-	sizeY = /*MUL_FIXED(ScreenDescriptorBlock.SDB_Height<<13, 87381)*/(ScreenDescriptorBlock.SDB_Height<<13) / Global_VDB_Ptr->VDB_ProjY;
-
-	VerticesBuffer[0].X = centreX - sizeX;
-	VerticesBuffer[0].Y = centreY - sizeY;
-	VerticesBuffer[0].Z = z;
-	VerticesBuffer[1].X = centreX + sizeX;
-	VerticesBuffer[1].Y = centreY - sizeY;
-	VerticesBuffer[1].Z = z;
-	VerticesBuffer[2].X = centreX + sizeX;
-	VerticesBuffer[2].Y = centreY + sizeY;
-	VerticesBuffer[2].Z = z;
-	VerticesBuffer[3].X = centreX - sizeX;
-	VerticesBuffer[3].Y = centreY + sizeY;
-	VerticesBuffer[3].Z = z;
-
-	// Frustum cull?
-
-	RenderPolygon.NumberOfVertices = 4;
-
-	VerticesBuffer[0].U = 192;
-	VerticesBuffer[0].V = 0;
-
-	VerticesBuffer[1].U = 255;
-	VerticesBuffer[1].V = 0;
-
-	VerticesBuffer[2].U = 255;
-	VerticesBuffer[2].V = 63;
-
-	VerticesBuffer[3].U = 192;
-	VerticesBuffer[3].V = 63;
-
-	AddParticle(&particle, VerticesBuffer);
-
-#else
-	int /*centreX, centreY, sizeX, sizeY,*/ z;
+	int z;
 	PARTICLE particle;
 	VECTORCH point = *positionPtr;
 	VECTORCHF tempVector;
+
+#ifndef USE_D3DVIEWTRANSFORM
+	TranslatePointIntoViewspace2(&point);
+
+	tempVector.vx = point.vx;
+	tempVector.vy = point.vy;
+	tempVector.vz = point.vz;
+#else
 	tempVector.vx = (float)point.vx;
 	tempVector.vy = (float)-point.vy;
 	tempVector.vz = (float)point.vz;
+
 	TransformToViewspace(&tempVector);
+#endif
 
-	/*
-	    point.vx = (int)tempVector.vx;
-	    point.vy = (int)tempVector.vy;
-	    point.vz = (int)tempVector.vz;
-
-	    if (point.vz < 64)
-	        return;
-	*/
 	if (tempVector.vz < 64) {
 		return;
 	}
@@ -4662,7 +4613,6 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 			AddCorona(&particle, &tempVector);
 		}
 	}
-#endif
 }
 
 #if VOLUMETRIC_FOG
