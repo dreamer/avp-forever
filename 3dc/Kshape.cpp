@@ -4562,7 +4562,7 @@ void RenderLightFlare(VECTORCH *positionPtr, uint32_t colour)
 	TranslatePointIntoViewspace2(&point);
 
 	tempVector.vx = point.vx;
-	tempVector.vy = point.vy;
+	tempVector.vy = -point.vy;
 	tempVector.vz = point.vz;
 #else
 	tempVector.vx = (float)point.vx;
