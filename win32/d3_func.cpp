@@ -2593,6 +2593,11 @@ void SetTransforms()
 	// set up projection matrix
 	D3DXMatrixPerspectiveFovLH(&d3d.matProjection, D3DXToRadian(d3d.fieldOfView), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
 
+	// bjd - 15/01/2013 - AvP would adjust the projection to a 'wide' projection before rendering the Aliens
+	// claws and tail. This is a hacky way to do that with the new rendering system. The below is a rough estimation of what their code was doing. May not look 100% accurate..
+	int32_t fov = ((float)d3d.fieldOfView * 1.1f);
+	D3DXMatrixPerspectiveFovLH(&d3d.matAlienWeaponProjection, D3DXToRadian(fov), (float)ScreenDescriptorBlock.SDB_Width / (float)ScreenDescriptorBlock.SDB_Height, 64.0f, 1000000.0f);
+	
 	// set up a viewport transform matrix
 	d3d.matViewPort = d3d.matIdentity;
 

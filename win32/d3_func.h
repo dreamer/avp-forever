@@ -248,6 +248,7 @@ typedef struct D3DInfo
 	// matrices
 	D3DXMATRIX matOrtho;
 	D3DXMATRIX matProjection;
+	D3DXMATRIX matAlienWeaponProjection;
 	D3DXMATRIX matView;
 	D3DXMATRIX matIdentity;
 	D3DXMATRIX matViewPort;

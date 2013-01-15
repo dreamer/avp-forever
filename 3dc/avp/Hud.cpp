@@ -55,6 +55,8 @@
 *  										G L O B A L S 	            					    *
 ****************************************************************************************KJL*/
 
+#include "RenderList.h"
+extern bool gunLayer;
 
 extern DISPLAYBLOCK* Player;
 extern int NumActiveBlocks;
@@ -250,10 +252,6 @@ void ReInitHUD(void)
 	InitialiseGrapplingHook();
 }
 
-#include "RenderList.h"
-
-extern bool gunLayer;
-
 /* KJL 16:27:39 09/20/96 - routine which handles all HUD activity */
 void MaintainHUD(void)
 {
@@ -362,6 +360,10 @@ void MaintainHUD(void)
 			}
 			case I_Alien:
 			{
+				// bjd 15/01/2013 - set this to false here otherwise Alien weapon Projection adjustment will take place on the Aliens face/teeth
+				// which we DON'T want.
+				gunLayer = false;
+
 				DrawAlienTeeth();
 				if (AlienTongueOffset)
 				{
@@ -371,6 +373,9 @@ void MaintainHUD(void)
 						AlienTongueOffset = 0;
 					}
 				}
+
+				// bjd 15/01/2013 - ok, we're back to 'weapon' rendering
+				gunLayer = true;
 
 				SetFrustumType(FRUSTUM_TYPE_NORMAL);
 

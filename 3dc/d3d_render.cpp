@@ -407,8 +407,15 @@ static bool ExecuteBuffer()
 		// set main shaders to active
 		d3d.effectSystem->SetActive(d3d.mainEffect);
 
-		// we don't need world matrix here as avp has done all the world transforms itself
-		R_MATRIX matWorldViewProj = /*d3d.matView **/ d3d.matProjection;
+		R_MATRIX matWorldViewProj;
+
+		// bjd - 15/01/2013 - AvP would adjust the projection to a 'wide' projection before rendering the Aliens
+		// claws and tail. This is a hacky way to do that with the new rendering system
+		if (AvP.PlayerType == I_Alien) {
+			matWorldViewProj = /*d3d.matView **/ d3d.matAlienWeaponProjection;
+		} else {
+			matWorldViewProj = /*d3d.matView **/ d3d.matProjection;
+		}
 
 		d3d.effectSystem->SetVertexShaderConstant(d3d.mainEffect, 0, CONST_MATRIX, &matWorldViewProj);
 
@@ -1350,10 +1357,6 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 		mainVertex[vb].x = (float)vertices->X;
 		mainVertex[vb].y = (float)-vertices->Y;
 		mainVertex[vb].z = (float)vertices->Z;
-
-		if (gunLayer) {
-			mainVertex[vb].z -= 200;
-		}
 
 		// gamma testing
 //		mainVertex[vb].color = RGBA_MAKE(vertices->R, vertices->G, vertices->B, vertices->A);
@@ -2734,6 +2737,8 @@ extern void D3D_DrawSlider(int x, int y, int alpha)
 
 extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int bScale)
 {
+	return; // TODO - fix this implementation
+
 	float yTop1    = HPos2DC(yTop);
 	float yBottom1 = HPos2DC(yBottom);
 
