@@ -77,9 +77,8 @@ void ToggleWireframe();
 const int kMaxTextureStages = 8;
 std::vector<texID_t> setTextureArray;
 
-// Alien FOV - 115
-// Marine & Predator FOV - 77
-const int kDefaultFOV = 77;
+// should really not be here, use MARINE_FOV from vision.cpp instead
+const int kDefaultFOV = 75;
 
 uint32_t nDrawIndexedPrimCalls = 0;
 

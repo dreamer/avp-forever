@@ -4718,7 +4718,7 @@ void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr)
 		o++;
 
 		if (explosionPtr->ExplosionPhase) {
-			fakeHeader.PolyFlags = iflag_transparent;
+			fakeHeader.PolyFlags  = iflag_transparent;
 			fakeHeader.PolyColour = BurningImageNumber;
 			RenderPolygon.TranslucencyMode = TRANSLUCENCY_NORMAL;
 		} else {
@@ -4736,7 +4736,8 @@ void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr)
 			vSphere++;
 		}
 
-		for (int f = 0; f < SPHERE_FACES; f++) {
+		for (int f = 0; f < SPHERE_FACES; f++) 
+		{
 			VECTORCH vertex[3];
 
 			for (int i = 0; i < 3; i++) {
@@ -4744,7 +4745,8 @@ void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr)
 				vertex[i] = SphereRotatedVertex[n];
 			}
 
-			for (int i = 0; i < 3; i++) {
+			for (int i = 0; i < 3; i++) 
+			{
 				int n = SphereFace[f].v[i];
 				VerticesBuffer[i].X = vertex[i].vx;
 				VerticesBuffer[i].Y = vertex[i].vy;
@@ -4810,12 +4812,14 @@ void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr)
 					}
 				}
 				// bjd - this isn't correct but looks better..kinda
-				VerticesBuffer[0].U /= 65536;
-				VerticesBuffer[1].U /= 65536;
-				VerticesBuffer[2].U /= 65536;
-				VerticesBuffer[0].V /= 65536;
-				VerticesBuffer[1].V /= 65536;
-				VerticesBuffer[2].V /= 65536;
+
+				VerticesBuffer[0].U >>= 16;
+				VerticesBuffer[1].U >>= 16;
+				VerticesBuffer[2].U >>= 16;
+				VerticesBuffer[0].V >>= 16;
+				VerticesBuffer[1].V >>= 16;
+				VerticesBuffer[2].V >>= 16;
+
 				/*
 				                char buf[100];
 				                sprintf(buf, "%d, %d, %d, %d, %d, %d\n",
@@ -5174,7 +5178,6 @@ void CreateStarArray(void)
 
 void RenderStarfield()
 {
-	//  return; // stars test
 	int sizeX;
 	int sizeY;
 	VECTORCHF tempVector;
@@ -5190,16 +5193,23 @@ void RenderStarfield()
 		position.vx += Global_VDB_Ptr->VDB_World.vx;
 		position.vy += Global_VDB_Ptr->VDB_World.vy;
 		position.vz += Global_VDB_Ptr->VDB_World.vz;
+
+#ifdef USE_D3DVIEWTRANSFORM
 		//      VECTORCH translatedPosition = particlePtr->Position;
 		tempVector.vx = (float)position.vx;
-		tempVector.vy = (float) - position.vy;
+		tempVector.vy = (float)-position.vy;
 		tempVector.vz = (float)position.vz;
 		TransformToViewspace(&tempVector);
+
 		position.vx = (int)tempVector.vx;
 		position.vy = (int)tempVector.vy;
 		position.vz = (int)tempVector.vz;
 		//      TranslatePointIntoViewspace(&position);
 		//      RotateVector(&position,&(Global_VDB_Ptr->VDB_Mat));
+#else
+		TranslatePointIntoViewspace(&position);
+#endif
+
 		VerticesBuffer[0].X = position.vx - sizeX;
 		VerticesBuffer[0].Y = position.vy - sizeY;
 		VerticesBuffer[0].Z = position.vz;

@@ -1775,10 +1775,11 @@ static void HandleAlienWeapon(void)
     twPtr = &TemplateWeapon[weaponPtr->WeaponIDNumber];
 
 	/* draw 3d muzzle flash */
-	if ((twPtr->MuzzleFlashShapeName != NULL)
-	  &&(!twPtr->PrimaryIsMeleeWeapon)
-	  &&(weaponPtr->CurrentState == WEAPONSTATE_FIRING_PRIMARY) )
+	if ((twPtr->MuzzleFlashShapeName != NULL) && (!twPtr->PrimaryIsMeleeWeapon) && (weaponPtr->CurrentState == WEAPONSTATE_FIRING_PRIMARY))
 		RenderThisDisplayblock(&PlayersWeaponMuzzleFlash);
+
+//	if ((weaponPtr->CurrentState == WEAPONSTATE_IDLE) || (weaponPtr->CurrentState == WEAPONSTATE_WAITING))
+//		return;
 
 	/* draw 3d weapon */
 	/* if there is no shape name then return */
@@ -1788,14 +1789,14 @@ static void HandleAlienWeapon(void)
 
 	RenderThisDisplayblock(&PlayersWeapon);
 
-	if ((weaponPtr->WeaponIDNumber == WEAPON_ALIEN_CLAW)&&(Alien_Visible_Weapon==0))
+	if ((weaponPtr->WeaponIDNumber == WEAPON_ALIEN_CLAW) && (Alien_Visible_Weapon == 0))
 	{
 		GunMuzzleSightX = (ScreenDescriptorBlock.SDB_Width<<15);
 		GunMuzzleSightY = (ScreenDescriptorBlock.SDB_Height<<15);
 	}
 	else
 	{
-	    SmartTarget(twPtr->SmartTargetSpeed,0);
+	    SmartTarget(twPtr->SmartTargetSpeed, 0);
 		/* aim gun sight */
 	    {
 	    	int aimingSpeed=twPtr->GunCrosshairSpeed * NormalFrameTime;

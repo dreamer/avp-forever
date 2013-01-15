@@ -190,12 +190,10 @@ std::vector<renderCorona>   coronaArray;
 // convert a width pixel range value (eg 0-640) to device coordinate (eg -1.0 to 1.0)
 inline float WPos2DC(int32_t pos)
 {
-	if (mainMenu)
-	{
+	if (mainMenu) {
 		return (float(pos / (float)640) * 2) - 1;
 	}
-	else
-	{
+	else {
 		return (float(pos / (float)ScreenDescriptorBlock.SDB_Width) * 2) - 1;
 	}
 }
@@ -203,12 +201,10 @@ inline float WPos2DC(int32_t pos)
 // convert a width pixel range value (eg 0-480) to device coordinate (eg -1.0 to 1.0)
 inline float HPos2DC(int32_t pos)
 {
-	if (mainMenu)
-	{
+	if (mainMenu) {
 		return (float(pos / (float)480) * 2) - 1;
 	}
-	else
-	{
+	else {
 		return (float(pos / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
 	}
 }
@@ -351,8 +347,8 @@ float cot(float in)
 static bool ExecuteBuffer()
 {
 	// sort the list of render objects
-//	particleList->Sort();
-//	decalList->Sort();
+	particleList->Sort();
+	decalList->Sort();
 //	mainList->Sort();
 
 	// these two just add the vertex data to the below lists (they dont draw anything themselves
@@ -1354,6 +1350,10 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 		mainVertex[vb].x = (float)vertices->X;
 		mainVertex[vb].y = (float)-vertices->Y;
 		mainVertex[vb].z = (float)vertices->Z;
+
+		if (gunLayer) {
+			mainVertex[vb].z -= 200;
+		}
 
 		// gamma testing
 //		mainVertex[vb].color = RGBA_MAKE(vertices->R, vertices->G, vertices->B, vertices->A);
@@ -2734,15 +2734,11 @@ extern void D3D_DrawSlider(int x, int y, int alpha)
 
 extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int bScale)
 {
+	float yTop1    = HPos2DC(yTop);
+	float yBottom1 = HPos2DC(yBottom);
 
-#if 0 // fixme
-//	CheckVertexBuffer(255, NO_TEXTURE, TRANSLUCENCY_OFF);
-
-//	CheckOrthoBuffer(255, NO_TEXTURE, TRANSLUCENCY_OFF, TEXTURE_CLAMP, FILTERING_BILINEAR_ON);
-
-	for (uint32_t i = 0; i < 255; )
+	for (uint32_t i = 0; i < 255;)
 	{
-		/* this'll do.. */
 		orthoList->AddItem(4, NO_TEXTURE, TRANSLUCENCY_OFF, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
 
 		unsigned int colour = 0;
@@ -2751,63 +2747,60 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 		c = GammaValues[i];
 
 		// set alpha to 255 otherwise d3d alpha test stops pixels being rendered
-		colour = RGBA_MAKE(MUL_FIXED(c,rScale),MUL_FIXED(c,gScale),MUL_FIXED(c,bScale),255);
-/*
-		// top left?
-		mainVertex[vb].x = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
-		mainVertex[vb].y = (float)yTop;
-		mainVertex[vb].z = 0.0f;
-//		mainVertex[vb].rhw = 1.0f;
-		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-		mainVertex[vb].u = 0.0f;
-		mainVertex[vb].v = 0.0f;
+//		colour = RGBA_MAKE(MUL_FIXED(c,rScale), MUL_FIXED(c,gScale), MUL_FIXED(c,bScale),0);
+		colour = RGBA_MAKE(255, 0, 255, 255);
 
-		vb++;
+		float x = WPos2DC((Global_VDB_Ptr->VDB_ClipRight*i)/255);
 
-		// bottom left?
-		mainVertex[vb].x = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
-		mainVertex[vb].y = (float)yBottom;
-		mainVertex[vb].z = 0.0f;
-//		mainVertex[vb].rhw = 1.0f;
-		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-		mainVertex[vb].u = 0.0f;
-		mainVertex[vb].v = 0.0f;
+		uint32_t offs = orthoVBOffset;
 
-		vb++;
-*/
+		// top left
+		orthoVertex[offs+1].x = x;//(float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
+		orthoVertex[offs+1].y = yTop1;
+		orthoVertex[offs+1].z = 1.0f;
+		orthoVertex[offs+1].colour = colour;
+		orthoVertex[offs+1].u = 0.0f;
+		orthoVertex[offs+1].v = 0.0f;
+//		orthoVBOffset++;
+
+		// bottom left
+		orthoVertex[offs].x = x;//(float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
+		orthoVertex[offs].y = yBottom1;
+		orthoVertex[offs].z = 1.0f;
+		orthoVertex[offs].colour = colour;
+		orthoVertex[offs].u = 0.0f;
+		orthoVertex[offs].v = 0.0f;
+//		orthoVBOffset++;
+
 		i++;
 		c = GammaValues[i];
-		colour = RGBA_MAKE(MUL_FIXED(c,rScale),MUL_FIXED(c,gScale),MUL_FIXED(c,bScale),255);
-/*
-		// bottom
-		mainVertex[vb].x = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
-		mainVertex[vb].y = (float)yBottom;
-		mainVertex[vb].z = 0.0f;
-//		mainVertex[vb].rhw = 1.0f;
-		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-		mainVertex[vb].u = 0.0f;
-		mainVertex[vb].v = 0.0f;
+//		colour = RGBA_MAKE(MUL_FIXED(c,rScale),MUL_FIXED(c,gScale),MUL_FIXED(c,bScale),0);
+		colour = RGBA_MAKE(255, 0, 255, 255);
 
-		vb++;
+		x = WPos2DC((Global_VDB_Ptr->VDB_ClipRight*i)/255);
 
-		mainVertex[vb].x = (float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
-		mainVertex[vb].y = (float)yTop;
-		mainVertex[vb].z = 0.0f;
-//		mainVertex[vb].rhw = 1.0f;
-		mainVertex[vb].color = colour;
-		mainVertex[vb].specular = RGBALIGHT_MAKE(0,0,0,255);
-		mainVertex[vb].u = 0.0f;
-		mainVertex[vb].v = 0.0f;
-*/
-		vb++;
+		// bottom right
+		orthoVertex[offs+2].x = x;//(float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
+		orthoVertex[offs+2].y = yBottom1;
+		orthoVertex[offs+2].z = 1.0f;
+		orthoVertex[offs+2].colour = colour;
+		orthoVertex[offs+2].u = 0.0f;
+		orthoVertex[offs+2].v = 0.0f;
+//		orthoVBOffset++;
 
-		OUTPUT_TRIANGLE(0,1,3, 4);
-		OUTPUT_TRIANGLE(1,2,3, 4);
+		// top right
+		orthoVertex[offs+3].x = x;//(float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
+		orthoVertex[offs+3].y = yTop1;
+		orthoVertex[offs+3].z = 1.0f;
+		orthoVertex[offs+3].colour = colour;
+		orthoVertex[offs+3].u = 0.0f;
+		orthoVertex[offs+3].v = 0.0f;
+//		orthoVBOffset++;
+
+		orthoVBOffset += 4;
+
+		orthoList->CreateOrthoIndices(orthoIndex);
 	}
-#endif
 }
 
 

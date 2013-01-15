@@ -8,6 +8,8 @@
 
 #if 1
 
+// #define USE_FRUSTUM_CULL
+
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"

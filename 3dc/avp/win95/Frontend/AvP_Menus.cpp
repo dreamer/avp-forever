@@ -1769,7 +1769,6 @@ static void RenderLoadGameMenu(void)
 		if (e==AvPMenus.CurrentlySelectedElement)
 		{
 			RenderHighlightRectangle(MENU_LEFTXEDGE,y-2,MENU_RIGHTXEDGE,y+4+HUD_FONT_HEIGHT*2,0,128,0);
-
 			targetBrightness = BRIGHTNESS_OF_HIGHLIGHTED_ELEMENT;
 		}
 		else
@@ -1863,12 +1862,12 @@ static void RenderLoadGameMenu(void)
 							slotPtr->TimeStamp.wYear
 						);
 #endif
-				RenderText(buffer2,MENU_RIGHTXEDGE-30,y+HUD_FONT_HEIGHT+1,elementPtr->Brightness,AVPMENUFORMAT_RIGHTJUSTIFIED);
+				RenderText(buffer2, MENU_RIGHTXEDGE-30, y+HUD_FONT_HEIGHT+1, elementPtr->Brightness, AVPMENUFORMAT_RIGHTJUSTIFIED);
 			}
 		}
 		else
 		{
-			RenderText(GetTextString(TEXTSTRING_SAVEGAME_EMPTYSLOT),MENU_CENTREX,y,elementPtr->Brightness,AVPMENUFORMAT_CENTREJUSTIFIED);
+			RenderText(GetTextString(TEXTSTRING_SAVEGAME_EMPTYSLOT), MENU_CENTREX, y, elementPtr->Brightness, AVPMENUFORMAT_CENTREJUSTIFIED);
 		}
 
 		y += HeightOfMenuElement(elementPtr);
@@ -1879,16 +1878,17 @@ static void RenderLoadGameMenu(void)
 	if (AvPMenus.MenusState == MENUSSTATE_MAINMENUS)
 	{
 		char *textPtr = GetTextString(AvPMenusData[AvPMenus.CurrentMenu].MenuTitle);
-		RenderMenuText(textPtr,MENU_CENTREX,70,ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
+		RenderMenuText(textPtr, MENU_CENTREX, 70, ONE_FIXED, AVPMENUFORMAT_CENTREJUSTIFIED);
 	}
 	else
 	{
 		char *textPtr = GetTextString(AvPMenusData[AvPMenus.CurrentMenu].MenuTitle);
 		AVPMENU_ELEMENT *elementPtr = &AvPMenus.MenuElements[AvPMenus.CurrentlySelectedElement];
 		y = (ScreenDescriptorBlock.SDB_Height - AvPMenus.MenuHeight)/2 - 30;
-		RenderText(textPtr,MENU_CENTREX,y,ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
+		RenderText(textPtr, MENU_CENTREX, y, ONE_FIXED, AVPMENUFORMAT_CENTREJUSTIFIED);
+
 		y = (ScreenDescriptorBlock.SDB_Height + AvPMenus.MenuHeight)/2 + 20;
-		RenderText(GetTextString(elementPtr->HelpString),MENU_CENTREX,y,ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
+		RenderText(GetTextString(elementPtr->HelpString), MENU_CENTREX, y, ONE_FIXED, AVPMENUFORMAT_CENTREJUSTIFIED);
 	}
 }
 

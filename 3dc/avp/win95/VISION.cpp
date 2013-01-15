@@ -50,8 +50,8 @@ extern void D3D_PredatorScreenInversionOverlay();
 extern void D3D_FadeDownScreen(int brightness, int colour);
 extern void D3D_ScreenInversionOverlay();
 
-const int MARINE_FOV =	77;
-const int ALIEN_FOV	 =	110;
+const int MARINE_FOV =	75;
+const int ALIEN_FOV	 =	105;
 
 extern void R_SetFov(uint32_t fov);
 
