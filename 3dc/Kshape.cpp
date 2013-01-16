@@ -5116,23 +5116,16 @@ int SkyColour_B = 200;
 void RenderSky(void)
 {
 	POLYHEADER fakeHeader;
-	int x, z, o, i;
+	int o = 0;
 
 	// if this is our first time in the function, initialise some values just the once
 	if (!skySetup) {
-		for (i = 0; i < OCTAVES; i++) {
-/* broken version fix
-			u[i] = (FastRandom() & 65535); //*128;
-			v[i] = (FastRandom() & 65535); //*128;
-			du[i] = (((FastRandom() & 65535) - 32768) * (i + 1)); //*8;
-			dv[i] = (((FastRandom() & 65535) - 32768) * (i + 1)); //*8;
-*/
+		for (int i = 0; i < OCTAVES; i++) {
 			u[i] = (FastRandom() & 65535) * 128;
 			v[i] = (FastRandom() & 65535) * 128;
 			du[i] = (((FastRandom() & 65535) - 32768) * (i + 1)) * 8;
 			dv[i] = (((FastRandom() & 65535) - 32768) * (i + 1)) * 8;
 		}
-
 		skySetup = true;
 	}
 
@@ -5145,45 +5138,34 @@ void RenderSky(void)
 	RenderPolygon.TranslucencyMode = TRANSLUCENCY_GLOWING;
 
 	for (o = 0; o < OCTAVES; o++) {
-		// makes the sky clouds move
-		//u[o] += MUL_FIXED(du[o], GetTestTimer() * 0.1f);//0x0000001);
-		//v[o] += MUL_FIXED(dv[o], GetTestTimer() * 0.1f);//0x0000001);
-
 		u[o] += MUL_FIXED(du[o], NormalFrameTime);
 		v[o] += MUL_FIXED(dv[o], NormalFrameTime);
 	}
 
-	for (x = -10; x <= 10; x++) {
-		for (z = -10; z <= 10; z++) {
+	for (int x = -10; x <= 10; x++)
+	{
+		for (int z = -10; z <= 10; z++)
+		{
 			int t = 255;
-//old			int size = /*65536*/128;
-			int size = /*65536 **/ 128;
+			int size = 65536 * 128;
 
-			for (o = 0; o < OCTAVES; o++) {
+			for (o = 0; o < OCTAVES; o++)
+			{
 				VECTORCH translatedPts[4] = {
 					// x   // y  // z
 					{-1024,-1000,-1024},
 					{-1024,-1000, 1024},
 					{ 1024,-1000, 1024},
 					{ 1024,-1000,-1024},
-/* old
-					{ -16384, -11000, -16384},
-					{ -16384, -11000, 16384},
-					{ 16384, -11000, 16384},
-					{ 16384, -11000, -16384},
-*/
 				};
 
-				for (i = 0; i < 4; i++) {
-/* old
-					translatedPts[i].vx += 32768 * x;
-					translatedPts[i].vz += 32768 * z;
-*/
+				for (int i = 0; i < 4; i++)
+				{
 					translatedPts[i].vx += 2048 * x;
 					translatedPts[i].vz += 2048 * z;
 
 					translatedPts[i].vx += Global_VDB_Ptr->VDB_World.vx;
-					translatedPts[i].vy += Global_VDB_Ptr->VDB_World.vy;// old + 1000;
+					translatedPts[i].vy += Global_VDB_Ptr->VDB_World.vy;
 					translatedPts[i].vz += Global_VDB_Ptr->VDB_World.vz;
 					TranslatePointIntoViewspace(&translatedPts[i]);
 					VerticesBuffer[i].X = translatedPts[i].vx;

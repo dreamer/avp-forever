@@ -2440,8 +2440,9 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVertice
 	uint32_t texWidth, texHeight;
 	Tex_GetDimensions(textureID, texWidth, texHeight);
 
-	float RecipW = 1.0f / (float) texWidth;
-	float RecipH = 1.0f / (float) texHeight;
+	// divide by 65536.0f to convert from fixed point
+	float RecipW = (1.0f / (float) texWidth)  / 65536.0f;
+	float RecipH = (1.0f / (float) texHeight) / 65536.0f;
 
 	mainList->AddItem(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode, FILTERING_BILINEAR_ON, TEXTURE_WRAP);
 
