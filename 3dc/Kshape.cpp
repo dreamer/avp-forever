@@ -200,7 +200,7 @@ typedef struct {
 	VECTORCH Position;
 	int Colour;
 } STARDESC;
-/*static*/ STARDESC StarArray[kNumStars];
+static STARDESC StarArray[kNumStars];
 
 extern void LoadStars();
 extern RenderList *mainList;
@@ -5246,6 +5246,23 @@ void RenderSky(void)
 
 void CreateStarArray(void)
 {
+	SetSeededFastRandom(FastRandom());
+
+	for (int i = 0; i < kNumStars; i++)
+	{
+		int phi = SeededFastRandom()&4095;
+
+		StarArray[i].Position.vy = ONE_FIXED-(SeededFastRandom()&131071);
+		{
+			float y = ((float)StarArray[i].Position.vy)/65536.0;
+			y = sqrt(1-y*y);
+
+			f2i(StarArray[i].Position.vx,(float)GetCos(phi)*y);
+			f2i(StarArray[i].Position.vz,(float)GetSin(phi)*y);
+		}
+		StarArray[i].Colour = 0xff000000 + (FastRandom()&0x7f7f7f)+0x7f7f7f;
+	}
+
 #if 0 // test code, disabled
 	SetSeededFastRandom(FastRandom());
 
@@ -5361,6 +5378,7 @@ void RenderStarfield()
 		VerticesBuffer[3].X = position.vx - sizeX;
 		VerticesBuffer[3].Y = position.vy + sizeY;
 		VerticesBuffer[3].Z = position.vz;
+
 		int outcode = QuadWithinFrustum();
 
 		if (/*outcode*/1) {
