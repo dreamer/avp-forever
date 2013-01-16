@@ -1408,7 +1408,7 @@ void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 			mainVertex[vb].color = RGBA_MAKE(vertices->R, vertices->G, vertices->B, 255);
 		}
 
-		mainVertex[vb].specular = RGB_MAKE(255, 255, 255);
+		mainVertex[vb].specular = 0;//RGB_MAKE(255, 255, 255);
 		mainVertex[vb].u = 0.0f;
 		mainVertex[vb].v = 0.0f;
 		vb++;

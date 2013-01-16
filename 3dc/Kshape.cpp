@@ -3790,10 +3790,10 @@ extern void RenderFlechetteParticle(PARTICLE *particlePtr)
 		VerticesBuffer[i].X = vertices[i].vx;
 		VerticesBuffer[i].Y = vertices[i].vy;
 		VerticesBuffer[i].Z = vertices[i].vz;
-		VerticesBuffer[i].A = (particlePtr->Colour >> 24) & 255;
 		VerticesBuffer[i].R = (particlePtr->Colour >> 16) & 255;
 		VerticesBuffer[i].G = (particlePtr->Colour >> 8) & 255;
 		VerticesBuffer[i].B = (particlePtr->Colour) & 255;
+		VerticesBuffer[i].A = (particlePtr->Colour >> 24) & 255;
 	}
 
 	RenderPolygon.NumberOfVertices = 3;
@@ -3846,10 +3846,10 @@ extern void RenderFlechetteParticle(PARTICLE *particlePtr)
 		VerticesBuffer[i].X = vertices[i + 2].vx;
 		VerticesBuffer[i].Y = vertices[i + 2].vy;
 		VerticesBuffer[i].Z = vertices[i + 2].vz;
-		VerticesBuffer[i].A = (particlePtr->Colour >> 24) & 255;
 		VerticesBuffer[i].R = (particlePtr->Colour >> 16) & 255;
 		VerticesBuffer[i].G = (particlePtr->Colour >> 8) & 255;
 		VerticesBuffer[i].B = (particlePtr->Colour) & 255;
+		VerticesBuffer[i].A = (particlePtr->Colour >> 24) & 255;
 	}
 
 	RenderPolygon.NumberOfVertices = 3;
@@ -4354,9 +4354,12 @@ void DrawWaterFallPoly(VECTORCH *v)
 
 void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 {
+
+#ifdef USE_D3DVIEWTRANSFORM
 	VECTOR2D offset[4];
 	int centreX, centreY;
 	int z = ONE_FIXED - scale;
+
 	// Mel - In the end, all we needed to do was to subtract screen's width and height
 	// from the SmartTargetSight, it's later used to aim predator shoulder cannon and
 	// marine smartgun, so we won't alter it to keep those from breaking, still need
@@ -4469,6 +4472,160 @@ void RenderPredatorTargetingSegment(int theta, int scale, int drawInRed)
 	d3d.rhwDecl->Set();
 	d3d.effectSystem->SetActive(d3d.rhwEffect);
 	d3d.lpD3DDevice->DrawPrimitiveUP(D3DPT_TRIANGLEFAN, 2, &list[0], sizeof(RHW_VERTEX));
+#else
+
+	VECTOR2D offset[4];
+	POLYHEADER fakeHeader;
+	int centreX, centreY;
+
+	int z = ONE_FIXED-scale;
+
+	z = MUL_FIXED(MUL_FIXED(z, z), 2048);
+
+	centreY = MUL_FIXED((SmartTargetSightY-(ScreenDescriptorBlock.SDB_Height<<15)) / Global_VDB_Ptr->VDB_ProjY, z);
+	if (MIRROR_CHEATMODE) {
+		centreX = MUL_FIXED(( - (SmartTargetSightX-(ScreenDescriptorBlock.SDB_Width<<15))) / Global_VDB_Ptr->VDB_ProjX, z);
+	}
+	else {
+		centreX = MUL_FIXED((SmartTargetSightX-(ScreenDescriptorBlock.SDB_Width<<15)) / Global_VDB_Ptr->VDB_ProjX, z);
+	}
+
+	z = (float)z*CameraZoomScale;
+
+	{
+		int a = 160;
+		int b = 40;
+
+		/* tan(30) = 1/sqrt(3), & 65536/(sqrt(3)) = 37837 */
+
+		int y = MUL_FIXED(37837,a+20);
+
+		offset[0].vx = -a+MUL_FIXED(113512,b);
+		offset[0].vy = y-b;
+
+		offset[1].vx = -offset[0].vx;
+		offset[1].vy = y-b;
+
+		offset[2].vx = a;
+		offset[2].vy = y;
+
+		offset[3].vx = -a;
+		offset[3].vy = y;
+
+		if (theta)
+		{
+			RotateVertex(&offset[0],theta);
+			RotateVertex(&offset[1],theta);
+			RotateVertex(&offset[2],theta);
+			RotateVertex(&offset[3],theta);
+		}
+
+		if (MIRROR_CHEATMODE)
+		{
+			offset[0].vx = -offset[0].vx;
+			offset[1].vx = -offset[1].vx;
+			offset[2].vx = -offset[2].vx;
+			offset[3].vx = -offset[3].vx;
+		}
+		VerticesBuffer[0].X = offset[0].vx+centreX;
+		VerticesBuffer[0].Y = offset[0].vy+centreY;
+
+		VerticesBuffer[1].X = offset[1].vx+centreX;
+		VerticesBuffer[1].Y = offset[1].vy+centreY;
+
+		VerticesBuffer[2].X = offset[2].vx+centreX;
+		VerticesBuffer[2].Y = offset[2].vy+centreY;
+
+		VerticesBuffer[3].X = offset[3].vx+centreX;
+		VerticesBuffer[3].Y = offset[3].vy+centreY;
+	}
+
+	fakeHeader.PolyFlags = iflag_transparent;
+	RenderPolygon.TranslucencyMode = TRANSLUCENCY_GLOWING;
+
+	for (int i = 0; i < 4; i++)
+	{
+		VerticesBuffer[i].Z	= z;
+		VerticesBuffer[i].R = 255;
+
+		if (drawInRed)
+		{
+			VerticesBuffer[i].G	= 0;
+			VerticesBuffer[i].B = 0;
+		}
+		else
+		{
+			VerticesBuffer[i].G	= 255;
+			VerticesBuffer[i].B = 255;
+		}
+
+		VerticesBuffer[i].A = 128;
+	}
+
+	RenderPolygon.NumberOfVertices = 4;
+/*
+	GouraudPolygon_ClipWithZ();
+	if(RenderPolygon.NumberOfVertices<3) return;
+	GouraudPolygon_ClipWithNegativeX();
+	if(RenderPolygon.NumberOfVertices<3) return;
+	GouraudPolygon_ClipWithPositiveY();
+	if(RenderPolygon.NumberOfVertices<3) return;
+	GouraudPolygon_ClipWithNegativeY();
+	if(RenderPolygon.NumberOfVertices<3) return;
+	GouraudPolygon_ClipWithPositiveX();
+	if(RenderPolygon.NumberOfVertices<3) return;
+	D3D_ZBufferedGouraudPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
+*/
+	D3D_ZBufferedGouraudPolygon_Output(&fakeHeader, VerticesBuffer);
+
+	if (drawInRed)
+	{
+		VerticesBuffer[0].X = MUL_FIXED(offset[3].vx,scale*8)+centreX;
+		VerticesBuffer[0].Y = MUL_FIXED(offset[3].vy,scale*8)+centreY;
+
+		VerticesBuffer[1].X = MUL_FIXED(offset[2].vx,scale*8)+centreX;
+		VerticesBuffer[1].Y = MUL_FIXED(offset[2].vy,scale*8)+centreY;
+
+		VerticesBuffer[2].X = offset[2].vx+centreX;
+		VerticesBuffer[2].Y = offset[2].vy+centreY;
+
+		VerticesBuffer[3].X = offset[3].vx+centreX;
+		VerticesBuffer[3].Y = offset[3].vy+centreY;
+	 
+		for (int i = 0; i < 2; i++)
+		{
+			VerticesBuffer[i].Z	= z;
+			VerticesBuffer[i].R = 255;
+			VerticesBuffer[i].G	= 0;
+			VerticesBuffer[i].B = 0;
+			VerticesBuffer[i].A = 0;
+		}
+		for (int i = 2; i < 4; i++)
+		{
+			VerticesBuffer[i].Z	= z;
+			VerticesBuffer[i].R = 255;
+			VerticesBuffer[i].G	= 0;
+			VerticesBuffer[i].B = 0;
+			VerticesBuffer[i].A = 128;
+		}
+		RenderPolygon.NumberOfVertices = 4;
+/*
+		GouraudPolygon_ClipWithZ();
+		if(RenderPolygon.NumberOfVertices<3) return;
+		GouraudPolygon_ClipWithNegativeX();
+		if(RenderPolygon.NumberOfVertices<3) return;
+		GouraudPolygon_ClipWithPositiveY();
+		if(RenderPolygon.NumberOfVertices<3) return;
+		GouraudPolygon_ClipWithNegativeY();
+		if(RenderPolygon.NumberOfVertices<3) return;
+		GouraudPolygon_ClipWithPositiveX();
+		if(RenderPolygon.NumberOfVertices<3) return;
+		D3D_ZBufferedGouraudPolygon_Output(&fakeHeader,RenderPolygon.Vertices);
+*/
+		D3D_ZBufferedGouraudPolygon_Output(&fakeHeader, VerticesBuffer);
+	}
+
+#endif
 }
 
 void RenderPredatorPlasmaCasterCharge(int value, VECTORCH *worldOffsetPtr, MATRIXCH *orientationPtr)
