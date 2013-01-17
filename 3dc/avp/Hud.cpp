@@ -379,6 +379,7 @@ void MaintainHUD(void)
 
 				SetFrustumType(FRUSTUM_TYPE_NORMAL);
 
+				// change to normal angle lens (same as marine and predator use)
 				Global_VDB_Ptr->VDB_ProjX = (Global_VDB_Ptr->VDB_ClipRight - Global_VDB_Ptr->VDB_ClipLeft) / 2;
 				Global_VDB_Ptr->VDB_ProjY = (Global_VDB_Ptr->VDB_ClipDown - Global_VDB_Ptr->VDB_ClipUp)    / 2;
 
@@ -386,6 +387,8 @@ void MaintainHUD(void)
 				HandleAlienOVision();
 
 				SetFrustumType(FRUSTUM_TYPE_WIDE);
+
+				// set back to wide angle lens that alien uses
 				Global_VDB_Ptr->VDB_ProjX = (Global_VDB_Ptr->VDB_ClipRight - Global_VDB_Ptr->VDB_ClipLeft) / 4;
 				Global_VDB_Ptr->VDB_ProjY = (Global_VDB_Ptr->VDB_ClipDown - Global_VDB_Ptr->VDB_ClipUp)    / 4;
 
@@ -1782,9 +1785,6 @@ static void HandleAlienWeapon(void)
 	/* draw 3d muzzle flash */
 	if ((twPtr->MuzzleFlashShapeName != NULL) && (!twPtr->PrimaryIsMeleeWeapon) && (weaponPtr->CurrentState == WEAPONSTATE_FIRING_PRIMARY))
 		RenderThisDisplayblock(&PlayersWeaponMuzzleFlash);
-
-//	if ((weaponPtr->CurrentState == WEAPONSTATE_IDLE) || (weaponPtr->CurrentState == WEAPONSTATE_WAITING))
-//		return;
 
 	/* draw 3d weapon */
 	/* if there is no shape name then return */

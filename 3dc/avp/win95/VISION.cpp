@@ -68,8 +68,8 @@ void SetupVision(void)
 
 		/* change clipping planes for new field of view */
 		/* KJL 12:00:54 07/04/97 - new projection angles */
-		VDBPtr->VDB_ProjX = ScreenDescriptorBlock.SDB_Width/4;
-		VDBPtr->VDB_ProjY = (ScreenDescriptorBlock.SDB_Height)/4;
+		VDBPtr->VDB_ProjX = ScreenDescriptorBlock.SDB_Width    / 4;
+		VDBPtr->VDB_ProjY = (ScreenDescriptorBlock.SDB_Height) / 4;
 
 		/* KJL 17:37:51 7/17/97 - frustum setup */
 		SetFrustumType(FRUSTUM_TYPE_WIDE);
@@ -83,8 +83,8 @@ void SetupVision(void)
 		LOCALASSERT(VDBPtr);
 
 		/* change clipping planes for new field of view */
-		VDBPtr->VDB_ProjX = ScreenDescriptorBlock.SDB_Width/2;
-		VDBPtr->VDB_ProjY = (ScreenDescriptorBlock.SDB_Height)/2;
+		VDBPtr->VDB_ProjX = ScreenDescriptorBlock.SDB_Width    / 2;
+		VDBPtr->VDB_ProjY = (ScreenDescriptorBlock.SDB_Height) / 2;
 
 		SetupPredOVision();
 		/* KJL 17:37:51 7/17/97 - frustum setup */
@@ -99,8 +99,8 @@ void SetupVision(void)
 		LOCALASSERT(VDBPtr);
 
 		/* change clipping planes for new field of view */
-		VDBPtr->VDB_ProjX = ScreenDescriptorBlock.SDB_Width/2;
-		VDBPtr->VDB_ProjY = (ScreenDescriptorBlock.SDB_Height)/2;
+		VDBPtr->VDB_ProjX = ScreenDescriptorBlock.SDB_Width    / 2;
+		VDBPtr->VDB_ProjY = (ScreenDescriptorBlock.SDB_Height) / 2;
 
 		SetupMarineOVision();
 		/* KJL 17:37:51 7/17/97 - frustum setup */
