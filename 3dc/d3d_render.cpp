@@ -1408,7 +1408,7 @@ void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 			mainVertex[vb].color = RGBA_MAKE(vertices->R, vertices->G, vertices->B, 255);
 		}
 
-		mainVertex[vb].specular = 0;//RGB_MAKE(255, 255, 255);
+		mainVertex[vb].specular = RGBA_MAKE(0, 0, 0, 0);
 		mainVertex[vb].u = 0.0f;
 		mainVertex[vb].v = 0.0f;
 		vb++;
@@ -1598,17 +1598,16 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 	VECTORCH vertices[3];
 	vertices[0] = *prevPositionPtr;
 
-	/* translate second vertex into view space */
-//	TranslatePointIntoViewspace(&vertices[0]);
+	// translate second vertex into view space
+	TranslatePointIntoViewspace(&vertices[0]);
 
-	/* is particle within normal view frustum ? */
-
-/*
+#ifndef USE_D3DVIEWTRANSFORM
+	// is particle within normal view frustum?
 	if ((-vertices[0].vx <= vertices[0].vz)
 	&& (vertices[0].vx <= vertices[0].vz)
 	&& (-vertices[0].vy <= vertices[0].vz)
 	&& (vertices[0].vy <= vertices[0].vz))
-*/
+#endif
 	{
 		vertices[1] = particlePtr->Position;
 		vertices[2] = particlePtr->Position;
@@ -1617,9 +1616,9 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 		vertices[1].vz += particlePtr->Offset.vz;
 		vertices[2].vz -= particlePtr->Offset.vz;
 
-		/* translate particle into view space */
-//		TranslatePointIntoViewspace(&vertices[1]);
-//		TranslatePointIntoViewspace(&vertices[2]);
+		// translate particle into view space
+		TranslatePointIntoViewspace(&vertices[1]);
+		TranslatePointIntoViewspace(&vertices[2]);
 
 		mainList->AddItem(3, NO_TEXTURE, TRANSLUCENCY_NORMAL);
 
@@ -1629,7 +1628,7 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr, VECTORCH *prevPositionPtr)
 		{
 			mainVertex[vb].x = (float)verticesPtr->vx;
 			mainVertex[vb].y = (float)-verticesPtr->vy;
-			mainVertex[vb].z = (float)verticesPtr->vz; // bjd - CHECK
+			mainVertex[vb].z = (float)verticesPtr->vz;
 
 			if (i==3)
 			{
