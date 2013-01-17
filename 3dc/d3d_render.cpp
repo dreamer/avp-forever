@@ -2229,7 +2229,7 @@ void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin)
 			MeshWorldVertex[i].vx = ((point->vx - WaterXOrigin)/4 + MUL_FIXED(GetSin((point->vy*16) & 4095), 128));
 			MeshWorldVertex[i].vy = ((point->vz - WaterZOrigin)/4 + MUL_FIXED(GetSin((point->vy*16+200) & 4095), 128));
 
-//bjd			TranslatePointIntoViewspace(point);
+			TranslatePointIntoViewspace(point);
 
 			i++;
 		}
@@ -2240,9 +2240,9 @@ void D3D_DrawWaterPatch(int xOrigin, int yOrigin, int zOrigin)
 
 void D3D_DrawWaterFall(int xOrigin, int yOrigin, int zOrigin)
 {
-	uint32_t noRequired = MUL_FIXED(250, NormalFrameTime);
+	uint32_t nRequired = MUL_FIXED(250, NormalFrameTime);
 
-	for (uint32_t i = 0; i < noRequired; i++)
+	for (uint32_t i = 0; i < nRequired; i++)
 	{
 		VECTORCH velocity;
 		VECTORCH position;
@@ -3136,7 +3136,7 @@ void D3D_DrawCable(VECTORCH *centrePtr, MATRIXCH *orientationPtr)
 
 				MeshVertexColour[i] = RGBA_MAKE(0, rOffset, 255, 128);
 
-//bjd				TranslatePointIntoViewspace(point);
+				TranslatePointIntoViewspace(point);
 
 				i++;
 			}
