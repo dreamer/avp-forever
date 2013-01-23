@@ -55,18 +55,20 @@ bool FileStream::IsGood()
 
 bool FileStream::Open(const std::string &fileName, eAccess accessType, eFastFileCheck skipFastFileCheck)
 {
-//	DWORD desiredAccess;       // GENERIC_READ, GENERIC_WRITE, or both (GENERIC_READ | GENERIC_WRITE). 
-//	DWORD creationDisposition; // An action to take on a file or device that exists or does not exist.
-
 	std::string realFileName;
 
-	// check if the file is in a fast file first (unless we were asked to skip this check)
-	if (SkipFastFileCheck == skipFastFileCheck)
-	{
+	// check for local version first
+	if (DoesFileExist(fileName)) {
 		realFileName = fileName;
 	}
 	else
 	{
+		// we haven't found a local copy of the file. Do we do the fast file check?
+		if (SkipFastFileCheck == skipFastFileCheck) {
+			return false;
+		}
+
+		// try find the file in a fast file archive
 		FastFileHandle *ffHandle = FF_Find(fileName);
 		if (ffHandle)
 		{
@@ -77,47 +79,20 @@ bool FileStream::Open(const std::string &fileName, eAccess accessType, eFastFile
 			// a .FFL file name
 			realFileName = FF_GetFastFileName(ffHandle->fastFileIndex);
 		}
-		else
-		{
-			realFileName = fileName;
+		else {
+			// no local or fast file copy of the file exists
+			return false;
 		}
 	}
-/*
-	switch (accessType)
-	{
-		case FileRead:
-			desiredAccess = GENERIC_READ;
-			creationDisposition = OPEN_EXISTING;
-			break;
-		case FileWrite:
-			desiredAccess = GENERIC_WRITE;
-			creationDisposition = CREATE_ALWAYS;
-			break;
-		case FileReadWrite:
-			desiredAccess = GENERIC_READ | GENERIC_WRITE;
-			creationDisposition = CREATE_ALWAYS;
-			break;
-		default:
-			return false;
-			break;
-	}
 
-	// try open the file
-	fileHandle = ::CreateFile(realFileName.c_str(), desiredAccess, 0, NULL, creationDisposition, FILE_ATTRIBUTE_NORMAL, NULL);
-	if (INVALID_HANDLE_VALUE == fileHandle)
-	{
-		fileHandle = 0;
-		return false;
-	}
-*/
+	// open the .ffl archive containing the file we want to access
 	if (!OpenActual(realFileName, accessType)) {
 		fileHandle = 0;
 		return false;
 	}
 
-	if (fromFastFile)
-	{
-		// seek to the start of the file we want within the fast file
+	if (fromFastFile) {
+		// seek to the start of the file we want within the fast file archive
 		Seek(fileOffset, SeekStart);
 	}
 

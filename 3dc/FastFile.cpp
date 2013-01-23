@@ -56,11 +56,12 @@ static bool FF_Open(const std::string &fastFileName, int32_t fastFileIndex);
 // or also null if the fast file system hasn't been initialised
 FastFileHandle* FF_Find(const std::string &fileName)
 {
-	if (!isInited)
+	if (!isInited) {
 		return NULL;
+	}
 
 	// there can be many variations on the case of a filename (either hardcoded in code or in a RIF file, so we always force our filenames to lowercase
-	// before we store them in our file list, and then lowercase our serch filename so we'll get a match regardless of the cases.
+	// before we store them in our file list, and then lowercase our search filename so we'll get a match regardless of the cases.
 	// e.g. so 'TEST.RIM' gets changed to 'test.rim' will match our stored 'test.rim' in the file list map but might actually have been "Test.Rim"
 	std::string lowercaseFileName = fileName;
 	std::transform(lowercaseFileName.begin(), lowercaseFileName.end(), lowercaseFileName.begin(), tolower);
@@ -72,36 +73,33 @@ FastFileHandle* FF_Find(const std::string &fileName)
 	// mod with table size
 	hash = hash % hashTableSize;
 
-	int32_t theSize = fastFileHandles[hash].size();
+	int32_t nEntries = fastFileHandles[hash].size();
 
 	// no entry in hash table for this file
-	if (theSize == 0) {
+	if (nEntries == 0) {
 		return NULL;
 	}
-	else
-	{
-		/* 
-		 * We use separate chaining to resolve collisions.
-		 * The first entry at a hash location won't contain the file's name as a string. If there's a collision
-		 * and a new entry is added to the location, we *do* add the file name for that entry. So, search backwards 
-		 * through the chain, checking for a matching string. If we've reached entry 0, we have no string to check.
-		 * So, this is a possible point of failure in the system. 
-		 */
-		for (int i = (theSize-1); i >= 0; i--)
-		{
-			if (i == 0) { // no string to check as first entry, just return it and assume it's ok.
-				return &fastFileHandles[hash][i];
-			}
 
-			if (fastFileHandles[hash][i].fileName == lowercaseFileName)
-			{
-				return &fastFileHandles[hash][i];
-			}
+	/*
+		* We use separate chaining to resolve collisions.
+		* The first entry at a hash location won't contain the file's name as a string. If there's a collision
+		* and a new entry is added to the location, we *do* add the file name for that entry. So, search backwards 
+		* through the chain, checking for a matching string. If we've reached entry 0, we have no string to check.
+		* So, this is a possible point of failure in the system. 
+	*/
+	for (int i = (nEntries-1); i >= 0; i--)
+	{
+		if (i == 0) { // no string to check as first entry, just return it and assume it's ok.
+			return &fastFileHandles[hash][i];
 		}
 
-		// shouldn't get here?
-		return NULL;
+		if (fastFileHandles[hash][i].fileName == lowercaseFileName) {
+			return &fastFileHandles[hash][i];
+		}
 	}
+
+	// shouldn't get here?
+	return NULL;
 }
 
 const std::string & FF_GetFastFileName(int32_t fastFileIndex)
@@ -151,22 +149,19 @@ static bool FF_Open(const std::string &fastFileName, int32_t fastFileIndex)
 	FileStream file;
 	file.Open(fastFileName, FileStream::FileRead, FileStream::SkipFastFileCheck);
 
-	if (!file.IsGood())
-	{
+	if (!file.IsGood()) {
 		return false;
 	}
 
 	// read and check file signature
 	uint32_t signature = file.GetUint32BE();
-	if (signature != RFFL)
-	{
+	if (signature != RFFL) {
 		// report error
 		return false;
 	}
 
 	uint32_t version = file.GetUint32LE();
-	if (version > 0)
-	{
+	if (version > 0) {
 		// we don't support versions other than 0 (and I don't think they actually exist..)
 		return false;
 	}
@@ -187,9 +182,8 @@ static bool FF_Open(const std::string &fastFileName, int32_t fastFileIndex)
 		uint32_t dataOffset = file.GetUint32LE();
 		uint32_t fileLength = file.GetUint32LE(); // size of the file data
 
-		// read in the wav file name until we hit the null terminator
-		while (file.PeekByte() != '\0')
-		{
+		// read in the file name until we hit the null terminator
+		while (file.PeekByte() != '\0')	{
 			requestedFile += file.GetByte();
 		}
 
@@ -201,8 +195,7 @@ static bool FF_Open(const std::string &fastFileName, int32_t fastFileIndex)
 		uint32_t bytesToSkip = alignedStringLength - stringLength - 1;
 
 		// skip the 4 byte align pad bytes
-		while (bytesToSkip)
-		{
+		while (bytesToSkip) {
 			file.GetByte();
 			bytesToSkip--;
 		}
