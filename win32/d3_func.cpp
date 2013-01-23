@@ -2975,7 +2975,7 @@ bool SetRenderStateDefaults()
 	d3d.lpD3DDevice->SetRenderState(D3DRS_CULLMODE,			D3DCULL_NONE);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_CLIPPING,			TRUE);
 	d3d.lpD3DDevice->SetRenderState(D3DRS_LIGHTING,			FALSE);
-	d3d.lpD3DDevice->SetRenderState(D3DRS_SPECULARENABLE,	TRUE);
+	d3d.lpD3DDevice->SetRenderState(D3DRS_SPECULARENABLE,	FALSE);
 	
 	{
 		// set transparency to TRANSLUCENCY_OFF
