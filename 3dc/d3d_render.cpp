@@ -205,7 +205,7 @@ inline float HPos2DC(int32_t pos)
 		return (float(pos / (float)480) * 2) - 1;
 	}
 	else {
-		return (float(pos / (float)ScreenDescriptorBlock.SDB_Height) * 2) - 1;
+		return (float(pos / (float)ScreenDescriptorBlock.SDB_Height)* 2) - 1;
 	}
 }
 
@@ -2737,10 +2737,14 @@ extern void D3D_DrawSlider(int x, int y, int alpha)
 
 extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int bScale)
 {
-	return; // TODO - fix this implementation
-
 	float yTop1    = HPos2DC(yTop);
 	float yBottom1 = HPos2DC(yBottom);
+
+	// this function draws a lot of triangles so we'll force a buffer flush so we can keen
+	// the size of the ortho buffer small
+	UnlockExecuteBufferAndPrepareForUse();
+	ExecuteBuffer();
+	LockExecuteBuffer();
 
 	for (uint32_t i = 0; i < 255;)
 	{
@@ -2752,55 +2756,49 @@ extern void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int
 		c = GammaValues[i];
 
 		// set alpha to 255 otherwise d3d alpha test stops pixels being rendered
-//		colour = RGBA_MAKE(MUL_FIXED(c,rScale), MUL_FIXED(c,gScale), MUL_FIXED(c,bScale),0);
-		colour = RGBA_MAKE(255, 0, 255, 255);
+		colour = RGBA_MAKE(MUL_FIXED(c,rScale), MUL_FIXED(c,gScale), MUL_FIXED(c,bScale),255);
 
 		float x = WPos2DC((Global_VDB_Ptr->VDB_ClipRight*i)/255);
 
 		uint32_t offs = orthoVBOffset;
 
 		// top left
-		orthoVertex[offs+1].x = x;//(float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
+		orthoVertex[offs+1].x = x;
 		orthoVertex[offs+1].y = yTop1;
 		orthoVertex[offs+1].z = 1.0f;
 		orthoVertex[offs+1].colour = colour;
 		orthoVertex[offs+1].u = 0.0f;
 		orthoVertex[offs+1].v = 0.0f;
-//		orthoVBOffset++;
 
 		// bottom left
-		orthoVertex[offs].x = x;//(float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
+		orthoVertex[offs].x = x;
 		orthoVertex[offs].y = yBottom1;
 		orthoVertex[offs].z = 1.0f;
 		orthoVertex[offs].colour = colour;
 		orthoVertex[offs].u = 0.0f;
 		orthoVertex[offs].v = 0.0f;
-//		orthoVBOffset++;
 
 		i++;
 		c = GammaValues[i];
-//		colour = RGBA_MAKE(MUL_FIXED(c,rScale),MUL_FIXED(c,gScale),MUL_FIXED(c,bScale),0);
-		colour = RGBA_MAKE(255, 0, 255, 255);
+		colour = RGBA_MAKE(MUL_FIXED(c,rScale),MUL_FIXED(c,gScale),MUL_FIXED(c,bScale),255);
 
 		x = WPos2DC((Global_VDB_Ptr->VDB_ClipRight*i)/255);
 
 		// bottom right
-		orthoVertex[offs+2].x = x;//(float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
+		orthoVertex[offs+2].x = x;
 		orthoVertex[offs+2].y = yBottom1;
 		orthoVertex[offs+2].z = 1.0f;
 		orthoVertex[offs+2].colour = colour;
 		orthoVertex[offs+2].u = 0.0f;
 		orthoVertex[offs+2].v = 0.0f;
-//		orthoVBOffset++;
 
 		// top right
-		orthoVertex[offs+3].x = x;//(float)(Global_VDB_Ptr->VDB_ClipRight*i)/255;
+		orthoVertex[offs+3].x = x;
 		orthoVertex[offs+3].y = yTop1;
 		orthoVertex[offs+3].z = 1.0f;
 		orthoVertex[offs+3].colour = colour;
 		orthoVertex[offs+3].u = 0.0f;
 		orthoVertex[offs+3].v = 0.0f;
-//		orthoVBOffset++;
 
 		orthoVBOffset += 4;
 
