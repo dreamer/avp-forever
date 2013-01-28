@@ -1439,14 +1439,7 @@ static void RenderKeyConfigurationMenu(void)
 	if (AvPMenus.MenusState == MENUSSTATE_MAINMENUS)
 	{
 		centreY = 480 / 2+25;
-	}
-	else
-	{
-		centreY = ScreenDescriptorBlock.SDB_Height/2+25;
-	}
 
-	if (AvPMenus.MenusState == MENUSSTATE_MAINMENUS)
-	{
 		char *textPtr = GetTextString(AvPMenusData[AvPMenus.CurrentMenu].MenuTitle);
 		int b;
 		if (AvPMenus.CurrentlySelectedElement >= 2)
@@ -1463,6 +1456,8 @@ static void RenderKeyConfigurationMenu(void)
 	}
 	else
 	{
+		centreY = ScreenDescriptorBlock.SDB_Height/2+25;
+
 		int b;
 		if (AvPMenus.CurrentlySelectedElement>=2)
 		{
@@ -1476,6 +1471,7 @@ static void RenderKeyConfigurationMenu(void)
 		RenderKeyConfigRectangle(b);
 	}
 	y = centreY-160;
+
 	for (i = 0; i<2; i++, elementPtr++)
 	{
 		int targetBrightness;
@@ -3214,16 +3210,17 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 		case AVPMENU_ELEMENT_SAVESETTINGS:
 		{
 			char *textPtr = GetTextString(static_cast<enum TEXTSTRING_ID>(elementPtr->TextDescription));
-			int menuCentreX = ScreenDescriptorBlock.SDB_Width / 2;
+
 			// general text rendering
 			if (AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
 			{
-				RenderText(textPtr,menuCentreX,y,elementPtr->Brightness,AVPMENUFORMAT_CENTREJUSTIFIED);
+				int menuCentreX = ScreenDescriptorBlock.SDB_Width / 2;
+				RenderText(textPtr, menuCentreX, y, elementPtr->Brightness, AVPMENUFORMAT_CENTREJUSTIFIED);
 				break;
 			}
 			else
 			{
-				RenderText(textPtr,MENU_CENTREX,y,elementPtr->Brightness,AVPMENUFORMAT_CENTREJUSTIFIED);
+				RenderText(textPtr, MENU_CENTREX, y, elementPtr->Brightness, AVPMENUFORMAT_CENTREJUSTIFIED);
 				break;
 			}
 		}

@@ -74,7 +74,6 @@ extern int GlobalAmbience;
 extern int NumActiveBlocks;
 
 extern DISPLAYBLOCK *ActiveBlockList[];
-//extern SHAPEHEADER **mainshapelist;
 
 bool MirroringActive = false;
 
@@ -317,7 +316,6 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 				PredatorThermalVision_ShapePipeline(shapePtr);
 				return;
 			}
-
 			break;
 		}
 
@@ -345,7 +343,6 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						if (marineStatusPointer->Android) {
 							useVision = TRUE;
 						}
-
 						break;
 					}
 
@@ -356,7 +353,6 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						    || (ghostDataPtr->type == I_BehaviourNetCorpse && ghostDataPtr->subtype == I_BehaviourAlienPlayer)) {
 							useVision = TRUE;
 						}
-
 						break;
 					}
 
@@ -366,7 +362,6 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						if (corpseDataPtr->Android || corpseDataPtr->Type == I_BehaviourAlienPlayer || corpseDataPtr->Type == I_BehaviourAlien) {
 							useVision = TRUE;
 						}
-
 						break;
 					}
 
@@ -380,7 +375,6 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						    || debrisDataPtr->Android) {
 							useVision = TRUE;
 						}
-
 						break;
 					}
 
@@ -390,10 +384,10 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						if (spearDataPtr->SpearThroughFragment) // more flags required!
 							if (spearDataPtr->Type == I_BehaviourAlien
 							    || spearDataPtr->Type == I_BehaviourPredatorAlien
-							    || spearDataPtr->Type == I_BehaviourAutoGun) {
+							    || spearDataPtr->Type == I_BehaviourAutoGun) 
+							{
 								useVision = TRUE;
 							}
-
 						break;
 					}
 
@@ -406,7 +400,6 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 					return;
 				}
 			}
-
 			break;
 		}
 
@@ -423,7 +416,6 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						if (!predData->CloakingEffectiveness) {
 							useVision = true;
 						}
-
 						break;
 					}
 
@@ -443,7 +435,6 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						        || (ghostDataPtr->type == I_BehaviourNetCorpse && ghostDataPtr->subtype == I_BehaviourPredatorPlayer))) {
 							useVision = true;
 						}
-
 						break;
 					}
 
@@ -453,7 +444,6 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						if (corpseDataPtr->Type == I_BehaviourPredatorPlayer || corpseDataPtr->Type == I_BehaviourPredator) {
 							useVision = true;
 						}
-
 						break;
 					}
 
@@ -463,7 +453,6 @@ void ShapePipeline(SHAPEHEADER *shapePtr)
 						if (debrisDataPtr->Type == I_BehaviourPredator) {
 							useVision = true;
 						}
-
 						break;
 					}
 
@@ -1186,11 +1175,6 @@ static void GouraudPolygon_Construct(POLYHEADER *polyPtr)
 		VertexNumberPtr++;
 	} while (--i);
 }
-
-
-
-
-
 
 /* GOURAUD TEXTURED POLYGONS */
 static void GouraudTexturedPolygon_Construct(POLYHEADER *polyPtr)
@@ -3552,12 +3536,13 @@ void RenderParticle(PARTICLE *particlePtr)
 {
 	int particleSize = particlePtr->Size;
 
-	VECTORCHF tempVector;
 	VECTORCH translatedPosition = particlePtr->Position;
 
 	// do view transform
 	TranslatePointIntoViewspace(&translatedPosition);
 #if 0
+	VECTORCHF tempVector;
+
 	tempVector.vx = (float)particlePtr->Position.vx;
 	tempVector.vy = (float) -particlePtr->Position.vy;
 	tempVector.vz = (float)particlePtr->Position.vz;
@@ -4968,26 +4953,7 @@ void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr)
 						VerticesBuffer[2].U += 128 * 65536 * SPHERE_TEXTURE_WRAP;
 					}
 				}
-				// bjd - this isn't correct but looks better..kinda
 
-				VerticesBuffer[0].U >>= 16;
-				VerticesBuffer[1].U >>= 16;
-				VerticesBuffer[2].U >>= 16;
-				VerticesBuffer[0].V >>= 16;
-				VerticesBuffer[1].V >>= 16;
-				VerticesBuffer[2].V >>= 16;
-
-				/*
-				                char buf[100];
-				                sprintf(buf, "%d, %d, %d, %d, %d, %d\n",
-				                    VerticesBuffer[0].U,
-				                    VerticesBuffer[1].U,
-				                    VerticesBuffer[2].U,
-				                    VerticesBuffer[0].V,
-				                    VerticesBuffer[1].V,
-				                    VerticesBuffer[2].V);
-				                OutputDebugString(buf);
-				*/
 				VerticesBuffer[i].A = explosionPtr->LifeTime / 256;
 				VerticesBuffer[i].R = red;
 				VerticesBuffer[i].G = green;
@@ -4995,6 +4961,10 @@ void RenderExplosionSurface(VOLUMETRIC_EXPLOSION *explosionPtr)
 				VerticesBuffer[i].SpecularR = 0;
 				VerticesBuffer[i].SpecularG = 0;
 				VerticesBuffer[i].SpecularB = 0;
+
+				// D3D_ZBufferedGouraudTexturedPolygon_Output no longer expects fixed point texture coordinates so convert them here
+				VerticesBuffer[i].U >>= 16;
+				VerticesBuffer[i].V >>= 16;
 			}
 
 			RenderPolygon.NumberOfVertices = 3;
@@ -5252,9 +5222,9 @@ void CreateStarArray(void)
 	{
 		int phi = SeededFastRandom()&4095;
 
-		StarArray[i].Position.vy = ONE_FIXED-(SeededFastRandom()&131071);
+		StarArray[i].Position.vy = ONE_FIXED-(SeededFastRandom() & 131071);
 		{
-			float y = ((float)StarArray[i].Position.vy)/65536.0;
+			float y = ((float)StarArray[i].Position.vy) / 65536.0f;
 			y = sqrt(1-y*y);
 
 			f2i(StarArray[i].Position.vx,(float)GetCos(phi)*y);
@@ -5336,7 +5306,6 @@ void RenderStarfield()
 {
 	int sizeX;
 	int sizeY;
-	VECTORCHF tempVector;
 	sizeX = 256;
 	//  sizeY = MUL_FIXED(sizeX,87381);
 	sizeY = sizeX;
@@ -5351,6 +5320,8 @@ void RenderStarfield()
 		position.vz += Global_VDB_Ptr->VDB_World.vz;
 
 #ifdef USE_D3DVIEWTRANSFORM
+		VECTORCHF tempVector;
+
 		//      VECTORCH translatedPosition = particlePtr->Position;
 		tempVector.vx = (float)position.vx;
 		tempVector.vy = (float)-position.vy;

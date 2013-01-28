@@ -39,6 +39,8 @@ Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{
 
 [Files]
 Source: "D:\Development\avp_redist\AvPx.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "D:\Development\avp_redist\AvPx_License.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "D:\Development\avp_redist\AvPx_Readme.txt"; DestDir: "{app}"; Flags: ignoreversion
 Source: "D:\Development\avp_redist\directx\*"; DestDir: "{app}\redist\directx\"; Flags: ignoreversion recursesubdirs createallsubdirs
 Source: "D:\Development\avp_redist\vcredist_x86.exe"; DestDir: "{app}\redist\vc\"; Flags: ignoreversion
 Source: "D:\Development\avp_redist\shaders\*"; DestDir: "{app}\shaders\"; Flags: ignoreversion recursesubdirs createallsubdirs

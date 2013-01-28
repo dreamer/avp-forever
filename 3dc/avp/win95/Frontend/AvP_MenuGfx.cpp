@@ -20,7 +20,6 @@ extern void DrawMenuTextGlow(uint32_t topLeftX, uint32_t topLeftY, uint32_t size
 
 extern void D3D_RenderHUDString(char *stringPtr,int x,int y,int colour);
 static void LoadMenuFont(void);
-static void UnloadMenuFont(void);
 extern int RenderSmallFontString(char *textPtr,int sx,int sy,int alpha, int red, int green, int blue);
 static void CalculateWidthsOfAAFont(void);
 extern bool IsDemoVersion();
@@ -200,11 +199,6 @@ static void LoadMenuFont(void)
 
 	// we're going to try create a square texture
 	IntroFont_Light.textureID = Tex_CreateTallFontTexture("graphics/Menus/IntroFont.RIM", image, TextureUsage_Normal);
-}
-
-static void UnloadMenuFont(void)
-{
-	Tex_Release(IntroFont_Light.textureID);
 }
 
 extern int LengthOfMenuText(const char *textPtr)
