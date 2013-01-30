@@ -82,7 +82,7 @@ texID_t Tex_CheckExists    (const std::string &textureName);
 texID_t Tex_AddExistingTexture(Texture &texture);
 const Texture& Tex_GetTextureDetails(texID_t textureID);
 
-texID_t Tex_CreateFromAvPTexture  (const std::string &textureName, AVPTEXTURE &AvPTexure, enum TextureUsage usageType);
+// texID_t Tex_CreateFromAvPTexture  (const std::string &textureName, AVPTEXTURE &AvPTexure, enum TextureUsage usageType);
 texID_t Tex_CreateTallFontTexture (const std::string &textureName, AVPTEXTURE &AvPTexure, enum TextureUsage usageType);
 
 std::string& Tex_GetName	(texID_t textureID);

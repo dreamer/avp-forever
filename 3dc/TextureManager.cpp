@@ -261,6 +261,7 @@ texID_t Tex_CreateFromRIM(const std::string &fileName)
 	return textureID;
 }
 
+#if 0
 texID_t Tex_CreateFromAvPTexture(const std::string &textureName, AVPTEXTURE &AvPTexure, enum TextureUsage usageType)
 {
 	Texture newTexture;
@@ -290,6 +291,7 @@ texID_t Tex_CreateFromAvPTexture(const std::string &textureName, AVPTEXTURE &AvP
 
 	return textureID;
 }
+#endif
 
 texID_t Tex_Create(const std::string &textureName, uint32_t width, uint32_t height, uint32_t bitsPerPixel, enum TextureUsage usageType)
 {

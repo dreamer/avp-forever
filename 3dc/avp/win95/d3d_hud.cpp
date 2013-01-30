@@ -69,9 +69,6 @@ texID_t WaterShaftImageNumber;
 fixed_t HUDScaleFactor;
 fixed_t MotionTrackerScale;
 
-float HUDScaleFactorf = 1.0f;
-float MotionTrackerScalef = 1.0f;
-
 const char *cl_pszGameMode = NULL;
 
 static struct HUDFontDescTag HUDFontDesc[] =
@@ -179,7 +176,7 @@ void Draw_HUDImage(HUDImageDesc *imageDescPtr)
 	quadVertices[2].V = imageDescPtr->TopLeftV + imageDescPtr->Height;
 	quadVertices[3].U = imageDescPtr->TopLeftU;
 	quadVertices[3].V = imageDescPtr->TopLeftV + imageDescPtr->Height;
-	
+
 	quadVertices[0].X = imageDescPtr->TopLeftX;
 	quadVertices[0].Y = imageDescPtr->TopLeftY;
 	quadVertices[1].X = imageDescPtr->TopLeftX + scaledWidth;
@@ -243,10 +240,9 @@ void D3D_InitialiseMarineHUD(void)
 	MotionTrackerCentreY = BlueBar.TopLeftY;
 	MotionTrackerCentreX = BlueBar.TopLeftX + (BlueBar.Width/2);
 	MotionTrackerScale  = ONE_FIXED;
-	MotionTrackerScalef = 1.0f;
 
-	HUDScaleFactor = DIV_FIXED(ScreenDescriptorBlock.SDB_Width, 640);
-	HUDScaleFactorf = (float)ScreenDescriptorBlock.SDB_Width / 640.0f;
+//	HUDScaleFactor = DIV_FIXED(ScreenDescriptorBlock.SDB_Width, 640);
+	HUDScaleFactor = DIV_FIXED(ScreenDescriptorBlock.SDB_Height, 480);
 
 	#if UseGadgets
 //	MotionTrackerGadget::SetCentre(r2pos(100,100));
@@ -349,10 +345,8 @@ void YClipMotionTrackerVertices(struct VertexTag *v1, struct VertexTag *v2)
 
 void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 {
-	BlueBar.TopLeftY = (ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset) - MUL_FIXED(MotionTrackerScale, 40);
 	MotionTrackerCentreY = BlueBar.TopLeftY;
 	MotionTrackerCentreX = BlueBar.TopLeftX+MUL_FIXED(MotionTrackerScale, (BlueBar.Width/2));
-	BlueBar.Scale = MotionTrackerScale;
 
 	int motionTrackerScaledHalfWidth = MUL_FIXED(MotionTrackerScale*3, MotionTrackerHalfWidth/2);
 
@@ -452,7 +446,9 @@ void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 	}
 
 	/* KJL 16:14:29 30/01/98 - draw bottom bar of MT */
+	BlueBar.TopLeftY = (ScreenDescriptorBlock.SDB_Height - ScreenDescriptorBlock.SDB_SafeZoneHeightOffset) - MUL_FIXED(MotionTrackerScale, 40);
 	BlueBar.Translucency = HUDTranslucencyLevel;
+	BlueBar.Scale = MotionTrackerScale;
 	Draw_HUDImage(&BlueBar);
 	
 	D3D_BLTDigitToHUD(ValueOfHUDDigit[MARINE_HUD_MOTIONTRACKER_UNITS],      17, -4, MARINE_HUD_FONT_MT_SMALL);
@@ -521,7 +517,7 @@ extern void D3D_BlitWhiteChar(int x, int y, unsigned char c)
 	imageDesc.Height = 15;
 	imageDesc.Width = 15;
 
-	imageDesc.Scale = ONE_FIXED; //DIV_FIXED(640, ScreenDescriptorBlock.SDB_Width);//ONE_FIXED;
+	imageDesc.Scale = ONE_FIXED;
 	imageDesc.Translucency = 255;
 	imageDesc.Red = 255;
 	imageDesc.Green = 255;
