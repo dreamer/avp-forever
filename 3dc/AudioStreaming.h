@@ -148,6 +148,7 @@ class AudioStream
 		uint32_t	bytesPerSample;
 		uint64_t	totalSamplesWritten;
 		bool		isPaused;
+		uint32_t    volume;
 		uint8_t		*buffers;
 		std::vector<DWORD> PacketStatus;
 		LPDIRECTSOUNDSTREAM dsStreamBuffer;
@@ -158,6 +159,7 @@ class AudioStream
 		int32_t  Stop();
 		int32_t  Play();
 		int32_t  SetVolume(uint32_t volume);
+		uint32_t GetVolume();
 		int32_t  SetPan(uint32_t pan);
 		uint32_t WriteData(uint8_t *audioData, uint32_t size);
 		uint32_t GetNumFreeBuffers();

@@ -79,7 +79,7 @@ const int kMaxTextureStages = 4;
 std::vector<texID_t> setTextureArray;
 
 // Alien FOV - 115
-// Marine & Predator FOV - 77
+// Marine & Predator FOV = 77
 const int kDefaultFOV = 77;
 
 // byte order macros for A8R8G8B8 d3d texture
@@ -675,10 +675,10 @@ bool CreateVolatileResources()
 
 	// orthographic projected quads
 	d3d.orthoVB = new VertexBuffer;
-	d3d.orthoVB->Create(kMaxVertices, sizeof(ORTHOVERTEX), USAGE_DYNAMIC);
+	d3d.orthoVB->Create(kMaxVertices, sizeof(ORTHOVERTEX), USAGE_STATIC);
 
 	d3d.orthoIB = new IndexBuffer;
-	d3d.orthoIB->Create(kMaxIndices * 3, USAGE_DYNAMIC);
+	d3d.orthoIB->Create(kMaxIndices * 3, USAGE_STATIC);
 
 	// particle vertex buffer
 	d3d.particleVB = new VertexBuffer;
@@ -746,8 +746,10 @@ bool R_LockTexture(Texture &texture, uint8_t **data, uint32_t *pitch, enum Textu
 	}
 	else
 	{
-		// hack for aa_font :(
+//		// hack for aa_font :(
 //		if (textureID == AVPMENUGFX_SMALL_FONT)
+
+#if 0 // FIXME
 		if ((texture.height != 368) && (texture.height != 184))
 		{
 			aaUnswizzled = new uint8_t[texture.width*texture.height*4];
@@ -761,6 +763,7 @@ bool R_LockTexture(Texture &texture, uint8_t **data, uint32_t *pitch, enum Textu
 			*pitch = (texture.width*4);
 		}
 		else
+#endif
 		{
 			*data = static_cast<uint8_t*>(lock.pBits);
 			*pitch = lock.Pitch;
@@ -1038,14 +1041,14 @@ bool R_CreateVertexShader(const std::string &fileName, r_VertexShader &vertexSha
 	XGBuffer* pShaderData = NULL;
 	XGBuffer* pErrors = NULL;
 
-	std::string properPath = "d:\\" + fileName;
+	std::string properPath = "d:\\" + shaderPath + "\\" + fileName;
 
 	// have to open the file ourselves and pass as string. XGAssembleShader won't do this for us
 	std::ifstream shaderFile(properPath.c_str(), std::ifstream::in);
 
 	if (!shaderFile.is_open())
 	{
-		LogErrorString("Error cannot open vertex shader file");
+		LogErrorString("Error cannot open vertex shader file '" + properPath + "'");
 		return false;
 	}
 
@@ -1099,14 +1102,14 @@ bool R_CreatePixelShader(const std::string &fileName, r_PixelShader &pixelShader
 	XGBuffer* pShaderData = NULL;
 	XGBuffer* pErrors = NULL;
 
-	std::string properPath = "d:\\" + fileName;
+	std::string properPath = "d:\\" + shaderPath + "\\" + fileName;
 
 	// have to open the file ourselves and pass as string. XGAssembleShader won't do this for us
 	std::ifstream shaderFile(properPath.c_str(), std::ifstream::in);
 
 	if (!shaderFile.is_open())
 	{
-		LogErrorString("Error cannot open pixel shader file");
+		LogErrorString("Error cannot open pixel shader file '" + properPath + "'");
 		return false;
 	}
 
@@ -2268,14 +2271,15 @@ bool InitialiseDirect3D()
 
 	d3d.effectSystem = new EffectManager;
 
-	d3d.mainEffect  = d3d.effectSystem->Add("main", "vertex.vsh", "pixel.psh", d3d.mainDecl);
-	d3d.orthoEffect = d3d.effectSystem->Add("ortho", "orthoVertex.vsh", "orthoPixel.psh", d3d.orthoDecl);
-	d3d.decalEffect = d3d.effectSystem->Add("decal", "decal.vsh", "decal.psh", d3d.decalDecl);
-	d3d.fmvEffect   = d3d.effectSystem->Add("fmv", "fmvVertex.vsh", "fmvPixel.psh", d3d.fmvDecl);
-	d3d.rhwEffect   = d3d.effectSystem->Add("rhw", "rhw.vsh", "rhw.psh", d3d.rhwDecl);
-	d3d.tallTextEffect = d3d.effectSystem->Add("tallText", "tallText.vsh", "tallText.psh", d3d.tallTextDecl);
-	d3d.particleEffect = d3d.effectSystem->Add("particle", "particle.vsh", "particle.psh", d3d.particleDecl);
-
+	d3d.mainEffect  = d3d.effectSystem->Add("main", "x_main.vsh", "x_main.psh", d3d.mainDecl);
+	d3d.orthoEffect = d3d.effectSystem->Add("ortho", "x_ortho.vsh", "x_ortho.psh", d3d.orthoDecl);
+/*	
+	d3d.decalEffect = d3d.effectSystem->Add("decal", "xbox_decal.vsh", "xbox_decal.psh", d3d.decalDecl);
+	d3d.fmvEffect   = d3d.effectSystem->Add("fmv", "xbox_fmvVertex.vsh", "xbox_fmvPixel.psh", d3d.fmvDecl);
+	d3d.rhwEffect   = d3d.effectSystem->Add("rhw", "xbox_rhw.vsh", "xbox_rhw.psh", d3d.rhwDecl);
+	d3d.tallTextEffect = d3d.effectSystem->Add("tallText", "xbox_tallText.vsh", "xbox_tallText.psh", d3d.tallTextDecl);
+	d3d.particleEffect = d3d.effectSystem->Add("particle", "xbox_particle.vsh", "xbox_particle.psh", d3d.particleDecl);
+*/
 	// create vertex and index buffers
 	CreateVolatileResources();
 

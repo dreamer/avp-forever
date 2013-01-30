@@ -114,7 +114,8 @@ char *GetSaveFolderPath()
 
 #ifdef _XBOX
 	// just blank the char array
-	saveFolder[0] = '\0';
+//	saveFolder[0] = '\0';
+	strcat(saveFolder, "D:\\");
 	return saveFolder;
 #endif
 #ifdef WIN32

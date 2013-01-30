@@ -24,8 +24,6 @@
 #include "mempool.h"
 #include "GammaControl.h"
 #include "avp_intro.h"
-#include "CDTrackSelection.h"
-#include "CD_Player.h"
 #include "psndplat.h"
 #include "AvP_UserProfile.h"
 #include "avp_menus.h"
@@ -38,6 +36,7 @@
 #include "logString.h"
 #include "FastFile.h"
 #include "console.h"
+#include "MusicPlayer.h"
 
 #if debug
 #define MainTextPrint 1
@@ -125,7 +124,7 @@ void _cdecl main()
 	// load AliensVsPredator.cfg
 	Config_Load();
 
-	LoadCDTrackList(); //load list of cd tracks assigned to levels , from a text file
+	Music_Init(); //load list of cd tracks assigned to levels , from a text file
 	LoadVorbisTrackList(); // do the same for any user ogg vorbis music files
 
 	SetFastRandom();
@@ -305,7 +304,7 @@ void _cdecl main()
 	Start the sound system
 	----------------------------------------------------------*/
 	SoundSys_Start();
-	CDDA_Start();
+	Music_Start();
 
 	// load language file and setup text string access
 	InitTextStrings();
@@ -423,8 +422,8 @@ void _cdecl main()
 
 						FlushTextprintBuffer();
 
-						//check cd status
-						CheckCDAndChooseTrackIfNeeded();
+						// check music status
+						Music_Check();
 
 						// check to see if we're pausing the game;
 						// if so kill off any sound effects
@@ -522,7 +521,7 @@ void _cdecl main()
 		//make sure the volume gets reset for the menus
 		SoundSys_ResetFadeLevel();
 
-		CDDA_Stop();
+		Music_Stop();
 		Vorbis_CloseSystem(); // stop ogg vorbis player
 
 		// netgame support
@@ -568,7 +567,7 @@ void _cdecl main()
 
 	Config_Save();
 
- 	CDDA_End();
+ 	Music_Deinit();
 	ClearMemoryPool();
 
 	// return to dashboard

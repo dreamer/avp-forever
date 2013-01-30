@@ -1179,26 +1179,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\CD_player.cpp">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\CDTrackSelection.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="..\3dc\avp\win95\Cheat.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
@@ -2604,6 +2584,9 @@
 			</File>
 			<File
 				RelativePath="..\3dc\MurmurHash3.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\MusicPlayer.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\networking.cpp">
@@ -4243,6 +4226,9 @@
 			</File>
 			<File
 				RelativePath="..\3dc\MurmurHash3.h">
+			</File>
+			<File
+				RelativePath="..\3dc\MusicPlayer.h">
 			</File>
 			<File
 				RelativePath="..\3dc\networking.h">
