@@ -22,6 +22,8 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#if 0
+
 #include "TheoraPlayback.h"
 #include "FmvPlayback.h"
 #include "console.h"
@@ -812,3 +814,5 @@ unsigned int __stdcall TheoraAudioThread(void *args)
 	_endthreadex(0);
 	return 0;
 }
+
+#endif

@@ -104,7 +104,7 @@
       <Culture>0x0000</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;libbinkdec.lib;libsmackerdec.lib;shell32.lib;shlwapi.lib;d3d9.lib;d3dx9d.lib;dxerr.lib;x3daudio.lib;dxguid.lib;ws2_32.lib;ole32.lib;../../enet/lib/enet.lib;../../enet/lib/enet.exp;libvorbisfile.lib;libvorbis.lib;libogg.lib;libtheora.lib;user32.lib;xinput.lib</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;libbinkdec.lib;libsmackerdec.lib;shell32.lib;shlwapi.lib;d3d9.lib;d3dx9d.lib;dxerr.lib;x3daudio.lib;dxguid.lib;ws2_32.lib;ole32.lib;../../enet/lib/enet.lib;../../enet/lib/enet.exp;libvorbisfile.lib;libvorbis.lib;libogg.lib;user32.lib;xinput.lib</AdditionalDependencies>
       <OutputFile>$(OutDir)\$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>3dc; enet;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -179,7 +179,7 @@
       <Culture>0x0809</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>winmm.lib;libbinkdec.lib;libsmackerdec.lib;shell32.lib;shlwapi.lib;d3d9.lib;d3dx9.lib;dxerr.lib;x3daudio.lib;dxguid.lib;ws2_32.lib;ole32.lib;../../enet/lib/enet.lib;../../enet/lib/enet.exp;libvorbisfile.lib;libvorbis.lib;libogg.lib;libtheora.lib;user32.lib;xinput.lib</AdditionalDependencies>
+      <AdditionalDependencies>winmm.lib;libbinkdec.lib;libsmackerdec.lib;shell32.lib;shlwapi.lib;d3d9.lib;d3dx9.lib;dxerr.lib;x3daudio.lib;dxguid.lib;ws2_32.lib;ole32.lib;../../enet/lib/enet.lib;../../enet/lib/enet.exp;libvorbisfile.lib;libvorbis.lib;libogg.lib;user32.lib;xinput.lib</AdditionalDependencies>
       <OutputFile>$(OutDir)\$(TargetName)$(TargetExt)</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <AdditionalLibraryDirectories>3dc; enet;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -342,6 +342,7 @@
     <ClCompile Include="..\..\3dc\avp\win95\MouseCentreing.cpp" />
     <ClCompile Include="..\..\3dc\avp\win95\NPCSETUP.CPP" />
     <ClCompile Include="..\..\3dc\avp\win95\Objsetup.cpp" />
+    <ClCompile Include="..\..\3dc\avp\win95\openal_audio.cpp" />
     <ClCompile Include="..\..\3dc\avp\win95\PathChnk.cpp" />
     <ClCompile Include="..\..\3dc\avp\win95\PLATSUP.cpp" />
     <ClCompile Include="..\..\3dc\avp\win95\Pldghost.cpp" />

@@ -22,6 +22,8 @@
 // OTHERWISE) ARISING IN ANY WAY OUT OF THE USE OF THIS SOFTWARE, EVEN IF
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
+#if 0
+
 #ifndef _TheoraPlayback_h_
 #define _TheoraPlayback_h_
 
@@ -215,5 +217,7 @@ class TheoraPlayback
 		bool HandleVorbisHeader(OggStream* stream, ogg_packet* packet);
 		bool HandleSkeletonHeader(OggStream* stream, ogg_packet* packet);
 };
+
+#endif
 
 #endif
