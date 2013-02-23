@@ -5,6 +5,75 @@
 
 #include "oglfunc.h"
 
+#if defined(_GL_STATIC)
+
+void glWrapperVertex3f( float x, float y, float z )
+{
+	glVertex3f( x, y, z );
+}
+
+void glWrapperBegin( GLenum mode )
+{
+	glBegin( mode );
+}
+
+void glWrapperEnd( )
+{
+	glEnd( );
+}
+
+void glWrapperArrayElement( GLint i )
+{
+	glArrayElement( i );
+}
+
+void glWrapperTexCoord2f( GLfloat s, GLfloat t )
+{
+	glTexCoord2f( s, t );
+}
+
+void glWrapperPushAttrib( )
+{
+//	glPushAttrib( );
+}
+
+void glWrapperPopAttrib( )
+{
+//	glPopAttrib( );
+}
+
+void glWrapperPixelZoom( GLfloat xFactor, GLfloat yFactor )
+{
+//	glPixelZoom( xFactor, yFactor );
+}
+
+void glWrapperOrtho( GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble near_val, GLdouble far_val )
+{
+	glOrtho( left, right, bottom, top, near_val, far_val );
+}
+
+void glWrapperRasterPos2i( GLint x, GLint y )
+{
+//	glRasterPos2i( x, y );
+}
+
+void glWrapperDrawPixels( GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels )
+{
+//	glDrawPixels( width, height, format, type, pixels );
+}
+
+void glWrapperPushClientAttrib( GLbitfield mask)
+{
+//	glPushClientAttrib( mask );
+}
+
+void glWrapperPopClientAttrib( )
+{
+//	glPopClientAttrib( );
+}
+
+#else
+
 PFNGLALPHAFUNCPROC		pglAlphaFunc;
 PFNGLARRAYELEMENTPROC		pglArrayElement;
 PFNGLBEGINPROC			pglBegin;
@@ -13,11 +82,28 @@ PFNGLBLENDFUNCPROC		pglBlendFunc;
 PFNGLCLEARPROC			pglClear;
 PFNGLCLEARCOLORPROC		pglClearColor;
 PFNGLCOLOR3FPROC		pglColor3f;
+#if !defined(_PANDORA)
 PFNGLCOLOR3FVPROC		pglColor3fv;
+PFNGLCOLOR4FVPROC		pglColor4fv;
+PFNGLTEXCOORD2FVPROC	pglTexCoord2fv;
+PFNGLTEXCOORD3FPROC		pglTexCoord3f;
+PFNGLTEXCOORD3FVPROC	pglTexCoord3fv;
+PFNGLTEXCOORD4FPROC		pglTexCoord4f;
+PFNGLTEXCOORD4FVPROC	pglTexCoord4fv;
+PFNGLVERTEX2FPROC		pglVertex2f;
+PFNGLVERTEX2FVPROC		pglVertex2fv;
+PFNGLVERTEX4FPROC		pglVertex4f;
+PFNGLVERTEX4FVPROC		pglVertex4fv;
+PFNGLPOLYGONMODEPROC	pglPolygonMode;
+PFNGLDRAWBUFFERPROC		pglDrawBuffer;
+PFNGLDRAWRANGEELEMENTSPROC	pglDrawRangeElements;
+PFNGLREADBUFFERPROC		pglReadBuffer;
+PFNGLDEPTHRANGEPROC		pglDepthRange;
+PFNGLVERTEX3FVPROC		pglVertex3fv;
+#endif
 PFNGLCOLOR3UBPROC		pglColor3ub;
 PFNGLCOLOR3UBVPROC		pglColor3ubv;
 PFNGLCOLOR4FPROC		pglColor4f;
-PFNGLCOLOR4FVPROC		pglColor4fv;
 PFNGLCOLOR4UBPROC		pglColor4ub;
 PFNGLCOLOR4UBVPROC		pglColor4ubv;
 PFNGLCOLORPOINTERPROC		pglColorPointer;
@@ -25,13 +111,10 @@ PFNGLCULLFACEPROC		pglCullFace;
 PFNGLDELETETEXTURESPROC		pglDeleteTextures;
 PFNGLDEPTHFUNCPROC		pglDepthFunc;
 PFNGLDEPTHMASKPROC		pglDepthMask;
-PFNGLDEPTHRANGEPROC		pglDepthRange;
 PFNGLDISABLEPROC		pglDisable;
 PFNGLDISABLECLIENTSTATEPROC	pglDisableClientState;
-PFNGLDRAWBUFFERPROC		pglDrawBuffer;
 PFNGLDRAWELEMENTSPROC		pglDrawElements;
 PFNGLDRAWPIXELSPROC		pglDrawPixels;
-PFNGLDRAWRANGEELEMENTSPROC	pglDrawRangeElements;
 PFNGLENABLEPROC			pglEnable;
 PFNGLENABLECLIENTSTATEPROC	pglEnableClientState;
 PFNGLENDPROC			pglEnd;
@@ -51,7 +134,6 @@ PFNGLNORMALPOINTERPROC		pglNormalPointer;
 PFNGLORTHOPROC			pglOrtho;
 PFNGLPIXELSTOREIPROC		pglPixelStorei;
 PFNGLPIXELZOOMPROC		pglPixelZoom;
-PFNGLPOLYGONMODEPROC		pglPolygonMode;
 PFNGLPOLYGONOFFSETPROC		pglPolygonOffset;
 PFNGLPOPATTRIBPROC		pglPopAttrib;
 PFNGLPOPCLIENTATTRIBPROC	pglPopClientAttrib;
@@ -60,17 +142,11 @@ PFNGLPUSHATTRIBPROC		pglPushAttrib;
 PFNGLPUSHCLIENTATTRIBPROC	pglPushClientAttrib;
 PFNGLPUSHMATRIXPROC		pglPushMatrix;
 PFNGLRASTERPOS2IPROC		pglRasterPos2i;
-PFNGLREADBUFFERPROC		pglReadBuffer;
 PFNGLREADPIXELSPROC		pglReadPixels;
 PFNGLROTATEFPROC		pglRotatef;
 PFNGLSCALEFPROC			pglScalef;
 PFNGLSHADEMODELPROC		pglShadeModel;
 PFNGLTEXCOORD2FPROC		pglTexCoord2f;
-PFNGLTEXCOORD2FVPROC		pglTexCoord2fv;
-PFNGLTEXCOORD3FPROC		pglTexCoord3f;
-PFNGLTEXCOORD3FVPROC		pglTexCoord3fv;
-PFNGLTEXCOORD4FPROC		pglTexCoord4f;
-PFNGLTEXCOORD4FVPROC		pglTexCoord4fv;
 PFNGLTEXCOORDPOINTERPROC	pglTexCoordPointer;
 PFNGLTEXENVFPROC		pglTexEnvf;
 PFNGLTEXENVFVPROC		pglTexEnvfv;
@@ -80,12 +156,7 @@ PFNGLTEXPARAMETERFPROC		pglTexParameterf;
 PFNGLTEXPARAMETERIPROC		pglTexParameteri;
 PFNGLTEXSUBIMAGE2DPROC		pglTexSubImage2D;
 PFNGLTRANSLATEFPROC		pglTranslatef;
-PFNGLVERTEX2FPROC		pglVertex2f;
-PFNGLVERTEX2FVPROC		pglVertex2fv;
 PFNGLVERTEX3FPROC		pglVertex3f;
-PFNGLVERTEX3FVPROC		pglVertex3fv;
-PFNGLVERTEX4FPROC		pglVertex4f;
-PFNGLVERTEX4FVPROC		pglVertex4fv;
 PFNGLVERTEXPOINTERPROC		pglVertexPointer;
 PFNGLVIEWPORTPROC		pglViewport;
 
@@ -99,6 +170,8 @@ PFNGLSECONDARYCOLOR3FVEXTPROC		pglSecondaryColor3fvEXT;
 PFNGLSECONDARYCOLOR3UBEXTPROC		pglSecondaryColor3ubEXT;
 PFNGLSECONDARYCOLOR3UBVEXTPROC		pglSecondaryColor3ubvEXT;
 PFNGLSECONDARYCOLORPOINTEREXTPROC	pglSecondaryColorPointerEXT;
+
+#endif
 
 int ogl_have_paletted_texture;
 int ogl_have_secondary_color;
@@ -146,6 +219,9 @@ void load_ogl_functions(int mode)
 
 	ogl_missing_func = NULL;
 	
+#if defined(_GL_STATIC)
+
+#else
 	LoadOGLProc(PFNGLALPHAFUNCPROC, glAlphaFunc);
 	LoadOGLProc(PFNGLARRAYELEMENTPROC, glArrayElement);
 	LoadOGLProc(PFNGLBEGINPROC, glBegin);
@@ -154,11 +230,28 @@ void load_ogl_functions(int mode)
 	LoadOGLProc(PFNGLCLEARPROC, glClear);
 	LoadOGLProc(PFNGLCLEARCOLORPROC, glClearColor);
 	LoadOGLProc(PFNGLCOLOR3FPROC, glColor3f);
+#if !defined(_PANDORA)
 	LoadOGLProc(PFNGLCOLOR3FVPROC, glColor3fv);
+	LoadOGLProc(PFNGLCOLOR4FVPROC, glColor4fv);
+	LoadOGLProc(PFNGLTEXCOORD2FVPROC, glTexCoord2fv);
+	LoadOGLProc(PFNGLTEXCOORD3FPROC, glTexCoord3f);
+	LoadOGLProc(PFNGLTEXCOORD3FVPROC, glTexCoord3fv);
+	LoadOGLProc(PFNGLTEXCOORD4FPROC, glTexCoord4f);
+	LoadOGLProc(PFNGLTEXCOORD4FVPROC, glTexCoord4fv);
+	LoadOGLProc(PFNGLVERTEX2FPROC, glVertex2f);
+	LoadOGLProc(PFNGLVERTEX2FVPROC, glVertex2fv);
+	LoadOGLProc(PFNGLVERTEX4FPROC, glVertex4f);
+	LoadOGLProc(PFNGLVERTEX4FVPROC, glVertex4fv);
+	LoadOGLProc(PFNGLDRAWBUFFERPROC, glDrawBuffer);
+	LoadOGLProc(PFNGLPOLYGONMODEPROC, glPolygonMode);
+	LoadOGLProc(PFNGLDRAWRANGEELEMENTSPROC, glDrawRangeElements);
+	LoadOGLProc(PFNGLREADBUFFERPROC, glReadBuffer);
+	LoadOGLProc(PFNGLDEPTHRANGEPROC, glDepthRange);
+	LoadOGLProc(PFNGLVERTEX3FVPROC, glVertex3fv);
+#endif
 	LoadOGLProc(PFNGLCOLOR3UBPROC, glColor3ub);
 	LoadOGLProc(PFNGLCOLOR3UBVPROC, glColor3ubv);
 	LoadOGLProc(PFNGLCOLOR4FPROC, glColor4f);
-	LoadOGLProc(PFNGLCOLOR4FVPROC, glColor4fv);
 	LoadOGLProc(PFNGLCOLOR4UBPROC, glColor4ub);
 	LoadOGLProc(PFNGLCOLOR4UBVPROC, glColor4ubv);
 	LoadOGLProc(PFNGLCOLORPOINTERPROC, glColorPointer);
@@ -166,13 +259,10 @@ void load_ogl_functions(int mode)
 	LoadOGLProc(PFNGLDELETETEXTURESPROC, glDeleteTextures);
 	LoadOGLProc(PFNGLDEPTHFUNCPROC, glDepthFunc);
 	LoadOGLProc(PFNGLDEPTHMASKPROC, glDepthMask);
-	LoadOGLProc(PFNGLDEPTHRANGEPROC, glDepthRange);
 	LoadOGLProc(PFNGLDISABLEPROC, glDisable);
 	LoadOGLProc(PFNGLDISABLECLIENTSTATEPROC, glDisableClientState);
-	LoadOGLProc(PFNGLDRAWBUFFERPROC, glDrawBuffer);
 	LoadOGLProc(PFNGLDRAWELEMENTSPROC, glDrawElements);
 	LoadOGLProc(PFNGLDRAWPIXELSPROC, glDrawPixels);
-	LoadOGLProc(PFNGLDRAWRANGEELEMENTSPROC, glDrawRangeElements);
 	LoadOGLProc(PFNGLENABLEPROC, glEnable);
 	LoadOGLProc(PFNGLENABLECLIENTSTATEPROC, glEnableClientState);
 	LoadOGLProc(PFNGLENDPROC, glEnd);
@@ -192,7 +282,6 @@ void load_ogl_functions(int mode)
 	LoadOGLProc(PFNGLORTHOPROC, glOrtho);
 	LoadOGLProc(PFNGLPIXELSTOREIPROC, glPixelStorei);
 	LoadOGLProc(PFNGLPIXELZOOMPROC, glPixelZoom);
-	LoadOGLProc(PFNGLPOLYGONMODEPROC, glPolygonMode);
 	LoadOGLProc(PFNGLPOLYGONOFFSETPROC, glPolygonOffset);
 	LoadOGLProc(PFNGLPOPATTRIBPROC, glPopAttrib);
 	LoadOGLProc(PFNGLPOPCLIENTATTRIBPROC, glPopClientAttrib);
@@ -201,17 +290,11 @@ void load_ogl_functions(int mode)
 	LoadOGLProc(PFNGLPUSHCLIENTATTRIBPROC, glPushClientAttrib);
 	LoadOGLProc(PFNGLPUSHMATRIXPROC, glPushMatrix);
 	LoadOGLProc(PFNGLRASTERPOS2IPROC, glRasterPos2i);
-	LoadOGLProc(PFNGLREADBUFFERPROC, glReadBuffer);
 	LoadOGLProc(PFNGLREADPIXELSPROC, glReadPixels);
 	LoadOGLProc(PFNGLROTATEFPROC, glRotatef);
 	LoadOGLProc(PFNGLSCALEFPROC, glScalef);
 	LoadOGLProc(PFNGLSHADEMODELPROC, glShadeModel);
 	LoadOGLProc(PFNGLTEXCOORD2FPROC, glTexCoord2f);
-	LoadOGLProc(PFNGLTEXCOORD2FVPROC, glTexCoord2fv);
-	LoadOGLProc(PFNGLTEXCOORD3FPROC, glTexCoord3f);
-	LoadOGLProc(PFNGLTEXCOORD3FVPROC, glTexCoord3fv);
-	LoadOGLProc(PFNGLTEXCOORD4FPROC, glTexCoord4f);
-	LoadOGLProc(PFNGLTEXCOORD4FVPROC, glTexCoord4fv);
 	LoadOGLProc(PFNGLTEXCOORDPOINTERPROC, glTexCoordPointer);
 	LoadOGLProc(PFNGLTEXENVFPROC, glTexEnvf);
 	LoadOGLProc(PFNGLTEXENVFVPROC, glTexEnvfv);
@@ -221,14 +304,11 @@ void load_ogl_functions(int mode)
 	LoadOGLProc(PFNGLTEXPARAMETERIPROC, glTexParameteri);
 	LoadOGLProc(PFNGLTEXSUBIMAGE2DPROC, glTexSubImage2D);
 	LoadOGLProc(PFNGLTRANSLATEFPROC, glTranslatef);
-	LoadOGLProc(PFNGLVERTEX2FPROC, glVertex2f);
-	LoadOGLProc(PFNGLVERTEX2FVPROC, glVertex2fv);
 	LoadOGLProc(PFNGLVERTEX3FPROC, glVertex3f);
-	LoadOGLProc(PFNGLVERTEX3FVPROC, glVertex3fv);
-	LoadOGLProc(PFNGLVERTEX4FPROC, glVertex4f);
-	LoadOGLProc(PFNGLVERTEX4FVPROC, glVertex4fv);
 	LoadOGLProc(PFNGLVERTEXPOINTERPROC, glVertexPointer);
 	LoadOGLProc(PFNGLVIEWPORTPROC, glViewport);
+
+#endif
 
 	if (!mode) {
 		ogl_have_paletted_texture = 0;
@@ -254,6 +334,7 @@ void load_ogl_functions(int mode)
 #define GL_COLOR_TABLE_WIDTH_EXT	GL_COLOR_TABLE_WIDTH
 #endif
 	
+#if !defined(_PANDORA)
 	if (ogl_have_paletted_texture) {
 		ogl_missing_func = NULL;
 		
@@ -273,7 +354,11 @@ void load_ogl_functions(int mode)
 			ogl_have_paletted_texture = 0;
 		}
 	}
+#endif
 	
+#if defined(_GL_STATIC)
+	ogl_have_secondary_color = 0;
+#else
 	if (ogl_have_secondary_color) {
 		ogl_missing_func = NULL;
 
@@ -287,6 +372,8 @@ void load_ogl_functions(int mode)
 			ogl_have_secondary_color = 0;
 		}
 	}
+
+#endif
 	
 	ogl_use_paletted_texture = ogl_have_paletted_texture;
 	ogl_use_secondary_color = ogl_have_secondary_color;
