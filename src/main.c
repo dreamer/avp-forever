@@ -614,12 +614,14 @@ int SetOGLVideoMode(int Width, int Height)
 	pglEnable(GL_DEPTH_TEST);
 	pglDepthFunc(GL_LEQUAL);
 	pglDepthMask(GL_TRUE);
-	pglDepthRange(0.0, 1.0);
 	
 	pglEnable(GL_TEXTURE_2D);
 
+#if !defined(_PANDORA)
+	pglDepthRange(0.0, 1.0);
 	pglPolygonMode(GL_FRONT, GL_FILL);
 	pglPolygonMode(GL_BACK, GL_FILL);
+#endif
 	pglDisable(GL_CULL_FACE);
 	
 	pglClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
@@ -1110,7 +1112,11 @@ void CheckForWindowsMessages()
         
 void InGameFlipBuffers()
 {
+#if defined(_PANDORA)
+	eglSwapBuffers( );
+#else
 	SDL_GL_SwapBuffers();
+#endif
 }
 
 void FlipBuffers()
@@ -1196,6 +1202,9 @@ int main(int argc, char *argv[])
 		}
 	}
 #endif
+
+	/* nanoGL */
+	nanoGL_Init( );
 
 	InitGameDirectories(argv[0]);
 	
