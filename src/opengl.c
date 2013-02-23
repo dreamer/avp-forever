@@ -54,8 +54,10 @@ static D3DTexture *CurrentlyBoundTexture = NULL;
 #define TA_MAXVERTICES		2048
 #define TA_MAXTRIANGLES		2048
 
+#if !defined(_PANDORA)
 #if GL_EXT_secondary_color
 extern PFNGLSECONDARYCOLORPOINTEREXTPROC pglSecondaryColorPointerEXT;
+#endif
 #endif
 
 typedef struct VertexArray
@@ -2516,16 +2518,26 @@ void BltImage(RECT *dest, DDSurface *image, RECT *src)
 	height = dest->bottom - dest->top + 1;
 	height1 = src->bottom - src->top + 1;
 	
-	pglPushAttrib(GL_COLOR_BUFFER_BIT | GL_PIXEL_MODE_BIT | GL_DEPTH_BUFFER_BIT | GL_ENABLE_BIT);
+	uint32_t attribBitsToPush = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
+#if !defined(_PANDORA)
+	attribBitsToPush |= GL_PIXEL_MODE_BIT | GL_ENABLE_BIT;
+#endif
+
+	pglPushAttrib(attribBitsToPush);
+
+#if !defined(_PANDORA)
 	pglPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
-	
+#endif
+
 	pglDisable(GL_BLEND);
 	pglDisable(GL_DEPTH_TEST);
 	pglDisable(GL_TEXTURE_2D);
 	pglDisable(GL_ALPHA_TEST);
 	
 	pglPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+#if !defined(_PANDORA)
 	pglPixelStorei(GL_UNPACK_ROW_LENGTH, image->w);
+#endif
 	pglPixelZoom((double)width/(double)width1, (double)height/(double)height1);
 	
 	pglMatrixMode(GL_PROJECTION);
