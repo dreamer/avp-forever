@@ -93,7 +93,9 @@ typedef unsigned char BYTE;
 typedef unsigned short WORD;
 typedef unsigned int DWORD;
 typedef long LONG;
+#if !defined(_PANDORA)
 typedef char TCHAR;
+#endif
 typedef DWORD * LPDWORD;
 typedef char * LPTSTR;
 
