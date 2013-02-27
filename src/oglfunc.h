@@ -6,12 +6,19 @@
 #endif
 
 #if defined(_PANDORA)
-#	include "gl.h"
-#	define _GL_STATIC	// Use Nano GL...
+	// Use GLES.
+#	include <gles/gl.h>
+
+	// GLES doesn't define GLdouble but we can do it here.
+	typedef double GLdouble;
+
+	// Specify that we wish to static link to GLES library.
+#	define _GL_STATIC
 #else
 #	include <GL/gl.h>
 #endif
-//#include <GL/glext.h>
+
+#define _GL_STATIC
 
 #if defined(_GL_STATIC)
 
@@ -54,22 +61,35 @@
 #	define pglPixelZoom				glWrapperPixelZoom
 #	define pglPushMatrix			glPushMatrix
 #	define pglPopMatrix				glPopMatrix
-#	define pglOrtho					glWrapperOrtho
+#	if defined(_PANDORA)
+#		define pglOrtho				glOrthof
+#	else
+#		define pglOrtho				glOrtho
+#	endif
 #	define pglRasterPos2i			glWrapperRasterPos2i
 #	define pglDrawPixels			glWrapperDrawPixels
 #	define pglGetError				glGetError
 #	define pglPopClientAttrib		glWrapperPopClientAttrib
 #	define pglTexSubImage2D			glTexSubImage2D
+#	define pglDrawElements			glDrawElements
+
+#	if defined(_PANDORA)
+#		define pglDepthRange			glDepthRangef
+#	else
+#		define pglDepthRange			glDepthRange
+#	endif
+
+#	define pglPolygonMode			glPolygonMode
+#	define pglPushClientAttrib		glPushClientAttrib
 
 void glWrapperVertex3f( float x, float y, float z );
 void glWrapperBegin( GLenum mode );
 void glWrapperEnd( );
 void glWrapperArrayElement( GLint i );
 void glWrapperTexCoord2f( GLfloat s, GLfloat t );
-void glWrapperPushAttrib( );
+void glWrapperPushAttrib( GLbitfield mask );
 void glWrapperPopAttrib( );
 void glWrapperPixelZoom( GLfloat xFactor, GLfloat yFactor );
-void glWrapperOrtho( GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble near_val, GLdouble far_val );
 void glWrapperRasterPos2i( GLint x, GLint y );
 void glWrapperDrawPixels( GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels );
 void glWrapperPushClientAttrib( GLbitfield mask);
