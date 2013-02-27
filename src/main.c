@@ -45,6 +45,14 @@
 #include "version.h"
 #include "fmv.h"
 
+// Platforms that use EGL instead of GL.
+#if defined(_PANDORA)
+#	include "gles.h"
+static unsigned int FullScreenSurfaceType = SDL_FULLSCREEN | SDL_SWSURFACE;
+#else
+static unsigned int FullScreenSurfaceType = SDL_FULLSCREEN | SDL_OPENGL;
+#endif
+
 char LevelName[] = {"predbit6\0QuiteALongNameActually"}; /* the real way to load levels */
 
 int DebouncedGotAnyKey;
@@ -68,7 +76,11 @@ JOYINFOEX JoystickData;
 JOYCAPS JoystickCaps;
 
 /* defaults */
+#if defined(_PANDORA)
+static int WantFullscreen = 1;
+#else
 static int WantFullscreen = 0;
+#endif
 int WantSound = 1;
 static int WantCDRom = 0;
 static int WantJoystick = 0;
@@ -369,7 +381,7 @@ int InitSDL()
 
 	atexit(SDL_Quit);
 	
-	SDL_AvailableVideoModes = SDL_ListModes(NULL, SDL_FULLSCREEN | SDL_OPENGL);
+	SDL_AvailableVideoModes = SDL_ListModes(NULL, FullScreenSurfaceType);
 	if (SDL_AvailableVideoModes == NULL)
 		return -1;
 	
@@ -383,7 +395,7 @@ int InitSDL()
 			for (j = 0; modes[j]; j++) {
 				if (modes[j]->w >= VideoModeList[i].w &&
 				    modes[j]->h >= VideoModeList[i].h) {
-					if (SDL_VideoModeOK(VideoModeList[i].w, VideoModeList[i].h, 16, SDL_FULLSCREEN | SDL_OPENGL)) {
+					if (SDL_VideoModeOK(VideoModeList[i].w, VideoModeList[i].h, 16, FullScreenSurfaceType)) {
 						/* assume SDL isn't lying to us */
 						VideoModeList[i].available = 1;
 						
@@ -400,7 +412,7 @@ int InitSDL()
 		
 		foundit = 0;
 		for (i = 0; i < TotalVideoModes; i++) {
-			if (SDL_VideoModeOK(VideoModeList[i].w, VideoModeList[i].h, 16, SDL_FULLSCREEN | SDL_OPENGL)) {
+			if (SDL_VideoModeOK(VideoModeList[i].w, VideoModeList[i].h, 16, FullScreenSurfaceType )) {
 				/* assume SDL isn't lying to us */
 				VideoModeList[i].available = 1;
 				
@@ -444,6 +456,11 @@ int InitSDL()
 /* ** */
 static void load_opengl_library(const char *lib)
 {
+#if defined(_PANDORA)
+	// We statically link against GLES on here.
+	return;
+#endif
+
 	char tmppath[PATH_MAX];
 	size_t len, copylen;
 	
@@ -480,6 +497,11 @@ static void load_opengl_library(const char *lib)
 
 int SetSoftVideoMode(int Width, int Height, int Depth)
 {
+#if defined(_PANDORA)
+	// Make sure GLES system is shutdown before creating software context.
+	GLES_Shutdown( );
+#endif
+
 	SDL_GrabMode isgrab;
 	int flags;
 	
@@ -553,6 +575,7 @@ int SetOGLVideoMode(int Width, int Height)
 	SDL_GrabMode isgrab;
 	int flags;
 	char *ext;
+	int bitDepth = 0;
 	
 	ScanDrawMode = ScanDrawD3DHardwareRGB;
 	GotMouse = 1;
@@ -583,16 +606,22 @@ int SetOGLVideoMode(int Width, int Height)
 
 	load_opengl_library(opengl_library);
 			
+#if defined(_PANDORA)
+	// Set up window/display/surface with GLES code.
+	surface = GLES_Init( );
+#else
+	// Use SDL to set up window directly.
 	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
 	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
 	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
 	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 	
-	if ((surface = SDL_SetVideoMode(Width, Height, 0, flags)) == NULL) {
+	if ((surface = SDL_SetVideoMode(Width, Height, bitDepth, flags)) == NULL) {
 		fprintf(stderr, "(OpenGL) SDL SetVideoMode failed: %s\n", SDL_GetError());
 		exit(EXIT_FAILURE);
 	}
+#endif
 	
 	load_ogl_functions(1);
 	
@@ -625,7 +654,9 @@ int SetOGLVideoMode(int Width, int Height)
 	
 	pglEnable(GL_TEXTURE_2D);
 
-#if !defined(_PANDORA)
+#if defined(_PANDORA)
+	glDepthRangef( 0.f, 1.f );
+#else
 	pglDepthRange(0.0, 1.0);
 	pglPolygonMode(GL_FRONT, GL_FILL);
 	pglPolygonMode(GL_BACK, GL_FILL);
@@ -1121,7 +1152,7 @@ void CheckForWindowsMessages()
 void InGameFlipBuffers()
 {
 #if defined(_PANDORA)
-	eglSwapBuffers( );
+	GLES_SwapBuffers( );
 #else
 	SDL_GL_SwapBuffers();
 #endif
@@ -1167,7 +1198,7 @@ static const char *usage_string =
 "      [-g | --withgl] [x]     Use [x] instead of /usr/lib/libGL.so.1 for OpenGL\n"
 ;
          
-int main(int argc, char *argv[])
+int EntryPoint(int argc, char *argv[])
 {			
 #if !defined(_MSC_VER)
 	int c;
@@ -1210,9 +1241,6 @@ int main(int argc, char *argv[])
 		}
 	}
 #endif
-
-	/* nanoGL */
-	nanoGL_Init( );
 
 	InitGameDirectories(argv[0]);
 	
@@ -1442,4 +1470,14 @@ if (AvP_MainMenus())
 	ClearMemoryPool();
 	
 	return 0;
+}
+
+// Some platforms define main to be other things (like SDL_Main), so
+// ensure these defines are undone here, create real main function
+// and call our entry point.
+#undef main
+
+int main(int argc, char *argv[])
+{
+	return EntryPoint( argc, argv );
 }
