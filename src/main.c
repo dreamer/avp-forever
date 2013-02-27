@@ -246,6 +246,7 @@ typedef struct VideoModeStruct
 VideoModeStruct VideoModeList[] = {
 { 	512, 	384,	0	},
 {	640,	480,	0	},
+{   800,    480,    0   },
 {	800,	600,	0	},
 {	1024,	768,	0	},
 {	1152,	864,	0	},
@@ -279,6 +280,13 @@ void LoadDeviceAndVideoModePreferences()
 	
 	/* No, or invalid, mode found */
 	
+#if defined(_PANDORA)
+	/* Try 800x480 first */
+	if ( VideoModeList[2].available) {
+		CurrentVideoMode = 2;
+	}
+	else 
+#endif
 	/* Try 640x480 first */
 	if (VideoModeList[1].available) {
 		CurrentVideoMode = 1;
