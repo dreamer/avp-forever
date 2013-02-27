@@ -6,70 +6,39 @@
 #include "oglfunc.h"
 
 #if defined(_GL_STATIC)
-
-void glWrapperVertex3f( float x, float y, float z )
+void glWrapperPushAttrib( GLbitfield mask )
 {
-	glVertex3f( x, y, z );
-}
-
-void glWrapperBegin( GLenum mode )
-{
-	glBegin( mode );
-}
-
-void glWrapperEnd( )
-{
-	glEnd( );
-}
-
-void glWrapperArrayElement( GLint i )
-{
-	glArrayElement( i );
-}
-
-void glWrapperTexCoord2f( GLfloat s, GLfloat t )
-{
-	glTexCoord2f( s, t );
-}
-
-void glWrapperPushAttrib( )
-{
-//	glPushAttrib( );
+	// TODO.
 }
 
 void glWrapperPopAttrib( )
 {
-//	glPopAttrib( );
+	// TODO.
 }
 
 void glWrapperPixelZoom( GLfloat xFactor, GLfloat yFactor )
 {
-//	glPixelZoom( xFactor, yFactor );
-}
-
-void glWrapperOrtho( GLdouble left, GLdouble right, GLdouble bottom, GLdouble top, GLdouble near_val, GLdouble far_val )
-{
-	glOrtho( left, right, bottom, top, near_val, far_val );
+	// TODO.
 }
 
 void glWrapperRasterPos2i( GLint x, GLint y )
 {
-//	glRasterPos2i( x, y );
+	// TODO.
 }
 
 void glWrapperDrawPixels( GLsizei width, GLsizei height, GLenum format, GLenum type, const GLvoid *pixels )
 {
-//	glDrawPixels( width, height, format, type, pixels );
+	// TODO.
 }
 
 void glWrapperPushClientAttrib( GLbitfield mask)
 {
-//	glPushClientAttrib( mask );
+	// TODO.
 }
 
 void glWrapperPopClientAttrib( )
 {
-//	glPopClientAttrib( );
+	// TODO.
 }
 
 #else
