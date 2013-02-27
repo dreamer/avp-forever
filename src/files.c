@@ -1,7 +1,9 @@
 #define _BSD_SOURCE
 
 #include <assert.h>
+#if !defined(_MSC_VER)
 #include <unistd.h>
+#endif
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
@@ -10,8 +12,198 @@
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <fcntl.h>
+#if defined(_MSC_VER)
+#	include "dirent/dirent.h"
+#	include <direct.h>
+#	include <io.h>
+#	ifndef S_ISDIR
+#		define S_ISDIR(mode)  (((mode) & S_IFMT) == S_IFDIR)
+#	endif
+
+#	ifndef S_ISREG
+#		define S_ISREG(mode)  (((mode) & S_IFMT) == S_IFREG)
+#	endif
+
+#	ifndef access
+#		define access _access
+#	endif
+
+#	ifndef R_OK
+#		define R_OK    4
+#	endif
+#	ifndef W_OK
+#		define W_OK    2
+#	endif
+#	ifndef F_OK
+#		define F_OK    0
+#	endif
+
+#	ifndef mkdir
+#		define mkdir( _Filename, _Flags ) _mkdir( ( ( _Filename ) ) )
+#	endif
+
+#include <ctype.h>
+#include <string.h>
+#include <stdio.h>
+
+#define	EOS	'\0'
+#define FNM_NOMATCH      1     /* Match failed. */
+#define FNM_NOSYS        2     /* Function not supported (unused). */
+
+#define FNM_NOESCAPE     0x01        /* Disable backslash escaping. */
+#define FNM_PATHNAME     0x02        /* Slash must be matched by slash. */
+#define FNM_PERIOD       0x04        /* Period must be matched by period. */
+#define FNM_LEADING_DIR  0x08        /* Ignore /<tail> after Imatch. */
+#define FNM_CASEFOLD     0x10        /* Case insensitive search. */
+#define FNM_PREFIX_DIRS  0x20
+
+static const char *rangematch(const char *, char, int);
+
+int fnmatch(const char *pattern, const char *string, int flags)
+{
+	const char *stringstart;
+	char c, test;
+
+	for (stringstart = string;;)
+		switch (c = *pattern++) {
+		case EOS:
+			if ((flags & FNM_LEADING_DIR) && *string == '/')
+				return (0);
+			return (*string == EOS ? 0 : FNM_NOMATCH);
+		case '?':
+			if (*string == EOS)
+				return (FNM_NOMATCH);
+			if (*string == '/' && (flags & FNM_PATHNAME))
+				return (FNM_NOMATCH);
+			if (*string == '.' && (flags & FNM_PERIOD) &&
+			    (string == stringstart ||
+			    ((flags & FNM_PATHNAME) && *(string - 1) == '/')))
+				return (FNM_NOMATCH);
+			++string;
+			break;
+		case '*':
+			c = *pattern;
+			/* Collapse multiple stars. */
+			while (c == '*')
+				c = *++pattern;
+
+			if (*string == '.' && (flags & FNM_PERIOD) &&
+			    (string == stringstart ||
+			    ((flags & FNM_PATHNAME) && *(string - 1) == '/')))
+				return (FNM_NOMATCH);
+
+			/* Optimize for pattern with * at end or before /. */
+			if (c == EOS)
+				if (flags & FNM_PATHNAME)
+					return ((flags & FNM_LEADING_DIR) ||
+					    strchr(string, '/') == NULL ?
+					    0 : FNM_NOMATCH);
+				else
+					return (0);
+			else if (c == '/' && flags & FNM_PATHNAME) {
+				if ((string = strchr(string, '/')) == NULL)
+					return (FNM_NOMATCH);
+				break;
+			}
+
+			/* General case, use recursion. */
+			while ((test = *string) != EOS) {
+				if (!fnmatch(pattern, string, flags & ~FNM_PERIOD))
+					return (0);
+				if (test == '/' && flags & FNM_PATHNAME)
+					break;
+				++string;
+			}
+			return (FNM_NOMATCH);
+		case '[':
+			if (*string == EOS)
+				return (FNM_NOMATCH);
+			if (*string == '/' && flags & FNM_PATHNAME)
+				return (FNM_NOMATCH);
+			if ((pattern =
+			    rangematch(pattern, *string, flags)) == NULL)
+				return (FNM_NOMATCH);
+			++string;
+			break;
+		case '\\':
+			if (!(flags & FNM_NOESCAPE)) {
+				if ((c = *pattern++) == EOS) {
+					c = '\\';
+					--pattern;
+				}
+			}
+			/* FALLTHROUGH */
+		default:
+			if (c == *string)
+				;
+			else if ((flags & FNM_CASEFOLD) &&
+				 (tolower((unsigned char)c) ==
+				  tolower((unsigned char)*string)))
+				;
+			else if ((flags & FNM_PREFIX_DIRS) && *string == EOS &&
+			     (c == '/' && string != stringstart ||
+			     string == stringstart+1 && *stringstart == '/') )
+				return (0);
+			else
+				return (FNM_NOMATCH);
+			string++;
+			break;
+		}
+	/* NOTREACHED */
+}
+
+static const char *
+rangematch(const char *pattern, char test, int flags)
+{
+	int negate, ok;
+	char c, c2;
+
+	/*
+	 * A bracket expression starting with an unquoted circumflex
+	 * character produces unspecified results (IEEE 1003.2-1992,
+	 * 3.13.2).  This implementation treats it like '!', for
+	 * consistency with the regular expression syntax.
+	 * J.T. Conklin (conklin@ngai.kaleida.com)
+	 */
+	if ( (negate = (*pattern == '!' || *pattern == '^')) )
+		++pattern;
+
+	if (flags & FNM_CASEFOLD)
+		test = tolower((unsigned char)test);
+
+	for (ok = 0; (c = *pattern++) != ']';) {
+		if (c == '\\' && !(flags & FNM_NOESCAPE))
+			c = *pattern++;
+		if (c == EOS)
+			return (NULL);
+
+		if (flags & FNM_CASEFOLD)
+			c = tolower((unsigned char)c);
+
+		if (*pattern == '-'
+		    && (c2 = *(pattern+1)) != EOS && c2 != ']') {
+			pattern += 2;
+			if (c2 == '\\' && !(flags & FNM_NOESCAPE))
+				c2 = *pattern++;
+			if (c2 == EOS)
+				return (NULL);
+
+			if (flags & FNM_CASEFOLD)
+				c2 = tolower((unsigned char)c2);
+
+			if ((unsigned char)c <= (unsigned char)test &&
+			    (unsigned char)test <= (unsigned char)c2)
+				ok = 1;
+		} else if (c == test)
+			ok = 1;
+	}
+	return (ok == negate ? NULL : pattern);
+}
+
+#else
 #include <dirent.h>
 #include <fnmatch.h>
+#endif
 
 #include "fixer.h"
 #include "files.h"
@@ -651,7 +843,11 @@ void InitGameDirectories(char *argv0)
 		
 		assert(tmp != NULL);
 
+#if defined(_MSC_VER)
+		_fullpath( tmp, tmppath, PATH_MAX );
+#else
 		gamedir = realpath(tmp, tmppath);
+#endif
 
 		if (!check_game_directory(gamedir)) {
 			gamedir = NULL;
