@@ -24,6 +24,69 @@
 #include "aw.h"
 #include "opengl.h"
 
+typedef struct
+{
+	float x, y, z;
+} VertexXyz;
+
+typedef struct
+{
+	float x, y, z;
+	float s, t;
+} VertexXyzSt;
+
+typedef struct
+{
+	int	m_AlphaTestEnabled;
+} StateTracker_s;
+#define STATE_TRACKER_MAX_DEPTH 16
+static StateTracker_s g_StateTracker[ STATE_TRACKER_MAX_DEPTH ];
+static int g_StateTrackerDepth = 0;
+
+void StateTrackerInitialise( )
+{
+	memset( g_StateTracker, 0, sizeof( StateTracker_s ) * STATE_TRACKER_MAX_DEPTH );
+	g_StateTrackerDepth = 0;
+
+	pglDisable( GL_ALPHA_TEST );
+}
+
+void StateTrackerEnableAlphaTest( )
+{
+	if ( g_StateTracker[ g_StateTrackerDepth ].m_AlphaTestEnabled == 0 )
+	{
+		pglEnable( GL_ALPHA_TEST );
+		g_StateTracker[ g_StateTrackerDepth ].m_AlphaTestEnabled = 1;
+	}
+}
+
+void StateTrackerDisableAlphaTest( )
+{
+	if ( g_StateTracker[ g_StateTrackerDepth ].m_AlphaTestEnabled == 1 )
+	{
+		pglDisable( GL_ALPHA_TEST );
+		g_StateTracker[ g_StateTrackerDepth ].m_AlphaTestEnabled = 0;
+	}
+}
+
+void StateTrackerPush( )
+{
+	g_StateTrackerDepth += 1;
+	memcpy( &g_StateTracker[ g_StateTrackerDepth ], &g_StateTracker[ g_StateTrackerDepth - 1 ], sizeof( StateTracker_s ) );
+}
+
+void StateTrackerPop( )
+{
+	g_StateTrackerDepth -= 1;
+	if ( g_StateTracker[ g_StateTrackerDepth ].m_AlphaTestEnabled != g_StateTracker[ g_StateTrackerDepth + 1 ].m_AlphaTestEnabled )
+	{
+		if ( g_StateTracker[ g_StateTrackerDepth ].m_AlphaTestEnabled )
+			pglEnable( GL_ALPHA_TEST );
+		else
+			pglDisable( GL_ALPHA_TEST );
+	}
+}
+
 int LightIntensityAtPoint(VECTORCH *pointPtr);
 
 extern IMAGEHEADER ImageHeaderArray[];
@@ -69,11 +132,15 @@ typedef struct VertexArray
 	GLubyte c[4];
 } VertexArray;
 
+#if defined(_MSC_VER)
+#	include <stdint.h>
+#endif
+
 typedef struct TriangleArray
 {
-	int a;
-	int b;
-	int c;
+	uint16_t a;
+	uint16_t b;
+	uint16_t c;
 } TriangleArray;
 
 static VertexArray varr[TA_MAXVERTICES*2];
@@ -89,14 +156,14 @@ static int svarrc, starrc;
 /* Do not call this directly! */
 static void SetTranslucencyMode(enum TRANSLUCENCY_TYPE mode)
 {		
-	pglDisable(GL_ALPHA_TEST);
+	StateTrackerDisableAlphaTest( );
 
 	switch(mode) {
 		case TRANSLUCENCY_OFF:
 			if (TRIPTASTIC_CHEATMODE||MOTIONBLUR_CHEATMODE) {
 				pglBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
 			} else {
-				pglEnable(GL_ALPHA_TEST);
+				StateTrackerEnableAlphaTest( );
 				pglBlendFunc(GL_ONE, GL_ZERO);
 			}
 			break;
@@ -124,6 +191,18 @@ static void SetTranslucencyMode(enum TRANSLUCENCY_TYPE mode)
 	}
 }
 
+void ResetVertexTexColourPointerAndState( )
+{
+	pglEnableClientState(GL_VERTEX_ARRAY);
+	pglVertexPointer(4, GL_FLOAT, sizeof(varr[0]), varr[0].v);
+
+	pglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	pglTexCoordPointer(2, GL_FLOAT, sizeof(varr[0]), varr[0].t);
+
+	pglEnableClientState(GL_COLOR_ARRAY);
+	pglColorPointer(4, GL_UNSIGNED_BYTE, sizeof(varr[0]), varr[0].c);
+}
+
 /* 
 A few things:
 - Vertices with a specular color are done twice.
@@ -134,6 +213,8 @@ A few things:
 
 void InitOpenGL()
 {
+	StateTrackerInitialise( );
+
 	CurrentTranslucencyMode = TRANSLUCENCY_OFF;
 	pglBlendFunc(GL_ONE, GL_ZERO);
 	
@@ -146,14 +227,7 @@ void InitOpenGL()
 	CurrentlyBoundTexture = NULL;
 	pglBindTexture(GL_TEXTURE_2D, 0);
 	
-	pglEnableClientState(GL_VERTEX_ARRAY);
-	pglVertexPointer(4, GL_FLOAT, sizeof(varr[0]), varr[0].v);
-		
-	pglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	pglTexCoordPointer(2, GL_FLOAT, sizeof(varr[0]), varr[0].t);
-		
-	pglEnableClientState(GL_COLOR_ARRAY);
-	pglColorPointer(4, GL_UNSIGNED_BYTE, sizeof(varr[0]), varr[0].c);
+	ResetVertexTexColourPointerAndState( );
 
 #if 0		
 #if GL_EXT_secondary_color
@@ -184,17 +258,7 @@ static void FlushTriangleBuffers(int backup)
 	int i;
 
 	if (tarrc) {
-#if 1
-		pglBegin(GL_TRIANGLES);
-		for (i = 0; i < tarrc; i++) {
-			pglArrayElement(tarr[i].a);
-			pglArrayElement(tarr[i].b);
-			pglArrayElement(tarr[i].c);
-		}
-		pglEnd();
-#else		
-		pglDrawElements(GL_TRIANGLES, tarrc*3, GL_UNSIGNED_INT, tarr);
-#endif
+		pglDrawElements(GL_TRIANGLES, tarrc*3, GL_UNSIGNED_SHORT, tarr);
 		
 		tarrc = 0;
 		tarrp = tarr;
@@ -219,17 +283,7 @@ static void FlushTriangleBuffers(int backup)
 
 		pglDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
-#if 1		
-		pglBegin(GL_TRIANGLES);
-		for (i = 0; i < starrc; i++) {
-			pglArrayElement(starr[i].a);
-			pglArrayElement(starr[i].b);
-			pglArrayElement(starr[i].c);
-		}
-		pglEnd();
-#else
-		pglDrawElements(GL_TRIANGLES, starrc*3, GL_UNSIGNED_INT, starr);
-#endif
+		pglDrawElements(GL_TRIANGLES, starrc*3, GL_UNSIGNED_SHORT, starr);
 		
 		pglEnableClientState(GL_TEXTURE_COORD_ARRAY);
 		
@@ -427,28 +481,6 @@ static void CheckTriangleBuffer(int rver, int sver, int rtri, int stri, D3DTextu
 
 }
 
-static void SelectPolygonBeginType(int points)
-{
-	if (tarrc || starrc)
-		FlushTriangleBuffers(1);
-		
-	switch(points) {
-		case 3:
-			pglBegin(GL_TRIANGLES);
-			break;
-		case 4:
-		case 5:
-		case 6:
-		case 7:
-		case 8:
-			pglBegin(GL_TRIANGLE_FAN);
-			break;
-		default:
-			fprintf(stderr, "SelectPolygonBeginType: points = %d\n", points);
-			break;
-	}
-}
-
 GLuint CreateOGLTexture(D3DTexture *tex, unsigned char *buf)
 {
 	GLuint h;
@@ -516,6 +548,9 @@ void SecondFlushD3DZBuffer()
 
 void D3D_DecalSystem_Setup()
 {
+	static GLfloat factor = 0.0f;
+	static GLfloat units = -0.09375f;
+
 	FlushTriangleBuffers(0);
 	
 	pglDepthMask(GL_FALSE);
@@ -523,8 +558,6 @@ void D3D_DecalSystem_Setup()
 	/* enable polygon offset to help lessen decal z-fighting... */
 	pglEnable(GL_POLYGON_OFFSET_FILL);
 	
-	static GLfloat factor = 0.0f;
-	static GLfloat units = -0.09375f;
 	pglPolygonOffset(factor, units);
 }
 
@@ -541,7 +574,8 @@ void D3D_DecalSystem_End()
 
 void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 {
-	GLfloat x[4], y[4];
+	VertexXyz verts[ 4 ];
+	unsigned short indicies[ 6 ] = { 0, 1, 3, 1, 2, 3 };
 	
 	if (y1 <= y0)
 		return;
@@ -551,37 +585,41 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 	
 	pglColor4ub(r, g, b, a);
 
-	x[0] = x0;
-	x[0] =  (x[0] - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
-	y[0] = y0;
-	y[0] = -(y[0] - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
-	
-	x[1] = x1 - 1;
-	x[1] =  (x[1] - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
-	y[1] = y0;
-	y[1] = -(y[1] - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
-	
-	x[2] = x1 - 1;
-	x[2] =  (x[2] - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
-	y[2] = y1 - 1;
-	y[2] = -(y[2] - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
-	
-	x[3] = x0;
-	x[3] =  (x[3] - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
-	y[3] = y1 - 1;
-	y[3] = -(y[3] - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
+	verts[0].x = x0;
+	verts[0].x =  (verts[0].x - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
+	verts[0].y = y0;
+	verts[0].y = -(verts[0].y - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
+	verts[0].z = -1.f;
 
-	SelectPolygonBeginType(3); /* triangles */
+	verts[1].x = x1 - 1;
+	verts[1].x =  (verts[1].x - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
+	verts[1].y = y0;
+	verts[1].y = -(verts[1].y - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
+	verts[1].z = -1.f;
 	
-	pglVertex3f(x[0], y[0], -1.0f);
-	pglVertex3f(x[1], y[1], -1.0f);
-	pglVertex3f(x[3], y[3], -1.0f);
+	verts[2].x = x1 - 1;
+	verts[2].x =  (verts[2].x - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
+	verts[2].y = y1 - 1;
+	verts[2].y = -(verts[2].y - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
+	verts[2].z = -1.f;
 	
-	pglVertex3f(x[1], y[1], -1.0f);
-	pglVertex3f(x[2], y[2], -1.0f);
-	pglVertex3f(x[3], y[3], -1.0f);
+	verts[3].x = x0;
+	verts[3].x =  (verts[3].x - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
+	verts[3].y = y1 - 1;
+	verts[3].y = -(verts[3].y - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
+	verts[3].z = -1.f;
+
+	if (tarrc || starrc)
+		FlushTriangleBuffers(1);
 	
-	pglEnd();
+	glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+	glDisableClientState( GL_COLOR_ARRAY );
+	glEnableClientState( GL_VERTEX_ARRAY );
+	
+	glVertexPointer( 3, GL_FLOAT, 0, &verts[ 0 ].x );
+	glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
+	
+	ResetVertexTexColourPointerAndState( );
 }
 
 /* ** */
@@ -1081,7 +1119,8 @@ void D3D_PlayerOnFireOverlay()
 {
 	int c = 128;
 	int colour = (FMVParticleColour&0xffffff)+(c<<24);
-	GLfloat x[4], y[4], s[4], t[4];
+	VertexXyzSt verts[ 4 ];
+	unsigned short indicies[ 6 ] = { 0, 1, 3, 1, 2, 3 };
 	float u, v;
 	int r, g, b, a;
 	D3DTexture *TextureHandle;
@@ -1102,40 +1141,39 @@ void D3D_PlayerOnFireOverlay()
 	u = (FastRandom()&255)/256.0f;
 	v = (FastRandom()&255)/256.0f;
 	
-	x[0] = -1.0f;
-	y[0] = -1.0f;
-	s[0] = u;
-	t[0] = v;
-	x[1] =  1.0f;
-	y[1] = -1.0f;
-	s[1] = u + 1.0f;
-	t[1] = v;
-	x[2] =  1.0f;
-	y[2] =  1.0f;
-	s[2] = u + 1.0f;
-	t[2] = v + 1.0f;
-	x[3] = -1.0f;
-	y[3] =  1.0f;
-	s[3] = u;
-	t[3] = v + 1.0f;
+	verts[ 0 ].x = -1.0f;
+	verts[ 0 ].y = -1.0f;
+	verts[ 0 ].z = -1.0f;
+	verts[ 0 ].s = u;
+	verts[ 0 ].t = v;
+	verts[ 1 ].x =  1.0f;
+	verts[ 1 ].y = -1.0f;
+	verts[ 1 ].z = -1.0f;
+	verts[ 1 ].s = u + 1.0f;
+	verts[ 1 ].t = v;
+	verts[ 2 ].x =  1.0f;
+	verts[ 2 ].y =  1.0f;
+	verts[ 2 ].z = -1.0f;
+	verts[ 2 ].s = u + 1.0f;
+	verts[ 2 ].t = v + 1.0f;
+	verts[ 3 ].x = -1.0f;
+	verts[ 3 ].y =  1.0f;
+	verts[ 3 ].z = -1.0f;
+	verts[ 3 ].s = u;
+	verts[ 3 ].t = v + 1.0f;
 	
-	SelectPolygonBeginType(3); /* triangles */
-	
-	pglTexCoord2f(s[0], t[0]);
-	pglVertex3f(x[0], y[0], -1.0f);
-	pglTexCoord2f(s[1], t[1]);
-	pglVertex3f(x[1], y[1], -1.0f);
-	pglTexCoord2f(s[3], t[3]);
-	pglVertex3f(x[3], y[3], -1.0f);
-	
-	pglTexCoord2f(s[1], t[1]);
-	pglVertex3f(x[1], y[1], -1.0f);
-	pglTexCoord2f(s[2], t[2]);
-	pglVertex3f(x[2], y[2], -1.0f);
-	pglTexCoord2f(s[3], t[3]);
-	pglVertex3f(x[3], y[3], -1.0f);
-	
-	pglEnd();
+	if (tarrc || starrc)
+		FlushTriangleBuffers(1);
+
+	glDisableClientState( GL_COLOR_ARRAY );
+	glEnableClientState( GL_TEXTURE_COORD_ARRAY );
+	glEnableClientState( GL_VERTEX_ARRAY );
+
+	glVertexPointer( 3, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].x );
+	glTexCoordPointer( 2, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].s );
+	glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
+
+	ResetVertexTexColourPointerAndState( );
 }
 
 void D3D_PlayerDamagedOverlay(int intensity)
@@ -1145,6 +1183,8 @@ void D3D_PlayerDamagedOverlay(int intensity)
 	int colour, baseColour;
 	int r, g, b, a;
 	int i;
+	VertexXyzSt verts[ 4 ];
+	unsigned short indicies[ 6 ] = { 0, 1, 3, 1, 2, 3 };
 	
 	theta[0] = (CloakingPhase/8)&4095;
 	theta[1] = (800-CloakingPhase/8)&4095;
@@ -1178,45 +1218,43 @@ void D3D_PlayerDamagedOverlay(int intensity)
 	
 	CheckTranslucencyModeIsCorrect(TRANSLUCENCY_INVCOLOUR);
 	for (i = 0; i < 2; i++) {
-		GLfloat x[4], y[4], s[4], t[4];
 		
 		float sin = (GetSin(theta[i]))/65536.0f/16.0f;
 		float cos = (GetCos(theta[i]))/65536.0f/16.0f;	
 
-		x[0] = -1.0f;
-		y[0] = -1.0f;
-		s[0] = 0.875f + (cos*(-1) - sin*(-1));
-		t[0] = 0.375f + (sin*(-1) + cos*(-1));
-		x[1] =  1.0f;
-		y[1] = -1.0f;
-		s[1] = 0.875f + (cos*(+1) - sin*(-1));
-		t[1] = 0.375f + (sin*(+1) + cos*(-1));
-		x[2] =  1.0f;
-		y[2] =  1.0f;
-		s[2] = 0.875f + (cos*(+1) - sin*(+1));
-		t[2] = 0.375f + (sin*(+1) + cos*(+1));
-		x[3] = -1.0f;
-		y[3] =  1.0f;
-		s[3] = 0.875f + (cos*(-1) - sin*(+1));
-		t[3] = 0.375f + (sin*(-1) + cos*(+1));
+		verts[ 0 ].x = -1.0f;
+		verts[ 0 ].y = -1.0f;
+		verts[ 0 ].z = -1.0f;
+		verts[ 0 ].s = 0.875f + (cos*(-1) - sin*(-1));
+		verts[ 0 ].t = 0.375f + (sin*(-1) + cos*(-1));
+		verts[ 1 ].x =  1.0f;
+		verts[ 1 ].y = -1.0f;
+		verts[ 1 ].z = -1.0f;
+		verts[ 1 ].s = 0.875f + (cos*(+1) - sin*(-1));
+		verts[ 1 ].t = 0.375f + (sin*(+1) + cos*(-1));
+		verts[ 2 ].x =  1.0f;
+		verts[ 2 ].y =  1.0f;
+		verts[ 2 ].z = -1.0f;
+		verts[ 2 ].s = 0.875f + (cos*(+1) - sin*(+1));
+		verts[ 2 ].t = 0.375f + (sin*(+1) + cos*(+1));
+		verts[ 3 ].x = -1.0f;
+		verts[ 3 ].y =  1.0f;
+		verts[ 3 ].z = -1.0f;
+		verts[ 3 ].s = 0.875f + (cos*(-1) - sin*(+1));
+		verts[ 3 ].t = 0.375f + (sin*(-1) + cos*(+1));
 	
-		SelectPolygonBeginType(3); /* triangles */
-	
-		pglTexCoord2f(s[0], t[0]);
-		pglVertex3f(x[0], y[0], -1.0f);
-		pglTexCoord2f(s[1], t[1]);
-		pglVertex3f(x[1], y[1], -1.0f);
-		pglTexCoord2f(s[3], t[3]);
-		pglVertex3f(x[3], y[3], -1.0f);
-	
-		pglTexCoord2f(s[1], t[1]);
-		pglVertex3f(x[1], y[1], -1.0f);
-		pglTexCoord2f(s[2], t[2]);
-		pglVertex3f(x[2], y[2], -1.0f);
-		pglTexCoord2f(s[3], t[3]);
-		pglVertex3f(x[3], y[3], -1.0f);
-	
-		pglEnd();
+		if (tarrc || starrc)
+			FlushTriangleBuffers(1);
+
+		glDisableClientState( GL_COLOR_ARRAY );
+		glEnableClientState( GL_TEXTURE_COORD_ARRAY );
+		glEnableClientState( GL_VERTEX_ARRAY );
+
+		glVertexPointer( 3, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].x );
+		glTexCoordPointer( 2, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].s );
+		glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
+
+		ResetVertexTexColourPointerAndState( );
 	
 		colour = baseColour + (intensity<<24);
 		
@@ -1233,7 +1271,9 @@ void D3D_PlayerDamagedOverlay(int intensity)
 
 void DrawNoiseOverlay(int tr)
 {
-	GLfloat x[4], y[4], s[4], t[4], u, v;
+	GLfloat /*x[4], y[4], s[4], t[4],*/ u, v;
+	VertexXyzSt verts[ 4 ];
+	unsigned short indicies[ 6 ] = { 0, 1, 3, 1, 2, 3 };
 	int r, g, b;
 	D3DTexture *tex;
 	int size;
@@ -1254,41 +1294,40 @@ void DrawNoiseOverlay(int tr)
 	u = FastRandom()&255;
 	v = FastRandom()&255;
 	
-	x[0] = -1.0f;
-	y[0] = -1.0f;
-	s[0] = u / 256.0f;
-	t[0] = v / 256.0f;
-	x[1] =  1.0f;
-	y[1] = -1.0f;
-	s[1] = (u + size) / 256.0f;
-	t[1] = v / 256.0f;
-	x[2] =  1.0f;
-	y[2] =  1.0f;
-	s[2] = (u + size) / 256.0f;
-	t[2] = (v + size) / 256.0f;
-	x[3] = -1.0f;
-	y[3] =  1.0f;
-	s[3] = u / 256.0f;
-	t[3] = (v + size) / 256.0f;
+	verts[ 0 ].x = -1.0f;
+	verts[ 0 ].y = -1.0f;
+	verts[ 0 ].z = 1.0f;
+	verts[ 0 ].s = u / 256.0f;
+	verts[ 0 ].t = v / 256.0f;
+	verts[ 1 ].x =  1.0f;
+	verts[ 1 ].y = -1.0f;
+	verts[ 1 ].z = 1.0f;
+	verts[ 1 ].s = (u + size) / 256.0f;
+	verts[ 1 ].t = v / 256.0f;
+	verts[ 2 ].x =  1.0f;
+	verts[ 2 ].y =  1.0f;
+	verts[ 2 ].z = 1.0f;
+	verts[ 2 ].s = (u + size) / 256.0f;
+	verts[ 2 ].t = (v + size) / 256.0f;
+	verts[ 3 ].x = -1.0f;
+	verts[ 3 ].y =  1.0f;
+	verts[ 3 ].z = 1.0f;
+	verts[ 3 ].s = u / 256.0f;
+	verts[ 3 ].t = (v + size) / 256.0f;
 	
-	SelectPolygonBeginType(3); /* triangles */
+	if (tarrc || starrc)
+		FlushTriangleBuffers(1);
+
 	pglColor4ub(r, g, b, tr);
-		
-	pglTexCoord2f(s[0], t[0]);
-	pglVertex3f(x[0], y[0], 1.0f);
-	pglTexCoord2f(s[1], t[1]);
-	pglVertex3f(x[1], y[1], 1.0f);
-	pglTexCoord2f(s[3], t[3]);
-	pglVertex3f(x[3], y[3], 1.0f);
-	
-	pglTexCoord2f(s[1], t[1]);
-	pglVertex3f(x[1], y[1], 1.0f);
-	pglTexCoord2f(s[2], t[2]);
-	pglVertex3f(x[2], y[2], 1.0f);
-	pglTexCoord2f(s[3], t[3]);
-	pglVertex3f(x[3], y[3], 1.0f);
-	
-	pglEnd();
+	glDisableClientState( GL_COLOR_ARRAY );
+	glEnableClientState( GL_TEXTURE_COORD_ARRAY );
+	glEnableClientState( GL_VERTEX_ARRAY );
+
+	glVertexPointer( 3, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].x );
+	glTexCoordPointer( 2, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].s );
+	glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
+
+	ResetVertexTexColourPointerAndState( );
 	
 	pglDepthFunc(GL_LEQUAL);
 }
@@ -1298,6 +1337,8 @@ void D3D_ScreenInversionOverlay()
 	D3DTexture *tex;
 	int theta[2];
 	int i;
+	VertexXyzSt verts[ 4 ];
+	unsigned short indicies[ 6 ] = { 0, 1, 3, 1, 2, 3 };
 	
 	theta[0] = (CloakingPhase/8)&4095;
 	theta[1] = (800-CloakingPhase/8)&4095;
@@ -1311,45 +1352,43 @@ void D3D_ScreenInversionOverlay()
 	pglColor4f(1.0f, 1.0f, 1.0f, 1.0f);
 	
 	for (i = 0; i < 2; i++) {
-		GLfloat x[4], y[4], s[4], t[4];
 		
 		float sin = (GetSin(theta[i]))/65536.0f/16.0f;
 		float cos = (GetCos(theta[i]))/65536.0f/16.0f;
 		
-		x[0] = -1.0f;
-		y[0] = -1.0f;
-		s[0] = 0.375f + (cos*(-1) - sin*(-1));
-		t[0] = 0.375f + (sin*(-1) + cos*(-1));
-		x[1] =  1.0f;
-		y[1] = -1.0f;
-		s[1] = 0.375f + (cos*(+1) - sin*(-1));
-		t[1] = 0.375f + (sin*(+1) + cos*(-1));
-		x[2] =  1.0f;
-		y[2] =  1.0f;
-		s[2] = 0.375f + (cos*(+1) - sin*(+1));
-		t[2] = 0.375f + (sin*(+1) + cos*(+1));
-		x[3] = -1.0f;
-		y[3] =  1.0f;
-		s[3] = 0.375f + (cos*(-1) - sin*(+1));
-		t[3] = 0.375f + (sin*(-1) + cos*(+1));
+		verts[ 0 ].x = -1.0f;
+		verts[ 0 ].y = -1.0f;
+		verts[ 0 ].z = -1.0f;
+		verts[ 0 ].s = 0.375f + (cos*(-1) - sin*(-1));
+		verts[ 0 ].t = 0.375f + (sin*(-1) + cos*(-1));
+		verts[ 1 ].x =  1.0f;
+		verts[ 1 ].y = -1.0f;
+		verts[ 1 ].z = -1.0f;
+		verts[ 1 ].s = 0.375f + (cos*(+1) - sin*(-1));
+		verts[ 1 ].t = 0.375f + (sin*(+1) + cos*(-1));
+		verts[ 2 ].x =  1.0f;
+		verts[ 2 ].y =  1.0f;
+		verts[ 2 ].z = -1.0f;
+		verts[ 2 ].s = 0.375f + (cos*(+1) - sin*(+1));
+		verts[ 2 ].t = 0.375f + (sin*(+1) + cos*(+1));
+		verts[ 3 ].x = -1.0f;
+		verts[ 3 ].y =  1.0f;
+		verts[ 3 ].z = -1.0f;
+		verts[ 3 ].s = 0.375f + (cos*(-1) - sin*(+1));
+		verts[ 3 ].t = 0.375f + (sin*(-1) + cos*(+1));
 
-		SelectPolygonBeginType(3); /* triangles */
-		
-		pglTexCoord2f(s[0], t[0]);
-		pglVertex3f(x[0], y[0], -1.0f);
-		pglTexCoord2f(s[1], t[1]);
-		pglVertex3f(x[1], y[1], -1.0f);
-		pglTexCoord2f(s[3], t[3]);
-		pglVertex3f(x[3], y[3], -1.0f);
-	
-		pglTexCoord2f(s[1], t[1]);
-		pglVertex3f(x[1], y[1], -1.0f);
-		pglTexCoord2f(s[2], t[2]);
-		pglVertex3f(x[2], y[2], -1.0f);
-		pglTexCoord2f(s[3], t[3]);
-		pglVertex3f(x[3], y[3], -1.0f);
-	
-		pglEnd();
+		if (tarrc || starrc)
+			FlushTriangleBuffers(1);
+
+		glDisableClientState( GL_COLOR_ARRAY );
+		glEnableClientState( GL_TEXTURE_COORD_ARRAY );
+		glEnableClientState( GL_VERTEX_ARRAY );
+
+		glVertexPointer( 3, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].x );
+		glTexCoordPointer( 2, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].s );
+		glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
+
+		ResetVertexTexColourPointerAndState( );
 		
 		CheckTranslucencyModeIsCorrect(TRANSLUCENCY_COLOUR);
 	}
@@ -1357,22 +1396,39 @@ void D3D_ScreenInversionOverlay()
 
 void D3D_PredatorScreenInversionOverlay()
 {
+	VertexXyz verts[ 4 ];
+	unsigned short indicies[ 6 ] = { 0, 1, 3, 1, 2, 3 };
+
 	CheckTranslucencyModeIsCorrect(TRANSLUCENCY_DARKENINGCOLOUR);
 	CheckBoundTextureIsCorrect(NULL);
 	pglDepthFunc(GL_ALWAYS);
 	
-	SelectPolygonBeginType(3); /* triangles */
+	if (tarrc || starrc)
+		FlushTriangleBuffers(1);
+	
 	pglColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	
-	pglVertex3f(-1.0f, -1.0f, 1.0f);
-	pglVertex3f( 1.0f, -1.0f, 1.0f);
-	pglVertex3f(-1.0f,  1.0f, 1.0f);
-	
-	pglVertex3f( 1.0f, -1.0f, 1.0f);
-	pglVertex3f( 1.0f,  1.0f, 1.0f);
-	pglVertex3f(-1.0f,  1.0f, 1.0f);
-	
-	pglEnd();
+
+	verts[ 0 ].x = -1.f;
+	verts[ 0 ].y = -1.f;
+	verts[ 0 ].z =  1.f;
+	verts[ 1 ].x =  1.f;
+	verts[ 1 ].y = -1.f;
+	verts[ 1 ].z =  1.f;
+	verts[ 2 ].x =  1.f;
+	verts[ 2 ].y =  1.f;
+	verts[ 2 ].z =  1.f;
+	verts[ 3 ].x = -1.f;
+	verts[ 3 ].y =  1.f;
+	verts[ 3 ].z =  1.f;
+
+	glDisableClientState( GL_COLOR_ARRAY );
+	glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+	glEnableClientState( GL_VERTEX_ARRAY );
+
+	glVertexPointer( 3, GL_FLOAT, 0, &verts[ 0 ].x );
+	glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
+
+	ResetVertexTexColourPointerAndState( );
 	
 	pglDepthFunc(GL_LEQUAL);
 }
@@ -1380,7 +1436,8 @@ void D3D_PredatorScreenInversionOverlay()
 void DrawScanlinesOverlay(float level)
 {
 	D3DTexture *tex;
-	GLfloat x[4], y[4], s[4], t[4];
+	VertexXyzSt verts[ 4 ];
+	unsigned short indicies[ 6 ] = { 0, 1, 3, 1, 2, 3 };
 	float v, size;
 	int c;
 	int a;
@@ -1400,47 +1457,48 @@ void DrawScanlinesOverlay(float level)
 	
 	pglColor4ub(c, c, c, a);
 
-	x[0] = -1.0f;
-	y[0] = -1.0f;
-	s[0] = (v - size) / 256.0f;
-	t[0] = 1.0f;
-	x[1] =  1.0f;
-	y[1] = -1.0f;
-	s[1] = (v - size) / 256.0f;
-	t[1] = 1.0f;
-	x[2] =  1.0f;
-	y[2] =  1.0f;
-	s[2] = (v + size) / 256.0f;
-	t[2] = 1.0f;
-	x[3] = -1.0f;
-	y[3] =  1.0f;
-	s[3] = (v + size) / 256.0f;
-	t[3] = 1.0f;
+	verts[ 0 ].x = -1.0f;
+	verts[ 0 ].y = -1.0f;
+	verts[ 0 ].z = 1.0f;
+	verts[ 0 ].s = (v - size) / 256.0f;
+	verts[ 0 ].t = 1.0f;
+	verts[ 1 ].x =  1.0f;
+	verts[ 1 ].y = -1.0f;
+	verts[ 1 ].z = 1.0f;
+	verts[ 1 ].s = (v - size) / 256.0f;
+	verts[ 1 ].t = 1.0f;
+	verts[ 2 ].x =  1.0f;
+	verts[ 2 ].y =  1.0f;
+	verts[ 2 ].z = 1.0f;
+	verts[ 2 ].s = (v + size) / 256.0f;
+	verts[ 2 ].t = 1.0f;
+	verts[ 3 ].x = -1.0f;
+	verts[ 3 ].y =  1.0f;
+	verts[ 3 ].z = 1.0f;
+	verts[ 3 ].s = (v + size) / 256.0f;
+	verts[ 3 ].t = 1.0f;
 	
-	SelectPolygonBeginType(3); /* triangles */
-		
-	pglTexCoord2f(s[0], t[0]);
-	pglVertex3f(x[0], y[0], 1.0f);
-	pglTexCoord2f(s[1], t[1]);
-	pglVertex3f(x[1], y[1], 1.0f);
-	pglTexCoord2f(s[3], t[3]);
-	pglVertex3f(x[3], y[3], 1.0f);
-	
-	pglTexCoord2f(s[1], t[1]);
-	pglVertex3f(x[1], y[1], 1.0f);
-	pglTexCoord2f(s[2], t[2]);
-	pglVertex3f(x[2], y[2], 1.0f);
-	pglTexCoord2f(s[3], t[3]);
-	pglVertex3f(x[3], y[3], 1.0f);
-	
-	pglEnd();	
+	if (tarrc || starrc)
+		FlushTriangleBuffers(1);
+
+	glDisableClientState( GL_COLOR_ARRAY );
+	glEnableClientState( GL_TEXTURE_COORD_ARRAY );
+	glEnableClientState( GL_VERTEX_ARRAY );
+
+	glVertexPointer( 3, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].x );
+	glTexCoordPointer( 2, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].s );
+	glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
+
+	ResetVertexTexColourPointerAndState( );
+
 	pglDepthFunc(GL_LEQUAL);
 }
 
 void D3D_FadeDownScreen(int brightness, int colour)
 {
 	int t, r, g, b, a;
-	GLfloat x[4], y[4];
+	VertexXyz verts[ 4 ];
+	unsigned short indicies[ 6 ] = { 0, 1, 3, 1, 2, 3 };
 	
 	t = 255 - (brightness>>8);
 	if (t<0) t = 0;
@@ -1456,26 +1514,30 @@ void D3D_FadeDownScreen(int brightness, int colour)
 	
 	pglColor4ub(r, g, b, a);
 	
-	x[0] = -1.0f;
-	y[0] = -1.0f;
-	x[1] =  1.0f;
-	y[1] = -1.0f;
-	x[2] =  1.0f;
-	y[2] =  1.0f;
-	x[3] = -1.0f;
-	y[3] =  1.0f;
+	verts[ 0 ].x = -1.0f;
+	verts[ 0 ].y = -1.0f;
+	verts[ 0 ].z = -1.0f;
+	verts[ 1 ].x =  1.0f;
+	verts[ 1 ].y = -1.0f;
+	verts[ 1 ].z = -1.0f;
+	verts[ 2 ].x =  1.0f;
+	verts[ 2 ].y =  1.0f;
+	verts[ 2 ].z = -1.0f;
+	verts[ 3 ].x = -1.0f;
+	verts[ 3 ].y =  1.0f;
+	verts[ 3 ].z = -1.0f;
 	
-	SelectPolygonBeginType(3); /* triangles */
-	
-	pglVertex3f(x[0], y[0], -1.0f);
-	pglVertex3f(x[1], y[1], -1.0f);
-	pglVertex3f(x[3], y[3], -1.0f);
-	
-	pglVertex3f(x[1], y[1], -1.0f);
-	pglVertex3f(x[2], y[2], -1.0f);
-	pglVertex3f(x[3], y[3], -1.0f);
-	
-	pglEnd();
+	if (tarrc || starrc)
+		FlushTriangleBuffers(1);
+
+	glDisableClientState( GL_COLOR_ARRAY );
+	glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+	glEnableClientState( GL_VERTEX_ARRAY );
+
+	glVertexPointer( 3, GL_FLOAT, 0, &verts[ 0 ].x );
+	glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
+
+	ResetVertexTexColourPointerAndState( );
 }
 
 void D3D_HUD_Setup()
@@ -1492,7 +1554,8 @@ void D3D_HUDQuad_Output(int imageNumber, struct VertexTag *quadVerticesPtr, unsi
 	float RecipW, RecipH;
 	int i;
 	D3DTexture *tex = ImageHeaderArray[imageNumber].D3DTexture;
-	GLfloat x[4], y[4], s[4], t[4];
+	VertexXyzSt verts[ 4 ];
+	unsigned short indicies[ 6 ] = { 0, 1, 3, 1, 2, 3 };
 	int r, g, b, a;
 
 /* possibly use polygon offset? (predator hud) */
@@ -1522,32 +1585,28 @@ void D3D_HUDQuad_Output(int imageNumber, struct VertexTag *quadVerticesPtr, unsi
 	pglColor4ub(r, g, b, a);
 	
 	for (i = 0; i < 4; i++) {
-		x[i] = quadVerticesPtr[i].X;
-		x[i] =  (x[i] - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
-		y[i] = quadVerticesPtr[i].Y;
-		y[i] = -(y[i] - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
+		verts[ i ].x = quadVerticesPtr[i].X;
+		verts[ i ].x =  (verts[ i ].x - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
+		verts[ i ].y = quadVerticesPtr[i].Y;
+		verts[ i ].y = -(verts[ i ].y - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
+		verts[ i ].z = -1.f;
 		
-		s[i] = ((float)quadVerticesPtr[i].U)*RecipW;
-		t[i] = ((float)quadVerticesPtr[i].V)*RecipH;
+		verts[ i ].s = ((float)quadVerticesPtr[i].U)*RecipW;
+		verts[ i ].t = ((float)quadVerticesPtr[i].V)*RecipH;
 	}
 	
-	SelectPolygonBeginType(3); /* triangles */
-	
-	pglTexCoord2f(s[0], t[0]);
-	pglVertex3f(x[0], y[0], -1.0f);
-	pglTexCoord2f(s[1], t[1]);
-	pglVertex3f(x[1], y[1], -1.0f);
-	pglTexCoord2f(s[3], t[3]);
-	pglVertex3f(x[3], y[3], -1.0f);
-	
-	pglTexCoord2f(s[1], t[1]);
-	pglVertex3f(x[1], y[1], -1.0f);
-	pglTexCoord2f(s[2], t[2]);
-	pglVertex3f(x[2], y[2], -1.0f);
-	pglTexCoord2f(s[3], t[3]);
-	pglVertex3f(x[3], y[3], -1.0f);
-	
-	pglEnd();
+	if (tarrc || starrc)
+		FlushTriangleBuffers(1);
+
+	glDisableClientState( GL_COLOR_ARRAY );
+	glEnableClientState( GL_TEXTURE_COORD_ARRAY );
+	glEnableClientState( GL_VERTEX_ARRAY );
+
+	glVertexPointer( 3, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].x );
+	glTexCoordPointer( 2, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].s );
+	glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
+
+	ResetVertexTexColourPointerAndState( );
 }
 
 void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colour)
@@ -2336,13 +2395,15 @@ void D3D_DrawRectangle(int x, int y, int w, int h, int alpha)
 void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int bScale)
 {
 	extern unsigned char GammaValues[256];
-	GLfloat x[4], y[4];
+	VertexXyz verts[ 4 ];
+	unsigned short indicies[ 6 ] = { 0, 1, 3, 1, 2, 3 };
 	int i;
 	
 	CheckTranslucencyModeIsCorrect(TRANSLUCENCY_OFF);
 	CheckBoundTextureIsCorrect(NULL);
 	
-	SelectPolygonBeginType(3); /* triangles */
+	if (tarrc || starrc)
+		FlushTriangleBuffers(1);
 	
 	for (i = 0; i < 255; ) {
 		unsigned int c;
@@ -2350,40 +2411,43 @@ void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int bScale
 		c = GammaValues[i];
 		pglColor4ub(MUL_FIXED(c,rScale), MUL_FIXED(c,gScale), MUL_FIXED(c,bScale), 255);
 		
-		x[0] = (Global_VDB_Ptr->VDB_ClipRight*i)/255;
-		x[0] =  (x[0] - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
-		y[0] = yTop;
-		y[0] = -(y[0] - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
+		verts[ 0 ].x = (Global_VDB_Ptr->VDB_ClipRight*i)/255;
+		verts[ 0 ].x =  (verts[ 0 ].x - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
+		verts[ 0 ].y = yTop;
+		verts[ 0 ].y = -(verts[ 0 ].y - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
+		verts[ 0 ].z = -1.f;
 		
-		x[1] = (Global_VDB_Ptr->VDB_ClipRight*i)/255;
-		x[1] =  (x[1] - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
-		y[1] = yBottom;
-		y[1] = -(y[1] - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
+		verts[ 1 ].x = (Global_VDB_Ptr->VDB_ClipRight*i)/255;
+		verts[ 1 ].x =  (verts[ 1 ].x - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
+		verts[ 1 ].y = yBottom;
+		verts[ 1 ].y = -(verts[ 1 ].y - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
+		verts[ 1 ].z = -1.f;
 		
 		i++;
 		c = GammaValues[i];
 		pglColor4ub(MUL_FIXED(c,rScale), MUL_FIXED(c,gScale), MUL_FIXED(c,bScale), 255);
-		x[2] = (Global_VDB_Ptr->VDB_ClipRight*i)/255;
-		x[2] =  (x[2] - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
-		y[2] = yBottom;
-		y[2] = -(y[2] - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
+		verts[ 2 ].x = (Global_VDB_Ptr->VDB_ClipRight*i)/255;
+		verts[ 2 ].x =  (verts[ 2 ].x - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
+		verts[ 2 ].y = yBottom;
+		verts[ 2 ].y = -(verts[ 2 ].y - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
+		verts[ 2 ].z = -1.f;
+
+		verts[ 3 ].x = (Global_VDB_Ptr->VDB_ClipRight*i)/255;
+		verts[ 3 ].x =  (verts[ 3 ].x - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
+		verts[ 3 ].y = yTop;
+		verts[ 3 ].y = -(verts[ 3 ].y - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
+		verts[ 3 ].z = -1.f;
 		
-		x[3] = (Global_VDB_Ptr->VDB_ClipRight*i)/255;
-		x[3] =  (x[3] - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
-		y[3] = yTop;
-		y[3] = -(y[3] - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
-		
-		
-		pglVertex3f(x[0], y[0], -1.0f);
-		pglVertex3f(x[1], y[1], -1.0f);
-		pglVertex3f(x[3], y[3], -1.0f);
-	
-		pglVertex3f(x[1], y[1], -1.0f);
-		pglVertex3f(x[2], y[2], -1.0f);
-		pglVertex3f(x[3], y[3], -1.0f);
+
+		glDisableClientState( GL_COLOR_ARRAY );
+		glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+		glEnableClientState( GL_VERTEX_ARRAY );
+
+		glVertexPointer( 3, GL_FLOAT, 0, &verts[ 0 ].x );
+		glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
+
+		ResetVertexTexColourPointerAndState( );
 	}
-	
-	pglEnd();
 }
 
 void ColourFillBackBuffer(int FillColour)
@@ -2402,7 +2466,8 @@ void ColourFillBackBuffer(int FillColour)
 
 void ColourFillBackBufferQuad(int FillColour, int x0, int y0, int x1, int y1)
 {
-	GLfloat x[4], y[4];
+	VertexXyz verts[ 4 ];
+	unsigned short indicies[ 6 ] = { 0, 1, 3, 1, 2, 3 };
 	int r, g, b, a;
 
 	if (y1 <= y0)
@@ -2418,37 +2483,41 @@ void ColourFillBackBufferQuad(int FillColour, int x0, int y0, int x1, int y1)
 
 	pglColor4ub(r, g, b, 255);
 
-	x[0] = x0;
-	x[0] =  (x[0] - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
-	y[0] = y0;
-	y[0] = -(y[0] - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
+	verts[ 0 ].x = x0;
+	verts[ 0 ].x =  (verts[ 0 ].x - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
+	verts[ 0 ].y = y0;
+	verts[ 0 ].y = -(verts[ 0 ].y - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
+	verts[ 0 ].z = -1.f;
 	
-	x[1] = x1 - 1;
-	x[1] =  (x[1] - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
-	y[1] = y0;
-	y[1] = -(y[1] - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
+	verts[ 1 ].x = x1 - 1;
+	verts[ 1 ].x =  (verts[ 1 ].x - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
+	verts[ 1 ].y = y0;
+	verts[ 1 ].y = -(verts[ 1 ].y - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
+	verts[ 1 ].z = -1.f;
 	
-	x[2] = x1 - 1;
-	x[2] =  (x[2] - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
-	y[2] = y1 - 1;
-	y[2] = -(y[2] - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
+	verts[ 2 ].x = x1 - 1;
+	verts[ 2 ].x =  (verts[ 2 ].x - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
+	verts[ 2 ].y = y1 - 1;
+	verts[ 2 ].y = -(verts[ 2 ].y - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
+	verts[ 2 ].z = -1.f;
 	
-	x[3] = x0;
-	x[3] =  (x[3] - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
-	y[3] = y1 - 1;
-	y[3] = -(y[3] - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
+	verts[ 3 ].x = x0;
+	verts[ 3 ].x =  (verts[ 3 ].x - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
+	verts[ 3 ].y = y1 - 1;
+	verts[ 3 ].y = -(verts[ 3 ].y - ScreenDescriptorBlock.SDB_CentreY)/ScreenDescriptorBlock.SDB_CentreY;
+	verts[ 3 ].z = -1.f;
 
-	SelectPolygonBeginType(3); /* triangles */
-	
-	pglVertex3f(x[0], y[0], -1.0f);
-	pglVertex3f(x[1], y[1], -1.0f);
-	pglVertex3f(x[3], y[3], -1.0f);
-	
-	pglVertex3f(x[1], y[1], -1.0f);
-	pglVertex3f(x[2], y[2], -1.0f);
-	pglVertex3f(x[3], y[3], -1.0f);
-	
-	pglEnd();
+	if (tarrc || starrc)
+		FlushTriangleBuffers(1);
+
+	glDisableClientState( GL_COLOR_ARRAY );
+	glDisableClientState( GL_TEXTURE_COORD_ARRAY );
+	glEnableClientState( GL_VERTEX_ARRAY );
+
+	glVertexPointer( 3, GL_FLOAT, 0, &verts[ 0 ].x );
+	glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
+
+	ResetVertexTexColourPointerAndState( );
 }
 
 void D3D_DrawBackdrop()
@@ -2512,18 +2581,21 @@ void BltImage(RECT *dest, DDSurface *image, RECT *src)
 {
 	int width1, width;
 	int height1, height;
+	unsigned int attribBitsToPush;
 
 	width = dest->right - dest->left + 1;
 	width1 = src->right - src->left + 1;
 	height = dest->bottom - dest->top + 1;
 	height1 = src->bottom - src->top + 1;
 	
-	uint32_t attribBitsToPush = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
+	attribBitsToPush = GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT;
 #if !defined(_PANDORA)
 	attribBitsToPush |= GL_PIXEL_MODE_BIT | GL_ENABLE_BIT;
 #endif
 
 	pglPushAttrib(attribBitsToPush);
+
+	StateTrackerPush( );
 
 #if !defined(_PANDORA)
 	pglPushClientAttrib(GL_CLIENT_PIXEL_STORE_BIT);
@@ -2532,9 +2604,11 @@ void BltImage(RECT *dest, DDSurface *image, RECT *src)
 	pglDisable(GL_BLEND);
 	pglDisable(GL_DEPTH_TEST);
 	pglDisable(GL_TEXTURE_2D);
-	pglDisable(GL_ALPHA_TEST);
+	StateTrackerDisableAlphaTest( );
 	
-	pglPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+// Defaults to 1 anyway...
+//	pglPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+	
 #if !defined(_PANDORA)
 	pglPixelStorei(GL_UNPACK_ROW_LENGTH, image->w);
 #endif
@@ -2551,8 +2625,24 @@ void BltImage(RECT *dest, DDSurface *image, RECT *src)
 		
 	pglPopMatrix();
 	
+	// Put server attributes back to defaults.
+	pglEnable(GL_BLEND);
+	pglEnable(GL_DEPTH_TEST);
+	pglEnable(GL_TEXTURE_2D);
+
+
+	// Put client attributes back to defaults.
+	pglPixelZoom( 1.0f, 1.0f );
+#if !defined(_PANDORA)
+	pglPixelStorei(GL_UNPACK_ROW_LENGTH, 0);
+#endif
+	
+#if !defined(_PANDORA)
 	pglPopClientAttrib();
+#endif
 	pglPopAttrib();;
+
+	StateTrackerPop( );
 }
 
 /* ** */
