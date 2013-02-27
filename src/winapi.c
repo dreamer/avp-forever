@@ -1,3 +1,5 @@
+#if !defined(_MSC_VER)
+
 #include <unistd.h>
 #include <stdio.h>
 #include <stdlib.h>
@@ -226,3 +228,5 @@ unsigned int GetTickCount()
 {
 	return timeGetTime();
 }
+
+#endif
