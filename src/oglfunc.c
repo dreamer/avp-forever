@@ -303,7 +303,7 @@ void load_ogl_functions(int mode)
 #define GL_COLOR_TABLE_WIDTH_EXT	GL_COLOR_TABLE_WIDTH
 #endif
 	
-#if !defined(_PANDORA)
+#if !defined(_GL_STATIC)
 	if (ogl_have_paletted_texture) {
 		ogl_missing_func = NULL;
 		
