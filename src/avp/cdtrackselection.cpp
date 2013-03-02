@@ -131,6 +131,9 @@ void LoadCDTrackList()
 	buffer=new char[file_size+1];
 	fread(buffer, 1, file_size, file);
 	fclose(file);
+
+	// NULL terminate buffer.
+	buffer[file_size] = '\0';
 	
 	char* bufferptr=buffer;
 
