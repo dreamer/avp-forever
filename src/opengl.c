@@ -612,12 +612,12 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 	if (tarrc || starrc)
 		FlushTriangleBuffers(1);
 	
-	glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-	glDisableClientState( GL_COLOR_ARRAY );
-	glEnableClientState( GL_VERTEX_ARRAY );
+	pglDisableClientState( GL_TEXTURE_COORD_ARRAY );
+	pglDisableClientState( GL_COLOR_ARRAY );
+	pglEnableClientState( GL_VERTEX_ARRAY );
 	
-	glVertexPointer( 3, GL_FLOAT, 0, &verts[ 0 ].x );
-	glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
+	pglVertexPointer( 3, GL_FLOAT, 0, &verts[ 0 ].x );
+	pglDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
 	
 	ResetVertexTexColourPointerAndState( );
 }
@@ -1165,13 +1165,13 @@ void D3D_PlayerOnFireOverlay()
 	if (tarrc || starrc)
 		FlushTriangleBuffers(1);
 
-	glDisableClientState( GL_COLOR_ARRAY );
-	glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-	glEnableClientState( GL_VERTEX_ARRAY );
+	pglDisableClientState( GL_COLOR_ARRAY );
+	pglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+	pglEnableClientState( GL_VERTEX_ARRAY );
 
-	glVertexPointer( 3, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].x );
-	glTexCoordPointer( 2, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].s );
-	glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
+	pglVertexPointer( 3, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].x );
+	pglTexCoordPointer( 2, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].s );
+	pglDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
 
 	ResetVertexTexColourPointerAndState( );
 }
@@ -1246,13 +1246,13 @@ void D3D_PlayerDamagedOverlay(int intensity)
 		if (tarrc || starrc)
 			FlushTriangleBuffers(1);
 
-		glDisableClientState( GL_COLOR_ARRAY );
-		glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-		glEnableClientState( GL_VERTEX_ARRAY );
+		pglDisableClientState( GL_COLOR_ARRAY );
+		pglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+		pglEnableClientState( GL_VERTEX_ARRAY );
 
-		glVertexPointer( 3, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].x );
-		glTexCoordPointer( 2, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].s );
-		glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
+		pglVertexPointer( 3, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].x );
+		pglTexCoordPointer( 2, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].s );
+		pglDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
 
 		ResetVertexTexColourPointerAndState( );
 	
@@ -1319,13 +1319,13 @@ void DrawNoiseOverlay(int tr)
 		FlushTriangleBuffers(1);
 
 	pglColor4ub(r, g, b, tr);
-	glDisableClientState( GL_COLOR_ARRAY );
-	glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-	glEnableClientState( GL_VERTEX_ARRAY );
+	pglDisableClientState( GL_COLOR_ARRAY );
+	pglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+	pglEnableClientState( GL_VERTEX_ARRAY );
 
-	glVertexPointer( 3, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].x );
-	glTexCoordPointer( 2, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].s );
-	glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
+	pglVertexPointer( 3, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].x );
+	pglTexCoordPointer( 2, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].s );
+	pglDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
 
 	ResetVertexTexColourPointerAndState( );
 	
@@ -1380,13 +1380,13 @@ void D3D_ScreenInversionOverlay()
 		if (tarrc || starrc)
 			FlushTriangleBuffers(1);
 
-		glDisableClientState( GL_COLOR_ARRAY );
-		glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-		glEnableClientState( GL_VERTEX_ARRAY );
+		pglDisableClientState( GL_COLOR_ARRAY );
+		pglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+		pglEnableClientState( GL_VERTEX_ARRAY );
 
-		glVertexPointer( 3, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].x );
-		glTexCoordPointer( 2, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].s );
-		glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
+		pglVertexPointer( 3, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].x );
+		pglTexCoordPointer( 2, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].s );
+		pglDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
 
 		ResetVertexTexColourPointerAndState( );
 		
@@ -1421,12 +1421,12 @@ void D3D_PredatorScreenInversionOverlay()
 	verts[ 3 ].y =  1.f;
 	verts[ 3 ].z =  1.f;
 
-	glDisableClientState( GL_COLOR_ARRAY );
-	glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-	glEnableClientState( GL_VERTEX_ARRAY );
+	pglDisableClientState( GL_COLOR_ARRAY );
+	pglDisableClientState( GL_TEXTURE_COORD_ARRAY );
+	pglEnableClientState( GL_VERTEX_ARRAY );
 
-	glVertexPointer( 3, GL_FLOAT, 0, &verts[ 0 ].x );
-	glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
+	pglVertexPointer( 3, GL_FLOAT, 0, &verts[ 0 ].x );
+	pglDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
 
 	ResetVertexTexColourPointerAndState( );
 	
@@ -1481,13 +1481,13 @@ void DrawScanlinesOverlay(float level)
 	if (tarrc || starrc)
 		FlushTriangleBuffers(1);
 
-	glDisableClientState( GL_COLOR_ARRAY );
-	glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-	glEnableClientState( GL_VERTEX_ARRAY );
+	pglDisableClientState( GL_COLOR_ARRAY );
+	pglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+	pglEnableClientState( GL_VERTEX_ARRAY );
 
-	glVertexPointer( 3, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].x );
-	glTexCoordPointer( 2, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].s );
-	glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
+	pglVertexPointer( 3, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].x );
+	pglTexCoordPointer( 2, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].s );
+	pglDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
 
 	ResetVertexTexColourPointerAndState( );
 
@@ -1530,12 +1530,12 @@ void D3D_FadeDownScreen(int brightness, int colour)
 	if (tarrc || starrc)
 		FlushTriangleBuffers(1);
 
-	glDisableClientState( GL_COLOR_ARRAY );
-	glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-	glEnableClientState( GL_VERTEX_ARRAY );
+	pglDisableClientState( GL_COLOR_ARRAY );
+	pglDisableClientState( GL_TEXTURE_COORD_ARRAY );
+	pglEnableClientState( GL_VERTEX_ARRAY );
 
-	glVertexPointer( 3, GL_FLOAT, 0, &verts[ 0 ].x );
-	glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
+	pglVertexPointer( 3, GL_FLOAT, 0, &verts[ 0 ].x );
+	pglDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
 
 	ResetVertexTexColourPointerAndState( );
 }
@@ -1598,13 +1598,13 @@ void D3D_HUDQuad_Output(int imageNumber, struct VertexTag *quadVerticesPtr, unsi
 	if (tarrc || starrc)
 		FlushTriangleBuffers(1);
 
-	glDisableClientState( GL_COLOR_ARRAY );
-	glEnableClientState( GL_TEXTURE_COORD_ARRAY );
-	glEnableClientState( GL_VERTEX_ARRAY );
+	pglDisableClientState( GL_COLOR_ARRAY );
+	pglEnableClientState( GL_TEXTURE_COORD_ARRAY );
+	pglEnableClientState( GL_VERTEX_ARRAY );
 
-	glVertexPointer( 3, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].x );
-	glTexCoordPointer( 2, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].s );
-	glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
+	pglVertexPointer( 3, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].x );
+	pglTexCoordPointer( 2, GL_FLOAT, sizeof( VertexXyzSt ), &verts[ 0 ].s );
+	pglDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
 
 	ResetVertexTexColourPointerAndState( );
 }
@@ -2439,12 +2439,12 @@ void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int bScale
 		verts[ 3 ].z = -1.f;
 		
 
-		glDisableClientState( GL_COLOR_ARRAY );
-		glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-		glEnableClientState( GL_VERTEX_ARRAY );
+		pglDisableClientState( GL_COLOR_ARRAY );
+		pglDisableClientState( GL_TEXTURE_COORD_ARRAY );
+		pglEnableClientState( GL_VERTEX_ARRAY );
 
-		glVertexPointer( 3, GL_FLOAT, 0, &verts[ 0 ].x );
-		glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
+		pglVertexPointer( 3, GL_FLOAT, 0, &verts[ 0 ].x );
+		pglDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
 
 		ResetVertexTexColourPointerAndState( );
 	}
@@ -2510,12 +2510,12 @@ void ColourFillBackBufferQuad(int FillColour, int x0, int y0, int x1, int y1)
 	if (tarrc || starrc)
 		FlushTriangleBuffers(1);
 
-	glDisableClientState( GL_COLOR_ARRAY );
-	glDisableClientState( GL_TEXTURE_COORD_ARRAY );
-	glEnableClientState( GL_VERTEX_ARRAY );
+	pglDisableClientState( GL_COLOR_ARRAY );
+	pglDisableClientState( GL_TEXTURE_COORD_ARRAY );
+	pglEnableClientState( GL_VERTEX_ARRAY );
 
-	glVertexPointer( 3, GL_FLOAT, 0, &verts[ 0 ].x );
-	glDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
+	pglVertexPointer( 3, GL_FLOAT, 0, &verts[ 0 ].x );
+	pglDrawElements( GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, &indicies );
 
 	ResetVertexTexColourPointerAndState( );
 }
