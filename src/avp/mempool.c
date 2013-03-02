@@ -19,6 +19,11 @@ void* PoolAllocateMem(unsigned int amount)
 {
 	char* retval;
 
+#if defined(_PANDORA)
+	// Ensure 4 byte alignment.
+	amount += ( 4 - ( amount % 4 ) ) % 4;
+#endif
+
 	GLOBALASSERT(amount<=MEMORY_BLOCK_SIZE)
 	
 	if(amount>MemoryLeft)
