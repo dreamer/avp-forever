@@ -237,7 +237,8 @@ void InitMarineHUD(void)
 
 	{
 		int i;
-		for (i=0; i<MAX_NO_OF_MARINE_HUD_DIGITS; i++)
+		//for (i=0; i<MAX_NO_OF_MARINE_HUD_DIGITS; i++)
+		for (i=0; i<MAX_NO_OF_COMMON_HUD_DIGITS; i++)
 			ValueOfHUDDigit[i]=0;
 	}
 	
