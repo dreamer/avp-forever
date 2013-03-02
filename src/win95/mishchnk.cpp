@@ -400,7 +400,11 @@ File_Chunk::File_Chunk(const char * file_name)
 		return;
 	}	
 
-	buffer = new char [file_size];
+	// Huffman decoding assumes it can read through the end of this buffer, so we +16 here.
+	buffer = new char [file_size + 16];
+
+	// And also memset end.
+	memset( &buffer[ file_size - 16 ], 0, 16 );
 
 	/* KJL 17:57:44 19/09/98 - if the rif is compressed, we must load the whole
 	file in and then pass it to the decompression routine, which will return a
