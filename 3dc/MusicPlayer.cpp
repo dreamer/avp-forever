@@ -238,7 +238,7 @@ static void ExtractTracksForLevel(char* &buffer, List<int> &track_list)
 			}
 		}
 		else {
-			*buffer++;
+			buffer++;
 		}
 	}
 

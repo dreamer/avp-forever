@@ -85,9 +85,8 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 	{
 		int volume = MUL_FIXED(FmvSoundVolume*256, GetVolumeOfNearestVideoScreen());
 
-		// TODO: Volume and Panning
-//fixme		AudioStream_SetBufferVolume(fmvList[ftPtr->fmvHandle].fmvClass->mAudioStream, volume);
-//fixme		AudioStream_SetPan(fmvList[ftPtr->fmvHandle].fmvClass->mAudioStream, PanningOfNearestVideoScreen);
+//		fmvList[ftPtr->fmvHandle]->_audioStream->SetVolume(volume);
+//		fmvList[ftPtr->fmvHandle]->_audioStream->SetPan(PanningOfNearestVideoScreen);
 
 		ftPtr->SoundVolume = FmvSoundVolume;
 
@@ -100,8 +99,9 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 		}
 		else
 		{
-			if (!fmvList[ftPtr->fmvHandle]->mFrameReady)
+			if (!fmvList[ftPtr->fmvHandle]->_frameReady) {
 				return 0;
+			}
 
 			fmvList[ftPtr->fmvHandle]->ConvertFrame(width, height, DestBufferPtr, width * sizeof(uint32_t));
 		}
@@ -144,15 +144,16 @@ void StartMenuBackgroundFmv()
 // called per frame to display a frame of the menu background FMV
 extern int PlayMenuBackgroundFmv()
 {
-	if (!MenuBackgroundFMV)
+	if (!MenuBackgroundFMV) {
 		return 0;
+	}
 
-	if (menuFMV->mFrameReady) {
+	if (menuFMV->_frameReady) {
 		menuFMV->ConvertFrame();
 	}
 
-	if (menuFMV->mTexturesReady) {
-		DrawFmvFrame(menuFMV->mFrameWidth, menuFMV->mFrameHeight, menuFMV->frameTextureIDs);
+	if (menuFMV->_texturesReady) {
+		DrawFmvFrame(menuFMV->_frameWidth, menuFMV->_frameHeight, menuFMV->_frameTextureIDs);
 	}
 
 	return 1;
@@ -241,12 +242,12 @@ extern void PlayFMV(const char *filenamePtr)
 			playing = false;
 		}
 
-		if (fmv.mFrameReady) {
+		if (fmv._frameReady) {
 			playing = fmv.ConvertFrame();
 		}
 
-		if (fmv.mTexturesReady) {
-			DrawFmvFrame(fmv.mFrameWidth, fmv.mFrameHeight, fmv.frameTextureIDs);
+		if (fmv._texturesReady) {
+			DrawFmvFrame(fmv._frameWidth, fmv._frameHeight, fmv._frameTextureIDs);
 		}
 
 		ThisFramesRenderingHasFinished();
@@ -433,8 +434,11 @@ void PlayMenuMusic(void)
 
 void EndMenuMusic()
 {
-	delete menuMusic;
-	menuMusic = NULL;
+	if (menuMusic) {
+		menuMusic->Close();
+		delete menuMusic;
+		menuMusic = NULL;
+	}
 }
 
 extern void InitialiseTriggeredFMVs()

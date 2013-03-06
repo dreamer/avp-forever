@@ -23,25 +23,35 @@
 // ADVISED OF THE POSSIBILITY OF SUCH DAMAGE.
 
 #include <assert.h>
+#include <new>
 #include "os_header.h"
 #include "RingBuffer.h"
 
-RingBuffer::RingBuffer(uint32_t size)
+bool RingBuffer::Init(uint32_t size)
 {
-	buffer = new uint8_t[size];
-	bufferCapacity = size;
-	readPos = 0;
-	writePos = 0;
-	amountFilled = 0;
-	initialFill = false;
+	_buffer = new(std::nothrow) uint8_t[size];
+	if (_buffer == NULL) {
+		return false;
+	}
 
-	InitializeCriticalSection(&mCriticalSection);
+	_bufferCapacity = size;
+	_readPos = 0;
+	_writePos = 0;
+	_amountFilled = 0;
+
+	if (pthread_mutex_init(&_criticalSection, NULL) != 0) {
+		return false;
+	}
+	_criticalSectionInited = true;
+	return true;
 }
 
 RingBuffer::~RingBuffer()
 {
-	delete[] buffer;
-	DeleteCriticalSection(&mCriticalSection);
+	delete[] _buffer;
+	if (_criticalSectionInited) {
+		pthread_mutex_destroy(&_criticalSection);
+	}
 }
 
 uint32_t RingBuffer::GetWritableSize()
@@ -49,32 +59,33 @@ uint32_t RingBuffer::GetWritableSize()
 	// load ring buffer
 	int32_t freeSpace = 0;
 
-	EnterCriticalSection(&mCriticalSection);
+	pthread_mutex_lock(&_criticalSection);
 
 	// if our read and write positions are at the same location, does that mean the buffer is empty or full?
-	if (readPos == writePos)
+	if (_readPos == _writePos)
 	{
 		// if fill size is greater than 0, we must be full? ..
-		if (amountFilled == bufferCapacity)
+		if (_amountFilled == _bufferCapacity)
 		{
 			// this should really just be zero store size free logically?
 			freeSpace = 0;
 		}
-		else if (amountFilled == 0)
+		else if (_amountFilled == 0)
 		{
 			// buffer fill size must be zero, we can assume there's no data in buffer, ie freespace is entire buffer
-			freeSpace = bufferCapacity;
+			freeSpace = _bufferCapacity;
 		}
 	}
 	else
 	{
 		// standard logic - buffers have a gap, work out writable space between them
-		freeSpace = readPos - writePos;
-		if (freeSpace < 0)
-			freeSpace += bufferCapacity;
+		freeSpace = _readPos - _writePos;
+		if (freeSpace < 0) {
+			freeSpace += _bufferCapacity;
+		}
 	}
 
-	LeaveCriticalSection(&mCriticalSection);
+	pthread_mutex_unlock(&_criticalSection);
 
 	return freeSpace;
 }
@@ -84,16 +95,16 @@ uint32_t RingBuffer::GetReadableSize()
 	// find out how we need to read data. do we split into 2 memcpy-s or not?
 	int32_t readableSpace = 0;
 
-	EnterCriticalSection(&mCriticalSection);
+	pthread_mutex_lock(&_criticalSection);
 
 	// if our read and write positions are at the same location, does that mean the buffer is empty or full?
-	if (readPos == writePos)
+	if (_readPos == _writePos)
 	{
 		// if fill size is greater than 0, we must be full? ..
-		if (amountFilled == bufferCapacity)
+		if (_amountFilled == _bufferCapacity)
 		{
 			// this should really just be entire buffer logically?
-			readableSpace = bufferCapacity;
+			readableSpace = _bufferCapacity;
 		}
 		else
 		{
@@ -104,20 +115,20 @@ uint32_t RingBuffer::GetReadableSize()
 	else
 	{
 		// standard logic - buffers have a gap, work out readable space between them
-		readableSpace = writePos - readPos;
+		readableSpace = _writePos - _readPos;
 		if (readableSpace < 0) {
-			readableSpace += bufferCapacity;
+			readableSpace += _bufferCapacity;
 		}
 	}
 
-	LeaveCriticalSection(&mCriticalSection);
+	pthread_mutex_unlock(&_criticalSection);
 
 	return readableSpace;
 }
 
 uint32_t RingBuffer::ReadData(uint8_t *destData, uint32_t amountToRead)
 {
-	assert (buffer);
+	assert (_buffer);
 	assert (destData != NULL);
 
 	uint32_t firstSize = 0;
@@ -127,14 +138,14 @@ uint32_t RingBuffer::ReadData(uint8_t *destData, uint32_t amountToRead)
 	// grab how much readable data there is
 	uint32_t readableSpace = GetReadableSize();
 
-	EnterCriticalSection(&mCriticalSection);
+	pthread_mutex_lock(&_criticalSection);
 
 	if (amountToRead > readableSpace)
 	{
 		amountToRead = readableSpace;
 	}
 
-	firstSize = bufferCapacity - readPos;
+	firstSize = _bufferCapacity - _readPos;
 
 	if (firstSize > amountToRead)
 	{
@@ -142,29 +153,29 @@ uint32_t RingBuffer::ReadData(uint8_t *destData, uint32_t amountToRead)
 	}
 
 	// read first bit of data
-	memcpy(&destData[0], &buffer[readPos], firstSize);
+	memcpy(&destData[0], &_buffer[_readPos], firstSize);
 	totalRead += firstSize;
 
 	secondSize = amountToRead - firstSize;
 
 	if (secondSize > 0)
 	{
-		memcpy(&destData[firstSize], &buffer[0], secondSize);
+		memcpy(&destData[firstSize], &_buffer[0], secondSize);
 		totalRead += secondSize;
 	}
 
 	// update our ring buffer read position and track the fact we've taken some data from it
-	readPos = (readPos + totalRead) % bufferCapacity;
-	amountFilled -= totalRead;
+	_readPos = (_readPos + totalRead) % _bufferCapacity;
+	_amountFilled -= totalRead;
 
-	LeaveCriticalSection(&mCriticalSection);
+	pthread_mutex_unlock(&_criticalSection);
 
 	return totalRead;
 }
 
 uint32_t RingBuffer::WriteData(uint8_t *srcData, uint32_t srcDataSize)
 {
-	assert (buffer);
+	assert (_buffer);
 	assert (srcData != NULL);
 
 	uint32_t firstSize = 0;
@@ -174,7 +185,7 @@ uint32_t RingBuffer::WriteData(uint8_t *srcData, uint32_t srcDataSize)
 	// grab how much writable space there is
 	uint32_t availableSpace = GetWritableSize();
 
-	EnterCriticalSection(&mCriticalSection);
+	pthread_mutex_lock(&_criticalSection);
 
 	if (srcDataSize > availableSpace)
 	{
@@ -182,7 +193,7 @@ uint32_t RingBuffer::WriteData(uint8_t *srcData, uint32_t srcDataSize)
 	}
 
 	// space free from write cursor to end of buffer
-	firstSize = bufferCapacity - writePos;
+	firstSize = _bufferCapacity - _writePos;
 
 	// is first size big enough to hold all our data?
 	if (firstSize > srcDataSize) {
@@ -190,7 +201,7 @@ uint32_t RingBuffer::WriteData(uint8_t *srcData, uint32_t srcDataSize)
 	}
 
 	// first part. from write cursor to end of buffer
-	memcpy(&buffer[writePos], &srcData[0], firstSize);
+	memcpy(&_buffer[_writePos], &srcData[0], firstSize);
 	totalWritten += firstSize;
 
 	secondSize = srcDataSize - firstSize;
@@ -199,14 +210,14 @@ uint32_t RingBuffer::WriteData(uint8_t *srcData, uint32_t srcDataSize)
 	if (secondSize > 0)
 	{
 		// copy second part. start of buffer to play cursor
-		memcpy(&buffer[0], &srcData[firstSize], secondSize);
+		memcpy(&_buffer[0], &srcData[firstSize], secondSize);
 		totalWritten += secondSize;
 	}
 
-	writePos = (writePos + firstSize + secondSize) % bufferCapacity;
-	amountFilled += firstSize + secondSize;
+	_writePos = (_writePos + firstSize + secondSize) % _bufferCapacity;
+	_amountFilled += firstSize + secondSize;
 
-	LeaveCriticalSection(&mCriticalSection);
+	pthread_mutex_unlock(&_criticalSection);
 
 	return totalWritten;
 }

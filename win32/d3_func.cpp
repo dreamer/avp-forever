@@ -729,7 +729,7 @@ bool CreateVolatileResources()
 
 	d3d.decalIB = new IndexBuffer;
 	// (MAX_NO_OF_DECALS + MAX_NO_OF_FIXED_DECALS) * 6 * 2 (as we have mirrored decals so we redraw everything)
-	d3d.decalIB->Create(12288 * 2, USAGE_STATIC);
+	d3d.decalIB->Create(12288 * 2, USAGE_DYNAMIC);
 
 	SetRenderStateDefaults();
 
@@ -1296,11 +1296,11 @@ bool R_CreateVertexShader(const std::string &fileName, r_VertexShader &vertexSha
 
 	// we're going to store handles to each register in our std::vector so make it the right size
 	vertexShader.constantsArray.resize(constantTableDesc.Constants);
-
+/*
 	std::stringstream message;
 	message << "Processing constants for vertex shader '" << fileName << "' which has " << constantTableDesc.Constants << " constant(s)\n";
 	LogDebugString(message.str());
-
+*/
 	D3DXCONSTANT_DESC constantDesc;
 
 	// we just want to get one constantDesc at a time
@@ -1313,10 +1313,11 @@ bool R_CreateVertexShader(const std::string &fileName, r_VertexShader &vertexSha
 		vertexShader.constantTable->GetConstantDesc(vertexShader.constantsArray[i], &constantDesc, &constArraySize);
 
 		assert(constArraySize == 1);
-
+#if 0
 		std::stringstream constantInfo;
 		constantInfo << "\t Name: " << constantDesc.Name << ", Register Index: " << constantDesc.RegisterIndex << /*", Register Index: " << constantDesc.RegisterIndex <<*/ "\n";
 		LogDebugString(constantInfo.str());
+#endif
 	}
 
 	return true;
@@ -1387,11 +1388,11 @@ bool R_CreatePixelShader(const std::string &fileName, r_PixelShader &pixelShader
 
 	// we're going to store handles to each register in our std::vector so make it the right size
 	pixelShader.constantsArray.resize(constantTableDesc.Constants);
-
+/*
 	std::stringstream message;
 	message << "Processing constants for pixel shader '" << fileName << "' which has " << constantTableDesc.Constants << " constant(s)\n";
 	LogDebugString(message.str());
-
+*/
 	D3DXCONSTANT_DESC constantDesc;
 
 	// we just want to get one constantDesc at a time
@@ -1404,10 +1405,11 @@ bool R_CreatePixelShader(const std::string &fileName, r_PixelShader &pixelShader
 		pixelShader.constantTable->GetConstantDesc(pixelShader.constantsArray[i], &constantDesc, &constArraySize);
 
 		assert(constArraySize == 1);
-
+#if 0
 		std::stringstream constantInfo;
 		constantInfo << "\t Name: " << constantDesc.Name << ", Register Index: " << constantDesc.RegisterIndex << /*", Register Index: " << constantDesc.RegisterIndex <<*/ "\n";
 		LogDebugString(constantInfo.str());
+#endif
 	}
 
 	return true;

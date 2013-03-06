@@ -271,7 +271,9 @@ static bool LockExecuteBuffer()
 	d3d.orthoIB->Lock(&orthoIndex);
 
 	d3d.decalVB->Lock((void**)&decalVertex);
+	d3d.decalIB->Lock(&decalIndex);
 
+#if 0
 	if (!staticDecalsTest)
 	{
 		d3d.decalIB->Lock(&decalIndex);
@@ -281,7 +283,7 @@ static bool LockExecuteBuffer()
 		// generate indices
 		for (int i = 0; i < (12288 * 2); i+=6)
 		{
-			decalIndex[i]   = 0 + vertexCount;//(vertexCount - (4) + (0));
+			decalIndex[i+0]   = 0 + vertexCount;//(vertexCount - (4) + (0));
 			decalIndex[i+1] = 1 + vertexCount;//(vertexCount - (4) + (1));
 			decalIndex[i+2] = 2 + vertexCount;//(vertexCount - (4) + (2));
 
@@ -296,6 +298,7 @@ static bool LockExecuteBuffer()
 
 //		staticDecalsTest = true;
 	}
+#endif
 
 	// reset lists to empty state
 	particleList->Reset();
@@ -328,10 +331,10 @@ static bool UnlockExecuteBufferAndPrepareForUse()
 	d3d.orthoVB->Unlock();
 	d3d.orthoIB->Unlock();
 
-	if (!staticDecalsTest)
+//	if (!staticDecalsTest)
 	{
 		d3d.decalIB->Unlock();
-		staticDecalsTest = true;
+//		staticDecalsTest = true;
 	}
 
 	d3d.decalVB->Unlock();

@@ -35,7 +35,7 @@ void LoseSound (LOADED_SOUND const * ls)
 		
 		if (ls_in_list->num_attached <= 0)
 		{
-			PlatEndGameSound ((SOUNDINDEX)ls_in_list->sound_num);
+			PlatUnloadGameSound ((SOUNDINDEX)ls_in_list->sound_num);
 			loaded_sounds.delete_entry (ls_in_list);
 			DeallocateMem (ls_in_list->wavname);
 			DeallocateMem (ls_in_list);
@@ -57,7 +57,7 @@ void LoseAllNonCommonSounds()
 
 		if (!ls->permanent)
 		{
-			PlatEndGameSound ((SOUNDINDEX)ls->sound_num);
+			PlatUnloadGameSound ((SOUNDINDEX)ls->sound_num);
 		}
 
 		DeallocateMem (ls->wavname);

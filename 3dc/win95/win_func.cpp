@@ -27,8 +27,9 @@ void CheckForWindowsMessages(void)
 	{
 		while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))
 		{
-			if (!GetMessage(&msg, NULL, 0, 0))
+			if (!GetMessage(&msg, NULL, 0, 0)) {
 				return;
+			}
 
 			TranslateMessage(&msg);
 			DispatchMessage(&msg);

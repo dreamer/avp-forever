@@ -35,41 +35,42 @@
 #include "audioStreaming.h"
 #include <string>
 
+#include <pthread.h>
+
 class VorbisPlayback
 {
 	public:
-		FILE *mVorbisFile;
-		vorbis_info *mVorbisInfo;
-		OggVorbis_File mOggFile;
+		FILE          *_vorbisFile;
+		vorbis_info	  *_vorbisInfo;
+		OggVorbis_File _oggFile;
 
-		AudioStream *audioStream;
-
-		bool mIsPlaying;
-
-		uint32_t mBufferSize;
-		uint32_t mHalfBufferSize;
-
-		HANDLE mPlaybackThreadFinished;
-
-		uint8_t *mAudioData;
+		AudioStream *_audioStream;
+		uint32_t  _bufferSize;
+		uint32_t  _halfBufferSize;
+		uint8_t	  *_audioData;
+		bool	  _isPlaying;
 
 		VorbisPlayback() :
-			mVorbisFile(0),
-			mVorbisInfo(0),
-			audioStream(0),
-			mIsPlaying(false),
-			mBufferSize(0),
-			mHalfBufferSize(0),
-			mPlaybackThreadFinished(0),
-			mAudioData(0)
+			_vorbisFile(0),
+			_vorbisInfo(0),
+			_audioStream(0),
+			_bufferSize(0),
+			_halfBufferSize(0),
+			_audioData(0),
+			_isPlaying(false),
+			_decodeThreadInited(false)
 		{
-			memset(&mOggFile, 0, sizeof(OggVorbis_File));
+			memset(&_oggFile, 0, sizeof(OggVorbis_File));
 		}
 		~VorbisPlayback();
 
 		bool Open(const std::string &fileName);
 		void Stop();
 		uint32_t GetVorbisData(uint32_t sizeToRead);
+
+	private:
+		pthread_t _playbackThread;
+		bool	  _decodeThreadInited;
 };
 
 void Vorbis_CloseSystem();

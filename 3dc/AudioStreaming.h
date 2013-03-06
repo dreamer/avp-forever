@@ -78,22 +78,22 @@ struct StreamingVoiceContext : public IXAudio2VoiceCallback
 class AudioStream
 {
 	private:
-		uint32_t	bufferSize;
-		uint32_t	bufferCount;
-		uint32_t	currentBuffer;
-		uint32_t	numChannels;
-		uint32_t	rate;
-		uint32_t	bytesPerSample;
-		uint64_t	totalBytesPlayed;
-		uint64_t	totalSamplesWritten;
-		bool		isPaused;
-		uint32_t    volume;
-		uint8_t		*buffers;
-		IXAudio2SourceVoice *pSourceVoice;
+		uint32_t	_bufferSize;
+		uint32_t	_bufferCount;
+		uint32_t	_currentBuffer;
+		uint32_t	_nChannels;
+		uint32_t	_rate;
+		uint32_t	_bytesPerSample;
+		uint64_t	_totalBytesPlayed;
+		uint64_t	_totalSamplesWritten;
+		bool		_isPaused;
+		uint32_t    _volume;
+		uint8_t		*_buffers;
+		IXAudio2SourceVoice *_pSourceVoice;
 
 	public:
 		AudioStream();
-		bool Init(uint32_t channels, uint32_t rate, uint32_t bitsPerSample, uint32_t bufferSize, uint32_t numBuffers);
+		bool Init(uint32_t nChannels, uint32_t rate, uint32_t bitsPerSample, uint32_t bufferSize, uint32_t nBuffers);
 		int32_t  Stop();
 		int32_t  Play();
 		int32_t  SetVolume(uint32_t volume);
@@ -106,10 +106,67 @@ class AudioStream
 		uint32_t GetWritableBufferSize();
 		uint32_t GetBytesWritten();
 		uint32_t GetBufferSize();
+		void WaitForFreeBuffer();
 
-		StreamingVoiceContext *voiceContext;
+		StreamingVoiceContext *_voiceContext;
 
 		~AudioStream();
+};
+
+#endif
+
+#ifdef USE_OPENAL
+
+#include <AL\al.h>
+#include <pthread.h>
+#include <deque>
+
+struct sndSource;
+
+void *CheckProcessedBuffers(void *argument);
+
+class AudioStream
+{
+	private:
+		uint32_t	_currentBuffer;
+		uint32_t	_nChannels;
+		uint32_t	_rate;
+		uint32_t	_bytesPerSample;
+		uint64_t	_totalSamplesWritten;
+		ALuint		*_buffers;
+		ALenum		_format;
+		uint8_t		*_dataBuffers;
+		uint32_t	_volume;
+
+	public:
+		AudioStream();
+		~AudioStream();
+		bool Init(uint32_t nChannels, uint32_t rate, uint32_t bitsPerSample, uint32_t bufferSize, uint32_t nBuffers);
+		int32_t  Stop();
+		int32_t  Play();
+		int32_t  SetVolume(uint32_t volume);
+		uint32_t GetVolume();
+		int32_t  SetPan(uint32_t pan);
+		uint32_t WriteData(uint8_t *audioData, uint32_t size);
+		uint32_t GetNumFreeBuffers();
+		uint64_t GetNumSamplesPlayed();
+		uint64_t GetNumSamplesWritten();
+		uint32_t GetWritableBufferSize();
+		uint32_t GetBytesWritten();
+		uint32_t GetBufferSize();
+		void WaitForFreeBuffer();
+
+		uint32_t	_bufferCount;
+		sndSource	*_source;
+		pthread_t	_playbackThread;
+		uint64_t	_totalBytesPlayed;
+		uint32_t	_bufferSize;
+		pthread_mutex_t _bufferMutex;
+
+		bool _isPaused;
+		bool _isPlaying;
+
+		std::deque<ALuint> _freeBufferQueue;
 };
 
 #endif
@@ -140,22 +197,22 @@ struct StreamingVoiceContext
 class AudioStream
 {
 	private:
-		uint32_t	bufferSize;
-		uint32_t	bufferCount;
-		uint32_t	currentBuffer;
-		uint32_t	numChannels;
-		uint32_t	rate;
-		uint32_t	bytesPerSample;
-		uint64_t	totalSamplesWritten;
-		bool		isPaused;
-		uint32_t    volume;
-		uint8_t		*buffers;
-		std::vector<DWORD> PacketStatus;
-		LPDIRECTSOUNDSTREAM dsStreamBuffer;
+		uint32_t	_bufferSize;
+		uint32_t	_bufferCount;
+		uint32_t	_currentBuffer;
+		uint32_t	_nChannels;
+		uint32_t	_rate;
+		uint32_t	_bytesPerSample;
+		uint64_t	_totalSamplesWritten;
+		bool		_isPaused;
+		uint32_t    _volume;
+		uint8_t		*_buffers;
+		std::vector<DWORD> _packetStatus;
+		LPDIRECTSOUNDSTREAM _dsStreamBuffer;
 
 	public:
 		AudioStream();
-		bool Init(uint32_t channels, uint32_t rate, uint32_t bitsPerSample, uint32_t bufferSize, uint32_t numBuffers);
+		bool Init(uint32_t channels, uint32_t rate, uint32_t bitsPerSample, uint32_t bufferSize, uint32_t nBuffers);
 		int32_t  Stop();
 		int32_t  Play();
 		int32_t  SetVolume(uint32_t volume);
@@ -167,6 +224,8 @@ class AudioStream
 		uint64_t GetNumSamplesWritten();
 		uint32_t GetWritableBufferSize();
 		uint32_t GetBufferSize();
+		void WaitForFreeBuffer();
+
 		StreamingVoiceContext *voiceContext;
 		uint64_t totalBytesPlayed;
 

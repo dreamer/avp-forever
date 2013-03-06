@@ -11,7 +11,27 @@
 #include <x3daudio.h>
 #endif
 
+#ifdef USE_OPENAL
+#include <AL\al.h>
+#endif
+
 #include "psnd.h"
+
+#ifdef USE_OPENAL
+
+struct sndSource
+{
+	bool _isFree;
+	ALuint _alSource;
+
+	// constructor
+	sndSource()
+	{
+		_isFree = true;
+	}
+};
+
+#endif
 
 /* Patrick 10/6/97 -------------------------------------------------------------
   SAMPLE SUPPORT
@@ -42,6 +62,11 @@ typedef struct soundsampledata
 	WAVEFORMATEX        audioWaveFormat;
 #endif
 
+#ifdef USE_OPENAL
+	uint8_t *audioBuffer;
+	ALuint  buffer;
+#endif
+
 	uint32_t flags;
 	int dsFrequency;
 	std::string wavName;
@@ -58,12 +83,16 @@ typedef struct soundsampledata
 		is3D = false;
 
 		#ifdef _XBOX
-			LPDIRECTSOUNDBUFFER dsBufferP = 0;
+			dsBufferP = NULL;
 		#endif
 
 		#ifdef USE_XAUDIO2
-			audioBuffer  = 0;
-			pSourceVoice = 0;
+			audioBuffer  = NULL;
+			pSourceVoice = NULL;
+		#endif
+
+		#ifdef USE_OPENAL
+			audioBuffer = NULL;
 		#endif
 
 		flags = 0;
@@ -109,6 +138,12 @@ typedef struct activesoundsample
 	IXAudio2SourceVoice *pSourceVoice;
 #endif
 
+#ifdef USE_OPENAL
+	uint8_t *audioBuffer;
+	sndSource *source;
+	ALuint buffer;
+#endif
+
 	// constructor
 	activesoundsample()
 	{
@@ -118,13 +153,18 @@ typedef struct activesoundsample
 		is3D = false;
 
 		#ifdef _XBOX
-			dsBufferP   = 0;
-			ds3DBufferP = 0;
+			dsBufferP   = NULL;
+			ds3DBufferP = NULL;
 		#endif
 
 		#ifdef USE_XAUDIO2
-			audioBuffer  = 0;
-			pSourceVoice = 0;
+			audioBuffer  = NULL;
+			pSourceVoice = NULL;
+		#endif
+
+		#ifdef USE_OPENAL
+			audioBuffer = NULL;
+			source = NULL;
 		#endif
 	}
 
@@ -193,7 +233,7 @@ extern int PlatSoundHasStopped(int activeIndex);
   Performs any platform specific operations required to unload a game sound,
   wile the sound system is exiting
   ----------------------------------------------------------------------------*/
-extern void PlatEndGameSound(SOUNDINDEX index);
+extern void PlatUnloadGameSound(SOUNDINDEX index);
 
 /* Davew 23/7/98 --------------------------------------------------------------
 	Update the player in the 3D sound system.
@@ -218,7 +258,7 @@ extern int PlatDontUse3DSoundHW();
 
 extern void SetBufferCurrentPosition(ACTIVESOUNDSAMPLE *activeSound, int position);
 extern void GetBufferCurrentPosition(ACTIVESOUNDSAMPLE *activeSound, int *position);
-int CheckSoundBufferIsValid(ACTIVESOUNDSAMPLE *activeSound);
+bool CheckSoundBufferIsValid(ACTIVESOUNDSAMPLE *activeSound);
 
 /* Patrick 5/6/97 -------------------------------------------------------------
   Defines for max number of sounds, and instances of sounds, allowed;

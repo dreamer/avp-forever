@@ -25,31 +25,32 @@
 #pragma once
 
 #include <stdint.h>
-
-#ifndef _XBOX
-#include <windows.h>
-#endif
-
-#ifdef _XBOX
-#include <xtl.h>
-#endif
+#include <pthread.h>
 
 class RingBuffer
 {
 	private:
-		uint32_t	readPos;
-		uint32_t	writePos;
-		uint32_t	amountFilled;
-		bool		initialFill;
-		uint8_t		*buffer;
-		uint32_t	bufferCapacity;
-		CRITICAL_SECTION mCriticalSection;
+		uint32_t	_readPos;
+		uint32_t	_writePos;
+		uint32_t	_amountFilled;
+		uint8_t	   *_buffer;
+		uint32_t	_bufferCapacity;
+		pthread_mutex_t _criticalSection;
+		bool _criticalSectionInited;
 
 	public:
-		RingBuffer(uint32_t size);
+		RingBuffer() :
+			_readPos(0),
+			_writePos(0),
+			_amountFilled(0),
+			_buffer(NULL),
+			_bufferCapacity(0),
+			_criticalSectionInited(false)
+			{}
+		bool Init(uint32_t size);
 		~RingBuffer();
-		uint32_t RingBuffer::GetWritableSize();
-		uint32_t RingBuffer::GetReadableSize();
-		uint32_t RingBuffer::ReadData(uint8_t *destData, uint32_t amountToRead);
-		uint32_t RingBuffer::WriteData(uint8_t *srcData, uint32_t srcDataSize);
+		uint32_t GetWritableSize();
+		uint32_t GetReadableSize();
+		uint32_t ReadData(uint8_t *destData, uint32_t amountToRead);
+		uint32_t WriteData(uint8_t *srcData, uint32_t srcDataSize);
 };

@@ -29,44 +29,46 @@
 #include "RingBuffer.h"
 #include "AudioStreaming.h"
 #include "TextureManager.h"
+#include <pthread.h>
 
 class SmackerPlayback
 {
 	private:
-		std::string mFileName;
+		std::string _fileName;
 
 		// thread handles
-		HANDLE mDecodeThreadHandle;
-		HANDLE mAudioThreadHandle;
+		pthread_t _decodeThreadHandle;
+		pthread_t _audioThreadHandle;
+		bool _decodeThreadInited;
+		bool _audioThreadInited;
 
-		bool mFrameCriticalSectionInited;
-		bool isLooped;
+		bool _frameCriticalSectionInited;
+		bool _isLooped;
 
-		uint8_t palette[768];
-		uint8_t *frame;
+		uint8_t _palette[768];
+		uint8_t *_frame;
 
-		uint32_t frameWidth;
-		uint32_t frameHeight;
+		uint32_t _frameWidth;
+		uint32_t _frameHeight;
 
 	public:
 
-		SmackerHandle handle;
+		SmackerHandle _handle;
 
-		CRITICAL_SECTION mFrameCriticalSection;
+		pthread_mutex_t _frameCriticalSection;
 
-		AudioStream		*audioStream;
-		RingBuffer		*mRingBuffer;
-		uint8_t			*mAudioData;
-		uint8_t			*mAudioDataBuffer;
-		uint32_t		mAudioDataBufferSize;
-
-		uint32_t		sampleRate;
-
-		uint32_t currentFrame;
-		float frameRate;
-		volatile bool mFmvPlaying;
-		bool mAudioStarted;
-		volatile bool mFrameReady;
+		uint32_t		_nAudioTracks;
+		AudioStream		*_audioStream;
+		RingBuffer		*_ringBuffer;
+		uint8_t			*_audioData;
+		uint8_t			*_audioDataBuffer;
+		uint32_t		_audioDataBufferSize;
+		uint32_t		_sampleRate;
+		uint32_t		_currentFrame;
+		float			_frameRate;
+		volatile bool	_fmvPlaying;
+		bool			_audioStarted;
+		volatile bool	_frameReady;
 
 		int	Open(const std::string &fileName);
 		void Close();
@@ -75,22 +77,23 @@ class SmackerPlayback
 
 		~SmackerPlayback();
 		SmackerPlayback() :
-			mFmvPlaying(false),
-			mAudioStarted(false),
-			mFrameReady(false),
-			isLooped(false),
-			mFrameCriticalSectionInited(false),
-			mDecodeThreadHandle(0),
-			mAudioThreadHandle(0),
-			audioStream(0),
-			mRingBuffer(0),
-			mAudioData(0),
-			frameRate(0),
-			mAudioDataBuffer(0),
-			currentFrame(0),
-			mAudioDataBufferSize(0),
-			sampleRate(0),
-			frame(0)
+			_decodeThreadInited(false),
+			_audioThreadInited(false),
+			_frameCriticalSectionInited(false),
+			_fmvPlaying(false),
+			_audioStarted(false),
+			_frameReady(false),
+			_isLooped(false),
+			_nAudioTracks(0),
+			_audioStream(0),
+			_ringBuffer(0),
+			_audioData(0),
+			_frameRate(0),
+			_audioDataBuffer(0),
+			_currentFrame(0),
+			_audioDataBufferSize(0),
+			_sampleRate(0),
+			_frame(0)
 			{}
 };
 

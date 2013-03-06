@@ -2,10 +2,6 @@
 	Console system. Heavily influenced by Quake3's code :)
 */
 
-/*
-	Console system. Heavily influenced by Quake3's code :)
-*/
-
 #if 0
 #include <string>
 #include <vector>
@@ -49,7 +45,7 @@ struct Console
 	int xPos;
 	int yPos;
 	int lines;
-	
+
 
 	int indent;
 

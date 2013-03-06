@@ -25,7 +25,6 @@
 #include "BinkPlayback.h"
 #include "FmvPlayback.h"
 #include "console.h"
-#include <process.h>
 #include <assert.h>
 #include "utilities.h"
 
@@ -33,8 +32,8 @@ static const int kAudioBufferSize  = 4096;
 static const int kAudioBufferCount = 3;
 static const int kQuantum = 1000 / 60;
 
-unsigned int __stdcall BinkDecodeThread(void *args);
-unsigned int __stdcall BinkAudioThread(void *args);
+void *BinkDecodeThread(void *args);
+void *BinkAudioThread(void *args);
 
 #ifdef _XBOX
 	#include <algorithm>
@@ -43,98 +42,98 @@ unsigned int __stdcall BinkAudioThread(void *args);
 int BinkPlayback::Open(const std::string &fileName, bool isLooped)
 {
 #ifdef _XBOX
-	mFileName = "d:/";
-	mFileName += fileName;
+	_fileName = "d:/";
+	_fileName += fileName;
 #else
-	mFileName = fileName;
+	_fileName = fileName;
 #endif
 
-	mIsLooped = isLooped;
+	_isLooped = isLooped;
 
 #ifdef _XBOX
 
 	// change forwardslashes in path to backslashes
-	std::replace(mFileName.begin(), mFileName.end(), '/', '\\');
+	std::replace(_fileName.begin(), _fileName.end(), '/', '\\');
 
 #endif
 
 	// open the file
-	handle = Bink_Open(mFileName.c_str());
-	if (!handle.isValid)
+	_handle = Bink_Open(_fileName.c_str());
+	if (!_handle.isValid)
 	{
-		Con_PrintError("can't open FMV file " + mFileName);
+		Con_PrintError("can't open Bink file " + _fileName);
 		return FMV_INVALID_FILE;
 	}
 
-	frameRate = Bink_GetFrameRate(handle);
+	_frameRate = Bink_GetFrameRate(_handle);
 
 	// get number of audio tracks available
-	nAudioTracks = Bink_GetNumAudioTracks(handle);
+	_nAudioTracks = Bink_GetNumAudioTracks(_handle);
 
-	audioTrackInfos.resize(nAudioTracks);
+	_audioTrackInfos.resize(_nAudioTracks);
 
 	// init the sound and mVideo api stuff we need
-	if (nAudioTracks)
+	if (_nAudioTracks)
 	{
 		// get audio information for all available tracks
-		for (uint32_t i = 0; i < audioTrackInfos.size(); i++) {
-			audioTrackInfos[i] = Bink_GetAudioTrackDetails(handle, i);
+		for (uint32_t i = 0; i < _audioTrackInfos.size(); i++) {
+			_audioTrackInfos[i] = Bink_GetAudioTrackDetails(_handle, i);
 		}
 
-		audioTrackIndex = 0;
+		_audioTrackIndex = 0;
 
-		uint32_t idealBufferSize = audioTrackInfos[audioTrackIndex].idealBufferSize;
+		uint32_t idealBufferSize = _audioTrackInfos[_audioTrackIndex].idealBufferSize;
 
 		// create mAudio streaming buffer (just for 1 track for now)
-		this->audioStream = new AudioStream();
-		if (!this->audioStream->Init(audioTrackInfos[audioTrackIndex].nChannels, audioTrackInfos[audioTrackIndex].sampleRate, 16, kAudioBufferSize, kAudioBufferCount))
+		_audioStream = new AudioStream();
+		if (!_audioStream->Init(_audioTrackInfos[_audioTrackIndex].nChannels, _audioTrackInfos[_audioTrackIndex].sampleRate, 16, kAudioBufferSize, kAudioBufferCount))
 		{
-			Con_PrintError("Failed to create mAudio stream buffer for FMV playback");
+			Con_PrintError("Failed to create _audioStream for Bink playback");
 			return FMV_ERROR;
 		}
 
 		// we need some temporary mAudio data storage space and a ring buffer instance
-		mAudioData = new(std::nothrow) uint8_t[idealBufferSize];
-		if (mAudioData == NULL)
+		_audioData = new(std::nothrow) uint8_t[idealBufferSize];
+		if (_audioData == NULL)
 		{
-			Con_PrintError("Failed to create mAudioData stream buffer for FMV playback");
+			Con_PrintError("Failed to create _audioData stream buffer for Bink playback");
 			return FMV_ERROR;
 		}
 
-		mRingBuffer = new(std::nothrow) RingBuffer(idealBufferSize * kAudioBufferCount);
-		if (mRingBuffer == NULL)
+		_ringBuffer = new(std::nothrow) RingBuffer();
+		if (!_ringBuffer->Init(idealBufferSize * kAudioBufferCount))
 		{
-			Con_PrintError("Failed to create mRingBuffer for FMV playback");
+			Con_PrintError("Failed to create _ringBuffer for Bink playback");
 			return FMV_ERROR;
 		}
 
-		mAudioDataBuffer = new(std::nothrow) uint8_t[idealBufferSize];
-		mAudioDataBufferSize = idealBufferSize;
+		_audioDataBuffer = new(std::nothrow) uint8_t[idealBufferSize];
+		_audioDataBufferSize = idealBufferSize;
 	}
 
-	Bink_GetFrameSize(handle, mFrameWidth, mFrameHeight);
+	Bink_GetFrameSize(_handle, _frameWidth, _frameHeight);
 
 	// determine how many textures we need
 	if (/* can gpu do shader yuv->rgb? */ 1) // TODO
 	{
-		frameTextureIDs.resize(3);
-		frameTextureIDs[0] = MISSING_TEXTURE;
-		frameTextureIDs[1] = MISSING_TEXTURE;
-		frameTextureIDs[2] = MISSING_TEXTURE;
-		mNumTextureBits = 8;
+		_frameTextureIDs.resize(3);
+		_frameTextureIDs[0] = MISSING_TEXTURE;
+		_frameTextureIDs[1] = MISSING_TEXTURE;
+		_frameTextureIDs[2] = MISSING_TEXTURE;
+		_nTextureBits = 8;
 	}
 	else
 	{
 		// do CPU YUV->RGB with a single 32bit texture
-		frameTextureIDs.resize(1);
-		frameTextureIDs[0] = MISSING_TEXTURE;
-		mNumTextureBits = 32;
+		_frameTextureIDs.resize(1);
+		_frameTextureIDs[0] = MISSING_TEXTURE;
+		_nTextureBits = 32;
 	}
 
-	for (uint32_t i = 0; i < frameTextureIDs.size(); i++)
+	for (uint32_t i = 0; i < _frameTextureIDs.size(); i++)
 	{
-		uint32_t width  = mFrameWidth;
-		uint32_t height = mFrameHeight;
+		uint32_t width  = _frameWidth;
+		uint32_t height = _frameHeight;
 
 		// the first texture is fullsize, the second two are quartersize
 		if (i > 0)
@@ -144,90 +143,92 @@ int BinkPlayback::Open(const std::string &fileName, bool isLooped)
 		}
 
 		// create the texture with desired parameters
-		frameTextureIDs[i] = Tex_Create(/*"CUTSCENE_"*/fileName + Util::IntToString(i), width, height, mNumTextureBits, TextureUsage_Dynamic);
-		if (frameTextureIDs[i] == MISSING_TEXTURE)
+		_frameTextureIDs[i] = Tex_Create(/*"CUTSCENE_"*/fileName + Util::IntToString(i), width, height, _nTextureBits, TextureUsage_Dynamic);
+		if (_frameTextureIDs[i] == MISSING_TEXTURE)
 		{
 			Con_PrintError("Unable to create texture(s) for FMV playback");
 			return FMV_ERROR;
 		}
 	}
 
-	mFmvPlaying   = true;
-	mAudioStarted = false;
-	mFrameReady   = false;
-	mTexturesReady = false;
+	_fmvPlaying   = true;
+	_audioStarted = false;
+	_frameReady   = false;
+	_texturesReady = false;
 
-	::InitializeCriticalSection(&mFrameCriticalSection);
-	mFrameCriticalSectionInited = true;
+	if (pthread_mutex_init(&_frameCriticalSection, NULL) != 0) {
+		return false;
+	}
+	_frameCriticalSectionInited = true;
 
 	// now start the threads
-	mDecodeThreadHandle = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, BinkDecodeThread, static_cast<void*>(this), 0, NULL));
-
-	if (nAudioTracks) {
-		mAudioThreadHandle = reinterpret_cast<HANDLE>(_beginthreadex(NULL, 0, BinkAudioThread, static_cast<void*>(this), 0, NULL));
+	if (pthread_create(&_decodeThreadHandle, NULL, BinkDecodeThread, static_cast<void*>(this)) != 0) {
+		return false;
 	}
+
+	if (_nAudioTracks) {
+		if (pthread_create(&_audioThreadHandle, NULL, BinkAudioThread, static_cast<void*>(this)) != 0) {
+			return false;
+		}
+		_audioThreadInited  = true;
+	}
+
+	_decodeThreadInited = true;
 
 	return FMV_OK;
 }
 
 BinkPlayback::~BinkPlayback()
 {
-	mFmvPlaying = false;
+	_fmvPlaying = false;
 
-	// wait for decode thread to finish
-	if (mDecodeThreadHandle)
-	{
-		::WaitForSingleObject(mDecodeThreadHandle, INFINITE);
-		::CloseHandle(mDecodeThreadHandle);
+	if (_decodeThreadInited) {
+		pthread_join(_decodeThreadHandle, NULL);
+	}
+	if (_audioThreadInited) {
+		pthread_join(_audioThreadHandle, NULL);
 	}
 
-	if (nAudioTracks)
+	if (_frameCriticalSectionInited)
 	{
-		// wait for audio thread to finish
-		if (mAudioThreadHandle)
-		{
-			::WaitForSingleObject(mAudioThreadHandle, INFINITE);
-			::CloseHandle(mAudioThreadHandle);
-		}
-
-		delete audioStream;
-		delete[] mAudioData;
-		delete[] mAudioDataBuffer;
-		delete mRingBuffer;
+		pthread_mutex_destroy(&_frameCriticalSection);
+		_frameCriticalSectionInited = false;
 	}
 
-	for (uint32_t i = 0; i < frameTextureIDs.size(); i++) {
-		Tex_Release(frameTextureIDs[i]);
+	if (_nAudioTracks)
+	{
+		delete _audioStream;
+		delete[] _audioData;
+		delete[] _audioDataBuffer;
+		delete _ringBuffer;
 	}
 
-	if (mFrameCriticalSectionInited)
-	{
-		DeleteCriticalSection(&mFrameCriticalSection);
-		mFrameCriticalSectionInited = false;
+	for (uint32_t i = 0; i < _frameTextureIDs.size(); i++) {
+		Tex_Release(_frameTextureIDs[i]);
 	}
 }
 
 void BinkPlayback::Close()
 {
-	mFmvPlaying = false;
+	_fmvPlaying = false;
 }
 
 bool BinkPlayback::IsPlaying()
 {
-	return mFmvPlaying;
+	return _fmvPlaying;
 }
 
 // copies a decoded Theora YUV frame to texture(s) for GPU to convert via shader
 bool BinkPlayback::ConvertFrame()
 {
-	if (!mFmvPlaying) {
+	if (!_fmvPlaying) {
 		return false;
 	}
 
 	// critical section
-	::EnterCriticalSection(&mFrameCriticalSection);
+	pthread_mutex_lock(&_frameCriticalSection);
 
-	for (uint32_t i = 0; i < frameTextureIDs.size(); i++)
+	for (uint32_t i = 0; i < _frameTextureIDs.size(); i++)
 	{
 		uint8_t *originalDestPtr = NULL;
 		uint32_t pitch = 0;
@@ -236,15 +237,15 @@ bool BinkPlayback::ConvertFrame()
 		uint32_t height = 0;
 
 		// get width and height
-		Tex_GetDimensions(frameTextureIDs[i], width, height);
+		Tex_GetDimensions(_frameTextureIDs[i], width, height);
 
 		// lock the texture
-		if (Tex_Lock(frameTextureIDs[i], &originalDestPtr, &pitch, TextureLock_Discard)) // only do below if lock succeeds
+		if (Tex_Lock(_frameTextureIDs[i], &originalDestPtr, &pitch, TextureLock_Discard)) // only do below if lock succeeds
 		{
 			for (uint32_t y = 0; y < height; y++)
 			{
 				uint8_t *destPtr = originalDestPtr + (y * pitch);
-				uint8_t *srcPtr  = yuvBuffer[i].data + (y * yuvBuffer[i].pitch);
+				uint8_t *srcPtr  = _yuvBuffer[i].data + (y * _yuvBuffer[i].pitch);
 
 				// copy entire width row in one go
 				memcpy(destPtr, srcPtr, width * sizeof(uint8_t));
@@ -254,25 +255,25 @@ bool BinkPlayback::ConvertFrame()
 			}
 
 			// unlock texture
-			Tex_Unlock(frameTextureIDs[i]);
+			Tex_Unlock(_frameTextureIDs[i]);
 		}
 	}
 
 	// set this value to true so we can now begin to draw the textured fmv frame
-	mTexturesReady = true;
+	_texturesReady = true;
 
-	mFrameReady = false;
+	_frameReady = false;
 
-	::LeaveCriticalSection(&mFrameCriticalSection);
+	pthread_mutex_unlock(&_frameCriticalSection);
 
 	return true;
 }
 
-unsigned int __stdcall BinkDecodeThread(void *args)
+void *BinkDecodeThread(void *args)
 {
 	BinkPlayback *fmv = static_cast<BinkPlayback*>(args);
 
-	while (Bink_GetCurrentFrameNum(fmv->handle) < Bink_GetNumFrames(fmv->handle))
+	while (Bink_GetCurrentFrameNum(fmv->_handle) < Bink_GetNumFrames(fmv->_handle))
 	{
 		// check if we should still be playing or not
 		if (!fmv->IsPlaying()) {
@@ -282,65 +283,68 @@ unsigned int __stdcall BinkDecodeThread(void *args)
 		uint32_t startTime = ::timeGetTime();
 
 		// critical section
-		::EnterCriticalSection(&fmv->mFrameCriticalSection);
+		pthread_mutex_lock(&fmv->_frameCriticalSection);
 
-		Bink_GetNextFrame(fmv->handle, fmv->yuvBuffer);
+		Bink_GetNextFrame(fmv->_handle, fmv->_yuvBuffer);
 
 		// we have a new frame and we're ready to use it
-		fmv->mFrameReady = true;
+		fmv->_frameReady = true;
 
-		::LeaveCriticalSection(&fmv->mFrameCriticalSection);
+		pthread_mutex_unlock(&fmv->_frameCriticalSection);
 
-		uint32_t audioSize = Bink_GetAudioData(fmv->handle, 0, (int16_t*)fmv->mAudioDataBuffer);
+		uint32_t audioSize = Bink_GetAudioData(fmv->_handle, 0, (int16_t*)fmv->_audioDataBuffer);
 
 		if (audioSize)
 		{
-			uint32_t freeSpace = fmv->mRingBuffer->GetWritableSize();
+			uint32_t freeSpace = fmv->_ringBuffer->GetWritableSize();
 
-			assert(freeSpace >= audioSize);
+//			assert(freeSpace >= audioSize);
 
 			if (audioSize > freeSpace)
 			{
-				while (audioSize > fmv->mRingBuffer->GetWritableSize())
+				while (audioSize > fmv->_ringBuffer->GetWritableSize())
 				{
 					// little bit of insurance in case we get stuck in here
-					if (!fmv->mFmvPlaying) {
+					if (!fmv->_fmvPlaying) {
 						break;
 					}
 
 					// wait for the audio buffer to tell us it's just freed up another audio buffer for us to fill
-					::WaitForSingleObject(fmv->audioStream->voiceContext->hBufferEndEvent, /*INFINITE*/20);
+					fmv->_audioStream->WaitForFreeBuffer();
 				}
 			}
 
-			fmv->mRingBuffer->WriteData((uint8_t*)&fmv->mAudioDataBuffer[0], audioSize);
+			fmv->_ringBuffer->WriteData((uint8_t*)&fmv->_audioDataBuffer[0], audioSize);
 		}
 
 		uint32_t endTime = ::timeGetTime();
 		
 		// sleep for frame time minus time to decode frame
-		int32_t timeToSleep = (1000 / (int32_t)fmv->frameRate) - (endTime - startTime);
+		int32_t timeToSleep = (1000 / (int32_t)fmv->_frameRate) - (endTime - startTime);
 		if (timeToSleep < 0) {
 			timeToSleep = 1;
 		}
 
 		::Sleep(timeToSleep);
 
-		if (fmv->mIsLooped)
+		if (fmv->_isLooped)
 		{
 			// handle looping
-			if (Bink_GetCurrentFrameNum(fmv->handle) >= Bink_GetNumFrames(fmv->handle)) {
-				Bink_GotoFrame(fmv->handle, 0);
+			if (Bink_GetCurrentFrameNum(fmv->_handle) >= Bink_GetNumFrames(fmv->_handle)) {
+				Bink_GotoFrame(fmv->_handle, 0);
 			}
 		}
 	}
 	
-	fmv->mFmvPlaying = false;
-	_endthreadex(0);
+	/*
+	  We might get to this point because we've played all frames - rather than the game code asking us to stop, 
+	  or the user interrupting the FMV. Setting _fmvPlaying to false will ensure that the audio decoding thread knows to quit
+	 */
+	fmv->_fmvPlaying = false;
 	return 0;
 }
 
-unsigned int __stdcall BinkAudioThread(void *args)
+void *BinkAudioThread(void *args)
 {
 	#ifdef USE_XAUDIO2
 		::CoInitializeEx(NULL, COINIT_MULTITHREADED);
@@ -352,35 +356,36 @@ unsigned int __stdcall BinkAudioThread(void *args)
 	int endTime = 0;
 	int timetoSleep = 0;
 
-	while (fmv->mFmvPlaying)
+	while (fmv->_fmvPlaying)
 	{
 		startTime = ::timeGetTime();
 
-		uint32_t numBuffersFree = fmv->audioStream->GetNumFreeBuffers();
+		uint32_t nBuffersFree = fmv->_audioStream->GetNumFreeBuffers();
 
-		while (numBuffersFree)
+		while (nBuffersFree)
 		{
-			uint32_t readableAudio = fmv->mRingBuffer->GetReadableSize();
+			uint32_t readableAudio = fmv->_ringBuffer->GetReadableSize();
 
-			// we can fill a buffer
-			if (readableAudio >= fmv->audioStream->GetBufferSize())
+			// can we fill a buffer
+			uint32_t bufferSize = fmv->_audioStream->GetBufferSize();
+
+			if (readableAudio >= bufferSize)
 			{
-				fmv->mRingBuffer->ReadData(fmv->mAudioData, fmv->audioStream->GetBufferSize());
-				fmv->audioStream->WriteData(fmv->mAudioData, fmv->audioStream->GetBufferSize());
+				fmv->_ringBuffer->ReadData  (fmv->_audioData, bufferSize);
+				fmv->_audioStream->WriteData(fmv->_audioData, bufferSize);
+				nBuffersFree--;
 
-				numBuffersFree--;
+				if (fmv->_audioStarted == false)
+				{
+					fmv->_audioStream->Play();
+					fmv->_audioStarted = true;
+				}
 			}
 			else
 			{
-				// not enough mAudio available this time
+				// not enough _audioData available this time
 				break;
 			}
-		}
-
-		if (fmv->mAudioStarted == false)
-		{
-			fmv->audioStream->Play();
-			fmv->mAudioStarted = true;
 		}
 
 		endTime = ::timeGetTime();
@@ -391,10 +396,7 @@ unsigned int __stdcall BinkAudioThread(void *args)
 		if (timetoSleep < 0 || timetoSleep > kQuantum) {
 			timetoSleep = 1;
 		}
-
-		::Sleep(timetoSleep);
 	}
 
-	_endthreadex(0);
 	return 0;
 }

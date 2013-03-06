@@ -1,4 +1,7 @@
 #ifdef USE_XAUDIO2
+
+#pragma comment(lib, "X3DAudio.lib")
+
 #define XAUDIO2_HELPER_FUNCTIONS
 /* Patrick 5/6/97 -------------------------------------------------------------
   AvP platform specific sound management source
@@ -20,7 +23,6 @@
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "db.h"
-#include "eax.h"
 #include <windows.h>
 #include <math.h>
 #include <new>
@@ -119,7 +121,7 @@ XAUDIO2FX_REVERB_I3DL2_PARAMETERS g_PRESET_PARAMS[ NUM_PRESETS ] =
   Internal global variables
   ----------------------------------------------------------------------------*/
 struct SoundConfigTag SoundConfig;
-static const int32_t vol_to_atten_table[] = 
+static const int32_t vol_to_atten_table[] =
 {
 	-10000, -9922, -8502, -7672, -7083, -6626, -6252, -5936,
 	-5663, -5422, -5206, -5011, -4832, -4669, -4517, -4375,
@@ -166,7 +168,7 @@ static const float vol_to_gain_table[] = {
 // this table plots the frequency change for
 // 128/ths of a semitone for one octave (0-1535),
 // divide or multiply by 2 to subtract or add an octave
-static const float pitch_to_frequency_mult_table [] = 
+static const float pitch_to_frequency_mult_table [] =
 {
 	1.0F,			1.00045137F,	1.000902943F,	1.00135472F,	1.001806701F,	1.002258886F,	1.002711275F,	1.003163868F,
 	1.003616666F,	1.004069668F,	1.004522874F,	1.004976285F,	1.005429901F,	1.005883722F,	1.006337747F,	1.006791977F,
@@ -362,46 +364,6 @@ static const float pitch_to_frequency_mult_table [] =
 	1.992792734F,	1.99369222F,	1.994592112F,	1.99549241F,	1.996393115F,	1.997294226F,	1.998195744F,	1.999097668F
 };
 
-/* Enviromental Presets. */
-EAX_REVERBPROPERTIES Sound_Enviroments[] =
-{
-/*	Enviroment							Volume	Decay	Damping */
-	{EAX_ENVIRONMENT_GENERIC,			0.5F,	1.493F,	0.5F},
-	{EAX_ENVIRONMENT_PADDEDCELL,		0.25F,	0.1F,	0.0F},
-	{EAX_ENVIRONMENT_ROOM,				0.417F,	0.4F,	0.666F},
-	{EAX_ENVIRONMENT_BATHROOM,			0.653F,	1.499F,	0.166F},
-	{EAX_ENVIRONMENT_LIVINGROOM,		0.208F,	0.478F,	0.0F},
- 	{EAX_ENVIRONMENT_STONEROOM,			0.5F,	2.309F,	0.888F},
-	{EAX_ENVIRONMENT_AUDITORIUM,		0.403F,	4.279F,	0.5F},
-	{EAX_ENVIRONMENT_CONCERTHALL,		0.5F,	3.961F,	0.5F},
-	{EAX_ENVIRONMENT_CAVE,				0.5F,	2.886F,	1.304F},
-	{EAX_ENVIRONMENT_ARENA,				0.361F,	7.284F,	0.332F},
-	{EAX_ENVIRONMENT_HANGAR,			0.5F,	10.0F,	0.3F},
-	{EAX_ENVIRONMENT_CARPETEDHALLWAY,	0.153F,	0.259F,	2.0F},
-	{EAX_ENVIRONMENT_HALLWAY,			0.361F,	1.493F,	0.0F},
-	{EAX_ENVIRONMENT_STONECORRIDOR,		0.444F,	2.697F,	0.638F},
-	{EAX_ENVIRONMENT_ALLEY,				0.25F,	1.752F,	0.776F},
-	{EAX_ENVIRONMENT_FOREST,			0.111F,	3.145F,	0.472F},
-	{EAX_ENVIRONMENT_CITY,				0.111F,	2.767F,	0.224F},
-	{EAX_ENVIRONMENT_MOUNTAINS,			0.194F,	7.841F,	0.472F},
-	{EAX_ENVIRONMENT_QUARRY,			1.0F,	1.499F,	0.5F},
-	{EAX_ENVIRONMENT_PLAIN,				0.097F,	2.767F,	0.224F},
-	{EAX_ENVIRONMENT_PARKINGLOT,		0.208F,	1.652F,	1.5F},
-	{EAX_ENVIRONMENT_SEWERPIPE,			0.652F,	2.886F,	0.25F},
-	{EAX_ENVIRONMENT_UNDERWATER,		1.0F,	1.499F,	0.0F},
-	{EAX_ENVIRONMENT_DRUGGED,			0.875F,	8.392F,	1.388F},
-	{EAX_ENVIRONMENT_DIZZY,				0.139F,	17.234F,0.666F},
-	{EAX_ENVIRONMENT_PSYCHOTIC,			0.486F,	7.563F,	0.806F},
-	{EAX_ENVIRONMENT_PLAIN,				0.0F,	0.1F,	0.5F}
-};
-
-// Extra enumeration we have made up.
-enum
-{
-	EAX_ENVIRONMENT_DEFAULT = EAX_ENVIRONMENT_PSYCHOTIC + 1,
-	EAX_MAX
-};
-
 static int SoundMaxHW = 128;
 extern int GlobalFrameCounter;
 
@@ -414,7 +376,6 @@ static int ToneToFrequency(int currentFrequency, int currentPitch, int newPitch)
 /* Patrick 5/6/97 -------------------------------------------------------------
   External references
   ----------------------------------------------------------------------------*/
-extern HWND hWndMain;
 extern DISPLAYBLOCK *Player;
 extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 extern int DopplerShiftIsOn;
@@ -634,8 +595,6 @@ int PlatStartSoundSys()
 
 void ResetEaxEnvironment(void)
 {
-	// Set a default value.
-	PlatSetEnviroment(EAX_ENVIRONMENT_DEFAULT, EAX_REVERBMIX_USEDISTANCE);
 }
 
 void PlatEndSoundSys()
@@ -685,18 +644,21 @@ void GetBufferCurrentPosition(ACTIVESOUNDSAMPLE *activeSound, int *position)
 	*position = 0;
 }
 
-int CheckSoundBufferIsValid(ACTIVESOUNDSAMPLE *activeSound)
+bool CheckSoundBufferIsValid(ACTIVESOUNDSAMPLE *activeSound)
 {
-	if (activeSound->pSourceVoice && activeSound->audioBuffer)
-		return 1;
-	else
-		return 0;
+	if (activeSound->pSourceVoice && activeSound->audioBuffer) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 int PlatChangeGlobalVolume(int volume)
 {
-	if (!soundEnabled)
+	if (!soundEnabled) {
 		return 1; // keep quiet about it?
+	}
 
 	LOCALASSERT((volume >= VOLUME_MIN) && (volume <= VOLUME_MAX));
 
@@ -705,7 +667,7 @@ int PlatChangeGlobalVolume(int volume)
 	{
 		return SOUND_PLATFORMERROR;
 	}
-	
+
 	return 1;
 }
 
@@ -773,7 +735,7 @@ int PlatPlaySound(int activeIndex)
 			return SOUND_PLATFORMERROR;
 		}
 	}
-	else 
+	else
 	{
 		/* 2d sound: ummm: cap all 2d sounds to SOUND_PLAT2DSCALE * their specified volume.
 		This is really project&platform specific, so that 3d sounds aren't drowned out by
@@ -825,7 +787,7 @@ int PlatPlaySound(int activeIndex)
 			db_logf5(("Playing Sound %i looping in slot %i on frame %i", ActiveSounds[activeIndex].soundIndex, activeIndex, GlobalFrameCounter));
 //			sprintf(buf, "Playing Sound %i looping in slot %i on frame %i\n", ActiveSounds[activeIndex].soundIndex, activeIndex, GlobalFrameCounter);
 //			OutputDebugString(buf);
-			
+
 		}
 		else
 		{
@@ -844,9 +806,10 @@ void PlatStopSound(int activeIndex)
 //	sprintf(buf, "Stopping Sound %i in slot %i on frame %i\n", ActiveSounds[activeIndex].soundIndex, activeIndex, GlobalFrameCounter);
 //	OutputDebugString(buf);
 
-	if (!(ActiveSounds[activeIndex].audioBuffer))
+	if (!(ActiveSounds[activeIndex].audioBuffer)) {
 		return;
-	
+	}
+
 	if (!ActiveSounds[activeIndex].paused)
 	{
 		ActiveSounds[activeIndex].pSourceVoice->Stop();
@@ -861,10 +824,10 @@ void PlatStopSound(int activeIndex)
 
 /* Patrick 15/6/97 -------------------------------------------------------------
   The standard volume interface in PSND is a linear intensity scale, matching the
-  PSX's scale. However, ds uses a logarithmic scale: 
+  PSX's scale. However, ds uses a logarithmic scale:
   Atenuation = 10 log(2) (I/I0).
   We should therefore convert from intensity to attenuation...
-  I have cheated here, and used a sequence of linear approximations between 
+  I have cheated here, and used a sequence of linear approximations between
   power-of-two intensity values....
   NB an attenuation of 70db is about 1% of full volume;
   ----------------------------------------------------------------------------*/
@@ -894,8 +857,7 @@ int PlatChangeSoundPitch(int activeIndex, int pitch)
 	}
 	else
 	{
-		frequency = (float)ToneToFrequency(GameSounds[gameSoundIndex].dsFrequency,
-			GameSounds[gameSoundIndex].pitch, pitch);
+		frequency = (float)ToneToFrequency(GameSounds[gameSoundIndex].dsFrequency, GameSounds[gameSoundIndex].pitch, pitch);
 	}
 
 	frequency = frequency / GameSounds[gameSoundIndex].dsFrequency;
@@ -921,12 +883,10 @@ int PlatSoundHasStopped(int activeIndex)
 
 	ActiveSounds[activeIndex].pSourceVoice->GetState(&voiceState);
 
-	if (voiceState.BuffersQueued)
-	{
+	if (voiceState.BuffersQueued) {
 		return 0;
 	}
-	else if (voiceState.BuffersQueued == 0)
-	{
+	else if (voiceState.BuffersQueued == 0) {
 		return 1;
 	}
 
@@ -937,13 +897,10 @@ int PlatDo3dSound(int activeIndex)
 {
 	VECTORCH relativePosn;
 
-	if (!soundEnabled)
+	if (!soundEnabled) {
 		return 0;
+	}
 
-	ActiveSounds[activeIndex].xa2Emitter.Position.x = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vx);
-	ActiveSounds[activeIndex].xa2Emitter.Position.y = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vy);
-	ActiveSounds[activeIndex].xa2Emitter.Position.z = static_cast<float>(ActiveSounds[activeIndex].threedeedata.position.vz);
-	
 	// find the distance of the sound
 	relativePosn.vx = ActiveSounds[activeIndex].threedeedata.position.vx - Global_VDB_Ptr->VDB_World.vx;
 	relativePosn.vy = ActiveSounds[activeIndex].threedeedata.position.vy - Global_VDB_Ptr->VDB_World.vy;
@@ -958,18 +915,16 @@ int PlatDo3dSound(int activeIndex)
 		if (distance < (ActiveSounds[activeIndex].threedeedata.outer_range + SOUND_DEACTIVATERANGE))
 		{
 			int loopCount = 0;
-			if (ActiveSounds[activeIndex].loop)
-			{
+			if (ActiveSounds[activeIndex].loop) {
 				loopCount = XAUDIO2_LOOP_INFINITE;
 			}
+
 			ActiveSounds[activeIndex].xa2Buffer.LoopCount = loopCount;
 			ActiveSounds[activeIndex].pSourceVoice->Start(0);
 			ActiveSounds[activeIndex].paused = 0;
-
 			newVolume = 0;
 		}
-		else
-		{
+		else {
 			return 1;
 		}
 	}
@@ -986,12 +941,10 @@ int PlatDo3dSound(int activeIndex)
 			float in_to_dis_to_out = static_cast<float>(ActiveSounds[activeIndex].threedeedata.outer_range - distance);
 			float in_to_out = static_cast<float>(ActiveSounds[activeIndex].threedeedata.outer_range - ActiveSounds[activeIndex].threedeedata.inner_range);
 
-			if (in_to_out > 0.0)
-			{
+			if (in_to_out > 0.0f) {
 				newVolume = (int)((float)ActiveSounds[activeIndex].volume * (in_to_dis_to_out / in_to_out));
 			}
-			else
-			{
+			else {
 				newVolume = 0;
 			}
 		}
@@ -1020,28 +973,27 @@ int PlatDo3dSound(int activeIndex)
 	if (newVolume > VOLUME_MAX) newVolume = VOLUME_MAX;
 	if (newVolume < VOLUME_MIN) newVolume = VOLUME_MIN;
 
-	if (PlatChangeSoundVolume(activeIndex, newVolume) == SOUND_PLATFORMERROR)
-	{
+	if (PlatChangeSoundVolume(activeIndex, newVolume) == SOUND_PLATFORMERROR) {
 		return SOUND_PLATFORMERROR;
 	}
 
 	// Now deal with the panning issues.
 	if (distance < ActiveSounds[activeIndex].threedeedata.outer_range)
 	{
-/*
 		ActiveSounds[activeIndex].xa2Emitter.Position.x = static_cast<float>(relativePosn.vx);
 		ActiveSounds[activeIndex].xa2Emitter.Position.y = static_cast<float>(relativePosn.vy);
 		ActiveSounds[activeIndex].xa2Emitter.Position.z = static_cast<float>(relativePosn.vz);
-*/
+
 		// TODO - velocity stuff?
 	}
 	return 1;
 }
 
-void PlatEndGameSound(SOUNDINDEX index)
+void PlatUnloadGameSound(SOUNDINDEX index)
 {
-	if ((index < 0) || (index >= SID_MAXIMUM))
+	if ((index < 0) || (index >= SID_MAXIMUM)) {
 		return; /* no such sound */
+	}
 
 	LOCALASSERT(GameSounds[index].loaded);
 	LOCALASSERT(GameSounds[index].pSourceVoice);
@@ -1065,7 +1017,7 @@ void PlatEndGameSound(SOUNDINDEX index)
 /* Patrick 5/6/97 -------------------------------------------------------------
   Change pan function is internal to this file, since it is only needed for
   doing 3d effects. Consequently, the parameter is not scaled to external
-  values, but to platform range. 
+  values, but to platform range.
   ----------------------------------------------------------------------------*/
 static int PlatChangeSoundPan(int activeIndex, int pan)
 {
@@ -1094,7 +1046,7 @@ unsigned int PlatMaxHWSounds()
   Wavs are recorded at a particular frequency, which is taken as equivalent to
   a base pitch setting of PITCH_DEFAULTPLAT.  However, some wavs need to be
   shifted up or down a number of semi-tones in order to be played at the correct
-  pitch... Hence, they are pitch shifted here, as neccessary....      
+  pitch... Hence, they are pitch shifted here, as neccessary....
   ----------------------------------------------------------------------------*/
 void InitialiseBaseFrequency(SOUNDINDEX soundNum)
 {
@@ -1106,10 +1058,11 @@ void InitialiseBaseFrequency(SOUNDINDEX soundNum)
 
 	// get the frequency
 	frequency = GameSounds[soundNum].dsFrequency;
-	
+
 	// if the pitch is default, just return at this point
-	if (GameSounds[soundNum].pitch == PITCH_DEFAULTPLAT)
+	if (GameSounds[soundNum].pitch == PITCH_DEFAULTPLAT) {
 		return;
+	}
 
 	float tempF;
 	GameSounds[soundNum].pSourceVoice->GetFrequencyRatio(&tempF);
@@ -1188,11 +1141,11 @@ int LoadWavFile(int soundNum, const std::string &fileName)
 		return 0;
 	}
 
-	while (1) 
+	while (1)
 	{
 		subChunkID = fStream.GetUint32BE();
 
-		if (subChunkID != 'data') 
+		if (subChunkID != 'data')
 		{
 			subChunkSize = fStream.GetUint32LE();
 			fStream.Seek(subChunkSize, FileStream::SeekCurrent);
@@ -1316,11 +1269,11 @@ int ExtractWavFile(int soundNum, FileStream &fStream)
 		return 0;
 	}
 
-	while (1) 
+	while (1)
 	{
 		subChunkID = fStream.GetUint32BE();
 
-		if (subChunkID != 'data') 
+		if (subChunkID != 'data')
 		{
 			subChunkSize = fStream.GetUint32LE();
 			fStream.Seek(subChunkSize, FileStream::SeekCurrent);
@@ -1381,15 +1334,16 @@ int ExtractWavFile(int soundNum, FileStream &fStream)
 
 /* Patrick 13/6/97 -------------------------------------------------------------
   Stuff for converting pitch semi-tones into frequencies:
-  The common sound interface in PSND uses 1/128ths of a semi-tone increments to 
-  change sounds (like the PSX) however, DS uses frequency shifts. We must therefore 
+  The common sound interface in PSND uses 1/128ths of a semi-tone increments to
+  change sounds (like the PSX) however, DS uses frequency shifts. We must therefore
   convert semi-tone shifts into frequency shifts. The conversion formula is:
   f = f0 * 2^(P-P0)
   ----------------------------------------------------------------------------*/
 static int ToneToFrequency(int currentFrequency, int currentPitch, int newPitch)
 {
-	if (!soundEnabled)
+	if (!soundEnabled) {
 		return 0;
+	}
 
 	int newFrequency = currentFrequency;
 
@@ -1408,14 +1362,13 @@ static int ToneToFrequency(int currentFrequency, int currentPitch, int newPitch)
 		numTones = (newPitch-currentPitch)%1536;
 
 		newFrequency<<=numOctaves;
-		if (newFrequency > FREQUENCY_MAXPLAT) 
-			newFrequency=FREQUENCY_MAXPLAT;
-		
-		if (numTones > 0) 
-			newFrequency = (int)((float)(newFrequency)*pitch_to_frequency_mult_table[numTones]);
+		if (newFrequency > FREQUENCY_MAXPLAT) newFrequency = FREQUENCY_MAXPLAT;
 
-		if (newFrequency > FREQUENCY_MAXPLAT) 
-			newFrequency = FREQUENCY_MAXPLAT;
+		if (numTones > 0) {
+			newFrequency = (int)((float)(newFrequency)*pitch_to_frequency_mult_table[numTones]);
+		}
+
+		if (newFrequency > FREQUENCY_MAXPLAT) newFrequency = FREQUENCY_MAXPLAT;
 	}
 	else
 	{
@@ -1425,22 +1378,22 @@ static int ToneToFrequency(int currentFrequency, int currentPitch, int newPitch)
 		numTones = (currentPitch-newPitch)%1536;
 
 		newFrequency>>=numOctaves;
-		if (newFrequency < FREQUENCY_MINPLAT) 
-			newFrequency = FREQUENCY_MINPLAT;
+		if (newFrequency < FREQUENCY_MINPLAT) newFrequency = FREQUENCY_MINPLAT;
 
-		if (numTones > 0) 
+		if (numTones > 0) {
 			newFrequency = (int)((float)(newFrequency)/pitch_to_frequency_mult_table[numTones]);
+		}
 
-		if (newFrequency < FREQUENCY_MINPLAT)
-			newFrequency = FREQUENCY_MINPLAT;
+		if (newFrequency < FREQUENCY_MINPLAT) newFrequency = FREQUENCY_MINPLAT;
 	}
 	return newFrequency;
 }
 
 void PlatUpdatePlayer()
 {
-	if (!soundEnabled)
+	if (!soundEnabled) {
 		return;
+	}
 
 	// update the listener (ie the player)
 	if (Global_VDB_Ptr)
@@ -1478,7 +1431,7 @@ void PlatUpdatePlayer()
 */
 /*
 			char buf2[250];
-			sprintf(buf2, "of:x %f of:y %f of:z :%f - ot:x %f ot:y %f ot:z :%f\n", 
+			sprintf(buf2, "of:x %f of:y %f of:z :%f - ot:x %f ot:y %f ot:z :%f\n",
 				XA2Listener.OrientFront.x,
 				XA2Listener.OrientFront.y,
 				XA2Listener.OrientFront.z,
@@ -1513,8 +1466,9 @@ void PlatUpdatePlayer()
 		for (int i = 0; i < SOUND_MAXACTIVE; i++)
 		{
 			// check if there's a sound here before doing anything
-			if (ActiveSounds[i].soundIndex == SID_NOSOUND)
-					continue;
+			if (ActiveSounds[i].soundIndex == SID_NOSOUND) {
+				continue;
+			}
 
 			if (ActiveSounds[i].is3D)
 			{
@@ -1597,7 +1551,7 @@ void PlatSetEnviroment(unsigned int env_index, float reverb_mix)
 	if((reverb_mix < 0.0F) || (reverb_mix > 1.0F))
 	{
 		db_log3("Using EAX,");
-		SoundConfig.reverb_mix = EAX_REVERBMIX_USEDISTANCE;	
+		SoundConfig.reverb_mix = EAX_REVERBMIX_USEDISTANCE;
 	}
 	else
 	{
@@ -1623,18 +1577,21 @@ int PlatDontUse3DSoundHW()
 
 void UpdateSoundFrequencies(void)
 {
-	if (!soundEnabled)
+	if (!soundEnabled) {
 		return;
+	}
 
-	if (!SoundSwitchedOn) 
+	if (!SoundSwitchedOn) {
 		return;
+	}
 
 	for (uint32_t i = 0; i < SOUND_MAXACTIVE; i++)
 	{
 		int32_t gameIndex = ActiveSounds[i].soundIndex;
 
-		if (gameIndex == SID_NOSOUND) 
+		if (gameIndex == SID_NOSOUND) {
 			continue;
+		}
 
 //		IDirectSoundBuffer_SetFrequency(ActiveSounds[i].dsBufferP,MUL_FIXED(GameSounds[gameIndex].dsFrequency,TimeScale));
 		if (ActiveSounds[i].pitch != GameSounds[gameIndex].pitch)
@@ -1646,30 +1603,31 @@ void UpdateSoundFrequencies(void)
 
 AudioStream::AudioStream()
 {
-	bufferSize    = 0;
-	bufferCount   = 0;
-	currentBuffer = 0;
-	numChannels   = 0;
-	rate = 0;
-	bytesPerSample      = 0;
-	totalBytesPlayed    = 0;
-	totalSamplesWritten = 0;
-	isPaused = false;
-	buffers  = 0;
-	pSourceVoice = 0;
-	voiceContext = 0;
-	volume = 0;
+	_bufferSize    = 0;
+	_bufferCount   = 0;
+	_currentBuffer = 0;
+	_nChannels   = 0;
+	_rate = 0;
+	_bytesPerSample      = 0;
+	_totalBytesPlayed    = 0;
+	_totalSamplesWritten = 0;
+	_isPaused = false;
+	_buffers  = 0;
+	_pSourceVoice = 0;
+	_voiceContext = 0;
+	_volume = 0;
 }
 
-bool AudioStream::Init(uint32_t channels, uint32_t rate, uint32_t bitsPerSample, uint32_t bufferSize, uint32_t numBuffers)
+bool AudioStream::Init(uint32_t nChannels, uint32_t rate, uint32_t bitsPerSample, uint32_t bufferSize, uint32_t nBuffers)
 {
-	if (!soundEnabled)
+	if (!soundEnabled) {
 		return false;
+	}
 
 	WAVEFORMATEX waveFormat;
 	ZeroMemory (&waveFormat, sizeof(waveFormat));
 	waveFormat.wFormatTag		= WAVE_FORMAT_PCM;
-	waveFormat.nChannels		= channels;
+	waveFormat.nChannels		= nChannels;
 	waveFormat.wBitsPerSample	= bitsPerSample;
 	waveFormat.nSamplesPerSec	= rate;
 	waveFormat.nBlockAlign		= waveFormat.nChannels * (waveFormat.wBitsPerSample / 8);    //what block boundaries exist
@@ -1677,34 +1635,34 @@ bool AudioStream::Init(uint32_t channels, uint32_t rate, uint32_t bitsPerSample,
 	waveFormat.cbSize			= sizeof(waveFormat);
 
 	// create a new voice context for "on buffer end" callback
-	this->voiceContext = new(std::nothrow) StreamingVoiceContext;
-	if (NULL == this->voiceContext)
+	_voiceContext = new(std::nothrow) StreamingVoiceContext;
+	if (NULL == _voiceContext)
 	{
 		Con_PrintError("Out of memory trying to create streaming voice context");
 		return false;
 	}
 
 	// create the source voice for playing the sound
-	LastError = pXAudio2->CreateSourceVoice(&this->pSourceVoice, &waveFormat, 0, XAUDIO2_DEFAULT_FREQ_RATIO, this->voiceContext);
+	LastError = pXAudio2->CreateSourceVoice(&_pSourceVoice, &waveFormat, 0, XAUDIO2_DEFAULT_FREQ_RATIO, _voiceContext);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
 		return false;
 	}
 
-	this->buffers = new(std::nothrow) uint8_t[bufferSize * numBuffers];
-	if (NULL == this->buffers)
+	_buffers = new(std::nothrow) uint8_t[bufferSize * nBuffers];
+	if (NULL == _buffers)
 	{
 		Con_PrintError("Out of memory trying to create streaming audio buffer");
 		return false;
 	}
 
-	this->bytesPerSample = waveFormat.wBitsPerSample / 8;
-	this->numChannels = waveFormat.nChannels;
-	this->rate = waveFormat.nSamplesPerSec;
-	this->isPaused = true;
-	this->bufferSize = bufferSize;
-	this->bufferCount = numBuffers;
+	_bytesPerSample = waveFormat.wBitsPerSample / 8;
+	_nChannels = waveFormat.nChannels;
+	_rate = waveFormat.nSamplesPerSec;
+	_isPaused = true;
+	_bufferSize  = bufferSize;
+	_bufferCount = nBuffers;
 
 	return true;
 }
@@ -1712,78 +1670,79 @@ bool AudioStream::Init(uint32_t channels, uint32_t rate, uint32_t bitsPerSample,
 uint32_t AudioStream::WriteData(uint8_t *audioData, uint32_t size)
 {
 	assert (audioData);
-	assert (size == this->bufferSize);
+	assert (size == _bufferSize);
 
-	uint32_t amountWritten = 0;
 	XAUDIO2_BUFFER xA2Buf = {0};
 
-	memcpy(&this->buffers[this->currentBuffer * this->bufferSize], audioData, size);
+	memcpy(&_buffers[_currentBuffer * _bufferSize], audioData, size);
 	xA2Buf.AudioBytes = size;
-	xA2Buf.pAudioData = static_cast<BYTE*>(&this->buffers[this->currentBuffer * this->bufferSize]);
+	xA2Buf.pAudioData = static_cast<BYTE*>(&_buffers[_currentBuffer * _bufferSize]);
 
-	this->pSourceVoice->SubmitSourceBuffer(&xA2Buf);
+	_pSourceVoice->SubmitSourceBuffer(&xA2Buf);
 
-	// this is so redundant..
-	amountWritten += size;
-
-	this->currentBuffer++;
-	this->currentBuffer %= this->bufferCount;
+	_currentBuffer++;
+	_currentBuffer %= _bufferCount;
 
 	// size in bytes divided by bits per sample (divided by 8 to get the bytes per sample) also dividded by the number of channels
-	this->totalSamplesWritten += ((size / this->bytesPerSample) / this->numChannels);
+	_totalSamplesWritten += ((size / _bytesPerSample) / _nChannels);
 
-	return amountWritten;
+	return size;
+}
+
+void AudioStream::WaitForFreeBuffer()
+{
+	::WaitForSingleObject(_voiceContext->hBufferEndEvent, /*INFINITE*/20);
 }
 
 uint32_t AudioStream::GetBufferSize()
 {
-	return bufferSize;
+	return _bufferSize;
 }
 
 uint32_t AudioStream::GetNumFreeBuffers()
 {
 	XAUDIO2_VOICE_STATE xA2VoiceState;
-	this->pSourceVoice->GetState(&xA2VoiceState);
+	_pSourceVoice->GetState(&xA2VoiceState);
 
-	return this->bufferCount - xA2VoiceState.BuffersQueued;
+	return _bufferCount - xA2VoiceState.BuffersQueued;
 }
 
 uint64_t AudioStream::GetNumSamplesPlayed()
 {
 	XAUDIO2_VOICE_STATE xA2VoiceState;
-	this->pSourceVoice->GetState(&xA2VoiceState);
+	_pSourceVoice->GetState(&xA2VoiceState);
 
 	return xA2VoiceState.SamplesPlayed;
 }
 
 uint64_t AudioStream::GetNumSamplesWritten()
 {
-	return this->totalSamplesWritten;
+	return _totalSamplesWritten;
 }
 
 uint32_t AudioStream::GetWritableBufferSize()
 {
 	XAUDIO2_VOICE_STATE xA2VoiceState;
-	this->pSourceVoice->GetState(&xA2VoiceState);
+	_pSourceVoice->GetState(&xA2VoiceState);
 
-	return ((this->bufferSize * this->bufferCount) - (xA2VoiceState.BuffersQueued * this->bufferSize));
+	return ((_bufferSize * _bufferCount) - (xA2VoiceState.BuffersQueued * _bufferSize));
 }
 
 int32_t AudioStream::SetVolume(uint32_t volume)
 {
-	LastError = this->pSourceVoice->SetVolume(vol_to_gain_table[volume]);
+	LastError = _pSourceVoice->SetVolume(vol_to_gain_table[volume]);
 	if (FAILED(LastError))
 	{
 		return AUDIOSTREAM_ERROR;
 	}
-	
-	this->volume = volume;
+
+	_volume = volume;
 	return AUDIOSTREAM_OK;
 }
 
 uint32_t AudioStream::GetVolume()
 {
-	return volume;
+	return _volume;
 }
 
 int32_t AudioStream::SetPan(uint32_t pan)
@@ -1794,26 +1753,26 @@ int32_t AudioStream::SetPan(uint32_t pan)
 
 int32_t AudioStream::Stop()
 {
-	LastError = this->pSourceVoice->Stop();
+	LastError = _pSourceVoice->Stop();
 	if (FAILED(LastError))
 	{
 		return AUDIOSTREAM_ERROR;
 	}
-	
+
 	return AUDIOSTREAM_OK;
 }
 
 int32_t AudioStream::Play()
 {
-	if (this->isPaused)
+	if (_isPaused)
 	{
-		LastError = this->pSourceVoice->Start();
+		LastError = _pSourceVoice->Start();
 
 		if (FAILED(LastError))
 		{
 			return AUDIOSTREAM_ERROR;
 		}
-		this->isPaused = false;
+		_isPaused = false;
 	}
 
 	return AUDIOSTREAM_OK;
@@ -1821,16 +1780,16 @@ int32_t AudioStream::Play()
 
 AudioStream::~AudioStream()
 {
-	if (this->pSourceVoice)
+	if (_pSourceVoice)
 	{
-		this->pSourceVoice->Stop();
-		this->pSourceVoice->DestroyVoice();
+		_pSourceVoice->Stop();
+		_pSourceVoice->DestroyVoice();
 	}
 
 	// clear the new-ed memory
-	delete[] this->buffers;
+	delete[] _buffers;
 
-	delete this->voiceContext;
+	delete _voiceContext;
 }
 
 #endif // #ifdef USE_XAUDIO2

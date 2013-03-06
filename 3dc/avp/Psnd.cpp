@@ -270,7 +270,7 @@ void SoundSys_RemoveAll(void)
 		if (GameSounds[i].loaded) 
 		{
 			LOCALASSERT(GameSounds[i].activeInstances == 0);
-			PlatEndGameSound(static_cast<SOUNDINDEX>(i));
+			PlatUnloadGameSound(static_cast<SOUNDINDEX>(i));
 			GameSounds[i] = BlankGameSound;
 		}
 	}
@@ -818,10 +818,12 @@ void Save_SoundState(int* soundHandle)
 		block->volume<<=7;
 		block->volume/=VOLUME_PLAT2DSCALE;
 		
-		if (CheckSoundBufferIsValid(sound))
+		if (CheckSoundBufferIsValid(sound)) {
 			GetBufferCurrentPosition(sound, &block->position);
-		else
+		}
+		else {
 			block->position = 0;
+		}
 
 		strcpy((char*)(block+1),name);
 	}
@@ -905,10 +907,12 @@ void Save_SoundsWithNoReference()
 				block->volume<<=7;
 				block->volume/=VOLUME_PLAT2DSCALE;
 
-				if (CheckSoundBufferIsValid(sound))
+				if (CheckSoundBufferIsValid(sound)) {
 					GetBufferCurrentPosition(sound, &block->position);
-				else
+				}
+				else {
 					block->position = 0;
+				}
 
 				strcpy((char*)(block+1),name);
 			}

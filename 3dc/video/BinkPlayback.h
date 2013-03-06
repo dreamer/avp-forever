@@ -29,74 +29,76 @@
 #include "RingBuffer.h"
 #include "AudioStreaming.h"
 #include "TextureManager.h"
+#include <pthread.h>
 
 class BinkPlayback
 {
 	private:
-		std::string mFileName;
+		std::string _fileName;
 
 		// thread handles
-		HANDLE mDecodeThreadHandle;
-		HANDLE mAudioThreadHandle;
-
-		bool mFrameCriticalSectionInited;
+		pthread_t _decodeThreadHandle;
+		pthread_t _audioThreadHandle;
+		bool _decodeThreadInited;
+		bool _audioThreadInited;
+		bool _frameCriticalSectionInited;
 
 	public:
-		BinkHandle handle;
-
-		CRITICAL_SECTION mFrameCriticalSection;
-
-		YUVbuffer yuvBuffer;
+		BinkHandle _handle;
 
 		// audio
-		uint32_t nAudioTracks;
-		std::vector<AudioInfo> audioTrackInfos;
+		uint32_t _nAudioTracks;
+		std::vector<AudioInfo> _audioTrackInfos;
 
-		uint32_t audioTrackIndex;
+		uint32_t _audioTrackIndex;
 
-		AudioStream		*audioStream;
-		RingBuffer		*mRingBuffer;
-		uint8_t			*mAudioData;
-		uint8_t			*mAudioDataBuffer;
-		uint32_t		mAudioDataBufferSize;
+		AudioStream	 *_audioStream;
+		RingBuffer	 *_ringBuffer;
+		uint8_t		 *_audioData;
+		uint8_t		 *_audioDataBuffer;
+		uint32_t	  _audioDataBufferSize;
 
-		// textures for video frames
-		std::vector<texID_t> frameTextureIDs;
+		// video
+		YUVbuffer _yuvBuffer;
 
-		uint32_t mTextureWidth;
-		uint32_t mTextureHeight;
-		uint32_t mFrameWidth;
-		uint32_t mFrameHeight;
-		uint8_t  mNumTextureBits;
+		std::vector<texID_t> _frameTextureIDs;
 
-		volatile bool mFmvPlaying;
-		volatile bool mFrameReady;
-		bool mAudioStarted;
-		volatile bool mTexturesReady;
-		bool mIsLooped;
+		uint32_t _textureWidth;
+		uint32_t _textureHeight;
+		uint32_t _frameWidth;
+		uint32_t _frameHeight;
+		uint8_t  _nTextureBits;
 
-		float frameRate;
+		pthread_mutex_t _frameCriticalSection;
+
+		volatile bool _fmvPlaying;
+		volatile bool _frameReady;
+		bool _audioStarted;
+		volatile bool _texturesReady;
+		bool _isLooped;
+		float _frameRate;
 
 		BinkPlayback() :
-			audioStream(0),
-			mRingBuffer(0),
-			mAudioData(0),
-			mAudioDataBuffer(0),
-			mAudioDataBufferSize(0),
-			audioTrackIndex(0),
-			mTextureWidth(0),
-			mTextureHeight(0),
-			mFrameWidth(0),
-			mFrameHeight(0),
-			mDecodeThreadHandle(0),
-			mAudioThreadHandle(0),
-			mFmvPlaying(false),
-			mFrameReady(false),
-			mAudioStarted(false),
-			mTexturesReady(false),
-			mIsLooped(false),
-			mFrameCriticalSectionInited(false),
-			frameRate(0)
+			_decodeThreadInited(false),
+			_audioThreadInited(false),
+			_frameCriticalSectionInited(false),
+			_audioStream(0),
+			_ringBuffer(0),
+			_nAudioTracks(0),
+			_audioData(0),
+			_audioDataBuffer(0),
+			_audioDataBufferSize(0),
+			_audioTrackIndex(0),
+			_textureWidth(0),
+			_textureHeight(0),
+			_frameWidth(0),
+			_frameHeight(0),
+			_fmvPlaying(false),
+			_frameReady(false),
+			_audioStarted(false),
+			_texturesReady(false),
+			_isLooped(false),
+			_frameRate(0)
 			{}
 		~BinkPlayback();
 
