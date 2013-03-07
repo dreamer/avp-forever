@@ -258,8 +258,9 @@ void SoundSys_RemoveAll(void)
 {
 	/* if we are not initialised, there should be no sounds loaded or playing.
 	if we are switched off, we should still unload them all */
-	if (!SoundInitialised) 
+	if (!SoundInitialised) {
 		return;
+	}
 
 	/* make sure there are no sounds playing */
 	SoundSys_StopAll();

@@ -241,7 +241,7 @@
 				Name="VCCustomBuildTool"/>
 			<Tool
 				Name="VCLinkerTool"
-				AdditionalDependencies="xapilib.lib d3d8.lib d3dx8.lib xgraphics.lib dsound.lib xacteng.lib xsndtrk.lib xvoice.lib xonline.lib xboxkrnl.lib xbdm.lib enet.lib libogg_static.lib libvorbis_static.lib libvorbisfile_static.lib libtheora_static.lib"
+				AdditionalDependencies="xapilib.lib d3d8.lib d3dx8.lib xgraphics.lib dsound.lib xacteng.lib xsndtrk.lib xvoice.lib xonline.lib xboxkrnl.lib xbdm.lib enet.lib libogg_static.lib libvorbis_static.lib libvorbisfile_static.lib libtheora_static.lib libpthreadXB.lib"
 				AdditionalLibraryDirectories="..\xbox\enet\lib"
 				GenerateDebugInformation="FALSE"
 				GenerateMapFile="FALSE"
