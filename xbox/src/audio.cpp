@@ -842,10 +842,11 @@ int PlatDo3dSound(int activeIndex)
 	return 1;
 }
 
-void PlatEndGameSound(SOUNDINDEX index)
+void PlatUnloadGameSound(SOUNDINDEX index)
 {
-	if ((index<0)||(index>=SID_MAXIMUM))
+	if ((index < 0) || (index >= SID_MAXIMUM)) {
 		return; // no such sound
+	}
 
 	LOCALASSERT(GameSounds[index].loaded);
 	LOCALASSERT(GameSounds[index].dsBufferP);
@@ -971,7 +972,7 @@ void InitialiseBaseFrequency(SOUNDINDEX soundNum)
 	{
 		/* error */
 		LOCALASSERT(1==0);
-		PlatEndGameSound(soundNum);
+		PlatUnloadGameSound(soundNum);
 		GameSounds[soundNum] = BlankGameSound;
 		return;
 	}
@@ -1514,21 +1515,23 @@ void GetBufferCurrentPosition(ACTIVESOUNDSAMPLE *activeSound, int *position)
 	*position = 0;
 }
 
-int CheckSoundBufferIsValid(ACTIVESOUNDSAMPLE *activeSound)
+bool CheckSoundBufferIsValid(ACTIVESOUNDSAMPLE *activeSound)
 {
-	if (activeSound->dsBufferP)
-		return 1;
-	else
-		return 0;
+	if (activeSound->dsBufferP) {
+		return true;
+	}
+	else {
+		return false;
+	}
 }
 
 void CALLBACK AudioStream_Callback(VOID* pStreamContext, VOID* pPacketContext, DWORD dwStatus)
 {
 	AudioStream *streamStruct = static_cast<AudioStream*>(pStreamContext);
 
-	streamStruct->totalBytesPlayed += streamStruct->GetBufferSize();
+	streamStruct->_totalBytesPlayed += streamStruct->GetBufferSize();
 
-	streamStruct->voiceContext->TriggerEvent();
+	streamStruct->_voiceContext->TriggerEvent();
 }
 
 AudioStream::AudioStream()
@@ -1561,38 +1564,38 @@ bool AudioStream::Init(uint32_t channels, uint32_t rate, uint32_t bitsPerSample,
 	streamDesc.lpvContext				= this;
 	streamDesc.dwFlags					= DSSTREAMCAPS_ACCURATENOTIFY;
 
-	LastError = DirectSoundCreateStream(&streamDesc, &this->dsStreamBuffer);
+	LastError = DirectSoundCreateStream(&streamDesc, &_dsStreamBuffer);
 	if (FAILED(LastError)) {
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
 
-	this->dsStreamBuffer->Pause(DSSTREAMPAUSE_PAUSE);
-	this->isPaused = true;
+	_dsStreamBuffer->Pause(DSSTREAMPAUSE_PAUSE);
+	_isPaused = true;
 
 	// Set the stream headroom to 0
-	this->dsStreamBuffer->SetHeadroom(0);
+	_dsStreamBuffer->SetHeadroom(0);
 
-	this->PacketStatus.resize(numBuffers);
+	_packetStatus.resize(numBuffers);
 
-	for (uint32_t i = 0; i < this->PacketStatus.size(); i++) {
-		this->PacketStatus[i] = XMEDIAPACKET_STATUS_SUCCESS;
+	for (uint32_t i = 0; i < _packetStatus.size(); i++) {
+		_packetStatus[i] = XMEDIAPACKET_STATUS_SUCCESS;
 	}
 
-	this->buffers = new uint8_t[bufferSize * numBuffers];
-	if (this->buffers == NULL) {
+	_buffers = new uint8_t[bufferSize * numBuffers];
+	if (_buffers == NULL) {
 		LogErrorString("Out of memory trying to create streaming audio buffer", __LINE__, __FILE__);
 	}
 
-	this->voiceContext = new StreamingVoiceContext;
+	_voiceContext = new StreamingVoiceContext;
 
-	this->bufferSize = bufferSize;
-	this->bufferCount = numBuffers;
-	this->currentBuffer = 0;
-	this->numChannels = waveFormat.nChannels;
-	this->rate = waveFormat.nSamplesPerSec;
-	this->bytesPerSample = waveFormat.wBitsPerSample / 8;
-	this->totalBytesPlayed = 0;
-	this->totalSamplesWritten = 0;
+	_bufferSize = bufferSize;
+	_bufferCount = numBuffers;
+	_currentBuffer = 0;
+	_nChannels = waveFormat.nChannels;
+	_rate = waveFormat.nSamplesPerSec;
+	_bytesPerSample = waveFormat.wBitsPerSample / 8;
+	_totalBytesPlayed = 0;
+	_totalSamplesWritten = 0;
 
 	return true;
 }
@@ -1600,7 +1603,7 @@ bool AudioStream::Init(uint32_t channels, uint32_t rate, uint32_t bitsPerSample,
 uint32_t AudioStream::WriteData(uint8_t *audioData, uint32_t size)
 {
 	assert (audioData);
-	assert (size == this->bufferSize);
+	assert (size == _bufferSize);
 
 	uint32_t amountWritten = 0;
 
@@ -1609,13 +1612,13 @@ uint32_t AudioStream::WriteData(uint8_t *audioData, uint32_t size)
 	ZeroMemory(&packet, sizeof(packet));
 
 	// offset into source data buffer
-	memcpy(&this->buffers[this->currentBuffer * this->bufferSize], audioData, size);
+	memcpy(&_buffers[_currentBuffer * _bufferSize], audioData, size);
 
-	packet.pvBuffer  = &this->buffers[this->currentBuffer * this->bufferSize];
+	packet.pvBuffer  = &_buffers[_currentBuffer * _bufferSize];
 	packet.dwMaxSize = size;
-	packet.pdwStatus = &this->PacketStatus[this->currentBuffer];
+	packet.pdwStatus = &_packetStatus[_currentBuffer];
 
-	LastError = this->dsStreamBuffer->Process(&packet, NULL);
+	LastError = _dsStreamBuffer->Process(&packet, NULL);
 	if (FAILED(LastError)) {
 		LogDxError(LastError, __LINE__, __FILE__);
 	}
@@ -1623,21 +1626,21 @@ uint32_t AudioStream::WriteData(uint8_t *audioData, uint32_t size)
 	// this is so redundant..
 	amountWritten += size;
 
-	this->currentBuffer++;
-	this->currentBuffer %= this->bufferCount;
+	_currentBuffer++;
+	_currentBuffer %= _bufferCount;
 
 	// size in bytes divided by bits per sample (divided by 8 to get the bytes per sample) also dividded by the number of channels
-	this->totalSamplesWritten += ((size / this->bytesPerSample) / this->numChannels);
+	_totalSamplesWritten += ((size / _bytesPerSample) / _nChannels);
 
 	DWORD status;
-	this->dsStreamBuffer->GetStatus(&status);
+	_dsStreamBuffer->GetStatus(&status);
 
 	switch (status)
 	{
 		case DSSTREAMSTATUS_STARVED:
 		{
 			OutputDebugString("stream starved! restarting...\n");
-			this->dsStreamBuffer->Pause(DSSTREAMPAUSE_RESUME);
+			_dsStreamBuffer->Pause(DSSTREAMPAUSE_RESUME);
 			break;
 		}
 	}
@@ -1645,18 +1648,23 @@ uint32_t AudioStream::WriteData(uint8_t *audioData, uint32_t size)
 	return amountWritten;
 }
 
+void AudioStream::WaitForFreeBuffer()
+{
+	::WaitForSingleObject(_voiceContext->hBufferEndEvent, 20);
+}
+
 uint32_t AudioStream::GetBufferSize()
 {
-	return bufferSize;
+	return _bufferSize;
 }
 
 uint32_t AudioStream::GetNumFreeBuffers()
 {
 	uint32_t numFreeBuffers = 0;
 
-	for (uint32_t i = 0; i < this->PacketStatus.size(); i++)
+	for (uint32_t i = 0; i < _packetStatus.size(); i++)
 	{
-		if (XMEDIAPACKET_STATUS_PENDING != this->PacketStatus[i]) {
+		if (XMEDIAPACKET_STATUS_PENDING != _packetStatus[i]) {
 			numFreeBuffers++;
 		}
 	}
@@ -1666,12 +1674,12 @@ uint32_t AudioStream::GetNumFreeBuffers()
 
 uint64_t AudioStream::GetNumSamplesPlayed()
 {
-	return ((this->totalBytesPlayed / this->bytesPerSample) / this->numChannels);
+	return ((_totalBytesPlayed / _bytesPerSample) / _nChannels);
 }
 
 uint64_t AudioStream::GetNumSamplesWritten()
 {
-	return this->totalSamplesWritten;
+	return _totalSamplesWritten;
 }
 
 uint32_t AudioStream::GetWritableBufferSize()
@@ -1682,7 +1690,7 @@ uint32_t AudioStream::GetWritableBufferSize()
 
 int32_t AudioStream::SetVolume(uint32_t volume)
 {
-	if (this->dsStreamBuffer == NULL) {
+	if (_dsStreamBuffer == NULL) {
 		return 0;
 	}
 
@@ -1697,10 +1705,10 @@ int32_t AudioStream::SetVolume(uint32_t volume)
 	if (attenuation > VOLUME_MAXPLAT) attenuation = VOLUME_MAXPLAT;
 	if (attenuation < VOLUME_MINPLAT) attenuation = VOLUME_MINPLAT;
 
-	this->volume = volume;
+	_volume = volume;
 
 	// and apply it
-	LastError = this->dsStreamBuffer->SetVolume(attenuation);
+	LastError = _dsStreamBuffer->SetVolume(attenuation);
 	if (FAILED(LastError))
 	{
 		LogDxError(LastError, __LINE__, __FILE__);
@@ -1712,7 +1720,7 @@ int32_t AudioStream::SetVolume(uint32_t volume)
 
 uint32_t AudioStream::GetVolume()
 {
-	return volume;
+	return _volume;
 }
 
 int32_t AudioStream::SetPan(uint32_t pan)
@@ -1723,15 +1731,15 @@ int32_t AudioStream::SetPan(uint32_t pan)
 
 int32_t AudioStream::Stop()
 {
-	if (this->dsStreamBuffer)
+	if (_dsStreamBuffer)
 	{
-		this->dsStreamBuffer->Flush();
-		this->dsStreamBuffer->Pause(DSSTREAMPAUSE_PAUSE);
-		this->isPaused = true;
+		_dsStreamBuffer->Flush();
+		_dsStreamBuffer->Pause(DSSTREAMPAUSE_PAUSE);
+		_isPaused = true;
 	}
 
-	for (uint32_t i = 0; i < this->PacketStatus.size(); i++) {
-		this->PacketStatus[i] = XMEDIAPACKET_STATUS_SUCCESS;
+	for (uint32_t i = 0; i < _packetStatus.size(); i++) {
+		_packetStatus[i] = XMEDIAPACKET_STATUS_SUCCESS;
 	}
 
 	return AUDIOSTREAM_OK;
@@ -1739,11 +1747,11 @@ int32_t AudioStream::Stop()
 
 int32_t AudioStream::Play()
 {
-	if (this->isPaused)
+	if (_isPaused)
 	{
 		OutputDebugString("starting streaming audio..\n");
-		this->dsStreamBuffer->Pause(DSSTREAMPAUSE_RESUME);
-		this->isPaused = false;
+		_dsStreamBuffer->Pause(DSSTREAMPAUSE_RESUME);
+		_isPaused = false;
 	}
 
 	return AUDIOSTREAM_OK;
@@ -1753,9 +1761,9 @@ AudioStream::~AudioStream()
 {
 	DWORD dwStatus;
 
-	if (this->dsStreamBuffer)
+	if (_dsStreamBuffer)
 	{
-		LastError = this->dsStreamBuffer->Flush();
+		LastError = _dsStreamBuffer->Flush();
 		if (FAILED(LastError)) {
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
@@ -1763,22 +1771,22 @@ AudioStream::~AudioStream()
 		do
 		{
 			// Perform other tasks while waiting for FlushEx to complete
-			this->dsStreamBuffer->GetStatus(&dwStatus);
+			_dsStreamBuffer->GetStatus(&dwStatus);
 		} while (dwStatus & DSSTREAMSTATUS_PLAYING);
 
 
-		LastError = this->dsStreamBuffer->Pause(DSSTREAMPAUSE_PAUSE);
+		LastError = _dsStreamBuffer->Pause(DSSTREAMPAUSE_PAUSE);
 
-		LastError = this->dsStreamBuffer->Release();
+		LastError = _dsStreamBuffer->Release();
 		if (FAILED(LastError)) {
 			LogDxError(LastError, __LINE__, __FILE__);
 		}
-		this->dsStreamBuffer = NULL;
+		_dsStreamBuffer = NULL;
 	}
 
 	// clear the new-ed memory
-	delete []this->buffers;
-	this->buffers = NULL;
+	delete []_buffers;
+	_buffers = NULL;
 
-	delete this->voiceContext;
+	delete _voiceContext;
 }

@@ -206,7 +206,7 @@ class AudioStream
 		uint64_t	_totalSamplesWritten;
 		bool		_isPaused;
 		uint32_t    _volume;
-		uint8_t		*_buffers;
+		uint8_t	   *_buffers;
 		std::vector<DWORD> _packetStatus;
 		LPDIRECTSOUNDSTREAM _dsStreamBuffer;
 
@@ -226,8 +226,8 @@ class AudioStream
 		uint32_t GetBufferSize();
 		void WaitForFreeBuffer();
 
-		StreamingVoiceContext *voiceContext;
-		uint64_t totalBytesPlayed;
+		StreamingVoiceContext *_voiceContext;
+		uint64_t _totalBytesPlayed;
 
 		~AudioStream();
 };
