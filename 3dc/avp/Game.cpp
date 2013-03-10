@@ -280,6 +280,7 @@ void StartGame(void)
 	}
 	
 	MotionTrackerScale = DIV_FIXED(ScreenDescriptorBlock.SDB_Width, 640);
+//	MotionTrackerScale = DIV_FIXED(ScreenDescriptorBlock.SDB_Height, 480) - (13107);
 
 	InitialiseTriggeredFMVs();
 	CreateStarArray();

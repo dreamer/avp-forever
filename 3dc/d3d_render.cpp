@@ -187,10 +187,21 @@ struct renderCorona
 std::vector<renderParticle> particleArray;
 std::vector<renderCorona>   coronaArray;
 
+// temp
+inline float FMV_WPos2DC(int32_t pos)
+{
+	return (float(pos / (float)640) * 2) - 1;
+}
+inline float FMV_HPos2DC(int32_t pos)
+{
+	return (float(pos / (float)480) * 2) - 1;
+}
+
 // convert a width pixel range value (eg 0-640) to device coordinate (eg -1.0 to 1.0)
 inline float WPos2DC(int32_t pos)
 {
-	if (mainMenu) {
+//	if (mainMenu) {
+	if ((GetAvPMenuState() == MENUSSTATE_MAINMENUS) || (GetAvPMenuState() == MENUSSTATE_INGAMEMENUS)) {
 		return (float(pos / (float)640) * 2) - 1;
 	}
 	else {
@@ -201,7 +212,8 @@ inline float WPos2DC(int32_t pos)
 // convert a width pixel range value (eg 0-480) to device coordinate (eg -1.0 to 1.0)
 inline float HPos2DC(int32_t pos)
 {
-	if (mainMenu) {
+//	if (mainMenu) {
+	if ((GetAvPMenuState() == MENUSSTATE_MAINMENUS) || (GetAvPMenuState() == MENUSSTATE_INGAMEMENUS)) {
 		return (float(pos / (float)480) * 2) - 1;
 	}
 	else {
@@ -451,14 +463,37 @@ void DrawFmvFrame(uint32_t frameWidth, uint32_t frameHeight, const std::vector<t
 #endif
 
 	// offset the video vertically in the centre of the screen
-	uint32_t topX = (640 - frameWidth) / 2;
-	uint32_t topY = (480 - frameHeight) / 2;
+	uint32_t topX, topY;
+
+//	uint32_t wScale = ScreenDescriptorBlock.SDB_Width / 640;
+//	uint32_t yScale = ScreenDescriptorBlock.SDB_Height / 480;
+	/*
+	if (mainMenu) {
+		topX = (640 - frameWidth) / 2;
+		topY = (480 - frameHeight) / 2;
+	} else {
+		topX = (ScreenDescriptorBlock.SDB_Width  - frameWidth) / 2;
+		topY = (ScreenDescriptorBlock.SDB_Height - frameHeight) / 2;
+	}
 
 	float x1 = WPos2DC(topX);
 	float y1 = HPos2DC(topY);
 
 	float x2 = WPos2DC(topX + frameWidth);
 	float y2 = HPos2DC(topY + frameHeight);
+	*/
+
+//	frameWidth *= wScale;
+//	frameHeight *= yScale;
+
+	topX = (/*ScreenDescriptorBlock.SDB_Width*/640  - frameWidth) / 2;
+	topY = (/*ScreenDescriptorBlock.SDB_Height*/480 - frameHeight) / 2;
+
+	float x1 = FMV_WPos2DC(topX);
+	float y1 = FMV_HPos2DC(topY);
+
+	float x2 = FMV_WPos2DC(topX + frameWidth);
+	float y2 = FMV_HPos2DC(topY + frameHeight);
 
 	// for non power of 2 texture UV adjustment - get top two textures (tex 2 and 3 should be the same resolution)
 	Texture tempTexture  = Tex_GetTextureDetails(textureIDs[0]);
@@ -554,8 +589,8 @@ void DrawProgressBar(const RECT &srcRect, const RECT &destRect, texID_t textureI
 
 	Texture thisTexture = Tex_GetTextureDetails(textureID);
 
-	float RecipW = (1.0f / thisTexture.realWidth);
-	float RecipH = (1.0f / thisTexture.realHeight);
+	float RecipW = 1.0f / thisTexture.realWidth;
+	float RecipH = 1.0f / thisTexture.realHeight;
 
 	orthoList->AddItem(4, textureID, TRANSLUCENCY_OFF, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
 
@@ -1013,7 +1048,7 @@ void DrawSmallMenuCharacter(uint32_t topX, uint32_t topY, uint32_t texU, uint32_
 	uint32_t textureWidth  = 0;
 	uint32_t textureHeight = 0;
 
-	Tex_GetDimensions(AVPMENUGFX_SMALL_FONT, textureWidth, textureHeight);
+	Tex_GetDimensions(AAFontImageNumber, textureWidth, textureHeight);
 
 	float RecipW = 1.0f / textureWidth; // 0.00390625
 	float RecipH = 1.0f / textureHeight;
@@ -1024,7 +1059,7 @@ void DrawSmallMenuCharacter(uint32_t topX, uint32_t topY, uint32_t texU, uint32_
 	float x2 = WPos2DC(topX + font_width);
 	float y2 = HPos2DC(topY + font_height);
 
-	orthoList->AddItem(4, AVPMENUGFX_SMALL_FONT, TRANSLUCENCY_GLOWING, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
+	orthoList->AddItem(4, AAFontImageNumber, TRANSLUCENCY_GLOWING, FILTERING_BILINEAR_ON, TEXTURE_CLAMP);
 
 	// bottom left
 	orthoVertex[orthoVBOffset].x = x1;
@@ -1344,8 +1379,8 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 	uint32_t texWidth, texHeight;
 	Tex_GetDimensions(textureID, texWidth, texHeight);
 
-	float RecipW = 1.0f / (float) texWidth;
-	float RecipH = 1.0f / (float) texHeight;
+	float RecipW = 1.0f / /*(float)*/ texWidth;
+	float RecipH = 1.0f / /*(float)*/ texHeight;
 
 	if (gunLayer) {
 		weaponList->AddItem(RenderPolygon.NumberOfVertices, textureID, RenderPolygon.TranslucencyMode);

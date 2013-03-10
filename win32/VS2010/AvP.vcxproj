@@ -309,7 +309,6 @@
     <ClCompile Include="..\..\3dc\avp\TRIGGERS.cpp" />
     <ClCompile Include="..\..\3dc\avp\Weapons.cpp" />
     <ClCompile Include="..\..\3dc\avp\win95\AVPCHUNK.CPP" />
-    <ClCompile Include="..\..\3dc\avp\win95\AvpReg.cpp" />
     <ClCompile Include="..\..\3dc\avp\win95\CHEAT.cpp" />
     <ClCompile Include="..\..\3dc\avp\win95\chtcodes.cpp" />
     <ClCompile Include="..\..\3dc\avp\win95\d3d_hud.cpp" />

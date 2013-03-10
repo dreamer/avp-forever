@@ -70,3 +70,6 @@ Name: {app}\libsmackerdec.dll; Type: files;
 Name: {app}\libtheora.dll; Type: files;
 Name: {app}\libvorbis.dll; Type: files;
 Name: {app}\libvorbisfile.dll; Type: files;
+Name: {app}\OpenAL32.dll; Type: files;
+Name: {app}\AvPx_License.txt; Type: files;
+Name: {app}\AvPx_Readme.txt; Type: files;

@@ -8,19 +8,13 @@
 #include "gameplat.h"
 #define UseLocalAssert TRUE
 #include "ourasert.h"
-
-/* patrick 5/12/96 */
 #include "bh_far.h"
 #include "pheromon.h"
 #include "huddefs.h"
 #include "hudgfx.h"
 #include "bh_gener.h"
 #include "pvisible.h"
-
 #include "projload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
-//#include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
-
-#include "ffstdio.h" // fast file stdio
 #include "avp_menus.h"
 
 /*------------Patrick 1/6/97---------------

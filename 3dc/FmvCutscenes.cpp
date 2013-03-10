@@ -52,10 +52,8 @@ int IntroOutroMoviesAreActive = 1;
 int VolumeOfNearestVideoScreen = 0;
 int PanningOfNearestVideoScreen = 0;
 
-//VorbisPlayback	*menuMusic = NULL;
-SmackerPlayback		*menuMusic = NULL;
-//TheoraPlayback	*menuFMV = NULL;
-BinkPlayback	*menuFMV = NULL;
+SmackerPlayback	*menuMusic = NULL;
+BinkPlayback	*menuFMV   = NULL;
 bool MenuBackgroundFMV = false;
 
 extern void ThisFramesRenderingHasBegun(void);
@@ -85,7 +83,18 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 	{
 		int volume = MUL_FIXED(FmvSoundVolume*256, GetVolumeOfNearestVideoScreen());
 
-//		fmvList[ftPtr->fmvHandle]->_audioStream->SetVolume(volume);
+		volume /= 256;
+
+		char buf[100];
+		sprintf(buf, "fmv volume: %d\n", volume);
+		OutputDebugString(buf);
+
+		// divide by 256?
+
+
+		// panning of 32768 = centre (both speakers)
+
+		fmvList[ftPtr->fmvHandle]->_audioStream->SetVolume(volume);
 //		fmvList[ftPtr->fmvHandle]->_audioStream->SetPan(PanningOfNearestVideoScreen);
 
 		ftPtr->SoundVolume = FmvSoundVolume;
@@ -458,21 +467,21 @@ extern void InitialiseTriggeredFMVs()
 
 extern void GetFMVInformation(int *messageNumberPtr, int *frameNumberPtr)
 {
-//	uint32_t i = NumberOfFMVTextures;
-/*
+	int32_t i = NumberOfFMVTextures;
+
 	while (i--)
 	{
 		if (FMVTexture[i].IsTriggeredPlotFMV)
 		{
-			if (FMVTexture[i].SmackHandle)
+			if (FMVTexture[i].fmvHandle != -1)
 			{
 				*messageNumberPtr = FMVTexture[i].MessageNumber;
-				*frameNumberPtr = 0;
+				*frameNumberPtr = fmvList[FMVTexture[i].fmvHandle]->_currentFrame;
 				return;
 			}
 		}
 	}
-*/
+
 	*messageNumberPtr = 0;
 	*frameNumberPtr = 0;
 }

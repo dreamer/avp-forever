@@ -631,6 +631,18 @@ static sndSource* FindFreeSource()
 	for (size_t i = 0; i < sourceList.size(); i++) {
 		if (sourceList[i]._isFree) {
 			sourceList[i]._isFree = false;
+
+			// set some default values
+			alSourcef (sourceList[i]._alSource, AL_PITCH,           1.0f);
+			alSourcef (sourceList[i]._alSource, AL_GAIN,            1.0f);
+			alSourcei (sourceList[i]._alSource, AL_LOOPING,         AL_FALSE);
+			alSource3f(sourceList[i]._alSource, AL_POSITION,        0.0f, 0.0f, 0.0f);
+			alSource3f(sourceList[i]._alSource, AL_VELOCITY,        0.0f, 0.0f, 0.0f);
+			alSource3f(sourceList[i]._alSource, AL_DIRECTION,       0.0f, 0.0f, 0.0f);
+			alSourcef (sourceList[i]._alSource, AL_ROLLOFF_FACTOR,  0.0f);
+			alSourcei (sourceList[i]._alSource, AL_SOURCE_RELATIVE, AL_TRUE);
+
+
 			return &sourceList[i];
 		}
 	}
@@ -1463,14 +1475,14 @@ bool AudioStream::Init(uint32_t nChannels, uint32_t rate, uint32_t bitsPerSample
 		Con_PrintError("No free sources available for streaming audio");
 		return false;
 	}
-
+/*
 	alSourcei (_source->_alSource, AL_LOOPING,         AL_FALSE);
 	alSource3f(_source->_alSource, AL_POSITION,        0.0f, 0.0f, 0.0f);
 	alSource3f(_source->_alSource, AL_VELOCITY,        0.0f, 0.0f, 0.0f);
 	alSource3f(_source->_alSource, AL_DIRECTION,       0.0f, 0.0f, 0.0f);
 	alSourcef (_source->_alSource, AL_ROLLOFF_FACTOR,  0.0f);
 	alSourcei (_source->_alSource, AL_SOURCE_RELATIVE, AL_TRUE);
-
+*/
 	_bytesPerSample = bitsPerSample / 8;
 	_nChannels = nChannels;
 	_rate = rate;

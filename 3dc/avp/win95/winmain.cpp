@@ -17,11 +17,9 @@
 #include "vision.h"
 #include "avp_menus.h"
 #include "ourasert.h" 
-#include "ffstdio.h" // fast file stdio
 #include "davehook.h"
 #include "showcmds.h"
 #include "consbind.hpp"
-#include "AvpReg.hpp"
 #include "mempool.h"
 #include "GammaControl.h"
 #include "avp_intro.h"
@@ -100,6 +98,9 @@ extern struct DEBUGGINGTEXTOPTIONS ShowDebuggingText;
 extern bool bRunning;
 
 bool unlimitedSaves = false;
+
+extern bool IsDemoVersion();
+extern texID_t AAFontImageNumber;
 
 void exit_break_point_function()
 {
@@ -300,20 +301,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		WeWantAnIntro();
 	}
 	#endif
-	GetPathFromRegistry();
 
-	/* JH 28/5/97 */
-	/* Initialise 'fast' file system */
-
-/*
-	#if MARINE_DEMO
-	ffInit("fastfile/mffinfo.txt", "fastfile/");
-	#elif ALIEN_DEMO
-	ffInit("alienfastfile/ffinfo.txt", "alienfastfile/");
-	#else
-	ffInit("fastfile/ffinfo.txt", "fastfile/");
-	#endif
-*/
+	// Initialise 'fast' file system
 	FF_Init();
 
 	InitGame();
@@ -359,6 +348,27 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 		MessageBox(hWndMain, error.c_str(), "Couldn't create render device!", MB_OK | MB_ICONSTOP);
 		exit(-1);
 	}
+
+	// load common font
+	if (IsDemoVersion()) {
+		AAFontImageNumber = Tex_CreateFromRIM("graphics/Menus/smallfont.RIM");
+	}
+	else {
+		AAFontImageNumber = Tex_CreateFromRIM("graphics/Common/aa_font.RIM");
+	}
+
+	extern void CalculateWidthsOfAAFont();
+	CalculateWidthsOfAAFont();
+
+	// call a function to remove the red grid from the small font texture- only if the texture is loaded
+	if (MISSING_TEXTURE != AAFontImageNumber)
+	{
+		DeRedTexture((Texture)Tex_GetTextureDetails(AAFontImageNumber));
+	}
+
+	// load slider graphics
+	AVPMENUGFX_SLIDERBAR       = Tex_CreateFromRIM("graphics/Menus/SliderBar.RIM");
+	AVPMENUGFX_SLIDER          = Tex_CreateFromRIM("graphics/Menus/Slider.RIM");
 
 	Con_Init();
 
@@ -646,6 +656,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 	#else
 //	QuickSplashScreens();
 	#endif
+
+	Tex_Release(AAFontImageNumber);
+	Tex_Release(AVPMENUGFX_SLIDERBAR);
+	Tex_Release(AVPMENUGFX_SLIDER);
 
 	ExitSystem();
 

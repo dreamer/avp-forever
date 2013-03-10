@@ -4,7 +4,6 @@
 #include "kshape.h"
 #include "progress_bar.h"
 #include "chnktexi.h"
-#include "awtexld.h"
 #include "inline.h"
 #include "gamedef.h"
 #include "psnd.h"
@@ -50,7 +49,7 @@ texID_t dbTextureID    = NO_TEXTURE;
 
 void Start_Progress_Bar()
 {
-	AAFontImageNumber = Tex_CreateFromRIM("graphics/Common/aa_font.RIM");
+//	AAFontImageNumber = Tex_CreateFromRIM("graphics/Common/aa_font.RIM");
 	
 	// load other graphics
 	if (!IsDemoVersion())
@@ -80,7 +79,6 @@ void Start_Progress_Bar()
 		if (!IsDemoVersion())
 		{
 			DrawProgressBar(LoadingBarEmpty_SrcRect, LoadingBarEmpty_DestRect, emptyTextureID);
-
 			RenderBriefingText(ScreenDescriptorBlock.SDB_Height/2, ONE_FIXED);
 		}
 		else

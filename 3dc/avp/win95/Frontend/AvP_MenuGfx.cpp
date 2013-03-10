@@ -1,12 +1,10 @@
 #include "3dc.h"
 #include "inline.h"
 #include "strtab.hpp"
-#include "awTexLd.h"
 #include "chnktexi.h"
 #include "hud_layout.h"
 #define UseLocalAssert TRUE
 #include "ourasert.h"
-#include "ffstdio.h"
 #include "renderer.h"
 #include "console.h"
 #include "TextureManager.h"
@@ -21,11 +19,11 @@ extern void DrawMenuTextGlow(uint32_t topLeftX, uint32_t topLeftY, uint32_t size
 extern void D3D_RenderHUDString(char *stringPtr,int x,int y,int colour);
 static void LoadMenuFont(void);
 extern int RenderSmallFontString(char *textPtr,int sx,int sy,int alpha, int red, int green, int blue);
-static void CalculateWidthsOfAAFont(void);
+/*static*/ void CalculateWidthsOfAAFont();
 extern bool IsDemoVersion();
 
 texID_t AVPMENUGFX_CLOUDY;
-texID_t AVPMENUGFX_SMALL_FONT;
+//texID_t AVPMENUGFX_SMALL_FONT;
 texID_t AVPMENUGFX_COPYRIGHT_SCREEN;
 
 texID_t AVPMENUGFX_PRESENTS;
@@ -750,22 +748,22 @@ Determine area used by text , so we can draw it centrally
 void LoadAllMenuTextures()
 {
 	AVPMENUGFX_CLOUDY = Tex_CreateFromRIM("graphics/Menus/fractal.RIM");
-
+#if 0
 	if (IsDemoVersion()) {
 		AVPMENUGFX_SMALL_FONT = Tex_CreateFromRIM("graphics/Menus/smallfont.RIM");
 	}
 	else {
 		AVPMENUGFX_SMALL_FONT = Tex_CreateFromRIM("graphics/Common/aa_font.RIM");
 	}
-
+#endif
 	AVPMENUGFX_COPYRIGHT_SCREEN = Tex_CreateFromRIM("graphics/Menus/Copyright.RIM");
 
 	AVPMENUGFX_PRESENTS        = Tex_CreateFromRIM("graphics/Menus/FIandRD.RIM");
 	AVPMENUGFX_AREBELLIONGAME  = Tex_CreateFromRIM("graphics/Menus/presents.RIM");
 	AVPMENUGFX_ALIENSVPREDATOR = Tex_CreateFromRIM("graphics/Menus/AliensVPredator.RIM");
 
-	AVPMENUGFX_SLIDERBAR       = Tex_CreateFromRIM("graphics/Menus/SliderBar.RIM");
-	AVPMENUGFX_SLIDER          = Tex_CreateFromRIM("graphics/Menus/Slider.RIM");
+//	AVPMENUGFX_SLIDERBAR       = Tex_CreateFromRIM("graphics/Menus/SliderBar.RIM");
+//	AVPMENUGFX_SLIDER          = Tex_CreateFromRIM("graphics/Menus/Slider.RIM");
 
 	AVPMENUGFX_BACKDROP        = Tex_CreateFromRIM("graphics/Menus/Starfield.RIM");
 	AVPMENUGFX_ALIENS_LOGO     = Tex_CreateFromRIM("graphics/Menus/aliens.RIM");
@@ -814,7 +812,7 @@ void LoadAllMenuTextures()
 	AVPMENUGFX_ALIEN_EPISODE9  = Tex_CreateFromRIM("graphics/Menus/bonus.RIM");
 	AVPMENUGFX_ALIEN_EPISODE10 = Tex_CreateFromRIM("graphics/Menus/bonus.RIM");
 
-	// Splash screens
+	// Demo Splash screens
 	#if MARINE_DEMO
 		AVPMENUGFX_WINNER_SCREEN = Tex_CreateFromRIM("graphics/MarineSplash/splash00.RIM");
 
@@ -831,7 +829,7 @@ void LoadAllMenuTextures()
 		AVPMENUGFX_SPLASH_SCREEN3 = Tex_CreateFromRIM("graphics/AlienSplash/splash03.RIM");
 		AVPMENUGFX_SPLASH_SCREEN4 = Tex_CreateFromRIM("graphics/AlienSplash/splash04.RIM");
 		AVPMENUGFX_SPLASH_SCREEN5 = Tex_CreateFromRIM("graphics/AlienSplash/splash05.RIM");
-	#else
+	#elif PREDATOR_DEMO
 		AVPMENUGFX_WINNER_SCREEN = Tex_CreateFromRIM("graphics/PredatorSplash/splash00.RIM");
 
 		AVPMENUGFX_SPLASH_SCREEN1 = Tex_CreateFromRIM("graphics/PredatorSplash/splash01.RIM");
@@ -846,14 +844,15 @@ extern void LoadAllAvPMenuGfx(void)
 {
 	LoadAllMenuTextures();
 	LoadMenuFont();
-	CalculateWidthsOfAAFont();
+//	CalculateWidthsOfAAFont();
 
 	// call a function to remove the red grid from the small font texture- only if the texture is loaded
+/*
 	if (MISSING_TEXTURE != AVPMENUGFX_SMALL_FONT)
 	{
 		DeRedTexture((Texture)Tex_GetTextureDetails(AVPMENUGFX_SMALL_FONT));
 	}
-
+*/
 	/*
 		AVPMENUGFX_ALIEN_LOGO and friends were originally constants that could be assigned at 
 		compile time (done in AvP_MenuData.c). As the IDs are no longer constants, we set them to 0
@@ -867,13 +866,13 @@ extern void LoadAllAvPMenuGfx(void)
 extern void ReleaseAllAvPMenuGfx(void)
 {
 	Tex_Release(AVPMENUGFX_CLOUDY);
-	Tex_Release(AVPMENUGFX_SMALL_FONT);
+//	Tex_Release(AVPMENUGFX_SMALL_FONT);
 	Tex_Release(AVPMENUGFX_COPYRIGHT_SCREEN);
 	Tex_Release(AVPMENUGFX_PRESENTS);
 	Tex_Release(AVPMENUGFX_AREBELLIONGAME);
 	Tex_Release(AVPMENUGFX_ALIENSVPREDATOR);
-	Tex_Release(AVPMENUGFX_SLIDERBAR);
-	Tex_Release(AVPMENUGFX_SLIDER);
+//	Tex_Release(AVPMENUGFX_SLIDERBAR);
+//	Tex_Release(AVPMENUGFX_SLIDER);
 	Tex_Release(AVPMENUGFX_BACKDROP);
 	Tex_Release(AVPMENUGFX_ALIENS_LOGO);
 	Tex_Release(AVPMENUGFX_ALIEN_LOGO);
@@ -1061,9 +1060,11 @@ extern int HeightOfMenuGfx(texID_t textureID)
 	return texHeight;
 }
 
-static void CalculateWidthsOfAAFont(void)
+extern texID_t AAFontImageNumber;
+
+/*static*/ void CalculateWidthsOfAAFont()
 {
-	if (MISSING_TEXTURE == AVPMENUGFX_SMALL_FONT)
+	if (MISSING_TEXTURE == AAFontImageNumber)
 	{
 		// the texture isn't loaded or hasn't loaded correctly so we can't perform the width calculation
 		return;
@@ -1072,7 +1073,7 @@ static void CalculateWidthsOfAAFont(void)
 	uint32_t textureWidth  = 0;
 	uint32_t textureHeight = 0;
 
-	Tex_GetDimensions(AVPMENUGFX_SMALL_FONT, textureWidth, textureHeight);
+	Tex_GetDimensions(AAFontImageNumber, textureWidth, textureHeight);
 
 	// we'll assume it can't be smaller than the original AvP font texture
 //	assert(textureWidth  >= 256);
@@ -1081,7 +1082,7 @@ static void CalculateWidthsOfAAFont(void)
 	uint8_t *originalSrcPtr = NULL;
 	uint32_t pitch = 0;
 
-	if (!Tex_Lock(AVPMENUGFX_SMALL_FONT, &originalSrcPtr, &pitch))
+	if (!Tex_Lock(AAFontImageNumber, &originalSrcPtr, &pitch))
 	{
 		Con_PrintError("CalculateWidthsOfAAFont() failed - Can't lock texture");
 		return;
@@ -1132,5 +1133,5 @@ static void CalculateWidthsOfAAFont(void)
 		}
 	}
 
-	Tex_Unlock(AVPMENUGFX_SMALL_FONT);
+	Tex_Unlock(AAFontImageNumber);
 }

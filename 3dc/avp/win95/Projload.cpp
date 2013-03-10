@@ -39,8 +39,6 @@
 #include "pvisible.h"
 #include "psndplat.h"
 #include "jsndsup.h"
-#include "AvpReg.hpp"
-#include "ffstdio.h"
 #include "d3d_hud.h"
 #include "decal.h"
 #include "mempool.h"
@@ -76,13 +74,6 @@ extern void PurgeMSLShapeList();
 
 BOOL LevelHasStars;
 
-// these are to link with chnkimag.cpp
-//const char *ToolsTex_Directory = "//Kate/Kate Share/avp/ToolsTex/";
-//const char *GenTex_Directory = "//Kate/Kate Share/avp/GenG-Tex/";
-//const char *SubShps_Directory = "SubShps/All/";
-// const char * GenTex_Directory = 0;
-//const char *FixTex_Directory = "//Kate/Kate Share/avp/Fix-Tex/";
-//const char *GameTex_Directory = "//Kate/Kate Share/avp/game-tex/";
 // new directories for new-style graphics - to be determined properly
 char const *FirstTex_Directory = "Graphics"; // currently relative to cwd
 char const *SecondTex_Directory = 0; // will be the src safe shadow for development builds
@@ -2905,43 +2896,11 @@ void avp_undo_rif_load(RIFFHANDLE h)
 
 RIFFHANDLE avp_load_rif(const char * fname)
 {
-	//see if there is a local copy of the rif file
-	FILE *rifFile = avp_fopen(fname, "rb");
-
-	if (!rifFile && AvpCDPath)
-	{
-		//try and load rif file from cd instead
-		char RifName[MAX_PATH];
-		sprintf(RifName, "%s%s", AvpCDPath, fname);
-		return load_rif(RifName);
-	}
-
-	// extra check
-	if (rifFile)
-	{
-		fclose(rifFile);
-	}
-
 	return load_rif(fname); 
 }
 
-RIFFHANDLE avp_load_rif_non_env(const char * fname)
+RIFFHANDLE avp_load_rif_non_env(const char *fname)
 {
-	//see if there is a local copy of the rif file
-	FILE* rifFile = avp_fopen(fname,"rb");
-	if(!rifFile && AvpCDPath)
-	{
-		//try and load rif file from cd instead
-		char RifName[MAX_PATH];
-		sprintf(RifName,"%s%s",AvpCDPath,fname);
-		return load_rif_non_env(RifName);
-	}
-
-	// extra check
-	if (rifFile)
-	{
-		fclose(rifFile);
-	}
 	return load_rif_non_env(fname); 
 }
 

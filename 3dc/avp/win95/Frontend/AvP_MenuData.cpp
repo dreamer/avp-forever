@@ -211,8 +211,17 @@ static AVPMENU_ELEMENT AvPMenu_VideoModeOptions[] =
 	{AVPMENU_ELEMENT_ENDOFMENU}
 };
 
+// bjd - ingame version of above
+static AVPMENU_ELEMENT AvPMenu_InGameVideoModeOptions[] =
+{
+	{AVPMENU_ELEMENT_VIDEOMODE,		{TEXTSTRING_VIDEOOPTIONS_TITLE},	{0},	{0},	{0},	TEXTSTRING_VIDEOOPTIONS_TITLE_HELP},
+	{AVPMENU_ELEMENT_VIDEOMODEOK,	{TEXTSTRING_AVOPTIONS_USETHESESETTINGS},	{AVPMENU_INGAMEAVOPTIONS},	{0},	{0},	TEXTSTRING_AVOPTIONS_USETHESESETTINGS_HELP},
+	{AVPMENU_ELEMENT_ENDOFMENU}
+};
+
 static AVPMENU_ELEMENT AvPMenu_InGameAVOptions[] = 
 {
+	{AVPMENU_ELEMENT_GOTOMENU,      {TEXTSTRING_VIDEOOPTIONS_TITLE},  {AVPMENU_INGAMEVIDEOMODE}}, // bjd - for ingame resolution changing
 	{AVPMENU_ELEMENT_SLIDER,		{TEXTSTRING_AVOPTIONS_GAMMASETTING},	{255},	{&RequestedGammaSetting}},
 	{AVPMENU_ELEMENT_SLIDER,		{TEXTSTRING_AVOPTIONS_EFFECTSVOLUME},	 {VOLUME_MAX},	{&EffectsSoundVolume}},
 	{AVPMENU_ELEMENT_SLIDER,		{TEXTSTRING_AVOPTIONS_MUSICVOLUME},	 {ONE_FIXED/512},	{&FmvSoundVolume}},
@@ -867,6 +876,9 @@ AVPMENU AvPMenusData[]=
 
 	// AVPMENU_SAVEGAME
 	{AVPMENU_FONT_SMALL,TEXTSTRING_SAVEGAME,					AvPMenu_SaveGame, AVPMENU_MAIN, 0},
+
+	// AVPMENU_INGAMEVIDEOMODE
+	{AVPMENU_FONT_SMALL,	TEXTSTRING_VIDEOOPTIONS_TITLE,		AvPMenu_InGameVideoModeOptions,		AVPMENU_INGAMEAVOPTIONS,	0},
 };
 
 extern void MakeSelectSessionMenu(void)
@@ -875,7 +887,7 @@ extern void MakeSelectSessionMenu(void)
 
 	if (NumberOfSessionsFound)
 	{
-		for (i=0; i<NumberOfSessionsFound; i++)
+		for (i = 0; i < NumberOfSessionsFound; i++)
 		{
 			AvPMenu_MultiplayerSelectSession[i].ElementID = AVPMENU_ELEMENT_LISTCHOICE;
 			AvPMenu_MultiplayerSelectSession[i].TextPtr = SessionData[i].Name;
@@ -889,32 +901,12 @@ extern void MakeSelectSessionMenu(void)
 		AvPMenu_MultiplayerSelectSession[0].TextDescription = TEXTSTRING_MULTIPLAYER_NOSESSIONSFOUND;
 		AvPMenu_MultiplayerSelectSession[0].MenuToGoTo = AVPMENU_MULTIPLAYERJOINGAME;
 		AvPMenu_MultiplayerSelectSession[0].HelpString = TEXTSTRING_MULTIPLAYER_NOSESSIONSFOUND_HELP;
-/*
-		if(netGameData.connectionType!=CONN_TCPIP)
-		{
-			AvPMenu_MultiplayerSelectSession[0].MenuToGoTo = AVPMENU_MULTIPLAYER;
-		}
-*/
-		i=1;
+		i = 1;
 	}
+
 	AvPMenu_MultiplayerSelectSession[i].ElementID = AVPMENU_ELEMENT_ENDOFMENU;
 
-	/*
-	Need to choose the correct parent menu.
-	For tcpip go back to chance to choose ip address.
-	Otherwise skip back to host/join menu
-	*/
-
-//	if(netGameData.connectionType==CONN_TCPIP)
-	{
-		AvPMenusData[AVPMENU_MULTIPLAYERSELECTSESSION].ParentMenu=AVPMENU_MULTIPLAYERJOINGAME;
-	}
-/*
-	else
-	{
-		AvPMenusData[AVPMENU_MULTIPLAYERSELECTSESSION].ParentMenu=AVPMENU_MULTIPLAYER;
-	}
-*/
+	AvPMenusData[AVPMENU_MULTIPLAYERSELECTSESSION].ParentMenu = AVPMENU_MULTIPLAYERJOINGAME;
 }
 
 extern void MakeInGameMenu(void)

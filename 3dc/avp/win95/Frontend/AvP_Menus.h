@@ -117,6 +117,8 @@ enum AVPMENU_ID
 
 	AVPMENU_LOADGAME,
 	AVPMENU_SAVEGAME,
+
+	AVPMENU_INGAMEVIDEOMODE // bjd - added for ingame resolution changing
 };
 
 enum AVPMENU_FONT_ID
@@ -252,11 +254,8 @@ typedef struct
 	};
 
 	enum TEXTSTRING_ID HelpString;
+	enum TEXTSTRING_ID NumberFieldZeroString; //special string for 0
 
-	union
-	{
-		enum TEXTSTRING_ID NumberFieldZeroString; //special string for 0
-	};
 	int Brightness;
 
 } AVPMENU_ELEMENT;

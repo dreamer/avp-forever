@@ -53,7 +53,7 @@ extern void Show_WinnerScreen(void);
 extern void AvP_UpdateMenus(void);
 extern void GetNextAllowedSpecies(int* species,BOOL search_forwards);
 static void SetBriefingTextForMultiplayer();
-extern BOOL Net_UpdateSessionList(int * SelectedItem);
+extern bool Net_UpdateSessionList(int * SelectedItem);
 extern void SelectMenuDisplayMode(void);
 extern void DrawMainMenusBackdrop(void);
 extern void GetFilenameForSaveSlot(int i, char *filenamePtr);
@@ -582,9 +582,9 @@ extern void AvP_UpdateMenus(void)
 
 		if (Net_UpdateSessionList(&selection))
 		{
-			//session list has changed , so we need to set the menu again
+			// session list has changed, so we need to set the menu again
 			SetupNewMenu(AVPMENU_MULTIPLAYERSELECTSESSION);
-			//adjust the selected menu item
+			// adjust the selected menu item
 			AvPMenus.CurrentlySelectedElement = selection;
 		}
 	}
@@ -711,13 +711,23 @@ extern void AvP_UpdateMenus(void)
 		}
 		case AVPMENU_INGAMEAVOPTIONS:
 		{
-			int scale = DIV_FIXED(ScreenDescriptorBlock.SDB_Height,480);
+			int scale = DIV_FIXED(480, 480);
+			int h = scale/2048;
+			int offset = scale/4096;
+			D3D_DrawColourBar(offset, offset+h,  ONE_FIXED, 0, 0);
+			D3D_DrawColourBar(offset*2+h, offset*2+h*2,  0, ONE_FIXED, 0);
+			D3D_DrawColourBar(480-offset*2-h*2, 480-offset*2-h,  0, 0, ONE_FIXED);
+			D3D_DrawColourBar(480-offset-h, 480-offset, ONE_FIXED, ONE_FIXED, ONE_FIXED);
+
+#if 0
+			int scale = DIV_FIXED(ScreenDescriptorBlock.SDB_Height, 480);
 			int h = scale/2048;
 			int offset = scale/4096;
 			D3D_DrawColourBar(offset, offset+h,  ONE_FIXED, 0, 0);
 			D3D_DrawColourBar(offset*2+h, offset*2+h*2,  0, ONE_FIXED, 0);
 			D3D_DrawColourBar(ScreenDescriptorBlock.SDB_Height-offset*2-h*2, ScreenDescriptorBlock.SDB_Height-offset*2-h,  0, 0, ONE_FIXED);
 			D3D_DrawColourBar(ScreenDescriptorBlock.SDB_Height-offset-h, ScreenDescriptorBlock.SDB_Height-offset, ONE_FIXED, ONE_FIXED, ONE_FIXED);
+#endif
 			RenderMenu();
 			break;
 		}
@@ -786,12 +796,6 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 			break;
 		}
 
-		case AVPMENU_VIDEOMODE:
-		{
-			//bjd LoadDeviceAndVideoModePreferences();
-			break;
-		}
-
 		case AVPMENU_USERPROFILESELECT:
 		{
 			InitialiseGammaSettings(128);
@@ -848,10 +852,10 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 		}
 		case AVPMENU_MULTIPLAYERSELECTSESSION:
 		{
-			if (previousMenuID!=AVPMENU_MULTIPLAYERSELECTSESSION)
+			if (previousMenuID != AVPMENU_MULTIPLAYERSELECTSESSION)
 			{
-				//save ip address (if it has been set)
-				SaveIPAddress(IP_Address_Name,IPAddressString);
+				// save ip address (if it has been set)
+				SaveIPAddress(IP_Address_Name, IPAddressString);
 				Net_JoinGame();
 			}
 			MakeSelectSessionMenu();
@@ -1155,23 +1159,21 @@ static void RenderMenu(void)
 	
 	if (AvPMenus.MenusState == MENUSSTATE_MAINMENUS)
 	{
-		if ((AvPMenus.CurrentMenu == AVPMENU_LEVELBRIEFING_BASIC)
-			||(AvPMenus.CurrentMenu == AVPMENU_LEVELBRIEFING_BONUS))
+		if    ((AvPMenus.CurrentMenu == AVPMENU_LEVELBRIEFING_BASIC)
+			|| (AvPMenus.CurrentMenu == AVPMENU_LEVELBRIEFING_BONUS))
 		{
 			y = MENU_BOTTOMYEDGE - AvPMenus.MenuHeight;
 			RenderBriefingScreenInfo();
 		}
 		else
 		{
-			y = MENU_CENTREY - (AvPMenus.MenuHeight)/2;
+			y = MENU_CENTREY - AvPMenus.MenuHeight / 2;
 		}
 	}
 	else // in game menus
 	{
-		// bjd - no more squinting to read text at high resolutions!
-//		AvPMenus.FontToUse = AVPMENU_FONT_BIG;
-//		y = (ScreenDescriptorBlock.SDB_Height - AvPMenus.MenuHeight * 2)/2;
-		y = (ScreenDescriptorBlock.SDB_Height - AvPMenus.MenuHeight) / 2;
+//		y = (ScreenDescriptorBlock.SDB_Height - AvPMenus.MenuHeight) / 2;
+		y = (480 - AvPMenus.MenuHeight) / 2;
 	}
 
 	for (int e = 0; e < AvPMenus.NumberOfElementsInMenu; e++, elementPtr++)
@@ -1283,10 +1285,11 @@ static void RenderEpisodeSelectMenu(void)
 			break;
 		}
 	}
-	{
-		char *textPtr = GetTextString(AvPMenusData[AvPMenus.CurrentMenu].MenuTitle);
-		RenderMenuText(textPtr,MENU_CENTREX,70,ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
-	}
+	
+	// render menu title
+	char *textPtr = GetTextString(AvPMenusData[AvPMenus.CurrentMenu].MenuTitle);
+	RenderMenuText(textPtr, MENU_CENTREX, 70, ONE_FIXED, AVPMENUFORMAT_CENTREJUSTIFIED);
+
 	for (i=0; i<=elementPtr->MaxSliderValue; i++)
 	{
 		int y;
@@ -1436,7 +1439,7 @@ static void RenderKeyConfigurationMenu(void)
 	int y;
 	int centreY;
 
-	if (AvPMenus.MenusState == MENUSSTATE_MAINMENUS)
+//	if (AvPMenus.MenusState == MENUSSTATE_MAINMENUS)
 	{
 		centreY = 480 / 2+25;
 
@@ -1454,6 +1457,7 @@ static void RenderKeyConfigurationMenu(void)
 		RenderKeyConfigRectangle(b);
 		RenderMenuText(textPtr, MENU_CENTREX, 70, ONE_FIXED, AVPMENUFORMAT_CENTREJUSTIFIED);
 	}
+#if 0
 	else
 	{
 		centreY = ScreenDescriptorBlock.SDB_Height/2+25;
@@ -1470,6 +1474,8 @@ static void RenderKeyConfigurationMenu(void)
 		
 		RenderKeyConfigRectangle(b);
 	}
+#endif
+
 	y = centreY-160;
 
 	for (i = 0; i<2; i++, elementPtr++)
@@ -1551,11 +1557,10 @@ static void RenderKeyConfigurationMenu(void)
 static void RenderScrollyMenu()
 {
 	AVPMENU_ELEMENT *elementPtr = AvPMenus.MenuElements;
-	{
-		//draw the title
-		char *textPtr = GetTextString(AvPMenusData[AvPMenus.CurrentMenu].MenuTitle);
-		RenderMenuText(textPtr, MENU_CENTREX, 70, ONE_FIXED, AVPMENUFORMAT_CENTREJUSTIFIED);
-	}
+	
+	// draw the title
+	char *textPtr = GetTextString(AvPMenusData[AvPMenus.CurrentMenu].MenuTitle);
+	RenderMenuText(textPtr, MENU_CENTREX, 70, ONE_FIXED, AVPMENUFORMAT_CENTREJUSTIFIED);
 
 	{
 		int first = AvPMenus.CurrentlySelectedElement;
@@ -1644,11 +1649,12 @@ static void RenderUserProfileSelectMenu(void)
 	int centrePosition = (currentEpisode)*65536+EpisodeSelectScrollOffset;
 	int i;
 	AVP_USER_PROFILE *profilePtr = GetFirstUserProfile();
-	{
-		char *textPtr = GetTextString(AvPMenusData[AvPMenus.CurrentMenu].MenuTitle);
-		RenderMenuText(textPtr,MENU_CENTREX,70,ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
-	}
+
+	char *textPtr = GetTextString(AvPMenusData[AvPMenus.CurrentMenu].MenuTitle);
+	RenderMenuText(textPtr,MENU_CENTREX,70,ONE_FIXED,AVPMENUFORMAT_CENTREJUSTIFIED);
+
 	GetLocalTime(&profilePtr->TimeLastUpdated);
+
 	for (i=0; i<=elementPtr->MaxSliderValue; i++, profilePtr = GetNextUserProfile())
 	{
 		int y;
@@ -1745,16 +1751,18 @@ static void RenderLoadGameMenu(void)
 	int y;
 	int (*RenderText)(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format);
 	
-	if (AvPMenus.MenusState == MENUSSTATE_MAINMENUS)
+//	if (AvPMenus.MenusState == MENUSSTATE_MAINMENUS)
 	{
 		y = MENU_CENTREY - (AvPMenus.MenuHeight)/2;
 		RenderText = RenderSmallMenuText;
 	}
+#if 0
 	else // in game menus
 	{
 		y = (ScreenDescriptorBlock.SDB_Height - AvPMenus.MenuHeight)/2;
 		RenderText = Hardware_RenderSmallMenuText;
 	}
+#endif
 
 	for (e = 0; e < AvPMenus.NumberOfElementsInMenu; e++, elementPtr++)
 	{
@@ -1878,6 +1886,7 @@ static void RenderLoadGameMenu(void)
 	}
 	else
 	{
+#if 0
 		char *textPtr = GetTextString(AvPMenusData[AvPMenus.CurrentMenu].MenuTitle);
 		AVPMENU_ELEMENT *elementPtr = &AvPMenus.MenuElements[AvPMenus.CurrentlySelectedElement];
 		y = (ScreenDescriptorBlock.SDB_Height - AvPMenus.MenuHeight)/2 - 30;
@@ -1885,6 +1894,7 @@ static void RenderLoadGameMenu(void)
 
 		y = (ScreenDescriptorBlock.SDB_Height + AvPMenus.MenuHeight)/2 + 20;
 		RenderText(GetTextString(elementPtr->HelpString), MENU_CENTREX, y, ONE_FIXED, AVPMENUFORMAT_CENTREJUSTIFIED);
+#endif
 	}
 }
 
@@ -1892,7 +1902,7 @@ static void RenderHelpString()
 {
 	AVPMENU_ELEMENT *elementPtr = &AvPMenus.MenuElements[AvPMenus.CurrentlySelectedElement];
 
-	if (elementPtr->HelpString!=TEXTSTRING_BLANK && AvPMenus.MenusState != MENUSSTATE_INGAMEMENUS)
+	if (elementPtr->HelpString!=TEXTSTRING_BLANK/* && AvPMenus.MenusState != MENUSSTATE_INGAMEMENUS*/)
 	{
 		RECT area;
 		//draw the attached string at the bottom of the screen
@@ -2129,13 +2139,13 @@ static void ActUponUsersInput(void)
 	{	
 		if ((DebouncedKeyboardInput[KEY_ESCAPE] || DebouncedKeyboardInput[KEY_JOYSTICK_BUTTON_4]) && (AvPMenus.CurrentMenu != AVPMENU_MAIN && AvPMenus.CurrentMenu != AVPMENU_INGAME))
 		{
-			switch(AvPMenus.CurrentMenu)
+			switch (AvPMenus.CurrentMenu)
 			{
 				case AVPMENU_MULTIPLAYER_CONFIG_JOIN:
 				{
 					AddNetMsg_PlayerLeaving();
 					NetSendMessages();
-					if(!LobbiedGame)
+					if (!LobbiedGame)
 					{
 						Net_Disconnect();
 					}
@@ -2145,7 +2155,7 @@ static void ActUponUsersInput(void)
 				{
 					SetDetailLevelsFromMenu();
 					SaveUserProfile(UserProfilePtr);
-					if(AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
+					if (AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
 					{
 						SetupNewMenu(AVPMENU_INGAMEAVOPTIONS);
 					}
@@ -2370,11 +2380,11 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 		{
 			if (interactionID == AVPMENU_ELEMENT_INTERACTION_SELECT)
 			{
-				//Check to see if we are on one of the menus for entering multiplayer name
-				if(AvPMenus.CurrentMenu==AVPMENU_MULTIPLAYER ||
-				   AvPMenus.CurrentMenu==AVPMENU_MULTIPLAYER_LOBBIEDSERVER)
+				// Check to see if we are on one of the menus for entering multiplayer name
+				if (AvPMenus.CurrentMenu == AVPMENU_MULTIPLAYER ||
+				   AvPMenus.CurrentMenu  == AVPMENU_MULTIPLAYER_LOBBIEDSERVER)
 				{
-					//save profile , so that multiplayer name is remembered
+					// save profile, so that multiplayer name is remembered
 					SaveUserProfile(UserProfilePtr);
 				}
 			
@@ -2386,7 +2396,7 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 		{
 			if (interactionID == AVPMENU_ELEMENT_INTERACTION_SELECT)
 			{
-				if(MP_Config_Name[0])
+				if (MP_Config_Name[0])
 				{
 					SaveMultiplayerConfiguration(MP_Config_Name);
 				}
@@ -3104,9 +3114,9 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 				SetDetailLevelsFromMenu();
 				SaveUserProfile(UserProfilePtr);
 				
-				if(AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
+				if (AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
 				{
-					if(AvPMenus.CurrentMenu == AVPMENU_DETAILLEVELS)
+					if (AvPMenus.CurrentMenu == AVPMENU_DETAILLEVELS)
 					{
 						SetupNewMenu(AVPMENU_INGAMEAVOPTIONS);
 					}
@@ -3171,12 +3181,14 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 	}
 	else
 	{
+#if 0
 		if (AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
 		{
 			RenderText = Hardware_RenderSmallMenuText;
 			RenderText_Coloured = Hardware_RenderSmallMenuText_Coloured;
 		}
 		else
+#endif
 		{
 			RenderText = RenderSmallMenuText;
 			RenderText_Coloured = RenderSmallMenuText_Coloured;
@@ -3212,6 +3224,7 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 			char *textPtr = GetTextString(static_cast<enum TEXTSTRING_ID>(elementPtr->TextDescription));
 
 			// general text rendering
+#if 0
 			if (AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
 			{
 				int menuCentreX = ScreenDescriptorBlock.SDB_Width / 2;
@@ -3219,6 +3232,7 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 				break;
 			}
 			else
+#endif
 			{
 				RenderText(textPtr, MENU_CENTREX, y, elementPtr->Brightness, AVPMENUFORMAT_CENTREJUSTIFIED);
 				break;
@@ -3252,7 +3266,7 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 			
 			if (elementPtr->TextDescription!=TEXTSTRING_BLANK)
 			{
-		
+#if 0
 				if (AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
 				{
 					RenderText
@@ -3273,6 +3287,7 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 					);
 				}
 				else
+#endif
 				{
 					int length = LengthOfMenuText(textPtr);
 
@@ -3542,13 +3557,14 @@ static void RenderMenuElement(AVPMENU_ELEMENT *elementPtr, int e, int y)
 			x += (201 * (*elementPtr->SliderValuePtr)) / elementPtr->MaxSliderValue;
 
 			RenderText(GetTextString(static_cast<enum TEXTSTRING_ID>(elementPtr->TextDescription)),MENU_CENTREX-MENU_ELEMENT_SPACING,y,elementPtr->Brightness,AVPMENUFORMAT_RIGHTJUSTIFIED);
-
+#if 0
 			if (AvPMenus.MenusState == MENUSSTATE_INGAMEMENUS)
 			{
 				D3D_DrawSliderBar(/*MENU_CENTREX*/(/*ScreenDescriptorBlock.SDB_Width*/640/2)+MENU_ELEMENT_SPACING, y+1, elementPtr->Brightness);
 				D3D_DrawSlider(x, y+4, elementPtr->Brightness);
 			}
 			else
+#endif
 			{
 				DrawAvPMenuGfx(AVPMENUGFX_SLIDERBAR, MENU_CENTREX+MENU_ELEMENT_SPACING, y+1, elementPtr->Brightness, AVPMENUFORMAT_LEFTJUSTIFIED);
 				DrawAvPMenuGfx(AVPMENUGFX_SLIDER, x, y+4, elementPtr->Brightness, AVPMENUFORMAT_LEFTJUSTIFIED);
@@ -4848,8 +4864,6 @@ void RenderBriefingText(int centreY, int brightness)
 	{
 		x = (ScreenDescriptorBlock.SDB_Width-lengthOfLongestLine)/2;
 	}
-
-//	x = (ScreenDescriptorBlock.SDB_Width - lengthOfLongestLine) / 2;
 
 	y = centreY - 3*HUD_FONT_HEIGHT;
 

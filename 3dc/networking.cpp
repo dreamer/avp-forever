@@ -112,8 +112,125 @@ static const GUID AvPGuid = { 0x379cca80, 0x8bdd, 0x11d0, { 0xa0, 0x78, 0x0, 0x4
 
 const uint32_t kMessageHeaderSize = sizeof(MessageHeader);
 
-BOOL Net_UpdateSessionList(int *SelectedItem)
+bool Net_SessionPoll()
 {
+	static bool isPolling = false;
+	static ENetHost *searchHost = 0;
+
+	ENetEvent eEvent;
+
+	if (!isPolling) 
+	{
+		// set up broadcast address
+		BroadcastAddress.host = ENET_HOST_BROADCAST;
+		BroadcastAddress.port = netPortNumber; // can I reuse port?? :\
+
+		// create Enet client
+		searchHost = enet_host_create(NULL,    // create a client host
+					1,                         // only allow 1 outgoing connection
+					0,                         // channel limit
+					incomingBandwidth,         // 57600 / 8 - 56K modem with 56 Kbps downstream bandwidth
+					outgoingBandwidth);        // 14400 / 8 - 56K modem with 14 Kbps upstream bandwidth
+
+		if (NULL == searchHost) {
+			Con_PrintError("Net_SessionPoll() - Failed to create ENet client");
+			return false;
+		}
+
+		ENetPeer *peer = enet_host_connect(searchHost, &BroadcastAddress, 2, 0);
+		if (NULL == peer) {
+			Con_PrintError("Net_SessionPoll() - Failed to connect to ENet Broadcast peer");
+			return false;
+		}
+
+		if (enet_host_service(searchHost, &eEvent, 500) > 0) // this could probably be lower?
+		{
+			if (ENET_EVENT_TYPE_CONNECT == eEvent.type)
+			{
+				Con_PrintDebugMessage("Net_SessionPoll() - Connected for Broadcast");
+	
+	            // create broadcast header
+				MessageHeader newHeader;
+				newHeader.messageType = AVP_BROADCAST;
+				newHeader.fromID      = kBroadcastID;
+				newHeader.toID        = kBroadcastID;
+	
+				memcpy(packetBuffer, &newHeader, sizeof(newHeader));
+	
+				// create ENet packet
+				ENetPacket *packet = enet_packet_create(packetBuffer, sizeof(newHeader), ENET_PACKET_FLAG_RELIABLE);
+	
+				enet_peer_send(peer, 0, packet);
+				enet_host_flush(searchHost);
+
+				isPolling = true;
+			}
+		}
+
+		if (!isPolling) {
+			return false;
+		}
+	}
+
+	// perform a poll to check for session data
+	if (isPolling) 
+	{
+		if (enet_host_check_events(searchHost, &eEvent) > 0) 
+		{
+			if (ENET_EVENT_TYPE_RECEIVE == eEvent.type) {
+				if (sizeof(SessionDescription) == (eEvent.packet->dataLength - kMessageHeaderSize)) {
+					// Handle session data
+				}
+			}
+		}
+	}
+}
+
+bool Net_CheckSessionDetails(const ENetEvent &eEvent)
+{
+	assert(sizeof(SessionDescription) == (eEvent.packet->dataLength - kMessageHeaderSize));
+
+	// get header
+	MessageHeader newHeader;
+	memcpy(&newHeader, static_cast<uint8_t*> (eEvent.packet->data), sizeof(MessageHeader));
+
+	if (AVP_SESSIONDATA != newHeader.messageType) {
+		return false;
+	}
+
+	Con_PrintDebugMessage("Net_CheckSessionDetails() - server sent us session data");
+
+	// get the session data from the packet
+	SessionDescription session;
+	memcpy(&session, static_cast<uint8_t*>(eEvent.packet->data + sizeof(MessageHeader)), sizeof(SessionDescription));
+
+#if 0
+	// check if we already have this session in our session list
+	for (int i = 0; i < NumberOfSessionsFound; i++) {
+
+		// already exists so update it
+		if (SessionData[i].Guid == session.guidInstance) {
+
+		}
+		else {
+
+		}
+	}
+#endif
+
+
+
+	return true;
+}
+
+bool Net_UpdateSessionList(int *SelectedItem)
+{
+	return false;
+
+	char buf[100];
+	sprintf(buf, "Net_UpdateSessionList at %d\n", timeGetTime());
+	OutputDebugString(buf);
+
 	GUID OldSessionGuids[MAX_NO_OF_SESSIONS];
 	uint32_t OldNumberOfSessions = NumberOfSessionsFound;
 	bool changed = false;
@@ -369,6 +486,10 @@ void Net_Disconnect()
 
 int Net_JoinGame()
 {	
+	char buf[100];
+	sprintf(buf, "Net_JoinGame at %d\n", timeGetTime());
+	OutputDebugString(buf);
+
 	if (!net_IsInitialised)
 	{
 		Con_PrintError("Networking is not initialisedr");
@@ -376,7 +497,7 @@ int Net_JoinGame()
 	}
 
 	// enumerate sessions
-	Net_FindAvPSessions();
+//	Net_FindAvPSessions();
 	return NumberOfSessionsFound;
 }
 
@@ -799,7 +920,7 @@ int Net_SendSystemMessage(int messageType, int fromID, int toID, uint8_t *messag
 	size_t length = kMessageHeaderSize + dataSize;
 
 	// create Enet packet
-	ENetPacket * packet = enet_packet_create (packetBuffer, length, ENET_PACKET_FLAG_RELIABLE);
+	ENetPacket *packet = enet_packet_create (packetBuffer, length, ENET_PACKET_FLAG_RELIABLE);
 
 	if (packet == NULL)
 	{
@@ -884,14 +1005,16 @@ int Net_ConnectToSession(int sessionNumber, char *playerName)
 {
 	OutputDebugString("Step 1: Connect To Session\n");
 
-	if (Net_OpenSession(SessionData[sessionNumber].hostAddress) != NET_OK) 
+	if (Net_OpenSession(SessionData[sessionNumber].hostAddress) != NET_OK) {
 		return NET_FAIL;
+	}
 
 	OutputDebugString("Step 2: Connecting to host: ");
 	OutputDebugString(SessionData[sessionNumber].hostAddress);
 
-	if (!Net_CreatePlayer(playerName, NULL))
+	if (!Net_CreatePlayer(playerName, NULL)) {
 		return NET_FAIL;
+	}
 
 	InitAVPNetGameForJoin();
 
