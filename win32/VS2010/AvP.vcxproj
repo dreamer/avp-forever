@@ -546,8 +546,6 @@
     <ClInclude Include="..\..\3dc\avp\TRIGGERS.H" />
     <ClInclude Include="..\..\3dc\avp\WEAPONS.H" />
     <ClInclude Include="..\..\3dc\avp\win95\AVPCHUNK.HPP" />
-    <ClInclude Include="..\..\3dc\avp\win95\AvpReg.hpp" />
-    <ClInclude Include="..\..\3dc\avp\win95\BMP2.H" />
     <ClInclude Include="..\..\3dc\avp\win95\CHEAT.H" />
     <ClInclude Include="..\..\3dc\avp\win95\d3d_hud.h" />
     <ClInclude Include="..\..\3dc\avp\win95\dbdefs.h" />
@@ -581,7 +579,6 @@
     <ClInclude Include="..\..\3dc\avp\win95\jsndsup.h" />
     <ClInclude Include="..\..\3dc\avp\win95\KZSORT.H" />
     <ClInclude Include="..\..\3dc\avp\win95\modcmds.hpp" />
-    <ClInclude Include="..\..\3dc\avp\win95\MULTMENU.H" />
     <ClInclude Include="..\..\3dc\avp\win95\NPCSETUP.H" />
     <ClInclude Include="..\..\3dc\avp\win95\OBJSETUP.HPP" />
     <ClInclude Include="..\..\3dc\avp\win95\PathChnk.hpp" />
@@ -668,7 +665,6 @@
     <ClInclude Include="..\..\3dc\win95\md5.h" />
     <ClInclude Include="..\..\3dc\win95\MISHCHNK.HPP" />
     <ClInclude Include="..\..\3dc\win95\OBCHUNK.HPP" />
-    <ClInclude Include="..\..\3dc\win95\objedit.h" />
     <ClInclude Include="..\..\3dc\win95\OEChunk.h" />
     <ClInclude Include="..\..\3dc\win95\OURASERT.H" />
     <ClInclude Include="..\..\3dc\win95\platform.h" />
