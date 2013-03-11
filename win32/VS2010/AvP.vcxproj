@@ -530,7 +530,6 @@
     <ClInclude Include="..\..\3dc\avp\support\COORDSTR.HPP" />
     <ClInclude Include="..\..\3dc\avp\support\daemon.h" />
     <ClInclude Include="..\..\3dc\avp\support\dcontext.hpp" />
-    <ClInclude Include="..\..\3dc\avp\support\expvar.hpp" />
     <ClInclude Include="..\..\3dc\avp\support\indexfnt.hpp" />
     <ClInclude Include="..\..\3dc\avp\support\r2base.h" />
     <ClInclude Include="..\..\3dc\avp\support\r2pos666.hpp" />
