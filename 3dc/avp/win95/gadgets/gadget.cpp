@@ -11,12 +11,12 @@
 /* Includes ********************************************************/
 #include "3dc.h"
 #include "gadget.h"
-#include "rootgadg.hpp"
+#include "root_gadget.hpp"
 #include "r2base.h"
-#include "hudgadg.hpp"
-#include "ahudgadg.hpp"
-#include "indexfnt.hpp"
-#include "trepgadg.hpp"
+#include "hud_gadget.hpp"
+#include "alien_hud_gadget.hpp"
+#include "index_font.hpp"
+#include "text_report_gadget.hpp"
 	#define UseLocalAssert TRUE
 	#include "ourasert.h"
 

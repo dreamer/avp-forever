@@ -2,7 +2,7 @@
 #include "inline.h"
 #include "module.h"
 #include "dynblock.h"
-#include "stratdef.h"
+#include "strategy_def.h"
 #include "gamedef.h"
 #include "bh_types.h"
 #include "bh_track.h"
@@ -12,7 +12,7 @@
 #include "ourasert.h"
 #include "plat_shp.h"
 #include "pvisible.h"
-#include "bh_debri.h"
+#include "bh_debris.h"
 
 void NotifyTargetsForTrackPoint(TRACK_OBJECT_BEHAV_BLOCK* to_bhv,int point_num,int reversing);
 

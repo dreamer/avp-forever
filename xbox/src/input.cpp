@@ -6,11 +6,11 @@
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"
-#include "stratdef.h"
+#include "strategy_def.h"
 #include "gamedef.h"
 #include "gameplat.h"
-#include "usr_io.h"
-#include "rentrntq.h"
+#include "user_io.h"
+#include "reentrant_queue.h"
 #include <xtl.h>
 #include "showcmds.h"
 

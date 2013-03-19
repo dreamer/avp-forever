@@ -2,7 +2,7 @@
 #define _game_stats_h_ 1
 
 /* KJL 99/2/12 - Statistics of current game */
-#include "equipmnt.h"
+#include "equipment.h"
 
 enum STATS_VICTIM_ID
 {

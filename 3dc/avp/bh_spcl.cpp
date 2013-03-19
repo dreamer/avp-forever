@@ -3,7 +3,7 @@
 #include "dynblock.h"
 #include "io.h"
 #define UseLocalAssert TRUE
-#include "pheromon.h"
+#include "pheromone.h"
 #include "ourasert.h"
 #include "vision.h"
 #include "plat_shp.h"

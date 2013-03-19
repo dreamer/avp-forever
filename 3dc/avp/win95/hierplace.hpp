@@ -2,7 +2,7 @@
 #define _hierplace_hpp 1
 
 #include "chunk.hpp"
-#include "chnktype.hpp"
+#include "chunk_type.hpp"
 
 class Placed_Hierarchy_Data_Chunk;
 

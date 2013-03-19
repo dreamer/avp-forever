@@ -19,8 +19,8 @@
 	#include "langenum.h"
 	#endif
 
-	#ifndef _strtab
-	#include "strtab.hpp"
+	#ifndef _string_table
+	#include "string_table.hpp"
 	#endif
 
 

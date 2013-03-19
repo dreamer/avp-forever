@@ -1,7 +1,7 @@
 #include "3dc.h"
 #include "inline.h"
 #include "module.h"
-#include "stratdef.h"
+#include "strategy_def.h"
 #include "gamedef.h"
 #include "bh_types.h"
 #include "bh_light.h"
@@ -11,11 +11,10 @@
 #include "io.h"
 #define UseLocalAssert TRUE
 #include "ourasert.h"
-
 #include "pvisible.h"
 #include "plat_shp.h"
-#include "bh_debri.h"
-#include "equipmnt.h"
+#include "bh_debris.h"
+#include "equipment.h"
 
 void UpdatePlacedLightState(PLACED_LIGHT_BEHAV_BLOCK* pl_bhv,STRATEGYBLOCK* sbPtr);
 void UpdatePlacedLightColour(PLACED_LIGHT_BEHAV_BLOCK* pl_bhv);

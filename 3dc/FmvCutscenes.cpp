@@ -12,13 +12,12 @@
 #include <vector>
 #include <string>
 #include "io.h"
-#include "Input.h"
+#include "input.h"
 #include "inline.h"
-#include "avp_userprofile.h"
+#include "user_profile.h"
 #include <math.h>
 #include <assert.h>
 
-//#include "TheoraPlayback.h"
 #include "BinkPlayback.h"
 #include "SmackerPlayback.h"
 

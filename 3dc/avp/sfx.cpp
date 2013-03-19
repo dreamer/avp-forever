@@ -2,16 +2,15 @@
 #include "module.h"
 #include "inline.h"
 #include "io.h"
-#include "stratdef.h"
+#include "strategy_def.h"
 #include "gamedef.h"
 #include "dynblock.h"
-
 #include "particle.h"
 #include "sfx.h"
 #include "detaillevels.h"
 #include "bh_types.h"
 #include "bh_ais.h"
-#include "bh_pred.h"
+#include "bh_predator.h"
 #include "bh_corpse.h"
 #include "lighting.h"
 #define UseLocalAssert TRUE

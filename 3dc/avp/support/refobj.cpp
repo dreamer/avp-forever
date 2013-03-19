@@ -13,7 +13,7 @@
 #include "refobj.hpp"
 
 	#if TrackReferenceCounted
-		#include "dcontext.hpp"
+		#include "dump_context.hpp"
 
 		#ifndef list_template_hpp
 		#include "list_tem.hpp"

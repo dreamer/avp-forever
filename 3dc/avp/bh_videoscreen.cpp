@@ -1,17 +1,15 @@
 #include "3dc.h"
 #include "inline.h"
 #include "module.h"
-#include "stratdef.h"
+#include "strategy_def.h"
 #include "gamedef.h"
 #include "bh_types.h"
 #include "bh_videoscreen.h"
 #include "dynblock.h"
 #include "dynamics.h"
-#include "bh_debri.h"
-
+#include "bh_debris.h"
 #define UseLocalAssert TRUE
 #include "ourasert.h"
-
 #include "pvisible.h"
 
 int Request_PolyFlags(void *polygon);

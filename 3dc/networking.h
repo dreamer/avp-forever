@@ -26,8 +26,8 @@
 #define _NETWORKING_H_
 
 #include "module.h"
-#include "stratdef.h"
-#include "equipmnt.h"
+#include "strategy_def.h"
+#include "equipment.h"
 #include "pldnet.h"
 
 int Net_Initialise();

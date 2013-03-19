@@ -1,20 +1,15 @@
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"
-
-#include "stratdef.h"
+#include "strategy_def.h"
 #include "gamedef.h"
 #include "bh_types.h"
-#include "inventry.h"
+#include "inventory.h"
 #include "gameplat.h"
-
 #include "gameflow.h"
-
 #include "bh_types.h"
-#include "bh_gener.h"
-
+#include "bh_generator.h"
 #define UseLocalAssert TRUE
-
 #include "ourasert.h"
 
 extern void ActivateSelfDestructSequence(int seconds);

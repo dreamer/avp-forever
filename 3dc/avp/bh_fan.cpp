@@ -2,7 +2,7 @@
 #include "inline.h"
 #include "module.h"
 #include "dynblock.h"
-#include "stratdef.h"
+#include "strategy_def.h"
 #include "gamedef.h"
 #include "bh_types.h"
 #include "track.h"

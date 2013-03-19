@@ -5,7 +5,7 @@
 #include "VorbisPlayer.h"
 #include "3dc.h"
 #include "gamedef.h"
-#include "AvP_EnvInfo.h"
+#include "env_info.h"
 #include "list_tem.hpp"
 #include "ConfigFile.h"
 

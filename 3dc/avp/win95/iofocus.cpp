@@ -12,7 +12,7 @@
 #include "3dc.h"
 #include "iofocus.h"
 #include "gadget.h"
-#include "avp_menus.h"
+#include "menus.h"
 #include "psnd.h"
 #define UseLocalAssert TRUE
 #include "ourasert.h"

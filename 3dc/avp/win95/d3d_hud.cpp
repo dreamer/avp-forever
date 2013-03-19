@@ -1,18 +1,18 @@
 #include "3dc.h"
 #include "module.h"
-#include "stratdef.h"
+#include "strategy_def.h"
 #include "gamedef.h"
 #include "bh_types.h"
-#include "hudgfx.h"
+#include "hud_gfx.h"
 #include "huddefs.h"
 #include "kshape.h"
-#include "chnktexi.h"
-#include "HUD_layout.h"
+#include "chunk_textures.h"
+#include "hud_layout.h"
 #include "language.h"
 #include "tables.h"
 #include "renderer.h"
 #include "r2base.h"
-#include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
+#include "chunk_load.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
 #include "d3d_hud.h"
 #define UseLocalAssert FALSE
 #include "ourasert.h"

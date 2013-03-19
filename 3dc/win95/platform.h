@@ -316,9 +316,6 @@ typedef enum {
 
 void CheckForWindowsMessages(void);
 BOOL ExitWindowsSystem(void);
-bool InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode);
-void KeyboardHandlerKeyDown(WPARAM wParam);
-void KeyboardHandlerKeyUp(WPARAM wParam);
 BOOL ReadJoystick(void); 
 BOOL CheckForJoystick(void);
 

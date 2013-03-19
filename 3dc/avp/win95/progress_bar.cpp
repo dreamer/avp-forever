@@ -3,7 +3,7 @@
 #include "platform.h"
 #include "kshape.h"
 #include "progress_bar.h"
-#include "chnktexi.h"
+#include "chunk_textures.h"
 #include "inline.h"
 #include "gamedef.h"
 #include "psnd.h"

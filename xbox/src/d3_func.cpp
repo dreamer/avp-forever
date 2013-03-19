@@ -24,13 +24,13 @@
 
 #include "d3_func.h"
 #include "fmvCutscenes.h"
-#include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
+#include "chunk_load.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
 #include "logString.h"
 #include "configFile.h"
 #include "Fonts.h"
 #include <xgraphics.h>
 #include <xgmath.h>
-#include "AvP_UserProfile.h"
+#include "user_profile.h"
 #include "console.h"
 
 extern void RenderListInit();

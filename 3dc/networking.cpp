@@ -27,8 +27,8 @@
 #include "console.h"
 #include "configFile.h"
 #include "logString.h"
-#include "AvP_Menus.h"
-#include "AvP_MP_Config.h"
+#include "menus.h"
+#include "mp_config.h"
 #include "networking.h"
 #include <assert.h>
 #include <queue>

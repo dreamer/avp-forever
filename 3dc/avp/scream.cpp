@@ -5,7 +5,7 @@
 #include "mempool.h"
 #include "scream.h"
 #include "dxlog.h"
-#include "avp_menus.h"
+#include "menus.h"
 
 extern DISPLAYBLOCK* Player;
 

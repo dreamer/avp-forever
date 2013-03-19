@@ -3,7 +3,7 @@
 
 #include "3dc.h"
 #include "module.h"
-#include "stratdef.h"
+#include "strategy_def.h"
 #include "TextureManager.h"
 
 typedef struct FMVTEXTURE

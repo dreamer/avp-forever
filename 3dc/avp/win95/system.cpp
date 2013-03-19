@@ -2,20 +2,20 @@
 
 #include "3dc.h"
 #include "module.h"
-#include "stratdef.h"
+#include "strategy_def.h"
 #include "gamedef.h"
 #include "bh_types.h"
 #include "gameplat.h"
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "bh_far.h"
-#include "pheromon.h"
+#include "pheromone.h"
 #include "huddefs.h"
-#include "hudgfx.h"
-#include "bh_gener.h"
+#include "hud_gfx.h"
+#include "bh_generator.h"
 #include "pvisible.h"
 #include "projload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
-#include "avp_menus.h"
+#include "menus.h"
 
 /*------------Patrick 1/6/97---------------
 New sound system 

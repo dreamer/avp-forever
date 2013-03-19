@@ -2,22 +2,21 @@
 #include "3dc.h"
 #include "inline.h"
 #include "module.h"
-#include "stratdef.h"
+#include "strategy_def.h"
 #include "gamedef.h"
 #include "game_statistics.h"
 #include "bh_types.h"
-#include "bh_marin.h"
+#include "bh_marine.h"
 #include "bh_alien.h"
 #include "bh_corpse.h"
-#include "bh_debri.h"
-#include "bh_weap.h"
+#include "bh_debris.h"
+#include "bh_weapon.h"
 #include "pldghost.h"
 #include "io.h"
 #define UseLocalAssert TRUE
 #include "ourasert.h"
-
-#include "AvP_EnvInfo.h"
-#include "AvP_UserProfile.h"
+#include "env_info.h"
+#include "user_profile.h"
 
 #define FIXED_MINUTE (ONE_FIXED*60)
 

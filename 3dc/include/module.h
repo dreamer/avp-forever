@@ -9,7 +9,7 @@
 	#if SupportModules
 
 
-#include "bh_waypt.h"
+#include "bh_waypoint.h"
 
 typedef struct moduletableheader {
 

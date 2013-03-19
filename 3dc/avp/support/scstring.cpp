@@ -14,10 +14,10 @@
 #include "scstring.hpp"
 
 #include "strutil.h"	
-#include "indexfnt.hpp"
+#include "index_font.hpp"
 
 	#if TrackReferenceCounted
-	#include "dcontext.hpp"
+	#include "dump_context.hpp"
 	#endif
 
 	#define UseLocalAssert TRUE

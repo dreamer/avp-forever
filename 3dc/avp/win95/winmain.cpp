@@ -2,37 +2,37 @@
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"
-#include "stratdef.h"
+#include "strategy_def.h"
 #include "gamedef.h"
 #include "gameplat.h"
 #include "bh_types.h"
-#include "usr_io.h"
+#include "user_io.h"
 #include <mmsystem.h>
 #include "renderer.h"
-#include "comp_shp.h"
-#include "chnkload.hpp"
+#include "compiled_shapes.h"
+#include "chunk_load.hpp"
 #include "npcsetup.h" /* JH 30/4/97 */
 #include "pldnet.h"
-#include "avpview.h"
+#include "view.h"
 #include "vision.h"
-#include "avp_menus.h"
+#include "menus.h"
 #include "ourasert.h" 
 #include "davehook.h"
 #include "showcmds.h"
-#include "consbind.hpp"
+#include "console_bind.hpp"
 #include "mempool.h"
-#include "GammaControl.h"
-#include "avp_intro.h"
+#include "gammacontrol.h"
+#include "intro.h"
 #include "MusicPlayer.h"
 #include "psndplat.h"
-#include "AvP_UserProfile.h"
-#include "avp_menus.h"
+#include "user_profile.h"
+#include "menus.h"
 #include "configFile.h"
 #include "VorbisPlayer.h"
 #include "networking.h"
-#include "avpview.h"
+#include "view.h"
 #include "renderer.h"
-#include "AvP_MP_Config.h"
+#include "mp_config.h"
 #include "logString.h"
 #include "FastFile.h"
 #include "console.h"
@@ -643,8 +643,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	EmptyUserProfilesList();
 	ClearMultiplayerLevelNameArray();
-
-//	ffKill();
 
 	/*-------------------Patrick 2/6/97-----------------------
 	End the sound system

@@ -7,7 +7,7 @@
 extern "C" {
 
 #include "fmvCutscenes.h"
-#include "avp_userprofile.h"
+#include "user_profile.h"
 #include "inline.h"
 #include <math.h>
 #include <assert.h>

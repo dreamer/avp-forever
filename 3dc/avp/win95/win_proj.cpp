@@ -18,7 +18,7 @@ extern unsigned char KeyboardInput[256];
 #include "psndplat.h"
 #include "onscreenKeyboard.h"
 
-#include "rentrntq.h"
+#include "reentrant_queue.h"
 	// Added 21/11/97 by DHM: support for a queue of Windows
 	// messages to avoid problems with re-entrancy due to WinProc()
 

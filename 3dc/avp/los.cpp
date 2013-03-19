@@ -4,14 +4,13 @@
 #include "3dc.h"
 #include "module.h"					  
 #include "inline.h"
-#include "stratdef.h"
+#include "strategy_def.h"
 #include "gamedef.h"
 #include "dynblock.h"
 #include "dynamics.h"					
-
 #include "bh_types.h"
-#include "comp_shp.h"
-#include "avpview.h"
+#include "compiled_shapes.h"
+#include "view.h"
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "dxlog.h"

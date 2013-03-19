@@ -4,7 +4,7 @@ extern "C" {
 #include "inline.h"
 #include "module.h"
 #include "gamedef.h"
-#include "stratdef.h"
+#include "strategy_def.h"
 //#include "vramtime.h"
 
 #include "dxlog.h"
@@ -46,7 +46,7 @@ extern "C++"{
 //#include "smacker.h"
 #include "fmv.h"
 #include "d3d_render.h"
-#include "avp_userprofile.h"
+#include "user_profile.h"
 #include "bh_types.h"
 
 const int MAX_VERTEXES = 4096 * 2;

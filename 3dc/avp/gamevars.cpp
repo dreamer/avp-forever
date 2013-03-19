@@ -3,11 +3,11 @@
 	This file contains game-specific console variables
 	
  */
-//#include "rentrntq.h"
+//#include "reentrant_queue.h"
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"
-#include "stratdef.h"
+#include "strategy_def.h"
 #include "gamedef.h"
 #include "davehook.h"
 #include "r2base.h"
@@ -19,12 +19,12 @@
 #include "daemon.h"
 	// hooks to daemon code
 
-#include "rentrntq.h"
-#include "consvar.hpp"
-#include "conscmnd.hpp"
-#include "equipmnt.h"
+#include "reentrant_queue.h"
+#include "console_variable.hpp"
+#include "console_command.hpp"
+#include "equipment.h"
 #include "pldnet.h"
-#include "avp_menus.h"
+#include "menus.h"
 
 /* KJL 11:48:45 28/01/98 - used to scale NormalFrameTime, so the game can be slowed down */
 extern int TimeScale;

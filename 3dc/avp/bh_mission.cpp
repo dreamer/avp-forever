@@ -1,7 +1,7 @@
 #include "3dc.h"
 #include "inline.h"
 #include "module.h"
-#include "stratdef.h"
+#include "strategy_def.h"
 #include "bh_types.h"
 #include "bh_mission.h"
 #include "ourasert.h"

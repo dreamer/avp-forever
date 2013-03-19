@@ -5,7 +5,7 @@
 #ifndef _bhqueen_h_
 #define _bhqueen_h_ 1
 
-#include "bh_pred.h"
+#include "bh_predator.h"
 #include "scream.h"
 
 typedef enum queen_behaviour_state {

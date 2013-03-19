@@ -9,26 +9,9 @@
 */
 
 #include "3dc.h"
-
 #include "strutil.h"
-
-#if 0
-#include "hhfile.h"
-
-#include "hhcolour.h"
-
-#include "daveserr.h"
-
-#include "inouttxt.h"
-#include "menutxt.h"
-
-#include "davelog.h"
-#endif
-
 #define UseLocalAssert TRUE
 #include "ourasert.h" 
-
-
 
 /* VERSION DEFINES */
 #define LogStringTables		FALSE

@@ -10,7 +10,7 @@
 #include "inline.h"
 #include <assert.h>
 #include "module.h"
-#include "stratdef.h"
+#include "strategy_def.h"
 #include "gamedef.h"
 #include "dynamics.h"
 #include "psndplat.h"

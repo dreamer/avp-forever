@@ -13,7 +13,7 @@
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"
-#include "stratdef.h"
+#include "strategy_def.h"
 #include "gamedef.h"
 #include "kshape.h"
 #include "kzsort.h"

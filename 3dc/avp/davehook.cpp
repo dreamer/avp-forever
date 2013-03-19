@@ -17,24 +17,24 @@
 // hooks to gadgets code
 #include "daemon.h"
 // hooks to daemon code
-#include "rentrntq.h"
+#include "reentrant_queue.h"
 #include "iofocus.h"
-#include "hudgadg.hpp"
-#include "consvar.hpp"
-#include "conscmnd.hpp"
+#include "hud_gadget.hpp"
+#include "console_variable.hpp"
+#include "console_command.hpp"
 #include "missions.hpp"
-#include "indexfnt.hpp"
+#include "index_font.hpp"
 // Includes for console variables:
-#include "textexp.hpp"
+#include "text_expansion.hpp"
 // Includes for console commands:
-#include "consvar.hpp"
-#include "modcmds.hpp"
-#include "trepgadg.hpp"
-#include "consbind.hpp"
-#include "consbtch.hpp"
+#include "console_variable.hpp"
+#include "module_commands.hpp"
+#include "text_report_gadget.hpp"
+#include "console_bind.hpp"
+#include "console_batch.hpp"
 #define UseLocalAssert TRUE
 #include "ourasert.h"
-#include "frontend/avp_menus.h"
+#include "frontend/menus.h"
 
 /* Version settings ************************************************/
 

@@ -12,11 +12,11 @@
 #define UseLocalAssert FALSE
 #include "ourasert.h"
 #include <assert.h>
-#include "avp_menus.h"
-#include "avp_userprofile.h"
-#include "avp_menugfx.hpp"
+#include "menus.h"
+#include "user_profile.h"
+#include "menu_gfx.hpp"
 #include "io.h"
-#include "pheromon.h"
+#include "pheromone.h"
 #include "tables.h"
 #include "particle.h"
 #include "kshape.h"
@@ -25,7 +25,7 @@
 #include "gamedef.h"
 #include "dxlog.h"
 #include "d3d_hud.h"
-#include "HUD_layout.h"
+#include "hud_layout.h"
 #define HAVE_VISION_H 1
 #include "lighting.h"
 #include "showcmds.h"
@@ -201,7 +201,7 @@ inline float FMV_HPos2DC(int32_t pos)
 inline float WPos2DC(int32_t pos)
 {
 //	if (mainMenu) {
-	if ((GetAvPMenuState() == MENUSSTATE_MAINMENUS) || (GetAvPMenuState() == MENUSSTATE_INGAMEMENUS)) {
+	if ((GetAvPMenuState() != MENUSSTATE_STARTGAME)) {
 		return (float(pos / (float)640) * 2) - 1;
 	}
 	else {
@@ -213,7 +213,7 @@ inline float WPos2DC(int32_t pos)
 inline float HPos2DC(int32_t pos)
 {
 //	if (mainMenu) {
-	if ((GetAvPMenuState() == MENUSSTATE_MAINMENUS) || (GetAvPMenuState() == MENUSSTATE_INGAMEMENUS)) {
+	if ((GetAvPMenuState() != MENUSSTATE_STARTGAME)) {
 		return (float(pos / (float)480) * 2) - 1;
 	}
 	else {

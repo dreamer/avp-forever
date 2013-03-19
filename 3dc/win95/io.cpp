@@ -1,19 +1,17 @@
 #include "3dc.h"
-
 #include <sys\stat.h>
 #include <string.h>
 #include "io.h"
 #include "inline.h"
 #include "module.h"
-#include "chnktexi.h"
+#include "chunk_textures.h"
 #include "d3d_hud.h"
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "hud_layout.h"
-#include "PSND.H"
+#include "psnd.H"
 
 #undef textprint
-
 
 #if SupportTLTFiles
 #define Output_TLT_File				FALSE
@@ -140,13 +138,11 @@ void PlatformSpecificVDBInit(VIEWDESCRIPTORBLOCK *vdb)
 	vdb_tmp = vdb;
 }
 
-
 void PlatformSpecificShowViewEntry(VIEWDESCRIPTORBLOCK *vdb, SCREENDESCRIPTORBLOCK *sdb)
 {
 	vdb_tmp = vdb;
 	sdb_tmp = sdb;
 }
-
 
 void PlatformSpecificShowViewExit(VIEWDESCRIPTORBLOCK *vdb, SCREENDESCRIPTORBLOCK *sdb)
 {
@@ -159,6 +155,8 @@ void PlatformSpecificShowViewExit(VIEWDESCRIPTORBLOCK *vdb, SCREENDESCRIPTORBLOC
  Initialise System and System Variables
 
 */
+
+extern bool InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode);
 
 void InitialiseSystem(HINSTANCE hInstance, int nCmdShow)
 {
@@ -351,26 +349,25 @@ void CursorHome(void)
 
 void GetProjectFilename(char *fname, char *image)
 {
-
 	char *src;
 	char *dst;
-
 
 	src = projectsubdirectory;
 	dst = fname;
 
-	while(*src)
+	while (*src) {
 		*dst++ = *src++;
+	}
 
 	src = image;
 
-	while(*src)
+	while (*src) {
 		*dst++ = *src++;
+	}
 
 	*dst = 0;
-
 }
-		
+
 /*
 
  Platform specific version of "printf()"

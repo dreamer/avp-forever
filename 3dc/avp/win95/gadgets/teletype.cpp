@@ -13,7 +13,7 @@
 #include "teletype.hpp"	
 #include "daemon.h"
 #include "inline.h"
-#include "trepgadg.hpp"
+#include "text_report_gadget.hpp"
 
 	#define UseLocalAssert TRUE
 	#include "ourasert.h"
@@ -22,7 +22,7 @@
     #define SupportTeletypeSound    TRUE
 
     #if UseGadgets
-		#include "indexfnt.hpp"
+		#include "index_font.hpp"
 
         #if SupportTeletypeSound
             #include "psnd.h"
