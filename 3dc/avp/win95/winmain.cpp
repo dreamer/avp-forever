@@ -115,6 +115,7 @@ void exit_break_point_function()
 //#define _ALLOC_CONSOLE
 
 extern void LoadKeyConfiguration();
+extern bool InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode);
 
 // so we can disable/enable stickey keys
 STICKYKEYS startupStickyKeys = {sizeof(STICKYKEYS), 0};
@@ -327,7 +328,9 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 	timeBeginPeriod(1);
 
-	InitialiseSystem(hInstance, nCmdShow);
+	// Initialise main window, windows procedure etc
+	InitialiseWindowsSystem(hInstance, nCmdShow, WinInitFull);
+	InitialiseSystem();
 	InitialiseRenderer();
 
 	if (!InitialiseDirect3D())

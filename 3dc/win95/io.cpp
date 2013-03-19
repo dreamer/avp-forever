@@ -156,13 +156,8 @@ void PlatformSpecificShowViewExit(VIEWDESCRIPTORBLOCK *vdb, SCREENDESCRIPTORBLOC
 
 */
 
-extern bool InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode);
-
-void InitialiseSystem(HINSTANCE hInstance, int nCmdShow)
+void InitialiseSystem()
 {
-    /* Initialise main window, windows procedure etc */
-	bool rc = InitialiseWindowsSystem(hInstance, nCmdShow, WinInitFull);
-
     /* Initialise input interface */
 	memset((void*)KeyboardInput, FALSE, MAX_NUMBER_OF_INPUT_KEYS);
 	GotAnyKey = false;

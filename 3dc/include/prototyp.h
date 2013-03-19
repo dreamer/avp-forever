@@ -1214,9 +1214,9 @@ void ShapeSpriteRPointsInstr(SHAPEINSTR *shapeinstrptr);
 
  Platform Specific Functions
 
-*/
+ */
 
-void InitialiseSystem(HINSTANCE hInstance, int nCmdShow);
+void InitialiseSystem();
 void InitialiseRenderer(void);
 void ExitSystem(void);
 void ResetFrameCounter(void);
