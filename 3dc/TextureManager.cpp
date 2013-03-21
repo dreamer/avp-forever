@@ -498,7 +498,7 @@ void Tex_Release(texID_t textureID)
 */
 		// set as invalid
 		textureList[textureID].isValid = false;
-		textureList[textureID].name = "";
+		textureList[textureID].name.clear();
 
 //		Tex_CheckMemoryUsage();
 	}
