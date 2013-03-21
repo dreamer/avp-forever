@@ -72,7 +72,7 @@ int BinkPlayback::Open(const std::string &fileName, bool isLooped)
 
 	_audioTrackInfos.resize(_nAudioTracks);
 
-	// init the sound and mVideo api stuff we need
+	// init the sound and video api stuff we need
 	if (_nAudioTracks)
 	{
 		// get audio information for all available tracks
@@ -84,7 +84,7 @@ int BinkPlayback::Open(const std::string &fileName, bool isLooped)
 
 		uint32_t idealBufferSize = _audioTrackInfos[_audioTrackIndex].idealBufferSize;
 
-		// create mAudio streaming buffer (just for 1 track for now)
+		// create AudioStream (just for 1 track for now)
 		_audioStream = new AudioStream();
 		if (!_audioStream->Init(_audioTrackInfos[_audioTrackIndex].nChannels, _audioTrackInfos[_audioTrackIndex].sampleRate, 16, kAudioBufferSize, kAudioBufferCount))
 		{

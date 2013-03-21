@@ -25,7 +25,6 @@
 #include "SmackerPlayback.h"
 #include "FmvPlayback.h"
 #include "console.h"
-#include <process.h>
 #include <assert.h>
 #include <new>
 
@@ -97,7 +96,6 @@ int SmackerPlayback::Open(const std::string &fileName)
 
 		_sampleRate = info.sampleRate;
 
-		// create mAudio streaming buffer
 		_audioStream = new AudioStream();
 
 		assert(info.bitsPerSample != 0);
@@ -108,7 +106,7 @@ int SmackerPlayback::Open(const std::string &fileName)
 			return FMV_ERROR;
 		}
 
-		// we need some temporary mAudio data storage space and a ring buffer instance
+		// we need some temporary audio data storage space and a ring buffer instance
 		_audioData = new(std::nothrow) uint8_t[info.idealBufferSize];
 		if (_audioData == NULL)
 		{
@@ -298,7 +296,7 @@ void *SmackerAudioThread(void *args)
 		{
 			uint32_t readableAudio = fmv->_ringBuffer->GetReadableSize();
 
-			// can we fill a buffer
+			// check if we can fill a buffer
 			uint32_t bufferSize = fmv->_audioStream->GetBufferSize();
 
 			if (readableAudio >= bufferSize)
