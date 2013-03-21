@@ -32,40 +32,39 @@ class IndexBuffer
 {
 	public:
 		// members
-		r_IndexBuffer	indexBuffer;
-		
-		uint32_t		sizeInBytes;
-		enum R_USAGE	usage;
-		bool			isLocked;
+		r_IndexBuffer	_indexBuffer;
+		uint32_t		_sizeInBytes;
+		enum R_USAGE	_usage;
+		bool			_isLocked;
 
 		// constructor
 		IndexBuffer():
-			capacity(0),
-			sizeInBytes(0),
-			usage(USAGE_DYNAMIC),
-			isLocked(false)
+			_capacity(0),
+			_sizeInBytes(0),
+			_usage(USAGE_DYNAMIC),
+			_isLocked(false)
 		{
 		}
 
 		// deconstructor
 		~IndexBuffer()
 		{
-			this->Release();
+			Release();
 		}
 
 		// public functions
-		bool IndexBuffer::Create(uint32_t capacity, enum R_USAGE usage);
-		bool IndexBuffer::Release();
-		bool IndexBuffer::Lock(uint16_t **data);
-		bool IndexBuffer::Unlock();
-		bool IndexBuffer::Set();
-		uint32_t IndexBuffer::GetCapacity() const { return capacity; }
-		uint32_t IndexBuffer::GetSize() const { return nIndices; }
-		void IndexBuffer::SetSize(uint32_t size);
+		bool Create(uint32_t capacity, enum R_USAGE usage);
+		bool Release();
+		bool Lock(uint16_t **data);
+		bool Unlock();
+		bool Set();
+		uint32_t GetCapacity() const { return _capacity; }
+		uint32_t GetSize()     const { return _nIndices; }
+		void SetSize(uint32_t size);
 
 	private:
-		uint32_t capacity;    // number of indices we can hold
-		uint32_t nIndices;    // number of indices in the buffer
+		uint32_t _capacity;    // number of indices we can hold
+		uint32_t _nIndices;    // number of indices in the buffer
 };
 
 #endif

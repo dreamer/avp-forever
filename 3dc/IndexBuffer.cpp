@@ -31,10 +31,10 @@ bool IndexBuffer::Set()
 
 bool IndexBuffer::Create(uint32_t capacity, enum R_USAGE usage)
 {
-	this->capacity = capacity;
-	this->usage = usage;
+	_capacity = capacity;
+	_usage = usage;
 
-	this->sizeInBytes = this->capacity * sizeof(uint16_t);
+	_sizeInBytes = _capacity * sizeof(uint16_t);
 
 	return R_CreateIndexBuffer(*this);
 }
@@ -46,7 +46,7 @@ bool IndexBuffer::Release()
 
 bool IndexBuffer::Lock(uint16_t **data)
 {
-	return R_LockIndexBuffer(*this, 0, 0, data, this->usage);
+	return R_LockIndexBuffer(*this, 0, 0, data, _usage);
 }
 
 bool IndexBuffer::Unlock()
@@ -56,5 +56,5 @@ bool IndexBuffer::Unlock()
 
 void IndexBuffer::SetSize(uint32_t size)
 {
-	this->nIndices = size;
+	_nIndices = size;
 }

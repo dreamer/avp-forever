@@ -368,7 +368,7 @@ bool R_CreateVertexBuffer(class VertexBuffer &vertexBuffer)
 	D3DPOOL vbPool;
 	DWORD	vbUsage;
 
-	switch (vertexBuffer.usage)
+	switch (vertexBuffer._usage)
 	{
 		case USAGE_STATIC:
 			vbUsage = 0;
@@ -385,7 +385,7 @@ bool R_CreateVertexBuffer(class VertexBuffer &vertexBuffer)
 			break;
 	}
 
-	LastError = d3d.lpD3DDevice->CreateVertexBuffer(vertexBuffer.sizeInBytes, vbUsage, 0, vbPool, &vertexBuffer.vertexBuffer.vertexBuffer, NULL);
+	LastError = d3d.lpD3DDevice->CreateVertexBuffer(vertexBuffer._sizeInBytes, vbUsage, 0, vbPool, &vertexBuffer._vertexBuffer.vertexBuffer, NULL);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't create vertex buffer");
@@ -398,9 +398,9 @@ bool R_CreateVertexBuffer(class VertexBuffer &vertexBuffer)
 
 bool R_ReleaseVertexBuffer(class VertexBuffer &vertexBuffer)
 {
-	if (vertexBuffer.vertexBuffer.vertexBuffer)
+	if (vertexBuffer._vertexBuffer.vertexBuffer)
 	{
-		vertexBuffer.vertexBuffer.vertexBuffer->Release();
+		vertexBuffer._vertexBuffer.vertexBuffer->Release();
 	}
 
 	return true;
@@ -411,7 +411,7 @@ bool R_CreateIndexBuffer(class IndexBuffer &indexBuffer)
 	D3DPOOL ibPool;
 	DWORD	ibUsage;
 
-	switch (indexBuffer.usage)
+	switch (indexBuffer._usage)
 	{
 		case USAGE_STATIC:
 			ibUsage = 0;
@@ -429,7 +429,7 @@ bool R_CreateIndexBuffer(class IndexBuffer &indexBuffer)
 	}
 	
 	// create index buffer
-	LastError = d3d.lpD3DDevice->CreateIndexBuffer(indexBuffer.sizeInBytes, ibUsage, D3DFMT_INDEX16, ibPool, &indexBuffer.indexBuffer.indexBuffer, NULL);
+	LastError = d3d.lpD3DDevice->CreateIndexBuffer(indexBuffer._sizeInBytes, ibUsage, D3DFMT_INDEX16, ibPool, &indexBuffer._indexBuffer.indexBuffer, NULL);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't create index buffer");
@@ -442,9 +442,9 @@ bool R_CreateIndexBuffer(class IndexBuffer &indexBuffer)
 
 bool R_ReleaseIndexBuffer(class IndexBuffer &indexBuffer)
 {
-	if (indexBuffer.indexBuffer.indexBuffer)
+	if (indexBuffer._indexBuffer.indexBuffer)
 	{
-		indexBuffer.indexBuffer.indexBuffer->Release();
+		indexBuffer._indexBuffer.indexBuffer->Release();
 	}
 
 	return true;
@@ -562,7 +562,7 @@ bool R_DrawPrimitive(uint32_t numPrimitives)
 
 bool R_LockVertexBuffer(class VertexBuffer &vertexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, void **data, enum R_USAGE usage)
 {
-	if (vertexBuffer.isLocked) {
+	if (vertexBuffer._isLocked) {
 		Con_PrintError("Vertex buffer already locked!");
 		assert(0);
 		return false;
@@ -573,7 +573,7 @@ bool R_LockVertexBuffer(class VertexBuffer &vertexBuffer, uint32_t offsetToLock,
 		vbFlags = D3DLOCK_DISCARD;
 	}
 
-	LastError = vertexBuffer.vertexBuffer.vertexBuffer->Lock(offsetToLock, sizeToLock, data, vbFlags);
+	LastError = vertexBuffer._vertexBuffer.vertexBuffer->Lock(offsetToLock, sizeToLock, data, vbFlags);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't lock vertex buffer");
@@ -581,7 +581,7 @@ bool R_LockVertexBuffer(class VertexBuffer &vertexBuffer, uint32_t offsetToLock,
 		return false;
 	}
 
-	vertexBuffer.isLocked = true;
+	vertexBuffer._isLocked = true;
 
 	return true;
 }
@@ -609,7 +609,7 @@ bool R_DrawIndexedPrimitive(uint32_t baseVertexIndex, uint32_t minIndex, uint32_
 
 bool R_LockIndexBuffer(class IndexBuffer &indexBuffer, uint32_t offsetToLock, uint32_t sizeToLock, uint16_t **data, enum R_USAGE usage)
 {
-	if (indexBuffer.isLocked) {
+	if (indexBuffer._isLocked) {
 		Con_PrintError("Index buffer is already locked!");
 		assert(0);
 		return false;
@@ -620,7 +620,7 @@ bool R_LockIndexBuffer(class IndexBuffer &indexBuffer, uint32_t offsetToLock, ui
 		ibFlags = D3DLOCK_DISCARD;
 	}
 
-	LastError = indexBuffer.indexBuffer.indexBuffer->Lock(offsetToLock, sizeToLock, (void**)data, ibFlags);
+	LastError = indexBuffer._indexBuffer.indexBuffer->Lock(offsetToLock, sizeToLock, (void**)data, ibFlags);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't lock index buffer");
@@ -628,14 +628,14 @@ bool R_LockIndexBuffer(class IndexBuffer &indexBuffer, uint32_t offsetToLock, ui
 		return false;
 	}
 
-	indexBuffer.isLocked = true;
+	indexBuffer._isLocked = true;
 
 	return true;
 }
 
 bool R_SetVertexBuffer(class VertexBuffer &vertexBuffer)
 {
-	LastError = d3d.lpD3DDevice->SetStreamSource(0, vertexBuffer.vertexBuffer.vertexBuffer, 0, vertexBuffer.stride);
+	LastError = d3d.lpD3DDevice->SetStreamSource(0, vertexBuffer._vertexBuffer.vertexBuffer, 0, vertexBuffer._stride);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't set vertex buffer");
@@ -648,7 +648,7 @@ bool R_SetVertexBuffer(class VertexBuffer &vertexBuffer)
 
 bool R_SetIndexBuffer(class IndexBuffer &indexBuffer)
 {
-	LastError = d3d.lpD3DDevice->SetIndices(indexBuffer.indexBuffer.indexBuffer);
+	LastError = d3d.lpD3DDevice->SetIndices(indexBuffer._indexBuffer.indexBuffer);
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't set index buffer");
@@ -661,11 +661,11 @@ bool R_SetIndexBuffer(class IndexBuffer &indexBuffer)
 
 bool R_UnlockVertexBuffer(class VertexBuffer &vertexBuffer)
 {
-	if (vertexBuffer.isLocked == false) {
+	if (vertexBuffer._isLocked == false) {
 		return false;
 	}
 
-	LastError = vertexBuffer.vertexBuffer.vertexBuffer->Unlock();
+	LastError = vertexBuffer._vertexBuffer.vertexBuffer->Unlock();
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't unlock vertex buffer");
@@ -673,18 +673,18 @@ bool R_UnlockVertexBuffer(class VertexBuffer &vertexBuffer)
 		return false;
 	}
 
-	vertexBuffer.isLocked = false;
+	vertexBuffer._isLocked = false;
 
 	return true;
 }
 
 bool R_UnlockIndexBuffer(class IndexBuffer &indexBuffer)
 {
-	if (indexBuffer.isLocked == false) {
+	if (indexBuffer._isLocked == false) {
 		return false;
 	}
 
-	LastError = indexBuffer.indexBuffer.indexBuffer->Unlock();
+	LastError = indexBuffer._indexBuffer.indexBuffer->Unlock();
 	if (FAILED(LastError))
 	{
 		Con_PrintError("Can't unlock index buffer");
@@ -692,7 +692,7 @@ bool R_UnlockIndexBuffer(class IndexBuffer &indexBuffer)
 		return false;
 	}
 
-	indexBuffer.isLocked = false;
+	indexBuffer._isLocked = false;
 
 	return true;
 }
