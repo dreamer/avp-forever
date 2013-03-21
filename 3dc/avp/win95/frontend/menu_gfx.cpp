@@ -865,14 +865,13 @@ extern void LoadAllAvPMenuGfx(void)
 
 extern void ReleaseAllAvPMenuGfx(void)
 {
-//	Tex_Release(AVPMENUGFX_CLOUDY);
-//	Tex_Release(AVPMENUGFX_SMALL_FONT);
+	// common menu textures such as small font, menu sliders and the scrolling cloud effect are kept in memory
+	// between main and ingame menus. they are released when the render device is shutdown on game exit
+
 	Tex_Release(AVPMENUGFX_COPYRIGHT_SCREEN);
 	Tex_Release(AVPMENUGFX_PRESENTS);
 	Tex_Release(AVPMENUGFX_AREBELLIONGAME);
 	Tex_Release(AVPMENUGFX_ALIENSVPREDATOR);
-//	Tex_Release(AVPMENUGFX_SLIDERBAR);
-//	Tex_Release(AVPMENUGFX_SLIDER);
 	Tex_Release(AVPMENUGFX_BACKDROP);
 	Tex_Release(AVPMENUGFX_ALIENS_LOGO);
 	Tex_Release(AVPMENUGFX_ALIEN_LOGO);
