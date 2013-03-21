@@ -38,7 +38,7 @@ bool VertexBuffer::Set()
 
 bool VertexBuffer::Lock(void **data)
 {
-	return R_LockVertexBuffer(*this, 0, 0, data, this->usage);
+	return R_LockVertexBuffer(*this, 0, 0, data, _usage);
 }
 
 bool VertexBuffer::Unlock()
@@ -54,16 +54,16 @@ bool VertexBuffer::Release()
 bool VertexBuffer::Create(uint32_t capacity, uint32_t stride, enum R_USAGE usage)
 {
 	// store values for later use
-	this->capacity = capacity;
-	this->usage = usage;
+	_capacity = capacity;
+	_usage = usage;
 
-	this->stride = stride;
-	this->sizeInBytes = this->capacity * this->stride;
+	_stride = stride;
+	_sizeInBytes = _capacity * _stride;
 
 	return R_CreateVertexBuffer(*this);
 }
 
 void VertexBuffer::SetSize(uint32_t size)
 {
-	this->nVerts = size;
+	_nVerts = size;
 }

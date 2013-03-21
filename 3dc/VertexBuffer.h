@@ -30,43 +30,42 @@
 class VertexBuffer
 {
 	public:
-		r_VertexBuffer	vertexBuffer;
-		
-		uint32_t		sizeInBytes;
-		enum R_USAGE	usage;
-		uint32_t		stride;
-		bool			isLocked;
+		r_VertexBuffer	_vertexBuffer;
+		uint32_t		_sizeInBytes;
+		enum R_USAGE	_usage;
+		uint32_t		_stride;
+		bool			_isLocked;
 
 		// constructor
 		VertexBuffer():
-			capacity(0),
-			sizeInBytes(0),
-			usage(USAGE_DYNAMIC),
-			stride(0),
-			isLocked(false)
+			_capacity(0),
+			_sizeInBytes(0),
+			_usage(USAGE_DYNAMIC),
+			_stride(0),
+			_isLocked(false)
 		{
 		}
 
 		// deconstructor
 		~VertexBuffer()
 		{
-			this->Release();
+			Release();
 		}
 
 		// public functions
-		bool VertexBuffer::Create(uint32_t capacity, uint32_t stride, enum R_USAGE usage);
-		bool VertexBuffer::Release();
-		bool VertexBuffer::Lock(void **data);
-		bool VertexBuffer::Unlock();
-		bool VertexBuffer::Set();
-		bool VertexBuffer::Draw();
-		uint32_t VertexBuffer::GetCapacity() const { return capacity; }
-		uint32_t VertexBuffer::GetSize() const { return nVerts; }
-		void VertexBuffer::SetSize(uint32_t size);
+		bool Create(uint32_t capacity, uint32_t stride, enum R_USAGE usage);
+		bool Release();
+		bool Lock(void **data);
+		bool Unlock();
+		bool Set();
+		bool Draw();
+		uint32_t GetCapacity() const { return _capacity; }
+		uint32_t GetSize()     const { return _nVerts; }
+		void SetSize(uint32_t size);
 
 	private:
-		uint32_t capacity;    // number of vertices we can hold
-		uint32_t nVerts;      // number of vertices in the buffer
+		uint32_t _capacity;    // number of vertices we can hold
+		uint32_t _nVerts;      // number of vertices in the buffer
 };
 
 #endif
