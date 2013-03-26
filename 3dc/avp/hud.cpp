@@ -926,23 +926,22 @@ static void DisplayMarinesAmmo(void)
 	secondaryRounds=weaponPtr->SecondaryRoundsRemaining>>16;
     if ( (weaponPtr->SecondaryRoundsRemaining&0xffff) ) secondaryRounds+=1;
 
-	if (primaryRounds>HUD_PrimaryRounds)
+	if (primaryRounds > HUD_PrimaryRounds)
 	{
 		HUD_PrimaryRounds += NormalFrameTime/512;
 	}
-	if (primaryRounds<HUD_PrimaryRounds)
+	if (primaryRounds < HUD_PrimaryRounds)
 	{
 		HUD_PrimaryRounds = primaryRounds;
 	}
-	if (secondaryRounds>HUD_SecondaryRounds)
+	if (secondaryRounds > HUD_SecondaryRounds)
 	{
 		HUD_SecondaryRounds += NormalFrameTime/512;
 	}
-	if (secondaryRounds<HUD_SecondaryRounds)
+	if (secondaryRounds < HUD_SecondaryRounds)
 	{
 		HUD_SecondaryRounds = secondaryRounds;
 	}
-
 
 	{
 		enum AMMO_ID ammo;

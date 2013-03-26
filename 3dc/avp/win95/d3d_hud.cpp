@@ -855,10 +855,11 @@ void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 
 void Render_MarineAmmo(enum TEXTSTRING_ID ammoText, enum TEXTSTRING_ID magazinesText, unsigned int magazines, enum TEXTSTRING_ID roundsText, unsigned int rounds, int primaryAmmo)
 {
-	int xCentre = (MUL_FIXED(HUDLayout_RightmostTextCentre,HUDScaleFactor)+ScreenDescriptorBlock.SDB_Width) - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset;
+	int xCentre = (MUL_FIXED(HUDLayout_RightmostTextCentre, HUDScaleFactor) + ScreenDescriptorBlock.SDB_Width) - ScreenDescriptorBlock.SDB_SafeZoneWidthOffset;
 
-	if (!primaryAmmo)
+	if (!primaryAmmo) {
 		xCentre += MUL_FIXED(HUDScaleFactor, HUDLayout_RightmostTextCentre * 2);
+	}
 
 	D3D_RenderHUDString_Centred
 	(

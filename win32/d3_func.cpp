@@ -2250,7 +2250,7 @@ bool InitialiseDirect3D()
 	}
 #endif
 
-// #define USEREFDEVICE
+//#define USEREFDEVICE
 
 #ifdef USEREFDEVICE
 	LastError = d3d.lpD3D->CreateDevice(D3DADAPTER_DEFAULT, D3DDEVTYPE_REF, hWndMain,
