@@ -1814,11 +1814,11 @@ void AddParticle(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 	// copy vertex data
 	for (int i = 0; i < 4; i++)
 	{
-		newParticle.vertices[i].x = renderVerticesPtr->X;
-		newParticle.vertices[i].y = renderVerticesPtr->Y;
-		newParticle.vertices[i].z = renderVerticesPtr->Z;
-		newParticle.vertices[i].u = renderVerticesPtr->U;
-		newParticle.vertices[i].v = renderVerticesPtr->V;
+		newParticle.vertices[i].x = (float)renderVerticesPtr->X;
+		newParticle.vertices[i].y = (float)renderVerticesPtr->Y;
+		newParticle.vertices[i].z = (float)renderVerticesPtr->Z;
+		newParticle.vertices[i].u = (float)renderVerticesPtr->U;
+		newParticle.vertices[i].v = (float)renderVerticesPtr->V;
 		renderVerticesPtr++;
 	}
 
@@ -3225,7 +3225,7 @@ extern void D3D_RenderHUDNumber_Centred(uint32_t number, uint32_t x, uint32_t y,
 		{
 			int topLeftU;
 			int topLeftV;
-			if (digit<8)
+			if (digit < 8)
 			{
 				topLeftU = 1+(digit)*16;
 				topLeftV = 1;
@@ -3261,13 +3261,14 @@ extern void D3D_RenderHUDNumber_Centred(uint32_t number, uint32_t x, uint32_t y,
 extern void D3D_RenderHUDString(char *stringPtr, int x, int y, int colour)
 {
 	// mission briefing text?
-	if (stringPtr == NULL)
+	if (stringPtr == NULL) {
 		return;
+	}
 
 	VertexTag quadVertices[4];
 
-	quadVertices[0].Y = y-1;
-	quadVertices[1].Y = y-1;
+	quadVertices[0].Y = y - 1;
+	quadVertices[1].Y = y - 1;
 	quadVertices[2].Y = y + HUD_FONT_HEIGHT + 1;
 	quadVertices[3].Y = y + HUD_FONT_HEIGHT + 1;
 
@@ -3282,7 +3283,7 @@ extern void D3D_RenderHUDString(char *stringPtr, int x, int y, int colour)
 			quadVertices[0].V = topLeftV - 1;
 			quadVertices[1].U = topLeftU + HUD_FONT_WIDTH + 1;
 			quadVertices[1].V = topLeftV - 1;
-			quadVertices[2].U = topLeftU + HUD_FONT_WIDTH + 1;
+			quadVertices[2].U = topLeftU + HUD_FONT_WIDTH  + 1;
 			quadVertices[2].V = topLeftV + HUD_FONT_HEIGHT + 1;
 			quadVertices[3].U = topLeftU - 1;
 			quadVertices[3].V = topLeftV + HUD_FONT_HEIGHT + 1;
@@ -3300,8 +3301,9 @@ extern void D3D_RenderHUDString(char *stringPtr, int x, int y, int colour)
 
 extern void D3D_RenderHUDString_Clipped(char *stringPtr, int x, int y, int colour)
 {
-	if (stringPtr == NULL)
+	if (stringPtr == NULL) {
 		return;
+	}
 
 	VertexTag quadVertices[4];
 
@@ -3350,27 +3352,28 @@ extern void D3D_RenderHUDString_Clipped(char *stringPtr, int x, int y, int colou
 void D3D_RenderHUDString_Centred(char *stringPtr, uint32_t centreX, uint32_t y, uint32_t colour)
 {
 	// white text only of marine HUD ammo, health numbers etc
-	if (stringPtr == NULL)
+	if (stringPtr == NULL) {
 		return;
+	}
 
 	int length = 0;
 	char *ptr = stringPtr;
 
 	while (*ptr)
 	{
-		length+=AAFontWidths[(uint8_t)*ptr++];
+		length += AAFontWidths[(uint8_t)*ptr++];
 	}
 
-	length = MUL_FIXED(HUDScaleFactor,length);
+	length = MUL_FIXED(HUDScaleFactor, length);
 
 	int x = centreX-length/2;
 
 	VertexTag quadVertices[4];
 
-	quadVertices[0].Y = y - MUL_FIXED(HUDScaleFactor,1);
-	quadVertices[1].Y = y - MUL_FIXED(HUDScaleFactor,1);
-	quadVertices[2].Y = y + MUL_FIXED(HUDScaleFactor,HUD_FONT_HEIGHT + 1);
-	quadVertices[3].Y = y + MUL_FIXED(HUDScaleFactor,HUD_FONT_HEIGHT + 1);
+	quadVertices[0].Y = y - MUL_FIXED(HUDScaleFactor, 1);
+	quadVertices[1].Y = y - MUL_FIXED(HUDScaleFactor, 1);
+	quadVertices[2].Y = y + MUL_FIXED(HUDScaleFactor, HUD_FONT_HEIGHT + 1);
+	quadVertices[3].Y = y + MUL_FIXED(HUDScaleFactor, HUD_FONT_HEIGHT + 1);
 
 	while (*stringPtr)
 	{
@@ -3381,11 +3384,11 @@ void D3D_RenderHUDString_Centred(char *stringPtr, uint32_t centreX, uint32_t y, 
 
 			// top left
 			quadVertices[0].U = topLeftU - 1;
-			quadVertices[0].V = topLeftV - 1;
+			quadVertices[0].V = topLeftV;// - 1;
 
 			// top right
 			quadVertices[1].U = topLeftU + HUD_FONT_WIDTH + 1;
-			quadVertices[1].V = topLeftV - 1;
+			quadVertices[1].V = topLeftV;// - 1;
 
 			// bottom right
 			quadVertices[2].U = topLeftU + HUD_FONT_WIDTH + 1;
@@ -3395,15 +3398,14 @@ void D3D_RenderHUDString_Centred(char *stringPtr, uint32_t centreX, uint32_t y, 
 			quadVertices[3].U = topLeftU - 1;
 			quadVertices[3].V = topLeftV + HUD_FONT_HEIGHT + 1;
 
-			quadVertices[0].X = x - MUL_FIXED(HUDScaleFactor,1);
-			quadVertices[3].X = x - MUL_FIXED(HUDScaleFactor,1);
-			quadVertices[1].X = x + MUL_FIXED(HUDScaleFactor,HUD_FONT_WIDTH + 1);
-			quadVertices[2].X = x + MUL_FIXED(HUDScaleFactor,HUD_FONT_WIDTH + 1);
+			quadVertices[0].X = x - MUL_FIXED(HUDScaleFactor, 1);
+			quadVertices[3].X = x - MUL_FIXED(HUDScaleFactor, 1);
+			quadVertices[1].X = x + MUL_FIXED(HUDScaleFactor, HUD_FONT_WIDTH + 1);
+			quadVertices[2].X = x + MUL_FIXED(HUDScaleFactor, HUD_FONT_WIDTH + 1);
 
-			D3D_HUDQuad_Output(AAFontImageNumber, quadVertices, colour, FILTERING_BILINEAR_OFF);
-
+			D3D_HUDQuad_Output(AAFontImageNumber, quadVertices, colour, FILTERING_BILINEAR_ON);
 		}
-		x += MUL_FIXED(HUDScaleFactor,AAFontWidths[(uint8_t)c]);
+		x += MUL_FIXED(HUDScaleFactor, AAFontWidths[(unsigned char)c]);
 	}
 }
 
@@ -3422,7 +3424,7 @@ extern void RenderStringCentred(char *stringPtr, int centreX, int y, int colour)
 		length += AAFontWidths[(uint8_t)*ptr++];
 	}
 
-	D3D_RenderHUDString(stringPtr,centreX-length/2,y,colour);
+	D3D_RenderHUDString(stringPtr, centreX-length/2, y, colour);
 }
 
 extern void RenderStringVertically(char *stringPtr, int centreX, int bottomY, int colour)
