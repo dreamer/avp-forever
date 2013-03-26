@@ -902,7 +902,7 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 		{
 			if (AvP.Network != I_No_Network)
 			{
-				//in a multiplayer game set up a menu without the restart mission option
+				// in a multiplayer game set up a menu without the restart mission option
 				menuID = AVPMENU_INNETGAME;
 				AvPMenus.CurrentMenu = menuID;
 				AvPMenus.MenuElements = AvPMenusData[menuID].MenuElements; // could use default
@@ -1456,7 +1456,10 @@ static void RenderKeyConfigurationMenu(void)
 		}
 		
 		RenderKeyConfigRectangle(b);
-		RenderMenuText(textPtr, MENU_CENTREX, 70, ONE_FIXED, AVPMENUFORMAT_CENTREJUSTIFIED);
+
+		if (AvPMenus.MenusState == MENUSSTATE_MAINMENUS) {
+			RenderMenuText(textPtr, MENU_CENTREX, 70, ONE_FIXED, AVPMENUFORMAT_CENTREJUSTIFIED);
+		}
 	}
 #if 0
 	else
