@@ -99,12 +99,6 @@
     <ClCompile Include="..\..\3dc\mem3dcpp.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\3dc\MemMgr.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
-    <ClCompile Include="..\..\3dc\MemoryStream.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\3dc\module.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -757,12 +751,6 @@
     </ClInclude>
     <ClInclude Include="..\..\3dc\video\BinkPlayback.h">
       <Filter>Video</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\3dc\MemMgr.h">
-      <Filter>Source Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\3dc\MemoryStream.h">
-      <Filter>Source Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\3dc\win95\animation_chunk.hpp">
       <Filter>Header Files</Filter>
