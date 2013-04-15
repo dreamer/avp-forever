@@ -16,11 +16,9 @@
 #include "vision.h"
 #include "menus.h"
 #include "ourasert.h" 
-#include "ffstdio.h" // fast file stdio
 #include "davehook.h"
 #include "showcmds.h"
 #include "console_bind.hpp"
-#include "AvpReg.hpp"
 #include "mempool.h"
 #include "GammaControl.h"
 #include "intro.h"
@@ -262,7 +260,6 @@ void _cdecl main()
   	if (!LobbiedGame)  // Edmond
 	 	WeWantAnIntro();
 	#endif
-	GetPathFromRegistry();
 
 	FF_Init();
 
@@ -285,7 +282,7 @@ void _cdecl main()
 	AvP.CurrentEnv = AvP.StartingEnv = I_Gen1;
 
 	/*******	System initialisation **********/
-	InitialiseSystem(0,0);
+	InitialiseSystem();
 
 	InitialiseRenderer();
 

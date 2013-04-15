@@ -272,1837 +272,244 @@
 			Name="Source Files"
 			Filter="cpp;c;cxx;rc;def;r;odl;idl;hpj;bat">
 			<File
-				RelativePath="..\3dc\avp\win95\gadgets\ahudgadg.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\ai_sight.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\AI_Sight.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\gadgets\alien_hud_gadget.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Animchnk.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\win95\animation_chunk.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\animobs.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\win95\animation_objects.cpp">
 			</File>
 			<File
 				RelativePath=".\src\audio.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Frontend\AvP_EnvInfo.cpp">
+				RelativePath="..\3dc\avp\win95\avp_chunk.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Frontend\AvP_Intro.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\Frontend\AvP_MenuData.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\Frontend\AvP_MenuGfx.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\Frontend\AvP_Menus.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\Frontend\AvP_MP_Config.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\Frontend\AvP_UserProfile.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\Avpchunk.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\AvpReg.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\Avpview.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\win95\avp_string.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\bh_agun.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\3dc\avp\bh_ais.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_alien.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\bh_alien.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_binsw.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\bh_binary_switch.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\bh_cable.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\3dc\avp\bh_corpse.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_deathvol.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\bh_death_volume.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_debri.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\bh_debris.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\bh_dummy.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\3dc\avp\bh_facehugger.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\bh_fan.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\3dc\avp\bh_far.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_fhug.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\Bh_gener.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\bh_ldoor.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\bh_generator.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\bh_lift.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\3dc\avp\bh_lift_door.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\bh_light.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_lnksw.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\bh_light_fx.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_ltfx.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\bh_link_switch.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_marin.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\bh_marine.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\bh_mission.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_near.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\bh_near.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_pargen.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\bh_paq.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_plachier.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\bh_particle_generator.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_plift.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\bh_placed_hierarchy.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_pred.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\bh_platform_lift.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\bh_predator.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\bh_queen.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_RubberDuck.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\bh_rubberduck.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_selfdest.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\bh_self_destruct.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_snds.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\bh_sounds.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\bh_spcl.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_swdor.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\bh_switch_door.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\bh_track.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_types.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\bh_types.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\bh_videoscreen.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_waypt.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\bh_waypoint.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_weap.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\bh_weapon.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_xeno.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\bh_xeno.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Bmpnames.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\video\BinkPlayback.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\BonusAbilities.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\win95\bitmap_names.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\bonusabilities.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\cconvars.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Cheat.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\cheat.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\CheatModes.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\cheat_codes.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\chnkload.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\cheatmodes.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Chnktexi.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\win95\chunk.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Chnktype.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\win95\chunk_dummy.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\chtcodes.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\win95\chunk_fragments.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Chunk.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\win95\chunk_gsprites.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Chunkpal.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\win95\chunk_light.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\comp_map.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\win95\chunk_load.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Comp_shp.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\win95\chunk_map.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\configFile.cpp">
+				RelativePath="..\3dc\win95\chunk_object.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\support\consbind.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\win95\chunk_palette.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\support\consbtch.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\win95\chunk_shape.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\gadgets\conscmnd.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\win95\chunk_sound.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\win95\chunk_sprites.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\win95\chunk_textures.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\win95\chunk_type.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\win95\chunk_waypoint.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\compiled_map.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\compiled_shapes.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\ConfigFile.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\console.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\ConsoleLog.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\support\console_batch.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\gadgets\conssym.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\support\console_bind.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\gadgets\consvar.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\gadgets\console_command.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\support\Coordstr.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\gadgets\console_symbol.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\shapes\Cube.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\gadgets\console_variable.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\consolelog.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\support\coord_strategies.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\shapes\cube.cpp">
 			</File>
 			<File
 				RelativePath=".\src\d3_func.cpp">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\d3d_hud.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\d3d_render.cpp">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\support\Daemon.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\davehook.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\win95\db.cpp">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\deaths.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\win95\Debuglog.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\decal.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\DetailLevels.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\win95\DummyObjectChunk.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\win95\Dxlog.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\Dynamics.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\Dynblock.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\endianio.c">
-			</File>
-			<File
-				RelativePath="..\3dc\win95\Enumchnk.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\win95\Enumsch.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\win95\Envchunk.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\Equipmnt.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\equiputl.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\extents.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\win95\fail.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\FastFile.cpp">
-			</File>
-			<File
-				RelativePath="..\3dc\FileStream.cpp">
-			</File>
-			<File
-				RelativePath="..\3dc\fmvCutscenes.cpp">
-			</File>
-			<File
-				RelativePath="..\3dc\fmvPlayback.cpp">
-			</File>
-			<File
-				RelativePath="..\3dc\Fonts.cpp">
-			</File>
-			<File
-				RelativePath="..\3dc\win95\fragchnk.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\frustum.cpp">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\gadgets\gadget.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\Game.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\game_statistics.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\gamecmds.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\gameflow.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\gamevars.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\GammaControl.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\win95\Gsprchnk.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\win95\hierchnk.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\hierplace.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\HModel.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\Hud.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\gadgets\hudgadg.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\win95\huffman.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\indexBuffer.cpp">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\support\indexfnt.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath=".\src\input.cpp">
 				<FileConfiguration
 					Name="Debug|Win32">
 					<Tool
@@ -2129,458 +536,232 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Inventry.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\d3d_hud.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\d3d_render.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\support\daemon.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\davehook.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\win95\db.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\deaths.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\win95\debuglog.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\decal.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\detaillevels.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\win95\dxlog.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\dynamics.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\dynblock.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\win95\enum_chunk.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\win95\enumsch.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\win95\frontend\env_info.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\win95\environment_chunk.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\equipment.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\equipment_util.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\extents.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\win95\fail.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\FastFile.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\FileStream.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\Fmv_stubbed.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\FmvCutscenes.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\FmvPlayback.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\Fonts.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\frustum.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\win95\gadgets\gadget.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\game.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\game_commands.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\game_statistics.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\gameflow.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\gamevars.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\win95\gammacontrol.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\win95\hierarchy_chunk.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\win95\hierplace.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\hmodel.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\hud.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\win95\gadgets\hud_gadget.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\win95\huffman.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\support\index_font.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\IndexBuffer.cpp">
+			</File>
+			<File
+				RelativePath=".\src\input.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\win95\frontend\intro.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\inventory.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\win95\io.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\3dc\avp\win95\iofocus.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\3dc\avp\win95\jsndsup.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\Kshape.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\kshape.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Kzsort.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\kzsort.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Language.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\language.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Lighting.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\lighting.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\win95\list_tem.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\load_shp.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\load_shape.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\logString.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\los.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\win95\Ltchunk.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath=".\src\main_xbox.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\Map.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\map.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\mathline.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\Maths.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\maths.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\win95\md5.c">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\media.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\Mem3dcpp.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\mem3dcpp.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\mempool.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\MessageHistory.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\frontend\menu_data.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Mishchnk.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\frontend\menu_gfx.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\win95\frontend\menus.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\messagehistory.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\win95\mishchnk.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\missions.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\modcmds.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\module.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\Module.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\module_commands.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\Morph.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\morph.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\MouseCentreing.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\mousecentreing.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\movement.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\Mslhand.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\frontend\mp_config.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\mslhand.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\MurmurHash3.cpp">
@@ -2592,1139 +773,232 @@
 				RelativePath="..\3dc\networking.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Npcsetup.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\npcsetup.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Obchunk.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\object.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\Object.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\object_setup.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Objsetup.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\OnScreenKeyboard.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\OEChunk.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\openal_audio.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\onscreenKeyboard.cpp">
+				RelativePath="..\3dc\win95\our_mem.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Our_mem.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\Paintball.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\paintball.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\particle.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\PathChnk.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\path_chunk.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Pfarlocs.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\pfarlocs.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Pheromon.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\pheromone.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\win95\plat_shp.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Platsup.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\platsup.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Player.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\player.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Pldghost.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\pldghost.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Pldnet.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\pldnet.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\win95\plspecfn.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Pmove.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\pmove.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\win95\progress_bar.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Projload.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\projload.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Psnd.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\psnd.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Psndproj.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\psndproj.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Pvisible.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\pvisible.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\support\r2base.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\3dc\avp\support\r2pos666.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+			</File>
+			<File
+				RelativePath="..\3dc\avp\support\reentrant_queue.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\support\reflist.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\3dc\avp\support\refobj.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\3dc\RenderList.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\support\rentrntq.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath="..\3dc\RimLoader.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\ringbuffer.cpp">
+				RelativePath="..\3dc\RingBuffer.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\gadgets\rootgadg.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\gadgets\root_gadget.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\savegame.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\3dc\avp\scream.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Scrshot.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\screenshot.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\support\scstring.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\SecStats.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\secstats.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\sfx.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\shaderManager.cpp">
+				RelativePath="..\3dc\ShaderManager.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\shpanim.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Shpchunk.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\win95\Sndchunk.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\video\SmackerPlayback.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\sphere.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Sprchunk.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\strategy_chunk.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Strachnk.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\strategy_def.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Stratdef.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\win95\String.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\support\strtab.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\support\string_table.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\support\strutil.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\3dc\avp\win95\system.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\gadgets\t_ingadg.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\Tables.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\tables.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\targeting.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\3dc\avp\win95\gadgets\teletype.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\gadgets\textexp.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\gadgets\text_expansion.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\gadgets\textin.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\gadgets\text_in_gadget.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\textureManager.cpp">
+				RelativePath="..\3dc\avp\win95\gadgets\text_input.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\win95\gadgets\text_report_gadget.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\TextureManager.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\video\TheoraPlayback.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\track.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\gadgets\trepgadg.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
 				RelativePath="..\3dc\avp\support\trig666.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Triggers.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\triggers.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Usr_io.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\user_io.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\win95\frontend\user_profile.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\utilities.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\Vdb.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\vdb.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\version.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\vertexBuffer.cpp">
+				RelativePath="..\3dc\VertexBuffer.cpp">
 			</File>
 			<File
 				RelativePath="..\3dc\VertexDeclaration.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\VideoModes.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\win95\videomodes.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Vision.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\view.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\vorbisPlayer.cpp">
+				RelativePath="..\3dc\avp\win95\vision.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Weapons.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\VorbisPlayer.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\wpchunk.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\weapons.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\support\wrapstr.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\win95\win_func.cpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Zsp.cpp">
-				<FileConfiguration
-					Name="Debug|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
-				<FileConfiguration
-					Name="Release|Win32">
-					<Tool
-						Name="VCCLCompilerTool"
-						AdditionalIncludeDirectories=""
-						PreprocessorDefinitions=""/>
-				</FileConfiguration>
+				RelativePath="..\3dc\avp\win95\win_proj.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\support\wrap_string.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\win95\xa2_audio.cpp">
+			</File>
+			<File
+				RelativePath="..\3dc\win95\zsp.cpp">
 			</File>
 		</Filter>
 		<Filter
@@ -3734,49 +1008,22 @@
 				RelativePath="..\3dc\include\3dc.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\gadgets\ahudgadg.hpp">
+				RelativePath="..\3dc\avp\ai_sight.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\AI_Sight.h">
+				RelativePath="..\3dc\avp\win95\gadgets\alien_hud_gadget.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Animchnk.hpp">
+				RelativePath="..\3dc\win95\animation_chunk.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\animobs.hpp">
+				RelativePath="..\3dc\win95\animation_objects.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\audioStreaming.h">
+				RelativePath="..\3dc\avp\win95\avp_chunk.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Frontend\AvP_EnvInfo.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\Frontend\AvP_MenuGfx.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\Frontend\AvP_Menus.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\Frontend\AvP_MP_Config.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\Frontend\AvP_UserProfile.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\Avpchunk.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\avpitems.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\avppages.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\AvpReg.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\Avpview.h">
+				RelativePath="..\3dc\win95\avp_string.hpp">
 			</File>
 			<File
 				RelativePath="..\3dc\win95\aw.h">
@@ -3788,10 +1035,10 @@
 				RelativePath="..\3dc\avp\bh_ais.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_alien.h">
+				RelativePath="..\3dc\avp\bh_alien.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_binsw.h">
+				RelativePath="..\3dc\avp\bh_binary_switch.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\bh_cable.h">
@@ -3800,253 +1047,244 @@
 				RelativePath="..\3dc\avp\bh_corpse.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_deathvol.h">
+				RelativePath="..\3dc\avp\bh_death_volume.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_debri.h">
+				RelativePath="..\3dc\avp\bh_debris.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\bh_dummy.h">
 			</File>
 			<File
+				RelativePath="..\3dc\avp\bh_facehugger.h">
+			</File>
+			<File
 				RelativePath="..\3dc\avp\bh_fan.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_far.h">
+				RelativePath="..\3dc\avp\bh_far.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_fhug.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\Bh_gener.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\bh_ldoor.h">
+				RelativePath="..\3dc\avp\bh_generator.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\bh_lift.h">
 			</File>
 			<File
+				RelativePath="..\3dc\avp\bh_lift_door.h">
+			</File>
+			<File
 				RelativePath="..\3dc\avp\bh_light.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_lnksw.h">
+				RelativePath="..\3dc\avp\bh_light_fx.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_ltfx.h">
+				RelativePath="..\3dc\avp\bh_link_switch.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_marin.h">
+				RelativePath="..\3dc\avp\bh_marine.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\bh_mission.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_near.h">
+				RelativePath="..\3dc\avp\bh_near.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_paq.h">
+				RelativePath="..\3dc\avp\bh_paq.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_pargen.h">
+				RelativePath="..\3dc\avp\bh_particle_generator.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_plachier.h">
+				RelativePath="..\3dc\avp\bh_placed_hierarchy.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_plift.h">
+				RelativePath="..\3dc\avp\bh_platform_lift.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_pred.h">
+				RelativePath="..\3dc\avp\bh_predator.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\bh_queen.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_RubberDuck.h">
+				RelativePath="..\3dc\avp\bh_rubberduck.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_selfdest.h">
+				RelativePath="..\3dc\avp\bh_self_destruct.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_snds.h">
+				RelativePath="..\3dc\avp\bh_sounds.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\bh_spcl.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_swdor.h">
+				RelativePath="..\3dc\avp\bh_switch_door.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\bh_track.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_types.h">
+				RelativePath="..\3dc\avp\bh_types.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\bh_videoscreen.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_waypt.h">
+				RelativePath="..\3dc\avp\bh_waypoint.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\bh_weap.h">
+				RelativePath="..\3dc\avp\bh_weapon.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Bh_xeno.h">
+				RelativePath="..\3dc\avp\bh_xeno.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Bmp2.h">
+				RelativePath="..\3dc\video\BinkPlayback.h">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Bmpnames.hpp">
+				RelativePath="..\3dc\win95\bitmap_names.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\BonusAbilities.h">
+				RelativePath="..\3dc\avp\bonusabilities.h">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\CD_player.h">
+				RelativePath="..\3dc\avp\win95\cheat.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\CDTrackSelection.h">
+				RelativePath="..\3dc\win95\chunk.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Cheat.h">
+				RelativePath="..\3dc\win95\chunk_dummy.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Chnkload.h">
+				RelativePath="..\3dc\win95\chunk_fragments.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Chnkload.hpp">
+				RelativePath="..\3dc\win95\chunk_gsprites.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Chnktexi.h">
+				RelativePath="..\3dc\win95\chunk_light.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Chnktype.hpp">
+				RelativePath="..\3dc\win95\chunk_load.h">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Chunk.hpp">
+				RelativePath="..\3dc\win95\chunk_load.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Chunkpal.hpp">
+				RelativePath="..\3dc\win95\chunk_object.hpp">
+			</File>
+			<File
+				RelativePath="..\3dc\win95\chunk_palette.hpp">
+			</File>
+			<File
+				RelativePath="..\3dc\win95\chunk_shape.hpp">
+			</File>
+			<File
+				RelativePath="..\3dc\win95\chunk_sound.hpp">
+			</File>
+			<File
+				RelativePath="..\3dc\win95\chunk_sprites.hpp">
+			</File>
+			<File
+				RelativePath="..\3dc\win95\chunk_textures.h">
+			</File>
+			<File
+				RelativePath="..\3dc\win95\chunk_type.hpp">
+			</File>
+			<File
+				RelativePath="..\3dc\win95\chunk_waypoint.hpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\support\command.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Comp_shp.h">
+				RelativePath="..\3dc\avp\compiled_shapes.h">
 			</File>
 			<File
-				RelativePath="..\3dc\configFile.h">
+				RelativePath="..\3dc\avp\support\console_batch.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\support\consbind.hpp">
+				RelativePath="..\3dc\avp\support\console_bind.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\support\consbtch.hpp">
+				RelativePath="..\3dc\avp\win95\gadgets\console_command.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\gadgets\conscmnd.hpp">
+				RelativePath="..\3dc\avp\win95\gadgets\console_symbol.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\console.h">
+				RelativePath="..\3dc\avp\win95\gadgets\console_variable.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\ConsoleLog.hpp">
+				RelativePath="..\3dc\avp\consolelog.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\gadgets\conssym.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\gadgets\consvar.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\support\Coordstr.hpp">
-			</File>
-			<File
-				RelativePath=".\src\d3_func.h">
+				RelativePath="..\3dc\avp\support\coord_strategies.hpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\win95\d3d_hud.h">
 			</File>
 			<File
-				RelativePath="..\3dc\d3d_render.h">
-			</File>
-			<File
 				RelativePath="..\3dc\avp\support\daemon.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\Database.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\datatype.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\davehook.h">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Db.h">
+				RelativePath="..\3dc\win95\db.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\win95\dbdefs.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\support\dcontext.hpp">
+				RelativePath="..\3dc\win95\debuglog.h">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Debuglog.h">
-			</File>
-			<File
-				RelativePath="..\3dc\win95\Debuglog.hpp">
+				RelativePath="..\3dc\win95\debuglog.hpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\decal.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\DetailLevels.h">
+				RelativePath="..\3dc\avp\detaillevels.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\dplayext.h">
+				RelativePath="..\3dc\avp\support\dump_context.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\DummyObjectChunk.hpp">
+				RelativePath="..\3dc\win95\dxlog.h">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Dxlog.h">
+				RelativePath="..\3dc\avp\dynamics.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Dynamics.h">
+				RelativePath="..\3dc\avp\dynblock.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Dynblock.h">
+				RelativePath="..\3dc\win95\enum_chunk.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Eax.h">
+				RelativePath="..\3dc\win95\enumsch.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\endianio.h">
+				RelativePath="..\3dc\avp\win95\frontend\env_info.h">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Enumchnk.hpp">
+				RelativePath="..\3dc\win95\environment_chunk.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Enumsch.hpp">
+				RelativePath="..\3dc\avp\equates.h">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Envchunk.hpp">
+				RelativePath="..\3dc\avp\equipment.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Equates.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\Equipmnt.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\equiputl.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\support\expvar.hpp">
+				RelativePath="..\3dc\avp\equipment_util.hpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\extents.h">
@@ -4055,58 +1293,31 @@
 				RelativePath="..\3dc\win95\fail.h">
 			</File>
 			<File
-				RelativePath="..\3dc\FastFile.h">
-			</File>
-			<File
-				RelativePath="..\3dc\FileStream.h">
-			</File>
-			<File
-				RelativePath="..\3dc\fmvCutscenes.h">
-			</File>
-			<File
-				RelativePath="..\3dc\fmvPlayback.h">
-			</File>
-			<File
-				RelativePath="..\3dc\font2.h">
-			</File>
-			<File
-				RelativePath="..\3dc\Fonts.h">
-			</File>
-			<File
-				RelativePath="..\3dc\win95\fragchnk.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\frustum.h">
-			</File>
-			<File
 				RelativePath="..\3dc\avp\win95\gadgets\gadget.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\game_statistics.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Gamedef.h">
+				RelativePath="..\3dc\avp\gamedef.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\gameflow.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Gameplat.h">
+				RelativePath="..\3dc\avp\win95\gameplat.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\GammaControl.h">
+				RelativePath="..\3dc\avp\win95\gammacontrol.h">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Gsprchnk.hpp">
+				RelativePath="..\3dc\win95\hash_tem.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Hash_tem.hpp">
+				RelativePath="..\3dc\avp\win95\heap_tem.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Heap_tem.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\win95\hierchnk.hpp">
+				RelativePath="..\3dc\win95\hierarchy_chunk.hpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\win95\hierplace.hpp">
@@ -4115,43 +1326,34 @@
 				RelativePath="..\3dc\avp\hmodel.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Hud_data.h">
+				RelativePath="..\3dc\avp\win95\gadgets\hud_gadget.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\HUD_layout.h">
+				RelativePath="..\3dc\avp\win95\hud_gfx.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Hud_map.h">
+				RelativePath="..\3dc\avp\win95\hud_layout.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Huddefs.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\gadgets\hudgadg.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\Hudgfx.h">
+				RelativePath="..\3dc\avp\huddefs.h">
 			</File>
 			<File
 				RelativePath="..\3dc\win95\huffman.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\indexBuffer.h">
+				RelativePath="..\3dc\avp\support\index_font.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\support\indexfnt.hpp">
+				RelativePath="..\3dc\win95\inline.h">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Inline.h">
+				RelativePath="..\3dc\avp\win95\frontend\intro.h">
 			</File>
 			<File
-				RelativePath="..\3dc\Input.h">
+				RelativePath="..\3dc\avp\inventory.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\intro.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\Inventry.h">
+				RelativePath="..\3dc\win95\io.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\win95\iofocus.h">
@@ -4160,39 +1362,25 @@
 				RelativePath="..\3dc\avp\win95\jsndsup.h">
 			</File>
 			<File
-				RelativePath="..\3dc\Kshape.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\Kzsort.h">
+				RelativePath="..\3dc\avp\win95\kzsort.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\langenum.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Language.h">
+				RelativePath="..\3dc\avp\language.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Lighting.h">
+				RelativePath="..\3dc\avp\lighting.h">
 			</File>
 			<File
 				RelativePath="..\3dc\win95\list_tem.hpp">
-				<FileConfiguration
-					Name="Debug|Xbox">
-					<Tool
-						Name="VCCustomBuildTool"/>
-				</FileConfiguration>
 			</File>
 			<File
-				RelativePath="..\3dc\avp\load_shp.h">
-			</File>
-			<File
-				RelativePath="..\3dc\logstring.h">
+				RelativePath="..\3dc\avp\load_shape.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\los.h">
-			</File>
-			<File
-				RelativePath="..\3dc\win95\Ltchunk.hpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\ltfx_exp.h">
@@ -4201,79 +1389,61 @@
 				RelativePath="..\3dc\win95\md5.h">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\media.hpp">
+				RelativePath="..\3dc\include\mem3dc.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\mempool.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\menudefs.h">
+				RelativePath="..\3dc\avp\win95\frontend\menu_data.h">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Mishchnk.hpp">
+				RelativePath="..\3dc\avp\win95\frontend\menu_gfx.hpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\win95\frontend\menus.h">
+			</File>
+			<File
+				RelativePath="..\3dc\win95\mishchnk.hpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\missions.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\modcmds.hpp">
+				RelativePath="..\3dc\include\module.h">
 			</File>
 			<File
-				RelativePath="..\3dc\Mslhand.h">
+				RelativePath="..\3dc\avp\win95\module_commands.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Multmenu.h">
+				RelativePath="..\3dc\avp\win95\frontend\mp_config.h">
 			</File>
 			<File
-				RelativePath="..\3dc\MurmurHash3.h">
+				RelativePath="..\3dc\avp\win95\npcsetup.h">
 			</File>
 			<File
-				RelativePath="..\3dc\MusicPlayer.h">
+				RelativePath="..\3dc\avp\win95\object_setup.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\networking.h">
+				RelativePath="..\3dc\win95\oechunk.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Npcsetup.h">
+				RelativePath="..\3dc\win95\ourasert.h">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Obchunk.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\win95\objedit.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\Objsetup.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\win95\OEChunk.h">
-			</File>
-			<File
-				RelativePath="..\3dc\onscreenKeyboard.h">
-			</File>
-			<File
-				RelativePath="..\3dc\os_header.h">
-			</File>
-			<File
-				RelativePath="..\3dc\win95\Ourasert.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\support\ourbool.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\Paintball.h">
+				RelativePath="..\3dc\avp\paintball.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\particle.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\PathChnk.hpp">
+				RelativePath="..\3dc\avp\win95\path_chunk.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Pfarlocs.h">
+				RelativePath="..\3dc\avp\pfarlocs.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Pheromon.h">
+				RelativePath="..\3dc\avp\pheromone.h">
 			</File>
 			<File
 				RelativePath="..\3dc\win95\plat_shp.h">
@@ -4282,13 +1452,16 @@
 				RelativePath="..\3dc\win95\platform.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Pldghost.h">
+				RelativePath="..\3dc\avp\player.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Pldnet.h">
+				RelativePath="..\3dc\avp\win95\pldghost.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Pmove.h">
+				RelativePath="..\3dc\avp\win95\pldnet.h">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\pmove.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\win95\progress_bar.h">
@@ -4297,7 +1470,7 @@
 				RelativePath="..\3dc\avp\projfont.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Projload.hpp">
+				RelativePath="..\3dc\avp\win95\projload.hpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\projtext.h">
@@ -4306,16 +1479,16 @@
 				RelativePath="..\3dc\include\prototyp.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Psnd.h">
+				RelativePath="..\3dc\avp\psnd.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Psndplat.h">
+				RelativePath="..\3dc\avp\win95\psndplat.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Psndproj.h">
+				RelativePath="..\3dc\avp\psndproj.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Pvisible.h">
+				RelativePath="..\3dc\avp\pvisible.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\support\r2base.h">
@@ -4324,31 +1497,16 @@
 				RelativePath="..\3dc\avp\support\r2pos666.hpp">
 			</File>
 			<File
+				RelativePath="..\3dc\avp\support\reentrant_queue.h">
+			</File>
+			<File
 				RelativePath="..\3dc\avp\support\reflist.hpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\support\refobj.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\renderer.h">
-			</File>
-			<File
-				RelativePath="..\3dc\RenderList.h">
-			</File>
-			<File
-				RelativePath="..\3dc\renderStates.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\support\rentrntq.h">
-			</File>
-			<File
-				RelativePath="..\3dc\RimLoader.h">
-			</File>
-			<File
-				RelativePath="..\3dc\ringbuffer.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\gadgets\rootgadg.hpp">
+				RelativePath="..\3dc\avp\win95\gadgets\root_gadget.hpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\savegame.h">
@@ -4357,70 +1515,46 @@
 				RelativePath="..\3dc\avp\scream.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Scrshot.hpp">
+				RelativePath="..\3dc\avp\win95\screenshot.hpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\support\scstring.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\sequnces.h">
+				RelativePath="..\3dc\avp\sequences.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\sfx.h">
 			</File>
 			<File
-				RelativePath="..\3dc\shaderManager.h">
-			</File>
-			<File
 				RelativePath="..\3dc\include\shape.h">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\ShowCmds.h">
+				RelativePath="..\3dc\win95\showcmds.h">
 			</File>
 			<File
 				RelativePath="..\3dc\win95\shpanim.h">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Shpchunk.hpp">
+				RelativePath="..\3dc\video\SmackerPlayback.h">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Sndchunk.hpp">
+				RelativePath="..\3dc\avp\status_panel.h">
 			</File>
 			<File
-				RelativePath="..\3dc\sphere.h">
+				RelativePath="..\3dc\avp\win95\strategy_chunk.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Sprchunk.hpp">
+				RelativePath="..\3dc\avp\strategy_def.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\statpane.h">
-			</File>
-			<File
-				RelativePath=".\src\stdint.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\Strachnk.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\Stratdef.h">
-			</File>
-			<File
-				RelativePath="..\3dc\win95\String.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\support\strtab.hpp">
+				RelativePath="..\3dc\avp\support\string_table.hpp">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\support\strutil.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\System.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\gadgets\t_ingadg.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\support\tallfont.hpp">
+				RelativePath="..\3dc\avp\win95\system.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\targeting.h">
@@ -4429,67 +1563,49 @@
 				RelativePath="..\3dc\avp\win95\gadgets\teletype.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\gadgets\textexp.hpp">
+				RelativePath="..\3dc\avp\win95\gadgets\text_expansion.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\gadgets\textin.hpp">
+				RelativePath="..\3dc\avp\win95\gadgets\text_in_gadget.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\textureManager.h">
+				RelativePath="..\3dc\avp\win95\gadgets\text_input.hpp">
+			</File>
+			<File
+				RelativePath="..\3dc\avp\win95\gadgets\text_report_gadget.hpp">
+			</File>
+			<File
+				RelativePath="..\3dc\video\TheoraPlayback.h">
 			</File>
 			<File
 				RelativePath="..\3dc\avp\track.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\gadgets\trepgadg.hpp">
-			</File>
-			<File
 				RelativePath="..\3dc\avp\support\trig666.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\Triggers.h">
+				RelativePath="..\3dc\avp\triggers.h">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\Txioctrl.h">
+				RelativePath="..\3dc\avp\win95\user_io.h">
 			</File>
 			<File
-				RelativePath="..\3dc\avp\win95\Usr_io.h">
+				RelativePath="..\3dc\avp\win95\frontend\user_profile.h">
 			</File>
 			<File
-				RelativePath="..\3dc\utilities.h">
+				RelativePath="..\3dc\avp\view.h">
 			</File>
 			<File
-				RelativePath="..\3dc\version.h">
+				RelativePath="..\3dc\avp\win95\vision.h">
 			</File>
 			<File
-				RelativePath="..\3dc\vertexBuffer.h">
+				RelativePath="..\3dc\avp\weapons.h">
 			</File>
 			<File
-				RelativePath="..\3dc\VertexDeclaration.h">
+				RelativePath="..\3dc\avp\support\wrap_string.hpp">
 			</File>
 			<File
-				RelativePath="..\3dc\win95\VideoModes.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\win95\Vision.h">
-			</File>
-			<File
-				RelativePath="..\3dc\vorbisPlayer.h">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\Weapons.h">
-			</File>
-			<File
-				RelativePath="..\3dc\win95\wpchunk.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\avp\support\wrapstr.hpp">
-			</File>
-			<File
-				RelativePath="..\3dc\include\xbox_defines.h">
-			</File>
-			<File
-				RelativePath="..\3dc\win95\Zsp.hpp">
+				RelativePath="..\3dc\win95\zsp.hpp">
 			</File>
 			<Filter
 				Name="Resource Files"

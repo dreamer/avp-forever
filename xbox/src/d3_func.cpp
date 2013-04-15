@@ -259,15 +259,14 @@ bool R_EndScene()
 bool R_CreateVertexBuffer(class VertexBuffer &vertexBuffer)
 {
 	// TODO - how to handle dynamic VBs? thinking of new-ing some space and using DrawPrimitiveUP functions?
-
-	vertexBuffer.vertexBuffer.dynamicVBMemory = 0;
-	vertexBuffer.vertexBuffer.dynamicVBMemorySize = 0;
-	vertexBuffer.vertexBuffer.vertexBuffer = 0;
+	vertexBuffer._vertexBuffer.dynamicVBMemory = 0;
+	vertexBuffer._vertexBuffer.dynamicVBMemorySize = 0;
+	vertexBuffer._vertexBuffer.vertexBuffer = 0;
 
 	D3DPOOL vbPool;
 	DWORD	vbUsage;
 
-	switch (vertexBuffer.usage)
+	switch (vertexBuffer._usage)
 	{
 		case USAGE_STATIC:
 			vbUsage = 0;
@@ -284,9 +283,9 @@ bool R_CreateVertexBuffer(class VertexBuffer &vertexBuffer)
 			break;
 	}
 
-	if (USAGE_STATIC == vertexBuffer.usage)
+	if (USAGE_STATIC == vertexBuffer._usage)
 	{
-		LastError = d3d.lpD3DDevice->CreateVertexBuffer(vertexBuffer.sizeInBytes, vbUsage, 0, vbPool, &vertexBuffer.vertexBuffer.vertexBuffer);
+		LastError = d3d.lpD3DDevice->CreateVertexBuffer(vertexBuffer._sizeInBytes, vbUsage, 0, vbPool, &vertexBuffer._vertexBuffer.vertexBuffer);
 		if (FAILED(LastError))
 		{
 			Con_PrintError("Can't create static vertex buffer");
@@ -294,15 +293,15 @@ bool R_CreateVertexBuffer(class VertexBuffer &vertexBuffer)
 			return false;
 		}
 	}
-	else if (USAGE_DYNAMIC == vertexBuffer.usage)
+	else if (USAGE_DYNAMIC == vertexBuffer._usage)
 	{
-		vertexBuffer.vertexBuffer.dynamicVBMemory = static_cast<uint8_t*>(GlobalAlloc(GMEM_FIXED, vertexBuffer.sizeInBytes));
-		if (vertexBuffer.vertexBuffer.dynamicVBMemory == NULL)
+		vertexBuffer._vertexBuffer.dynamicVBMemory = static_cast<uint8_t*>(GlobalAlloc(GMEM_FIXED, vertexBuffer._sizeInBytes));
+		if (vertexBuffer._vertexBuffer.dynamicVBMemory == NULL)
 		{
 			Con_PrintError("Can't create dynamic vertex buffer - GlobalAlloc() failed");
 			return false;
 		}
-		vertexBuffer.vertexBuffer.dynamicVBMemorySize = vertexBuffer.sizeInBytes;
+		vertexBuffer._vertexBuffer.dynamicVBMemorySize = vertexBuffer._sizeInBytes;
 	}
 
 	return true;
@@ -310,9 +309,9 @@ bool R_CreateVertexBuffer(class VertexBuffer &vertexBuffer)
 
 bool R_ReleaseVertexBuffer(class VertexBuffer &vertexBuffer)
 {
-	if (vertexBuffer.vertexBuffer.vertexBuffer)
+	if (vertexBuffer._vertexBuffer.vertexBuffer)
 	{
-		vertexBuffer.vertexBuffer.vertexBuffer->Release();
+		vertexBuffer._vertexBuffer.vertexBuffer->Release();
 	}
 
 	return true;
@@ -323,11 +322,11 @@ bool R_CreateIndexBuffer(class IndexBuffer &indexBuffer)
 	D3DPOOL ibPool;
 	DWORD	ibUsage;
 
-	indexBuffer.indexBuffer.dynamicIBMemory = 0;
-	indexBuffer.indexBuffer.dynamicIBMemorySize = 0;
-	indexBuffer.indexBuffer.indexBuffer = 0;
+	indexBuffer._indexBuffer.dynamicIBMemory = 0;
+	indexBuffer._indexBuffer.dynamicIBMemorySize = 0;
+	indexBuffer._indexBuffer.indexBuffer = 0;
 
-	switch (indexBuffer.usage)
+	switch (indexBuffer._usage)
 	{
 		case USAGE_STATIC:
 			ibUsage = 0;
@@ -343,9 +342,9 @@ bool R_CreateIndexBuffer(class IndexBuffer &indexBuffer)
 			break;
 	}
 
-	if (USAGE_STATIC == indexBuffer.usage)
+	if (USAGE_STATIC == indexBuffer._usage)
 	{
-		LastError = d3d.lpD3DDevice->CreateIndexBuffer(indexBuffer.sizeInBytes, ibUsage, D3DFMT_INDEX16, ibPool, &indexBuffer.indexBuffer.indexBuffer);
+		LastError = d3d.lpD3DDevice->CreateIndexBuffer(indexBuffer._sizeInBytes, ibUsage, D3DFMT_INDEX16, ibPool, &indexBuffer._indexBuffer.indexBuffer);
 		if (FAILED(LastError))
 		{
 			Con_PrintError("Can't create index buffer");
@@ -353,15 +352,15 @@ bool R_CreateIndexBuffer(class IndexBuffer &indexBuffer)
 			return false;
 		}
 	}
-	else if (USAGE_DYNAMIC == indexBuffer.usage)
+	else if (USAGE_DYNAMIC == indexBuffer._usage)
 	{
-		indexBuffer.indexBuffer.dynamicIBMemory = static_cast<uint8_t*>(GlobalAlloc(GMEM_FIXED, indexBuffer.sizeInBytes));
-		if (indexBuffer.indexBuffer.dynamicIBMemory == NULL)
+		indexBuffer._indexBuffer.dynamicIBMemory = static_cast<uint8_t*>(GlobalAlloc(GMEM_FIXED, indexBuffer._sizeInBytes));
+		if (indexBuffer._indexBuffer.dynamicIBMemory == NULL)
 		{
 			Con_PrintError("Can't create index buffer - GlobalAlloc() failed");
 			return false;
 		}
-		indexBuffer.indexBuffer.dynamicIBMemorySize = indexBuffer.sizeInBytes;
+		indexBuffer._indexBuffer.dynamicIBMemorySize = indexBuffer._sizeInBytes;
 	}
 
 	return true;
@@ -369,9 +368,9 @@ bool R_CreateIndexBuffer(class IndexBuffer &indexBuffer)
 
 bool R_ReleaseIndexBuffer(class IndexBuffer &indexBuffer)
 {
-	if (indexBuffer.indexBuffer.indexBuffer)
+	if (indexBuffer._indexBuffer.indexBuffer)
 	{
-		indexBuffer.indexBuffer.indexBuffer->Release();
+		indexBuffer._indexBuffer.indexBuffer->Release();
 	}
 
 	return true;
@@ -482,11 +481,11 @@ bool R_LockVertexBuffer(class VertexBuffer &vertexBuffer, uint32_t offsetToLock,
 
 	if (usage == USAGE_DYNAMIC)
 	{
-		(*data) = (void*)(vertexBuffer.vertexBuffer.dynamicVBMemory + offsetToLock);
+		(*data) = (void*)(vertexBuffer._vertexBuffer.dynamicVBMemory + offsetToLock);
 	}
 	else if (usage == USAGE_STATIC)
 	{
-		LastError = vertexBuffer.vertexBuffer.vertexBuffer->Lock(offsetToLock, sizeToLock, reinterpret_cast<byte**>(data), vbFlags);
+		LastError = vertexBuffer._vertexBuffer.vertexBuffer->Lock(offsetToLock, sizeToLock, reinterpret_cast<byte**>(data), vbFlags);
 		if (FAILED(LastError))
 		{
 			Con_PrintError("Can't vertex index buffer");
@@ -495,7 +494,7 @@ bool R_LockVertexBuffer(class VertexBuffer &vertexBuffer, uint32_t offsetToLock,
 		}
 	}
 
-	vertexBuffer.isLocked = true;
+	vertexBuffer._isLocked = true;
 
 	return true;
 }
@@ -551,11 +550,11 @@ bool R_LockIndexBuffer(class IndexBuffer &indexBuffer, uint32_t offsetToLock, ui
 
 	if (usage == USAGE_DYNAMIC)
 	{
-		(*data) = (uint16_t*)(indexBuffer.indexBuffer.dynamicIBMemory + offsetToLock);
+		(*data) = (uint16_t*)(indexBuffer._indexBuffer.dynamicIBMemory + offsetToLock);
 	}
 	else if (usage == USAGE_STATIC)
 	{
-		LastError = indexBuffer.indexBuffer.indexBuffer->Lock(offsetToLock, sizeToLock, (byte**)data, ibFlags);
+		LastError = indexBuffer._indexBuffer.indexBuffer->Lock(offsetToLock, sizeToLock, (byte**)data, ibFlags);
 		if (FAILED(LastError))
 		{
 			Con_PrintError("Can't lock index buffer");
@@ -564,7 +563,7 @@ bool R_LockIndexBuffer(class IndexBuffer &indexBuffer, uint32_t offsetToLock, ui
 		}
 	}
 
-	indexBuffer.isLocked = true;
+	indexBuffer._isLocked = true;
 
 	return true;
 }
@@ -573,16 +572,16 @@ bool R_SetVertexBuffer(class VertexBuffer &vertexBuffer)
 {
 	currentVBPointer = 0;
 
-	if (vertexBuffer.vertexBuffer.dynamicVBMemory)
+	if (vertexBuffer._vertexBuffer.dynamicVBMemory)
 	{
-		currentVBPointer = vertexBuffer.vertexBuffer.dynamicVBMemory;
-		currentVertexStride = vertexBuffer.stride;
+		currentVBPointer = vertexBuffer._vertexBuffer.dynamicVBMemory;
+		currentVertexStride = vertexBuffer._stride;
 	}
-	else if (vertexBuffer.vertexBuffer.vertexBuffer)
+	else if (vertexBuffer._vertexBuffer.vertexBuffer)
 	{
-		assert(vertexBuffer.stride);
+		assert(vertexBuffer._stride);
 
-		LastError = d3d.lpD3DDevice->SetStreamSource(0, vertexBuffer.vertexBuffer.vertexBuffer, vertexBuffer.stride);
+		LastError = d3d.lpD3DDevice->SetStreamSource(0, vertexBuffer._vertexBuffer.vertexBuffer, vertexBuffer._stride);
 		if (FAILED(LastError))
 		{
 			Con_PrintError("Can't set vertex buffer");
@@ -598,13 +597,13 @@ bool R_SetIndexBuffer(class IndexBuffer &indexBuffer)
 {
 	currentIBPointer = 0;
 
-	if (indexBuffer.indexBuffer.dynamicIBMemory)
+	if (indexBuffer._indexBuffer.dynamicIBMemory)
 	{
-		currentIBPointer = indexBuffer.indexBuffer.dynamicIBMemory;
+		currentIBPointer = indexBuffer._indexBuffer.dynamicIBMemory;
 	}
-	else if (indexBuffer.indexBuffer.indexBuffer)
+	else if (indexBuffer._indexBuffer.indexBuffer)
 	{
-		LastError = d3d.lpD3DDevice->SetIndices(indexBuffer.indexBuffer.indexBuffer, 0);
+		LastError = d3d.lpD3DDevice->SetIndices(indexBuffer._indexBuffer.indexBuffer, 0);
 		if (FAILED(LastError))
 		{
 			Con_PrintError("Can't set index buffer");
@@ -618,14 +617,14 @@ bool R_SetIndexBuffer(class IndexBuffer &indexBuffer)
 
 bool R_UnlockVertexBuffer(class VertexBuffer &vertexBuffer)
 {
-	if (vertexBuffer.usage == USAGE_DYNAMIC)
+	if (vertexBuffer._usage == USAGE_DYNAMIC)
 	{
 		// nothing to do here yet
 		return true;
 	}
-	else if (vertexBuffer.usage == USAGE_STATIC)
+	else if (vertexBuffer._usage == USAGE_STATIC)
 	{
-		LastError = vertexBuffer.vertexBuffer.vertexBuffer->Unlock();
+		LastError = vertexBuffer._vertexBuffer.vertexBuffer->Unlock();
 		if (FAILED(LastError))
 		{
 			Con_PrintError("Can't unlock vertex buffer");
@@ -634,21 +633,21 @@ bool R_UnlockVertexBuffer(class VertexBuffer &vertexBuffer)
 		}
 	}
 
-	vertexBuffer.isLocked = false;
+	vertexBuffer._isLocked = false;
 
 	return true;
 }
 
 bool R_UnlockIndexBuffer(class IndexBuffer &indexBuffer)
 {
-	if (indexBuffer.usage == USAGE_DYNAMIC)
+	if (indexBuffer._usage == USAGE_DYNAMIC)
 	{
 		// nothing to do here yet
 		return true;
 	}
-	else if (indexBuffer.usage == USAGE_STATIC)
+	else if (indexBuffer._usage == USAGE_STATIC)
 	{
-		LastError = indexBuffer.indexBuffer.indexBuffer->Unlock();
+		LastError = indexBuffer._indexBuffer.indexBuffer->Unlock();
 		if (FAILED(LastError))
 		{
 			Con_PrintError("Can't unlock index buffer");
@@ -657,7 +656,7 @@ bool R_UnlockIndexBuffer(class IndexBuffer &indexBuffer)
 		}
 	}
 
-	indexBuffer.isLocked = false;
+	indexBuffer._isLocked = false;
 
 	return true;
 }
