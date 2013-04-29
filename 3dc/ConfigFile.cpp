@@ -37,7 +37,7 @@ static bool Config_CreateDefault();
 typedef std::map<std::string, std::string> MapValue;
 typedef std::map<std::string, MapValue> MapHeading;
 
-static const char* kCfgFileName = "AliensVsPredator.cfg";
+static const std::string kCfgFileName = "AliensVsPredator.cfg";
 
 MapHeading AvPConfig;
 
@@ -46,7 +46,7 @@ bool Config_Load()
 	std::string filePath(GetSaveFolderPath());
 	filePath += kCfgFileName;
 
-	std::ifstream file(filePath.c_str());
+	std::ifstream file(filePath);
 
 	std::string tempLine;
 	std::string currentHeading;
@@ -62,7 +62,7 @@ bool Config_Load()
 		}
 		else
 		{
-			file.open(filePath.c_str());
+			file.open(filePath);
 			if (!file.is_open())
 			{
 				LogErrorString("Error opening config file!");
@@ -75,8 +75,9 @@ bool Config_Load()
 	// go through the cfg file line by line
 	while (getline(file, tempLine))
 	{
-		if (tempLine.length() == 0) // skip empty lines
+		if (tempLine.length() == 0) { // skip empty lines
 			continue;
+		}
 
 		if ((tempLine.at(0) == '[') || (tempLine.at(tempLine.length() - 1) == ']')) // found a header block
 		{
@@ -85,39 +86,21 @@ bool Config_Load()
 		}
 		else
 		{
-			// special case for strings such as command line
-			size_t stringCheck = tempLine.find('"'); // check for a quote..
-
-			if (stringCheck != std::string::npos)
-			{
-				// we want to remove the quotes
-				//tempLine.erase(std::remove(tempLine.begin(), tempLine.end(),'"'), tempLine.end());
-
-				// and also, the whitespace in the pre quotes section
-				std::string tempString = tempLine.substr(0, stringCheck);
-				std::string tempString2 = tempLine.substr(stringCheck, tempLine.length());
-
-				// remove spaces
-				tempString.erase(std::remove(tempString.begin(), tempString.end(),' '), tempString.end());
-
-				// remove quotes
-//				tempString2.erase(std::remove(tempString2.begin(), tempString2.end(),'"'), tempString2.end());
-
-				// recreate original line string
-				tempLine = tempString + tempString2;
-			}
-			else
-			{
-				// remove whitespace
-				tempLine.erase(std::remove(tempLine.begin(), tempLine.end(),' '), tempLine.end());
-			}
-
-			// assume we got a variable and value
-			size_t lenOfVar = tempLine.find("=");
-
 			// if there's no equals sign in the string, don't add it
-			if (lenOfVar == std::string::npos)
+			size_t equalsPosition = tempLine.find("=");
+			if (equalsPosition == std::string::npos) {
 				continue;
+			}
+
+			// get the variable part and remove any spaces
+			std::string variable = tempLine.substr(0, equalsPosition);
+			variable.erase(std::remove(variable.begin(), variable.end(),' '), variable.end());
+
+			// get the value part, skipping the = character and a single space after that if present. we dont want to remove any spaces after that (as they may be part of a file path)
+			std::string value = tempLine.substr(equalsPosition + 1, std::string::npos);
+			if (value.at(0) == ' ') {
+				value.erase(value.begin(), value.begin() + 1);
+			}
 
 //			std::cout << "got variable name: " << tempLine.substr(0, lenOfVar) << "\n";
 //			std::cout << "its value is: " << tempLine.substr(lenOfVar + 1) << "\n";
@@ -125,8 +108,7 @@ bool Config_Load()
 			// should only create a new key in AvPConfig if one doesn't already exists
 			MapValue &tempValue = AvPConfig[currentHeading];
 
-			// +1 to skip over the equals sign
-			tempValue.insert(std::make_pair(tempLine.substr(0, lenOfVar), tempLine.substr(lenOfVar + 1)));
+			tempValue.insert(std::make_pair(variable, value));
 		}
 	}
 
@@ -137,14 +119,10 @@ bool Config_Load()
 
 bool Config_Save()
 {
-	std::string filePath(GetSaveFolderPath());
-	filePath += kCfgFileName;
-
-	std::ofstream file(filePath.c_str());
-
+	std::ofstream file(GetSaveFolderPath() + kCfgFileName);
 	if (!file.is_open())
 	{
-		LogErrorString("Error opening config file for save!");
+		std::cout << "Error opening config file " << kCfgFileName << " for save!" << std::endl;
 		return false;
 	}
 
@@ -152,6 +130,7 @@ bool Config_Save()
 
 	while (headingIt != AvPConfig.end())
 	{
+		// writes the heading, eg [Video]
 		file << (*headingIt).first << "\n";
 
 		MapValue::iterator variableIt = (*headingIt).second.begin();
@@ -163,7 +142,11 @@ bool Config_Save()
 		}
 
 		++headingIt;
-		file << "\n";
+
+		// puts a newline between each new heading section
+		if (headingIt != AvPConfig.end()) {
+			file << "\n";
+		}
 	}
 	return true;
 }
@@ -308,7 +291,7 @@ static bool Config_CreateDefault()
 	std::string filePath(GetSaveFolderPath());
 	filePath += kCfgFileName;
 
-	std::ofstream file(filePath.c_str());
+	std::ofstream file(filePath);
 	if (!file.is_open())
 	{
 		LogErrorString("Couldn't create default config file!");
