@@ -94,7 +94,7 @@ Macros</h2></td></tr>
 <tr class="memitem:a7e3fba7774ffbf6f095c7c1c643db823"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7e3fba7774ffbf6f095c7c1c643db823"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>ENET_VERSION_MINOR</b>&#160;&#160;&#160;3</td></tr>
 <tr class="memitem:a7e08f37772431845fe118f9a87bebda2"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="a7e08f37772431845fe118f9a87bebda2"></a>
-#define&#160;</td><td class="memItemRight" valign="bottom"><b>ENET_VERSION_PATCH</b>&#160;&#160;&#160;5</td></tr>
+#define&#160;</td><td class="memItemRight" valign="bottom"><b>ENET_VERSION_PATCH</b>&#160;&#160;&#160;7</td></tr>
 <tr class="memitem:ab3ebd57b901e14fa1ff745b0472ea786"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="ab3ebd57b901e14fa1ff745b0472ea786"></a>
 #define&#160;</td><td class="memItemRight" valign="bottom"><b>ENET_VERSION_CREATE</b>(major, minor, patch)&#160;&#160;&#160;(((major)&lt;&lt;16) | ((minor)&lt;&lt;8) | (patch))</td></tr>
 <tr class="memitem:aefb355eb62b5a7096faf91b3134e9016"><td class="memItemLeft" align="right" valign="top"><a class="anchor" id="aefb355eb62b5a7096faf91b3134e9016"></a>
@@ -175,10 +175,14 @@ Enumerations</h2></td></tr>
 <a class="el" href="enet_8h.html#adf764cbdea00d65edcd07bb9953ad2b7af40f3e48e3f87859c06d62023601eb57">ENET_HOST_BROADCAST</a> =  0xFFFFFFFF, 
 <a class="el" href="enet_8h.html#adf764cbdea00d65edcd07bb9953ad2b7a851f798e15c7f68c29a5755ac7d7cce4">ENET_PORT_ANY</a> =  0
  }</td></tr>
-<tr class="memitem:a9d1fc0ce6da0a057f18bd8b9c762003d"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="enet_8h.html#a9d1fc0ce6da0a057f18bd8b9c762003d">_ENetPacketFlag</a> { <a class="el" href="enet_8h.html#a9d1fc0ce6da0a057f18bd8b9c762003daab20e7088245ab2ddb7f11dcc9433738">ENET_PACKET_FLAG_RELIABLE</a> =  (1 &lt;&lt; 0), 
+<tr class="memitem:a9d1fc0ce6da0a057f18bd8b9c762003d"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><a class="el" href="enet_8h.html#a9d1fc0ce6da0a057f18bd8b9c762003d">_ENetPacketFlag</a> { <br/>
+&#160;&#160;<a class="el" href="enet_8h.html#a9d1fc0ce6da0a057f18bd8b9c762003daab20e7088245ab2ddb7f11dcc9433738">ENET_PACKET_FLAG_RELIABLE</a> =  (1 &lt;&lt; 0), 
 <a class="el" href="enet_8h.html#a9d1fc0ce6da0a057f18bd8b9c762003dad230cc769ef9cc4c7c582b28f9c443fe">ENET_PACKET_FLAG_UNSEQUENCED</a> =  (1 &lt;&lt; 1), 
 <a class="el" href="enet_8h.html#a9d1fc0ce6da0a057f18bd8b9c762003daa6ce462752c36aad22e68ebefac3df8c">ENET_PACKET_FLAG_NO_ALLOCATE</a> =  (1 &lt;&lt; 2), 
-<a class="el" href="enet_8h.html#a9d1fc0ce6da0a057f18bd8b9c762003da7f79cd86eacd2543d6cde2eeccea995e">ENET_PACKET_FLAG_UNRELIABLE_FRAGMENT</a> =  (1 &lt;&lt; 3)
+<a class="el" href="enet_8h.html#a9d1fc0ce6da0a057f18bd8b9c762003da7f79cd86eacd2543d6cde2eeccea995e">ENET_PACKET_FLAG_UNRELIABLE_FRAGMENT</a> =  (1 &lt;&lt; 3), 
+<br/>
+&#160;&#160;<a class="el" href="enet_8h.html#a9d1fc0ce6da0a057f18bd8b9c762003da57b64ab5cfbeb1ecbcd7f10429c79771">ENET_PACKET_FLAG_SENT</a> =  (1&lt;&lt;8)
+<br/>
  }</td></tr>
 <tr class="memdesc:a9d1fc0ce6da0a057f18bd8b9c762003d"><td class="mdescLeft">&#160;</td><td class="mdescRight">Packet flag bit constants.  <a href="enet_8h.html#a9d1fc0ce6da0a057f18bd8b9c762003d">More...</a><br/></td></tr>
 <tr class="memitem:a9c86e93edb63e1af90a4c59a2cc2f2bb"><td class="memItemLeft" align="right" valign="top">enum &#160;</td><td class="memItemRight" valign="bottom"><b>_ENetPeerState</b> { <br/>
@@ -551,6 +555,9 @@ enet_host_bandwidth_throttle() </dd></dl>
 <tr><td valign="top"><em><a class="anchor" id="a9d1fc0ce6da0a057f18bd8b9c762003da7f79cd86eacd2543d6cde2eeccea995e"></a>ENET_PACKET_FLAG_UNRELIABLE_FRAGMENT</em>&nbsp;</td><td>
 <p>packet will be fragmented using unreliable (instead of reliable) sends if it exceeds the MTU </p>
 </td></tr>
+<tr><td valign="top"><em><a class="anchor" id="a9d1fc0ce6da0a057f18bd8b9c762003da57b64ab5cfbeb1ecbcd7f10429c79771"></a>ENET_PACKET_FLAG_SENT</em>&nbsp;</td><td>
+<p>whether the packet has been sent from all queues it has been entered into </p>
+</td></tr>
 </table>
 </dd>
 </dl>
@@ -597,7 +604,7 @@ enet_host_bandwidth_throttle() </dd></dl>
 </div><!-- contents -->
 <!-- start footer part -->
 <hr class="footer"/><address class="footer"><small>
-Generated on Tue Dec 11 2012 13:36:18 for enet by &#160;<a href="http://www.doxygen.org/index.html">
+Generated on Wed Mar 6 2013 18:35:52 for enet by &#160;<a href="http://www.doxygen.org/index.html">
 <img class="footer" src="doxygen.png" alt="doxygen"/>
 </a> 1.8.1.2
 </small></address>
