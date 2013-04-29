@@ -1105,7 +1105,8 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 			}
 
 			/* find available difficulty levels */
-			AvPMenus.NumberOfElementsInMenu=MaxDifficultyLevelAllowed(AvP.PlayerType, episodeToPlay);
+			AvPMenus.NumberOfElementsInMenu = MaxDifficultyLevelAllowed(AvP.PlayerType, episodeToPlay);
+
 			/* highlight a suitable level of difficulty */
 			if (episodeToPlay)
 			{
@@ -1830,15 +1831,15 @@ static void RenderLoadGameMenu(void)
 				}
 			}
 
-			sprintf(buffer, "%s", GetTextString(static_cast<enum TEXTSTRING_ID>(TEXTSTRING_MULTIPLAYER_MARINE+slotPtr->Species)));
+			sprintf(buffer, "%s", GetTextString(static_cast<enum TEXTSTRING_ID>(TEXTSTRING_MULTIPLAYER_MARINE + slotPtr->Species)));
 			RenderText(buffer, MENU_LEFTXEDGE+30, y, elementPtr->Brightness, AVPMENUFORMAT_LEFTJUSTIFIED);
 			
 			sprintf(buffer, "%s", GetTextString(static_cast<enum TEXTSTRING_ID>(textID+slotPtr->Episode)));
 			RenderText(buffer, MENU_CENTREX, y, elementPtr->Brightness, AVPMENUFORMAT_CENTREJUSTIFIED);
 
-			if (numberOfBasicEpisodes>slotPtr->Episode)
+			if (numberOfBasicEpisodes > slotPtr->Episode)
 			{
-				sprintf(buffer, "%s", GetTextString(static_cast<enum TEXTSTRING_ID>(TEXTSTRING_DIFFICULTY_EASY+slotPtr->Difficulty)));
+				sprintf(buffer, "%s", GetTextString(static_cast<enum TEXTSTRING_ID>(TEXTSTRING_DIFFICULTY_EASY + slotPtr->Difficulty)));
 				RenderText(buffer, MENU_RIGHTXEDGE-30, y, elementPtr->Brightness, AVPMENUFORMAT_RIGHTJUSTIFIED);
 			}
 

@@ -11,6 +11,7 @@
 #include "list_tem.hpp"
 #define UseLocalAssert TRUE
 #include "ourasert.h"
+#include "FileStream.h"
 
 extern void SetDefaultMultiplayerConfig();
 extern char MP_SessionName[];
@@ -158,8 +159,9 @@ BOOL BuildLoadMPConfigMenu()
 
 const char* GetMultiplayerConfigDescription(int index)
 {
-	if (index < 0 || index >= ConfigurationFilenameList.size())
+	if (index < 0 || index >= ConfigurationFilenameList.size()) {
 		return 0;
+	}
 
 	const char* name = ConfigurationFilenameList[index];
 
@@ -196,10 +198,12 @@ const char* GetMultiplayerConfigDescription(int index)
 	}
 
 	char filename[MAX_PATH];
-	if (netGameData.skirmishMode)
+	if (netGameData.skirmishMode) {
 		sprintf(filename, "%s%s/%s.skirmish_cfg", GetSaveFolderPath(), MP_CONFIG_DIR, name);
-	else
+	}
+	else {
 		sprintf(filename, "%s%s/%s.cfg", GetSaveFolderPath(), MP_CONFIG_DIR, name);
+	}
 
 	FILE* file = avp_fopen(filename, "rb");
 	if (!file)
@@ -225,8 +229,9 @@ const char* GetMultiplayerConfigDescription(int index)
 
 void LoadMultiplayerConfigurationByIndex(int index)
 {
-	if (index < 0 || index >= ConfigurationFilenameList.size()) 
+	if (index < 0 || index >= ConfigurationFilenameList.size()) {
 		return;
+	}
 
 	LoadMultiplayerConfiguration(ConfigurationFilenameList[index]);	
 }
@@ -234,94 +239,95 @@ void LoadMultiplayerConfigurationByIndex(int index)
 void LoadMultiplayerConfiguration(const char* name)
 {
 	char filename[MAX_PATH];
-	if (netGameData.skirmishMode)
+	if (netGameData.skirmishMode) {
 		sprintf(filename, "%s%s/%s.skirmish_cfg", GetSaveFolderPath(), MP_CONFIG_DIR, name);
-	else
+	}
+	else {
 		sprintf(filename, "%s%s/%s.cfg", GetSaveFolderPath(), MP_CONFIG_DIR, name);
+	}
 
-	FILE* file = avp_fopen(filename, "rb");
-	if (!file) 
+	FileStream file;
+	file.Open(filename, FileStream::FileRead, FileStream::SkipFastFileCheck);
+	if (!file.IsGood()) {
 		return;
+	}
 
-	//set defaults first , in case there are entries not set by this file
+	// set defaults first, in case there are entries not set by this file
 	SetDefaultMultiplayerConfig();
 
-	fread(&netGameData.gameType,sizeof(int),1,file);
-	fread(&netGameData.levelNumber,sizeof(int),1,file);
-	fread(&netGameData.scoreLimit,sizeof(int),1,file);
-	fread(&netGameData.timeLimit,sizeof(int),1,file);
-	fread(&netGameData.invulnerableTime,sizeof(int),1,file);
-	fread(&netGameData.characterKillValues[0],sizeof(int),1,file);
-	fread(&netGameData.characterKillValues[1],sizeof(int),1,file);
-	fread(&netGameData.characterKillValues[2],sizeof(int),1,file);
-	fread(&netGameData.baseKillValue,sizeof(int),1,file);
-	fread(&netGameData.useDynamicScoring,sizeof(BOOL),1,file);
-	fread(&netGameData.useCharacterKillValues,sizeof(BOOL),1,file);
+	netGameData.gameType    = (NETGAME_TYPE)file.GetUint32LE();
+	netGameData.levelNumber = file.GetInt32LE();
+	netGameData.scoreLimit  = file.GetInt32LE();
+	netGameData.timeLimit   = file.GetInt32LE();
+	netGameData.invulnerableTime = file.GetInt32LE();
+	netGameData.characterKillValues[0] = file.GetInt32LE();
+	netGameData.characterKillValues[1] = file.GetInt32LE();
+	netGameData.characterKillValues[2] = file.GetInt32LE();
+	netGameData.baseKillValue          = file.GetInt32LE();
+	netGameData.useDynamicScoring      = file.GetInt32LE();
+	netGameData.useCharacterKillValues = file.GetInt32LE();
 
-	fread(&netGameData.maxMarine,sizeof(int),1,file);
-	fread(&netGameData.maxAlien,sizeof(int),1,file);
-	fread(&netGameData.maxPredator,sizeof(int),1,file);
-	fread(&netGameData.maxMarineGeneral,sizeof(int),1,file);
-	fread(&netGameData.maxMarinePulseRifle,sizeof(int),1,file);
-	fread(&netGameData.maxMarineSmartgun,sizeof(int),1,file);
-	fread(&netGameData.maxMarineFlamer,sizeof(int),1,file);
-	fread(&netGameData.maxMarineSadar,sizeof(int),1,file);
-	fread(&netGameData.maxMarineGrenade,sizeof(int),1,file);
-	fread(&netGameData.maxMarineMinigun,sizeof(int),1,file);
+	netGameData.maxMarine   = file.GetInt32LE();
+	netGameData.maxAlien    = file.GetInt32LE();
+	netGameData.maxPredator = file.GetInt32LE();
+	netGameData.maxMarineGeneral    = file.GetInt32LE();
+	netGameData.maxMarinePulseRifle = file.GetInt32LE();
+	netGameData.maxMarineSmartgun   = file.GetInt32LE();
+	netGameData.maxMarineFlamer     = file.GetInt32LE();
+	netGameData.maxMarineSadar      = file.GetInt32LE();
+	netGameData.maxMarineGrenade    = file.GetInt32LE();
+	netGameData.maxMarineMinigun    = file.GetInt32LE();
 
-	fread(&netGameData.allowSmartgun,sizeof(BOOL),1,file);
-	fread(&netGameData.allowFlamer,sizeof(BOOL),1,file);
-	fread(&netGameData.allowSadar,sizeof(BOOL),1,file);
-	fread(&netGameData.allowGrenadeLauncher,sizeof(BOOL),1,file);
-	fread(&netGameData.allowMinigun,sizeof(BOOL),1,file);
-	fread(&netGameData.allowDisc,sizeof(BOOL),1,file);
-	fread(&netGameData.allowPistol,sizeof(BOOL),1,file);
-	fread(&netGameData.allowPlasmaCaster,sizeof(BOOL),1,file);
-	fread(&netGameData.allowSpeargun,sizeof(BOOL),1,file);
-	fread(&netGameData.allowMedicomp,sizeof(BOOL),1,file);
-	fread(&MP_SessionName[0],sizeof(char),13,file); // BJD - TODO (limit size of MP_SessionName or increase this value (will break compatability..)
+	netGameData.allowSmartgun = file.GetInt32LE();
+	netGameData.allowFlamer   = file.GetInt32LE();
+	netGameData.allowSadar    = file.GetInt32LE();
+	netGameData.allowGrenadeLauncher = file.GetInt32LE();
+	netGameData.allowMinigun  = file.GetInt32LE();
+	netGameData.allowDisc     = file.GetInt32LE();
+	netGameData.allowPistol   = file.GetInt32LE();
+	netGameData.allowPlasmaCaster = file.GetInt32LE();
+	netGameData.allowSpeargun = file.GetInt32LE();
+	netGameData.allowMedicomp = file.GetInt32LE();
 
-	fread(&netGameData.maxLives,sizeof(int),1,file);
-	fread(&netGameData.useSharedLives,sizeof(BOOL),1,file);
+	file.ReadBytes((uint8_t*)MP_SessionName, 13); // BJD - TODO (limit size of MP_SessionName or increase this value (will break compatability..)
 
-	fread(&netGameData.pointsForRespawn,sizeof(int),1,file);
-	fread(&netGameData.timeForRespawn,sizeof(int),1,file);
+	netGameData.maxLives         = file.GetInt32LE();
+	netGameData.useSharedLives   = file.GetInt32LE();
+	netGameData.pointsForRespawn = file.GetInt32LE();
+	netGameData.timeForRespawn   = file.GetInt32LE();
+	
+	netGameData.aiKillValues[0] = file.GetInt32LE();
+	netGameData.aiKillValues[1] = file.GetInt32LE();
+	netGameData.aiKillValues[2] = file.GetInt32LE();
 
-	fread(&netGameData.aiKillValues[0],sizeof(int),1,file);
-	fread(&netGameData.aiKillValues[1],sizeof(int),1,file);
-	fread(&netGameData.aiKillValues[2],sizeof(int),1,file);
+	netGameData.gameSpeed = file.GetInt32LE();
 
-	fread(&netGameData.gameSpeed,sizeof(int),1,file);
+	int description_length = file.GetInt32LE();
+	file.ReadBytes((uint8_t*)MP_Config_Description, description_length);
 
-	int description_length = 0;
-	fread(&description_length,sizeof(int),1,file);
-	fread(MP_Config_Description,1,description_length,file);
+	netGameData.preDestroyLights    = file.GetInt32LE();
+	netGameData.disableFriendlyFire = file.GetInt32LE();
+	netGameData.fallingDamage       = file.GetInt32LE();
 
-	fread(&netGameData.preDestroyLights,sizeof(BOOL),1,file);
-	fread(&netGameData.disableFriendlyFire,sizeof(BOOL),1,file);
-	fread(&netGameData.fallingDamage,sizeof(BOOL),1,file);
-	#if LOAD_NEW_MPCONFIG_ENTRIES
-	fread(&netGameData.maxMarineSmartDisc,sizeof(int),1,file);
-	fread(&netGameData.maxMarinePistols,sizeof(int),1,file);
-	fread(&netGameData.allowSmartDisc,sizeof(BOOL),1,file);
-	fread(&netGameData.allowPistols,sizeof(BOOL),1,file);
-	fread(&netGameData.pistolInfiniteAmmo,sizeof(BOOL),1,file);
-	fread(&netGameData.specialistPistols,sizeof(BOOL),1,file);
-	#endif
+#if LOAD_NEW_MPCONFIG_ENTRIES
+	netGameData.maxMarineSmartDisc = file.GetInt32LE();
+	netGameData.maxMarinePistols   = file.GetInt32LE();
+	netGameData.allowSmartDisc     = file.GetInt32LE();
+	netGameData.allowPistols       = file.GetInt32LE();
+	netGameData.pistolInfiniteAmmo = file.GetInt32LE();
+	netGameData.specialistPistols  = file.GetInt32LE();
+#endif
 
-	//read the custom level name
-	int length = 0;
-	fread(&length,sizeof(int),1,file);
-	if (length)
-	{
-		fread(netGameData.customLevelName, 1, length, file);
+	// read the custom level name
+	int length = file.GetInt32LE();
+	if (length) {
+		file.ReadBytes((uint8_t*)netGameData.customLevelName, length);
 	}
-	else
-	{
+	else {
 		netGameData.customLevelName[0] = 0;
 	}
-	
-	fclose(file);
+
+	file.Close();
 
 	//if the custom level name has been set , we need to find the index
 	if (netGameData.customLevelName[0])
@@ -340,91 +346,98 @@ void LoadMultiplayerConfiguration(const char* name)
 void SaveMultiplayerConfiguration(const char* name)
 {
 	char filename[MAX_PATH];
-	if (netGameData.skirmishMode)
-		sprintf(filename, "%s/%s.skirmish_cfg", MP_CONFIG_DIR, name);
-	else
-		sprintf(filename, "%s/%s.cfg", MP_CONFIG_DIR, name);
+	if (netGameData.skirmishMode) {
+		sprintf(filename, "%s%s/%s.skirmish_cfg", GetSaveFolderPath(), MP_CONFIG_DIR, name);
+	}
+	else {
+		sprintf(filename, "%s%s/%s.cfg", GetSaveFolderPath(), MP_CONFIG_DIR, name);
+	}
 	
 	::CreateDirectory(MP_CONFIG_DIR, 0);
-	FILE* file = avp_fopen(filename, "wb");
-	if (!file) 
+
+	FileStream file;
+	file.Open(filename, FileStream::FileWrite, FileStream::SkipFastFileCheck);
+	if (!file.IsGood()) {
 		return;
+	}
 
-	fwrite(&netGameData.gameType,sizeof(int),1,file);
-	fwrite(&netGameData.levelNumber,sizeof(int),1,file);
-	fwrite(&netGameData.scoreLimit,sizeof(int),1,file);
-	fwrite(&netGameData.timeLimit,sizeof(int),1,file);
-	fwrite(&netGameData.invulnerableTime,sizeof(int),1,file);
-	fwrite(&netGameData.characterKillValues[0],sizeof(int),1,file);
-	fwrite(&netGameData.characterKillValues[1],sizeof(int),1,file);
-	fwrite(&netGameData.characterKillValues[2],sizeof(int),1,file);
-	fwrite(&netGameData.baseKillValue,sizeof(int),1,file);
-	fwrite(&netGameData.useDynamicScoring,sizeof(BOOL),1,file);
-	fwrite(&netGameData.useCharacterKillValues,sizeof(BOOL),1,file);
+	file.PutUint32LE((uint32_t)netGameData.gameType);
+	file.PutInt32LE(netGameData.levelNumber);
+	file.PutInt32LE(netGameData.scoreLimit);
+	file.PutInt32LE(netGameData.timeLimit);
+	file.PutInt32LE(netGameData.invulnerableTime);
+	file.PutInt32LE(netGameData.characterKillValues[0]);
+	file.PutInt32LE(netGameData.characterKillValues[1]);
+	file.PutInt32LE(netGameData.characterKillValues[2]);
+	file.PutInt32LE(netGameData.baseKillValue);
+	file.PutInt32LE(netGameData.useDynamicScoring);
+	file.PutInt32LE(netGameData.useCharacterKillValues);
 
-	fwrite(&netGameData.maxMarine,sizeof(int),1,file);
-	fwrite(&netGameData.maxAlien,sizeof(int),1,file);
-	fwrite(&netGameData.maxPredator,sizeof(int),1,file);
-	fwrite(&netGameData.maxMarineGeneral,sizeof(int),1,file);
-	fwrite(&netGameData.maxMarinePulseRifle,sizeof(int),1,file);
-	fwrite(&netGameData.maxMarineSmartgun,sizeof(int),1,file);
-	fwrite(&netGameData.maxMarineFlamer,sizeof(int),1,file);
-	fwrite(&netGameData.maxMarineSadar,sizeof(int),1,file);
-	fwrite(&netGameData.maxMarineGrenade,sizeof(int),1,file);
-	fwrite(&netGameData.maxMarineMinigun,sizeof(int),1,file);
+	file.PutInt32LE(netGameData.maxMarine);
+	file.PutInt32LE(netGameData.maxAlien);
+	file.PutInt32LE(netGameData.maxPredator);
+	file.PutInt32LE(netGameData.maxMarineGeneral);
+	file.PutInt32LE(netGameData.maxMarinePulseRifle);
+	file.PutInt32LE(netGameData.maxMarineSmartgun);
+	file.PutInt32LE(netGameData.maxMarineFlamer);
+	file.PutInt32LE(netGameData.maxMarineSadar);
+	file.PutInt32LE(netGameData.maxMarineGrenade);
+	file.PutInt32LE(netGameData.maxMarineMinigun);
 
-	fwrite(&netGameData.allowSmartgun,sizeof(BOOL),1,file);
-	fwrite(&netGameData.allowFlamer,sizeof(BOOL),1,file);
-	fwrite(&netGameData.allowSadar,sizeof(BOOL),1,file);
-	fwrite(&netGameData.allowGrenadeLauncher,sizeof(BOOL),1,file);
-	fwrite(&netGameData.allowMinigun,sizeof(BOOL),1,file);
-	fwrite(&netGameData.allowDisc,sizeof(BOOL),1,file);
-	fwrite(&netGameData.allowPistol,sizeof(BOOL),1,file);
-	fwrite(&netGameData.allowPlasmaCaster,sizeof(BOOL),1,file);
-	fwrite(&netGameData.allowSpeargun,sizeof(BOOL),1,file);
-	fwrite(&netGameData.allowMedicomp,sizeof(BOOL),1,file);
-	fwrite(&MP_SessionName[0],sizeof(char),13,file);
+	file.PutInt32LE(netGameData.allowSmartgun);
+	file.PutInt32LE(netGameData.allowFlamer);
+	file.PutInt32LE(netGameData.allowSadar);
+	file.PutInt32LE(netGameData.allowGrenadeLauncher);
+	file.PutInt32LE(netGameData.allowMinigun);
+	file.PutInt32LE(netGameData.allowDisc);
+	file.PutInt32LE(netGameData.allowPistol);
+	file.PutInt32LE(netGameData.allowPlasmaCaster);
+	file.PutInt32LE(netGameData.allowSpeargun);
+	file.PutInt32LE(netGameData.allowMedicomp);
 
-	fwrite(&netGameData.maxLives,sizeof(int),1,file);
-	fwrite(&netGameData.useSharedLives,sizeof(BOOL),1,file);
+	file.WriteBytes((uint8_t*)&MP_SessionName[0], 13); // BJD - TODO (limit size of MP_SessionName or increase this value (will break compatability..)
 
-	fwrite(&netGameData.pointsForRespawn,sizeof(int),1,file);
-	fwrite(&netGameData.timeForRespawn,sizeof(int),1,file);
+	file.PutInt32LE(netGameData.maxLives);
+	file.PutInt32LE(netGameData.useSharedLives);
+	file.PutInt32LE(netGameData.pointsForRespawn);
+	file.PutInt32LE(netGameData.timeForRespawn);
 	
-	fwrite(&netGameData.aiKillValues[0],sizeof(int),1,file);
-	fwrite(&netGameData.aiKillValues[1],sizeof(int),1,file);
-	fwrite(&netGameData.aiKillValues[2],sizeof(int),1,file);
+	file.PutInt32LE(netGameData.aiKillValues[0]);
+	file.PutInt32LE(netGameData.aiKillValues[1]);
+	file.PutInt32LE(netGameData.aiKillValues[2]);
 
-	fwrite(&netGameData.gameSpeed,sizeof(int),1,file);
+	file.PutInt32LE(netGameData.gameSpeed);
 
-	//write the description of the config
-	//first the length
-	int length = strlen(MP_Config_Description)+1;
-	fwrite(&length,sizeof(int),1,file);
+	// write the description of the config
+	// first the length
+	int length = strlen(MP_Config_Description) + 1;
+	file.PutInt32LE(length);
 
-	//and now the string
-	fwrite(MP_Config_Description,1,length,file);
+	// and now the string
+	file.WriteBytes((uint8_t*)MP_Config_Description, length);
 
-	fwrite(&netGameData.preDestroyLights,sizeof(BOOL),1,file);
-	fwrite(&netGameData.disableFriendlyFire,sizeof(BOOL),1,file);
-	fwrite(&netGameData.fallingDamage,sizeof(BOOL),1,file);
-	#if SAVE_NEW_MPCONFIG_ENTRIES
-	fwrite(&netGameData.maxMarineSmartDisc,sizeof(int),1,file);
-	fwrite(&netGameData.maxMarinePistols,sizeof(int),1,file);
-	fwrite(&netGameData.allowSmartDisc,sizeof(BOOL),1,file);
-	fwrite(&netGameData.allowPistols,sizeof(BOOL),1,file);
-	fwrite(&netGameData.pistolInfiniteAmmo,sizeof(BOOL),1,file);
-	fwrite(&netGameData.specialistPistols,sizeof(BOOL),1,file);
-	#endif
+	file.PutInt32LE(netGameData.preDestroyLights);
+	file.PutInt32LE(netGameData.disableFriendlyFire);
+	file.PutInt32LE(netGameData.fallingDamage);
 
-	//write the custom level name (if relevant)
-	//first the length
-	length = strlen(netGameData.customLevelName)+1;
-	fwrite(&length,sizeof(int),1,file);
-	//and now the string
-	fwrite(netGameData.customLevelName,1,length,file);
+#if SAVE_NEW_MPCONFIG_ENTRIES
+	file.PutInt32LE(netGameData.maxMarineSmartDisc);
+	file.PutInt32LE(netGameData.maxMarinePistols);
+	file.PutInt32LE(netGameData.allowSmartDisc);
+	file.PutInt32LE(netGameData.allowPistols);
+	file.PutInt32LE(netGameData.pistolInfiniteAmmo);
+	file.PutInt32LE(netGameData.specialistPistols);
+#endif
 
-	fclose(file);
+	// write the custom level name (if relevant)
+	// first the length
+	length = strlen(netGameData.customLevelName) + 1;
+	file.PutInt32LE(length);
+
+	// and now the string
+	file.WriteBytes((uint8_t*)netGameData.customLevelName, length);
+
+	file.Close();
 
 	//clear the last description stuff
 	delete[] LastDescriptionFile;
@@ -433,17 +446,19 @@ void SaveMultiplayerConfiguration(const char* name)
 	LastDescriptionText = 0;
 }
 
-
 void DeleteMultiplayerConfigurationByIndex(int index)
 {
-	if (index < 0 || index >= ConfigurationFilenameList.size()) 
+	if (index < 0 || index >= ConfigurationFilenameList.size()) {
 		return;
+	}
 
 	char filename[MAX_PATH];
-	if (netGameData.skirmishMode)
+	if (netGameData.skirmishMode) {
 		sprintf(filename, "%s%s/%s.skirmish_cfg", GetSaveFolderPath(), MP_CONFIG_DIR, ConfigurationFilenameList[index]);
-	else
+	}
+	else {
 		sprintf(filename, "%s%s/%s.cfg", GetSaveFolderPath(), MP_CONFIG_DIR, ConfigurationFilenameList[index]);
+	}
 
 	::DeleteFile(filename);
 }
@@ -513,13 +528,14 @@ BOOL BuildLoadIPAddressMenu()
 			IPAddFilenameList.add_entry(name);
 		}
 	
-	}while (::FindNextFile(hFindFile,&wfd));
+	} while (::FindNextFile(hFindFile,&wfd));
 	
 	::FindClose(hFindFile);
 
 	//delete the old menu
-	if (AvPMenu_Multiplayer_LoadIPAddress) 
+	if (AvPMenu_Multiplayer_LoadIPAddress) {
 		delete[] AvPMenu_Multiplayer_LoadIPAddress;
+	}
 
 	//create a new menu from the list of filenames
 	AvPMenu_Multiplayer_LoadIPAddress = new AVPMENU_ELEMENT[IPAddFilenameList.size()+1];
@@ -602,9 +618,10 @@ void BuildMultiplayerLevelNameArray()
 {
 	char buffer[256];
 
-	//only want to do this once
-	if (MultiplayerLevelNames)
+	// only want to do this once
+	if (MultiplayerLevelNames) {
 		return;
+	}
 
 	// first do a search for custom level rifs
 	// allow a wildcard search
