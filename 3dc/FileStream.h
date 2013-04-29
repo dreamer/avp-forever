@@ -88,6 +88,7 @@ class FileStream
 		uint8_t  GetByte();
 		uint16_t GetUint16LE();
 		uint16_t GetUint16BE();
+		int32_t GetInt32LE();
 		uint32_t GetUint32LE();
 		uint32_t GetUint32BE();
 		uint64_t GetUint64LE();
@@ -98,6 +99,7 @@ class FileStream
 		void PutByte(uint8_t value);
 		void PutUint16LE(uint16_t value);
 		void PutUint16BE(uint16_t value);
+		void PutInt32LE(int32_t value);
 		void PutUint32LE(uint32_t value);
 		void PutUint32BE(uint32_t value);
 		void PutUint64LE(uint64_t value);

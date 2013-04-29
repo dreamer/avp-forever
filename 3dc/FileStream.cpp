@@ -55,7 +55,19 @@ bool FileStream::IsGood()
 
 bool FileStream::Open(const std::string &fileName, eAccess accessType, eFastFileCheck skipFastFileCheck)
 {
+	// TODO - write this properly. Also, add write append mode
 	std::string realFileName;
+
+	// handle write mode
+	if (accessType == FileStream::FileWrite) {
+		if (!OpenActual(fileName, accessType)) {
+			fileHandle = 0;
+			return false;
+		}
+
+		isGood = true;
+		return true;
+	}
 
 	// check for local version first
 	if (DoesFileExist(fileName)) {
@@ -271,6 +283,13 @@ uint16_t FileStream::GetUint16BE()
 	return swapBytes<uint16_t>(ret);
 }
 
+int32_t FileStream::GetInt32LE()
+{
+	int32_t ret;
+	ReadBytes(reinterpret_cast<uint8_t*>(&ret), sizeof(ret));
+	return ret;
+}
+
 uint32_t FileStream::GetUint32LE()
 {
 	uint32_t ret;
@@ -332,6 +351,11 @@ void FileStream::PutUint16BE(uint16_t value)
 }
 
 void FileStream::PutUint32LE(uint32_t value)
+{
+	WriteBytes(reinterpret_cast<uint8_t*>(&value), sizeof(value));
+}
+
+void FileStream::PutInt32LE(int32_t value)
 {
 	WriteBytes(reinterpret_cast<uint8_t*>(&value), sizeof(value));
 }
