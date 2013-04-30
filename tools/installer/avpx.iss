@@ -28,7 +28,7 @@ UsePreviousAppDir=false
 EnableDirDoesntExistWarning=true
 AppendDefaultDirName=false
 DirExistsWarning=no
-SetupIconFile=D:\Development\AvP-Branch\trunk\3dc\avp.ico
+SetupIconFile=D:\Development\AvP-Branch\trunk\win32\avp.ico
 UninstallDisplayIcon={app}\AvPx.exe
 
 [Languages]
