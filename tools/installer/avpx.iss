@@ -28,7 +28,7 @@ UsePreviousAppDir=false
 EnableDirDoesntExistWarning=true
 AppendDefaultDirName=false
 DirExistsWarning=no
-SetupIconFile=D:\Development\AvP-Branch\trunk\win32\avp.ico
+SetupIconFile=..\..\win32\avp.ico
 UninstallDisplayIcon={app}\AvPx.exe
 
 [Languages]
@@ -38,13 +38,13 @@ Name: "english"; MessagesFile: "compiler:Default.isl"
 Name: "desktopicon"; Description: "{cm:CreateDesktopIcon}"; GroupDescription: "{cm:AdditionalIcons}"; Flags: unchecked
 
 [Files]
-Source: "D:\Development\avp_redist\AvPx.exe"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Development\avp_redist\AvPx_License.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Development\avp_redist\AvPx_Readme.txt"; DestDir: "{app}"; Flags: ignoreversion
-Source: "D:\Development\avp_redist\directx\*"; DestDir: "{app}\redist\directx\"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "D:\Development\avp_redist\vcredist_x86.exe"; DestDir: "{app}\redist\vc\"; Flags: ignoreversion
-Source: "D:\Development\avp_redist\shaders\*"; DestDir: "{app}\shaders\"; Flags: ignoreversion recursesubdirs createallsubdirs
-Source: "D:\Development\avp_redist\dlls\*"; DestDir: "{app}";
+Source: "..\..\redist\AvPx.exe"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\redist\AvPx_License.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\redist\AvPx_Readme.txt"; DestDir: "{app}"; Flags: ignoreversion
+Source: "..\..\redist\directx\*"; DestDir: "{app}\redist\directx\"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\..\redist\vcredist_x86.exe"; DestDir: "{app}\redist\vc\"; Flags: ignoreversion
+Source: "..\..\redist\shaders\*"; DestDir: "{app}\shaders\"; Flags: ignoreversion recursesubdirs createallsubdirs
+Source: "..\..\redist\dlls\*"; DestDir: "{app}";
 ; NOTE: Don't use "Flags: ignoreversion" on any shared system files
 
 [Icons]
