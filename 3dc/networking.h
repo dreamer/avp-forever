@@ -34,7 +34,7 @@ int Net_Initialise();
 int Net_Deinitialise();
 int Net_ConnectingToSession();
 int Net_Send(int fromID, int toID, int flags, uint8_t *messageData, size_t dataSize);
-int Net_Receive(int *fromID, int *toID, int flags, uint8_t *messageData, size_t *dataSize);
+int Net_Receive(int &fromID, int &toID, int flags, uint8_t *messageData, size_t &dataSize);
 int Net_SendSystemMessage(int messageType, int fromID, int toID, uint8_t *messageData, size_t dataSize);
 int Net_InitLobbiedGame();
 void Net_ServiceNetwork();
@@ -112,9 +112,9 @@ const int kSessionNameSize = 40;
 // enum for message types
 enum
 {
-	AVP_BROADCAST,
-	AVP_REQUEST_SESSION_DATA,
-	AVP_SYSTEMMESSAGE,
+	AVP_REQUEST_SERVER_INFO,
+	AVP_REQUEST_SESSION_INFO,
+	AVP_SYSTEM_MESSAGE,
 	AVP_SESSIONDATA,
 	AVP_GAMEDATA = 666,
 	AVP_PING,
@@ -126,7 +126,6 @@ enum
 
 struct SessionDescription
 {
-	uint32_t	size;
 	GUID		guidInstance;
 	GUID		guidApplication;
 	uint8_t		maxPlayers;
@@ -143,7 +142,7 @@ struct PlayerDetails
 	char		name[kPlayerNameSize];
 };
 
-struct DPMSG_DESTROYPLAYERORGROUP
+struct DestroyPlayerOrGroup
 {
 	uint32_t	type;
 	uint32_t	ID;

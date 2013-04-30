@@ -48,6 +48,7 @@
 int IsThisObjectVisibleFromThisPosition_WithIgnore(DISPLAYBLOCK *objectPtr, DISPLAYBLOCK *ignoredObjectPtr, VECTORCH *positionPtr, int maxRange);
 
 #include "networking.h" // new net
+#include "MemoryStream.h"
 
 /*----------------------------------------------------------------------
   Some globals for use in this file
@@ -376,16 +377,14 @@ void InitAVPNetGame(void)
 		{
 			netGameData.playerData[i].playerId = 0;
 
-			for (j = 0; j < (NET_PLAYERNAMELENGTH); j++)
-			{
+			for (j = 0; j < (NET_PLAYERNAMELENGTH); j++) {
 				netGameData.playerData[i].name[j] = '\0';
 			}
 
 			netGameData.playerData[i].characterType = NGCT_Marine;
 			netGameData.playerData[i].characterSubType = NGSCT_General;
 
-			for (j = 0; j < (NET_MAXPLAYERS); j++)
-			{
+			for (j = 0; j < (NET_MAXPLAYERS); j++) {
 				netGameData.playerData[i].playerFrags[j] = 0;
 			}
 
@@ -400,8 +399,7 @@ void InitAVPNetGame(void)
 			netGameData.playerData[i].startFlag = 0;
 		}
 
-		for (j = 0; j < 3; j++)
-		{
+		for (j = 0; j < 3; j++) {
 			netGameData.teamScores[j] = 0;
 		}
 
@@ -568,14 +566,15 @@ void InitAVPNetGameForHost(int species, int gamestyle, int level)
 	netNextLocalObjectId = 1;        /* init local object network id */
 	numMessagesReceived = 0;         /* these are for testing */
 	numMessagesTransmitted = 0;
+
 	/* If I'm the host, add myself to the game data */
 	netGameData.playerData[0].playerId = AvPNetID;
 	strncpy(netGameData.playerData[0].name, thisClientPlayer.name, NET_PLAYERNAMELENGTH - 1);
 	netGameData.playerData[0].name[NET_PLAYERNAMELENGTH - 1] = '\0';
+
 	//  ConvertNetNameToUpperCase(netGameData.playerData[0].name);
 	{
-		int myIndex;
-		myIndex = PlayerIdInPlayerList(AvPNetID);
+		int myIndex = PlayerIdInPlayerList(AvPNetID);
 		LOCALASSERT(myIndex != NET_IDNOTINPLAYERLIST);
 		netGameData.playerData[myIndex].characterType = netGameData.myCharacterType;
 		netGameData.playerData[myIndex].characterSubType = netGameData.myCharacterSubType;
@@ -614,8 +613,10 @@ void InitAVPNetGameForJoin(void)
 	AvP.GameMode = I_GM_Playing;
 	AvP.Network  = I_Peer;
 	AvP.NetworkAIServer = 0;
+
 	/* init the send message buffer */
 	InitialiseSendMessageBuffer();
+
 	netGameData.myGameState = NGS_Joining;
 	/* base initialisation of game description */
 	{
@@ -705,7 +706,7 @@ void MinimalNetCollectMessages(void)
 
 		while ((res == NET_OK) && AvPNetID)
 		{
-			res = Net_Receive(&fromID, &toID, NET_RECEIVE_ALL, &msg[0], &msgSize);
+			res = Net_Receive(fromID, toID, NET_RECEIVE_ALL, &msg[0], msgSize);
 
 			if (NET_OK == res)
 			{
@@ -729,6 +730,7 @@ void NetCollectMessages(void)
 	int fromID = 0;
 	int toID = 0;
 	size_t msgSize = 0;
+
 	/* first off, some assertions about our game state */
 	LOCALASSERT(!((AvP.Network == I_Host) && (netGameData.myGameState == NGS_Leaving)));
 	LOCALASSERT(!((AvP.Network == I_Host) && (netGameData.myGameState == NGS_Error_GameFull)));
@@ -751,7 +753,7 @@ void NetCollectMessages(void)
 
 		while ((NET_OK == res) && AvPNetID)
 		{
-			res = Net_Receive(&fromID, &toID, NET_RECEIVE_ALL, &msg[0], &msgSize);
+			res = Net_Receive(fromID, toID, NET_RECEIVE_ALL, &msg[0], msgSize);
 
 			if (NET_OK == res)
 			{
@@ -764,7 +766,7 @@ void NetCollectMessages(void)
 				}
 				else
 				{
-					ProcessGameMessage(fromID, &msg[0] , msgSize);
+					ProcessGameMessage(fromID, &msg[0], msgSize);
 				}
 			}
 		}
@@ -772,13 +774,14 @@ void NetCollectMessages(void)
 
 	LogNetInfo("... Finished collecting Messages\n");
 	//  OutputDebugString("...Finished collecting Messages\n");
+
 	/* check ghost integrities */
 	MaintainGhosts();
+
 	/* time and score limit checks...*/
 	{
 		//update timer
-		if (netGameData.myGameState == NGS_Playing)
-		{
+		if (netGameData.myGameState == NGS_Playing) {
 			netGameData.GameTimeElapsed += RealFrameTime;
 		}
 
@@ -959,8 +962,7 @@ void NetCollectMessages(void)
 
 	LogNetInfo("Finished message collection post-processing \n");
 
-	if (MultiplayerObservedPlayer)
-	{
+	if (MultiplayerObservedPlayer) {
 		CheckStateOfObservedPlayer();
 	}
 }
@@ -972,7 +974,7 @@ static void ProcessSystemMessage(uint8_t *msgP, unsigned int msgSize)
 {
 	int systemMessageType;
 	char buf[100];
-	MessageHeader newMessageHeader = {0};
+	MessageHeader newMessageHeader;
 
 	/* currently, only the host deals with system mesages */
 	/* check for invalid parameters */
@@ -981,7 +983,10 @@ static void ProcessSystemMessage(uint8_t *msgP, unsigned int msgSize)
 		return;
 	}
 
-	memcpy(&newMessageHeader, &msgP[0], sizeof(MessageHeader));
+	MemoryReadStream rs(msgP, msgSize);
+
+	rs.GetBytes((uint8_t*)&newMessageHeader, sizeof(MessageHeader));
+
 	systemMessageType = newMessageHeader.toID;
 	OutputDebugString("we're going to process a system message\n");
 
@@ -1001,17 +1006,14 @@ static void ProcessSystemMessage(uint8_t *msgP, unsigned int msgSize)
 			detect game state and exit immediately */
 			if ((AvP.Network == I_Host))
 			{
-				PlayerDetails newPlayer = {0};
+				PlayerDetails newPlayer;
+
 				// copy message data to player struct
-				memcpy(&newPlayer, &msgP[kMessageHeaderSize], sizeof(PlayerDetails));
+				rs.GetBytes((uint8_t*)&newPlayer, sizeof(PlayerDetails));
+
 				// FIXME if (DPPLAYERTYPE_PLAYER == newPlayer.playerType)
-				{
-					int id = newPlayer.playerID;
-					char name[40];
-					strncpy(&name[0], &newPlayer.name[0], 40 - 1);
-					name[40 - 1] = '\0';
-					AddPlayerToGame(id, &name[0]);
-				}
+
+				AddPlayerToGame(newPlayer.playerID, newPlayer.name);
 			}
 
 			LogNetInfo("system message:  NET_CREATEPLAYERORGROUP \n");
@@ -1038,14 +1040,13 @@ static void ProcessSystemMessage(uint8_t *msgP, unsigned int msgSize)
 
 			if ((AvP.Network == I_Host))
 			{
-				DPMSG_DESTROYPLAYERORGROUP destroyMessage;
-				memcpy(&destroyMessage, &msgP[kMessageHeaderSize], sizeof(DPMSG_DESTROYPLAYERORGROUP));
+				DestroyPlayerOrGroup destroyMessage;
+				rs.GetBytes((uint8_t*)&destroyMessage, sizeof(DestroyPlayerOrGroup));
 
 				if (destroyMessage.playerType == NET_PLAYERTYPE_PLAYER)
 				{
-					DPID id = destroyMessage.ID;
 					OutputDebugString("going to drop a player as they disconnected\n");
-					RemovePlayerFromGame(id);
+					RemovePlayerFromGame(destroyMessage.ID);
 					NewOnScreenMessage("A PLAYER HAS DISCONNECTED");
 				}
 			}
@@ -1131,8 +1132,7 @@ static void AddPlayerToGame(int id, char *name)
 	/* find a free slot for the player */
 	freePlayerIndex = EmptySlotInPlayerList();
 
-	if (freePlayerIndex == NET_NOEMPTYSLOTINPLAYERLIST)
-	{
+	if (freePlayerIndex == NET_NOEMPTYSLOTINPLAYERLIST) {
 		return;
 	}
 
@@ -1140,15 +1140,13 @@ static void AddPlayerToGame(int id, char *name)
 	netGameData.playerData[freePlayerIndex].playerId = id;
 	strncpy(netGameData.playerData[freePlayerIndex].name, name, NET_PLAYERNAMELENGTH - 1);
 	netGameData.playerData[freePlayerIndex].name[NET_PLAYERNAMELENGTH - 1] = '\0';
+
 	//  ConvertNetNameToUpperCase(netGameData.playerData[freePlayerIndex].name);
 	netGameData.playerData[freePlayerIndex].characterType = NGCT_Marine;
 	netGameData.playerData[freePlayerIndex].characterSubType = NGSCT_General;
 	netGameData.playerData[freePlayerIndex].startFlag = 0;
 	{
-		int i;
-
-		for (i = 0; i < NET_MAXPLAYERS; i++)
-		{
+		for (int i = 0; i < NET_MAXPLAYERS; i++) {
 			netGameData.playerData[freePlayerIndex].playerFrags[i] = 0;
 		}
 
@@ -1169,10 +1167,9 @@ static void AddPlayerToGame(int id, char *name)
 
 void RemovePlayerFromGame(DPID id)
 {
-	int playerIndex, j;
 	//LOCALASSERT(AvP.Network==I_Host);
 	/* get player index from dpid */
-	playerIndex = PlayerIdInPlayerList(id);
+	int playerIndex = PlayerIdInPlayerList(id);
 
 	if (playerIndex == NET_IDNOTINPLAYERLIST)
 	{
@@ -1184,8 +1181,7 @@ void RemovePlayerFromGame(DPID id)
 	/* free the slot */
 	netGameData.playerData[playerIndex].playerId = 0;
 
-	for (j = 0; j < NET_PLAYERNAMELENGTH; j++)
-	{
+	for (int j = 0; j < NET_PLAYERNAMELENGTH; j++) {
 		netGameData.playerData[playerIndex].name[j] = '\0';
 	}
 
@@ -1193,9 +1189,7 @@ void RemovePlayerFromGame(DPID id)
 	netGameData.playerData[playerIndex].characterSubType = NGSCT_General;
 	netGameData.playerData[playerIndex].startFlag = 0;
 	{
-		int i;
-
-		for (i = 0; i < NET_MAXPLAYERS; i++)
+		for (int i = 0; i < NET_MAXPLAYERS; i++)
 		{
 			netGameData.playerData[playerIndex].playerFrags[i] = 0;
 			netGameData.playerData[i].playerFrags[playerIndex] = 0;
@@ -1777,10 +1771,9 @@ void NetSendMessages(void)
 	{
 		/* send our message buffer...
 		NB it should always be non-empty, and always less than the maximum message size */
-		int res;
-		int numBytes;
-		BOOL clearSendBuffer = TRUE;
-		numBytes = (int)(endSendBuffer - &sendBuffer[0]);
+		int res = NET_OK;
+		bool clearSendBuffer = true;
+		int numBytes = numBytes = (int)(endSendBuffer - &sendBuffer[0]);
 
 		if (netGameData.myGameState == NGS_EndGameScreen || netGameData.myGameState == NGS_Joining)
 		{
@@ -1815,7 +1808,7 @@ void NetSendMessages(void)
 							*/
 							if (numBytes < NET_MESSAGEBUFFERSIZE / 2)
 							{
-								clearSendBuffer = FALSE;
+								clearSendBuffer = false;
 							}
 
 							break;
@@ -2037,6 +2030,7 @@ void AddNetMsg_GameDescription(void)
 	NETMESSAGE_GAMEDESCRIPTION *messagePtr;
 	int headerSize = sizeof(NETMESSAGEHEADER);
 	int messageSize = sizeof(NETMESSAGE_GAMEDESCRIPTION);
+
 	/* some conditions */
 	LOCALASSERT(AvP.Network == I_Host);
 	/* check there's enough room in the send buffer */
@@ -2060,9 +2054,7 @@ void AddNetMsg_GameDescription(void)
 	headerPtr->type = (unsigned char)NetMT_GameDescription;
 	/*fill out the message */
 	{
-		int i;
-
-		for (i = 0; i < NET_MAXPLAYERS; i++)
+		for (int i = 0; i < NET_MAXPLAYERS; i++)
 		{
 			messagePtr->players[i].playerId = netGameData.playerData[i].playerId;
 			messagePtr->players[i].characterType = (unsigned char)netGameData.playerData[i].characterType;
@@ -2076,7 +2068,7 @@ void AddNetMsg_GameDescription(void)
 		messagePtr->timeLimit = (unsigned char)netGameData.timeLimit;
 		messagePtr->invulnerableTime = (unsigned char)netGameData.invulnerableTime;
 
-		for (i = 0; i < 3; i++)
+		for (int i = 0; i < 3; i++)
 		{
 			messagePtr->characterKillValues[i] = (unsigned char)netGameData.characterKillValues[i];
 			messagePtr->aiKillValues[i] = (unsigned char)netGameData.aiKillValues[i];
@@ -2125,12 +2117,10 @@ void AddNetMsg_GameDescription(void)
 		messagePtr->pistolInfiniteAmmo = netGameData.pistolInfiniteAmmo;
 		messagePtr->specialistPistols = netGameData.specialistPistols;
 
-		if (netGameData.myGameState == NGS_EndGameScreen)
-		{
+		if (netGameData.myGameState == NGS_EndGameScreen) {
 			messagePtr->endGame = 1;
 		}
-		else
-		{
+		else {
 			messagePtr->endGame = 0;
 		}
 	}
@@ -2207,8 +2197,7 @@ void AddNetMsg_PlayerState(STRATEGYBLOCK *sbPtr)
 	int messageSize = sizeof(NETMESSAGE_PLAYERSTATE);
 	int playerIndex;
 
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
@@ -11416,7 +11405,7 @@ static void NetworkGameConsoleMessageWithWeaponIcon(enum TEXTSTRING_ID stringID,
 static int CharacterTypesAvailable[NUM_PC_TYPES];
 static int CharacterSubTypesAvailable[NUM_PC_SUBTYPES];
 
-int DetermineAvailableCharacterTypes(BOOL ConsiderUsedCharacters)
+int DetermineAvailableCharacterTypes(bool ConsiderUsedCharacters)
 {
 	int i;
 	int maxMarines = 0;
@@ -11632,7 +11621,7 @@ void GetNextAllowedSpecies(int *species, BOOL search_forwards)
 		}
 	}
 
-	DetermineAvailableCharacterTypes(TRUE);
+	DetermineAvailableCharacterTypes(true);
 
 	do
 	{
@@ -11804,7 +11793,7 @@ void SpeciesTag_DetermineMyNextCharacterType()
 		//either suicide , or we have too many predators for some reason
 		//pick marine/alien at random
 		//first determine available character types
-		DetermineAvailableCharacterTypes(TRUE);
+		DetermineAvailableCharacterTypes(true);
 		total = CharacterTypesAvailable[NGCT_Marine] +
 		        CharacterTypesAvailable[otherSpecies];
 
@@ -11812,7 +11801,7 @@ void SpeciesTag_DetermineMyNextCharacterType()
 		{
 			//hmm , no available character types
 			//in that case look at the character types that are allowed in the first place
-			DetermineAvailableCharacterTypes(FALSE);
+			DetermineAvailableCharacterTypes(false);
 			total = CharacterTypesAvailable[NGCT_Marine] +
 			        CharacterTypesAvailable[otherSpecies];
 		}
