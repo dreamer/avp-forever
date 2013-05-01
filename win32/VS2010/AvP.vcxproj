@@ -372,6 +372,7 @@
     <ClCompile Include="..\..\3dc\mathline.cpp" />
     <ClCompile Include="..\..\3dc\maths.cpp" />
     <ClCompile Include="..\..\3dc\mem3dcpp.cpp" />
+    <ClCompile Include="..\..\3dc\MemoryStream.cpp" />
     <ClCompile Include="..\..\3dc\module.cpp" />
     <ClCompile Include="..\..\3dc\morph.cpp" />
     <ClCompile Include="..\..\3dc\mslhand.cpp" />
@@ -594,6 +595,7 @@
     <ClInclude Include="..\..\3dc\include\module.h" />
     <ClInclude Include="..\..\3dc\include\prototyp.h" />
     <ClInclude Include="..\..\3dc\include\shape.h" />
+    <ClInclude Include="..\..\3dc\MemoryStream.h" />
     <ClInclude Include="..\..\3dc\video\BinkPlayback.h" />
     <ClInclude Include="..\..\3dc\video\SmackerPlayback.h" />
     <ClInclude Include="..\..\3dc\video\TheoraPlayback.h" />

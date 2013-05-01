@@ -741,6 +741,9 @@
     <ClCompile Include="..\..\3dc\avp\win95\frontend\intro.cpp">
       <Filter>Source Files\menus</Filter>
     </ClCompile>
+    <ClCompile Include="..\..\3dc\MemoryStream.cpp">
+      <Filter>Source Files</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="..\..\3dc\video\TheoraPlayback.h">
@@ -1345,6 +1348,9 @@
     </ClInclude>
     <ClInclude Include="..\..\3dc\avp\win95\frontend\intro.h">
       <Filter>Header Files\menus</Filter>
+    </ClInclude>
+    <ClInclude Include="..\..\3dc\MemoryStream.h">
+      <Filter>Header Files</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
