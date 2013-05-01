@@ -375,7 +375,7 @@ void RemoveGhost(STRATEGYBLOCK *sbPtr)
 
 /* removes a given player's ghost, and all associated ghosts, eg when a player
 leaves the game... */
-void RemovePlayersGhosts(DPID id)
+void RemovePlayersGhosts(NetID id)
 {
 	int sbIndex = 0;
 	STRATEGYBLOCK *sbPtr;
@@ -396,7 +396,7 @@ void RemovePlayersGhosts(DPID id)
 
 
 /* locates a ghost from Id and ObId */
-STRATEGYBLOCK *FindGhost(DPID Id, int obId)
+STRATEGYBLOCK *FindGhost(NetID Id, int obId)
 {
 	int sbIndex = 0;
 	STRATEGYBLOCK *sbPtr;
@@ -417,7 +417,7 @@ STRATEGYBLOCK *FindGhost(DPID Id, int obId)
 
 /* create a new ghost: doesn't do shape animation stuff: this is performed using a
 seperate set of functions */
-STRATEGYBLOCK *CreateNetGhost(DPID playerId, int objectId, VECTORCH *position, EULER* orientation, AVP_BEHAVIOUR_TYPE type, unsigned char IOType, unsigned char subtype)
+STRATEGYBLOCK *CreateNetGhost(NetID playerId, int objectId, VECTORCH *position, EULER* orientation, AVP_BEHAVIOUR_TYPE type, unsigned char IOType, unsigned char subtype)
 {
 	int i;
 	STRATEGYBLOCK *sbPtr;
@@ -887,8 +887,8 @@ void PostDynamicsExtrapolationUpdate()
 }
 #endif //EXTRAPOLATION_TEST
 
-extern HIERARCHY_VARIANT_DATA* GetHierarchyAlternateShapeSetCollectionFromLibrary(const char* rif_name,int index);
-void ChangeGhostMarineAccoutrementSet(HMODELCONTROLLER *HModelController,DPID playerId)
+extern HIERARCHY_VARIANT_DATA* GetHierarchyAlternateShapeSetCollectionFromLibrary(const char* rif_name, int index);
+void ChangeGhostMarineAccoutrementSet(HMODELCONTROLLER *HModelController, NetID playerId)
 {
 
 	HIERARCHY_VARIANT_DATA* variant_data;
@@ -4936,11 +4936,11 @@ STRATEGYBLOCK *MakeNewCorpse()
 				}
 				Create_HModel(&corpseData->HModelController,root_section);
 				{
-					extern DPID AvPNetID;
-					ChangeGhostMarineAccoutrementSet(&corpseData->HModelController,AvPNetID);
+					extern NetID AvPNetID;
+					ChangeGhostMarineAccoutrementSet(&corpseData->HModelController, AvPNetID);
 				}
 				//choose a default sequence , the proper death anim will be set later	
-				InitHModelSequence(&corpseData->HModelController,(int)HMSQT_MarineStand,(int)MSSS_Standard,ONE_FIXED);
+				InitHModelSequence(&corpseData->HModelController, (int)HMSQT_MarineStand, (int)MSSS_Standard, ONE_FIXED);
 				
 				break;
 			}

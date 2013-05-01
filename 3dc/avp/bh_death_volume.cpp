@@ -116,8 +116,8 @@ void DeathVolumeBehaveFun(STRATEGYBLOCK* vol_sbptr)
 				   sbPtr->I_SBtype==I_BehaviourPredatorPlayer || 
 				   sbPtr->I_SBtype==I_BehaviourAlienPlayer) 
 				{
-					extern DPID myNetworkKillerId;
-					extern DPID AvPNetID;
+					extern NetID myNetworkKillerId;
+					extern NetID AvPNetID;
 
 					//this is a neutral source of damage (for cooperative multiplayer games)
 					myNetworkKillerId = 0;

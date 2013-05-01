@@ -209,10 +209,10 @@ int LobbiedGame = 0;
 static uint8_t sendBuffer[NET_MESSAGEBUFFERSIZE];
 static uint8_t *endSendBuffer = NULL;
 static int netNextLocalObjectId = 1;
-DPID myNetworkKillerId = 0;
-DPID myIgniterId = 0;
+NetID myNetworkKillerId = 0;
+NetID myIgniterId = 0;
 int MyHitBodyPartId = -1;
-DPID MultiplayerObservedPlayer = 0;
+NetID MultiplayerObservedPlayer = 0;
 
 /* for testing */
 static int numMessagesReceived = 0;
@@ -256,30 +256,30 @@ extern void NewOnScreenMessage(char *messagePtr);
 /*----------------------------------------------------------------------
   Some protoypes for this file
   ----------------------------------------------------------------------*/
-static void ProcessSystemMessage(uint8_t *msgP, unsigned int msgSize);
-static void ProcessGameMessage(DPID senderId, uint8_t *msgP, unsigned int msgSize);
+static void ProcessSystemMessage(uint8_t *msgP, size_t msgSize);
+static void ProcessGameMessage(NetID senderId, uint8_t *msgP, size_t msgSize);
 static void AddPlayerToGame(int id, char *name);
 static void AddPlayerAndObjectUpdateMessages(void);
-static void UpdateNetworkGameScores(DPID playerKilledId, DPID killerId, NETGAME_CHARACTERTYPE playerKilledType, NETGAME_CHARACTERTYPE killerType);
+static void UpdateNetworkGameScores(NetID playerKilledId, NetID killerId, NETGAME_CHARACTERTYPE playerKilledType, NETGAME_CHARACTERTYPE killerType);
 static void InitFinalNetGameScores(void);
 static void ConvertNetNameToUpperCase(char *strPtr);
 
 static void ProcessNetMsg_GameDescription(NETMESSAGE_GAMEDESCRIPTION *msgPtr);
-static void ProcessNetMsg_PlayerDescription(NETMESSAGE_PLAYERDESCRIPTION *msgPtr, DPID senderId);
+static void ProcessNetMsg_PlayerDescription(NETMESSAGE_PLAYERDESCRIPTION *msgPtr, NetID senderId);
 static void ProcessNetMsg_StartGame(void);
-static void ProcessNetMsg_PlayerState(NETMESSAGE_PLAYERSTATE *msgPtr, DPID senderId);
-static void ProcessNetMsg_PlayerState_Minimal(NETMESSAGE_PLAYERSTATE_MINIMAL *msgPtr, DPID senderId, BOOL orientation);
-static void ProcessNetMsg_FrameTimer(unsigned short frame_time, DPID senderId);
-static void ProcessNetMsg_PlayerKilled(NETMESSAGE_PLAYERKILLED *msgPtr, DPID senderId);
-static void ProcessNetMsg_PlayerDeathAnim(NETMESSAGE_CORPSEDEATHANIM *messagePtr, DPID senderId);
-static void ProcessNetMsg_PlayerLeaving(DPID senderId);
+static void ProcessNetMsg_PlayerState(NETMESSAGE_PLAYERSTATE *msgPtr, NetID senderId);
+static void ProcessNetMsg_PlayerState_Minimal(NETMESSAGE_PLAYERSTATE_MINIMAL *msgPtr, NetID senderId, BOOL orientation);
+static void ProcessNetMsg_FrameTimer(unsigned short frame_time, NetID senderId);
+static void ProcessNetMsg_PlayerKilled(NETMESSAGE_PLAYERKILLED *msgPtr, NetID senderId);
+static void ProcessNetMsg_PlayerDeathAnim(NETMESSAGE_CORPSEDEATHANIM *messagePtr, NetID senderId);
+static void ProcessNetMsg_PlayerLeaving(NetID senderId);
 static void ProcessNetMsg_AllGameScores(NETMESSAGE_ALLGAMESCORES *msgPtr);
 static void ProcessNetMsg_PlayerScores(NETMESSAGE_PLAYERSCORES *msgPtr);
 static void ProcessNetMsg_SpeciesScores(NETMESSAGE_SPECIESSCORES *msgPtr);
 static void ProcessNetMsg_LocalRicochet(NETMESSAGE_LOCALRICOCHET *msgPtr);
-static void ProcessNetMsg_LocalObjectState(NETMESSAGE_LOBSTATE *msgPtr, DPID senderId);
-static void ProcessNetMsg_LocalObjectDamaged(char *msgPtr, DPID senderId);
-static void ProcessNetMsg_LocalObjectDestroyed(NETMESSAGE_LOBDESTROYED *msgPtr, DPID senderId);
+static void ProcessNetMsg_LocalObjectState(NETMESSAGE_LOBSTATE *msgPtr, NetID senderId);
+static void ProcessNetMsg_LocalObjectDamaged(char *msgPtr, NetID senderId);
+static void ProcessNetMsg_LocalObjectDestroyed(NETMESSAGE_LOBDESTROYED *msgPtr, NetID senderId);
 static void ProcessNetMsg_ObjectPickedUp(NETMESSAGE_OBJECTPICKEDUP *messagePtr);
 static void ProcessNetMsg_EndGame(void);
 static void ProcessNetMsg_InanimateObjectDamaged(char *msgPtr);
@@ -287,37 +287,37 @@ static void ProcessNetMsg_InanimateObjectDestroyed(NETMESSAGE_INANIMATEDESTROYED
 static void ProcessNetMsg_LOSRequestBinarySwitch(NETMESSAGE_LOSREQUESTBINARYSWITCH *msgPtr);
 static void ProcessNetMsg_PlatformLiftState(NETMESSAGE_PLATFORMLIFTSTATE *msgPtr);
 static void ProcessNetMsg_RequestPlatformLiftActivate(NETMESSAGE_REQUESTPLATFORMLIFTACTIVATE *msgPtr);
-static void ProcessNetMsg_PlayerAutoGunState(NETMESSAGE_AGUNSTATE *msgPtr, DPID senderId);
-static unsigned char *ProcessNetMsg_ChatBroadcast(unsigned char *subMessagePtr, DPID senderId);
+static void ProcessNetMsg_PlayerAutoGunState(NETMESSAGE_AGUNSTATE *msgPtr, NetID senderId);
+static unsigned char *ProcessNetMsg_ChatBroadcast(unsigned char *subMessagePtr, NetID senderId);
 static void ProcessNetMsg_MakeExplosion(NETMESSAGE_MAKEEXPLOSION *messagePtr);
 static void ProcessNetMsg_MakeFlechetteExplosion(NETMESSAGE_MAKEFLECHETTEEXPLOSION *messagePtr);
 static void ProcessNetMsg_MakePlasmaExplosion(NETMESSAGE_MAKEPLASMAEXPLOSION *messagePtr);
-static void ProcessNetMsg_PredatorSights(NETMESSAGE_PREDATORSIGHTS *messagePtr, DPID senderId);
+static void ProcessNetMsg_PredatorSights(NETMESSAGE_PREDATORSIGHTS *messagePtr, NetID senderId);
 static void ProcessNetMsg_FragmentalObjectsStatus(NETMESSAGE_FRAGMENTALOBJECTSSTATUS *messagePtr);
 static void ProcessNetMsg_StrategySynch(NETMESSAGE_STRATEGYSYNCH *messagePtr);
-static void ProcessNetMsg_LocalObjectOnFire(NETMESSAGE_LOBONFIRE *messagePtr, DPID senderId);
-static void ProcessNetMsg_AlienAIState(NETMESSAGE_ALIENAISTATE *messagePtr, DPID senderId);
-static void ProcessNetMsg_FarAlienPosition(NETMESSAGE_FARALIENPOSITION *messagePtr, DPID senderId);
-static void ProcessNetMsg_SpotAlienSound(NETMESSAGE_SPOTALIENSOUND *messagePtr, DPID senderId);
-static void ProcessNetMsg_LocalObjectDestroyed_Request(NETMESSAGE_LOBDESTROYED_REQUEST *messagePtr, DPID senderId);
+static void ProcessNetMsg_LocalObjectOnFire(NETMESSAGE_LOBONFIRE *messagePtr, NetID senderId);
+static void ProcessNetMsg_AlienAIState(NETMESSAGE_ALIENAISTATE *messagePtr, NetID senderId);
+static void ProcessNetMsg_FarAlienPosition(NETMESSAGE_FARALIENPOSITION *messagePtr, NetID senderId);
+static void ProcessNetMsg_SpotAlienSound(NETMESSAGE_SPOTALIENSOUND *messagePtr, NetID senderId);
+static void ProcessNetMsg_LocalObjectDestroyed_Request(NETMESSAGE_LOBDESTROYED_REQUEST *messagePtr, NetID senderId);
 static void ProcessNetMsg_ScoreChange(NETMESSAGE_SCORECHANGE *messagePtr);
 static void ProcessNetMsg_CreateWeapon(NETMESSAGE_CREATEWEAPON *messagePtr);
-static void ProcessNetMsg_Gibbing(NETMESSAGE_GIBBING *messagePtr, DPID senderId);
-static void ProcessNetMsg_GhostHierarchyDamaged(char *messagePtr, DPID senderId);
+static void ProcessNetMsg_Gibbing(NETMESSAGE_GIBBING *messagePtr, NetID senderId);
+static void ProcessNetMsg_GhostHierarchyDamaged(char *messagePtr, NetID senderId);
 static void ProcessNetMsg_MakeDecal(NETMESSAGE_MAKEDECAL *messagePtr);
-static void ProcessNetMsg_AlienAISequenceChange(NETMESSAGE_ALIENSEQUENCECHANGE *messagePtr, DPID senderId);
-static void ProcessNetMsg_AlienAIKilled(NETMESSAGE_ALIENAIKILLED *messagePtr, DPID senderId);
-static void ProcessNetMsg_SpotOtherSound(NETMESSAGE_SPOTOTHERSOUND *messagePtr, DPID senderId);
+static void ProcessNetMsg_AlienAISequenceChange(NETMESSAGE_ALIENSEQUENCECHANGE *messagePtr, NetID senderId);
+static void ProcessNetMsg_AlienAIKilled(NETMESSAGE_ALIENAIKILLED *messagePtr, NetID senderId);
+static void ProcessNetMsg_SpotOtherSound(NETMESSAGE_SPOTOTHERSOUND *messagePtr, NetID senderId);
 void StartOfGame_PlayerPlacement(STRATEGYBLOCK *playerSbPtr, int seed);
 
 static void CheckLastManStandingState();
-static void Handle_LastManStanding_Restart(DPID alienID, int seed);
-static void Handle_LastManStanding_RestartInfo(DPID alienID);
-static void Handle_LastManStanding_LastMan(DPID marineID);
+static void Handle_LastManStanding_Restart(NetID alienID, int seed);
+static void Handle_LastManStanding_RestartInfo(NetID alienID);
+static void Handle_LastManStanding_LastMan(NetID marineID);
 static void Handle_LastManStanding_RestartTimer(unsigned char time);
 
 static void CheckSpeciesTagState();
-static void Handle_SpeciesTag_NewPersonIt(DPID predatorID);
+static void Handle_SpeciesTag_NewPersonIt(NetID predatorID);
 static int CountPlayersOfType(NETGAME_CHARACTERTYPE species);
 
 static int GetSizeOfLocalObjectDamagedMessage(char *messagePtr);
@@ -333,11 +333,11 @@ static ALIEN_SEQUENCE GetMyAlienSequence(void);
 static PREDATOR_SEQUENCE GetMyPredatorSequence(void);
 
 
-static void Inform_PlayerHasDied(DPID killer, DPID victim, NETGAME_CHARACTERTYPE killerType, char weaponIcon);
-static void Inform_AiHasDied(DPID killer, ALIEN_TYPE type, char weaponIcon);
-static void Inform_PlayerHasLeft(DPID player);
-static void Inform_PlayerHasJoined(DPID player);
-static void Inform_PlayerHasConnected(DPID player);
+static void Inform_PlayerHasDied(NetID killer, NetID victim, NETGAME_CHARACTERTYPE killerType, char weaponIcon);
+static void Inform_AiHasDied(NetID killer, ALIEN_TYPE type, char weaponIcon);
+static void Inform_PlayerHasLeft(NetID player);
+static void Inform_PlayerHasJoined(NetID player);
+static void Inform_PlayerHasConnected(NetID player);
 static void Inform_NewHost(void);
 
 static void WriteFragmentStatus(int fragmentNumber, int status);
@@ -695,28 +695,33 @@ static uint8_t msg[NET_MESSAGEBUFFERSIZE];
 void MinimalNetCollectMessages(void)
 {
 	int res = NET_OK;
-	int fromID = 0;
-	int toID = 0;
-	size_t msgSize = 0;
+	NetID fromID = 0;
+	NetID toID   = 0;
+	size_t msgSize  = 0;
 
 	/* collects messages until something other than NET_OK is returned (eg NET_NO_MESSAGES) */
 	if (!netGameData.skirmishMode)
 	{
 		Net_ServiceNetwork();
 
-		while ((res == NET_OK) && AvPNetID)
+		while ((NET_OK == res) && AvPNetID)
 		{
-			res = Net_Receive(fromID, toID, NET_RECEIVE_ALL, &msg[0], msgSize);
+			res = Net_Receive(fromID, toID, &msg[0], msgSize);
+
+			MessageHeader newHeader;
+			MemoryReadStream rs(msg, msgSize);
+			rs.GetBytes((uint8_t*)&newHeader, sizeof(MessageHeader));
+
+			fromID = newHeader.fromID;
+			toID   = newHeader.toID;
 
 			if (NET_OK == res)
 			{
-				/* process last message, if there is one */
-				if (NET_SYSTEM_MESSAGE == fromID)
-				{
+				// process last message, if there is one
+				if (NET_SYSTEM_MESSAGE == fromID) {
 					ProcessSystemMessage(&msg[0], msgSize);
 				}
-				else
-				{
+				else {
 					ProcessGameMessage(fromID, &msg[0], msgSize);
 				}
 			}
@@ -727,8 +732,8 @@ void MinimalNetCollectMessages(void)
 void NetCollectMessages(void)
 {
 	int res = NET_OK;
-	int fromID = 0;
-	int toID = 0;
+	NetID fromID = 0;
+	NetID toID   = 0;
 	size_t msgSize = 0;
 
 	/* first off, some assertions about our game state */
@@ -753,13 +758,13 @@ void NetCollectMessages(void)
 
 		while ((NET_OK == res) && AvPNetID)
 		{
-			res = Net_Receive(fromID, toID, NET_RECEIVE_ALL, &msg[0], msgSize);
+			res = Net_Receive(fromID, toID, &msg[0], msgSize);
 
 			if (NET_OK == res)
 			{
 				numMessagesReceived++;
 
-				/* process last message, if there is one */
+				// process last message, if there is one
 				if (NET_SYSTEM_MESSAGE == fromID)
 				{
 					ProcessSystemMessage(&msg[0], msgSize);
@@ -970,7 +975,7 @@ void NetCollectMessages(void)
 /*----------------------------------------------------------------------
   Functions for processing system messages
   ----------------------------------------------------------------------*/
-static void ProcessSystemMessage(uint8_t *msgP, unsigned int msgSize)
+static void ProcessSystemMessage(uint8_t *msgP, size_t msgSize)
 {
 	int systemMessageType;
 	char buf[100];
@@ -978,8 +983,7 @@ static void ProcessSystemMessage(uint8_t *msgP, unsigned int msgSize)
 
 	/* currently, only the host deals with system mesages */
 	/* check for invalid parameters */
-	if ((msgSize == 0) || (msgP == NULL))
-	{
+	if ((msgSize == 0) || (msgP == NULL)) {
 		return;
 	}
 
@@ -1165,7 +1169,7 @@ static void AddPlayerToGame(int id, char *name)
 	Inform_PlayerHasConnected(id);
 }
 
-void RemovePlayerFromGame(DPID id)
+void RemovePlayerFromGame(NetID id)
 {
 	//LOCALASSERT(AvP.Network==I_Host);
 	/* get player index from dpid */
@@ -1212,26 +1216,25 @@ void RemovePlayerFromGame(DPID id)
 /*----------------------------------------------------------------------
   Core function for processing game messages
   ----------------------------------------------------------------------*/
-static void ProcessGameMessage(DPID senderId, uint8_t *msgP, unsigned int msgSize)
+static void ProcessGameMessage(NetID senderId, uint8_t *msgP, size_t msgSize)
 {
 	uint8_t *subMessagePtr = NULL;
 	uint8_t *endOfMessage = NULL;
 	NETMESSAGEHEADER *headerPtr = NULL;
 	LogNetInfo("Processing a game message \n");
 
-	/* check for invalid parameters */
-	if ((msgSize == 0) || (msgP == NULL))
-	{
+	// check for invalid parameters
+	if ((msgSize == 0) || (msgP == NULL)) {
 		return;
 	}
 
-	/* some assertions about our game state */
+	// some assertions about our game state
 	LOCALASSERT(!((AvP.Network == I_Host) && (netGameData.myGameState == NGS_Leaving)));
 	LOCALASSERT(!((AvP.Network == I_Host) && (netGameData.myGameState == NGS_Error_GameFull)));
 	LOCALASSERT(!((AvP.Network == I_Host) && (netGameData.myGameState == NGS_Error_GameStarted)));
 	LOCALASSERT(!((AvP.Network == I_Host) && (netGameData.myGameState == NGS_Error_HostLost)));
 
-	/* In leaving or error states, we can ignore game messages */
+	// In leaving or error states, we can ignore game messages
 	if ((netGameData.myGameState != NGS_StartUp)
 	    && (netGameData.myGameState != NGS_Playing)
 	    && (netGameData.myGameState != NGS_Joining)
@@ -1790,7 +1793,7 @@ void NetSendMessages(void)
 		{
 			if (AvPNetID)
 			{
-				res = Net_Send(AvPNetID, NET_ID_ALLPLAYERS, 0, &sendBuffer[0], numBytes);
+				res = Net_Send(AvPNetID, NET_ID_ALLPLAYERS, &sendBuffer[0], numBytes);
 
 				if (res != NET_OK)
 				{
@@ -3172,7 +3175,7 @@ void AddNetMsg_PlayerKilled(int objectId, DAMAGE_PROFILE *damage)
 	/* fill out the header */
 	headerPtr->type = (unsigned char)NetMT_PlayerKilled;
 	/* fill out the message: myNetworkkillerId should either be NULL indicating that player
-	has killed himself, or the DPID of the killer (which may in fact be the player's DPID)*/
+	has killed himself, or the NetID of the killer (which may in fact be the player's NetID)*/
 	messagePtr->objectId = objectId; /* ID of the new corpse. */
 	messagePtr->killerId = myNetworkKillerId;
 	messagePtr->myType = netGameData.myCharacterType;
@@ -5612,8 +5615,8 @@ void AddNetMsg_SpotAlienSound(int soundCategory, int alienType, int pitch, VECTO
 	messagePtr->vy = position->vy;
 	messagePtr->vz = position->vz;
 }
-//for messages that just require a player id
-void AddNetMsg_PlayerID(DPID playerID, unsigned char message)
+// for messages that just require a player id
+void AddNetMsg_PlayerID(NetID playerID, unsigned char message)
 {
 	NETMESSAGEHEADER *headerPtr;
 	NETMESSAGE_PLAYERID *messagePtr;
@@ -5671,7 +5674,7 @@ void AddNetMsg_LastManStanding_RestartTimer(char time)
 	messagePtr->timer = time;
 }
 
-void AddNetMsg_LastManStanding_Restart(DPID alienID, int seed)
+void AddNetMsg_LastManStanding_Restart(NetID alienID, int seed)
 {
 	NETMESSAGEHEADER *headerPtr;
 	NETMESSAGE_LMS_RESTART *messagePtr;
@@ -5992,7 +5995,7 @@ static void ProcessNetMsg_GameDescription(NETMESSAGE_GAMEDESCRIPTION *messagePtr
 	}
 }
 
-static void ProcessNetMsg_PlayerDescription(NETMESSAGE_PLAYERDESCRIPTION *messagePtr, DPID senderId)
+static void ProcessNetMsg_PlayerDescription(NETMESSAGE_PLAYERDESCRIPTION *messagePtr, NetID senderId)
 {
 	/* only act on this if we're the host and in start-up */
 	if (AvP.Network != I_Host)
@@ -6054,7 +6057,7 @@ static void ProcessNetMsg_StartGame(void)
 	}
 }
 
-static void ProcessNetMsg_PlayerState(NETMESSAGE_PLAYERSTATE *messagePtr, DPID senderId)
+static void ProcessNetMsg_PlayerState(NETMESSAGE_PLAYERSTATE *messagePtr, NetID senderId)
 {
 	VECTORCH position;
 	int playerIndex;
@@ -6401,7 +6404,7 @@ static void ProcessNetMsg_PlayerState(NETMESSAGE_PLAYERSTATE *messagePtr, DPID s
 		}
 	}
 }
-static void ProcessNetMsg_PlayerState_Minimal(NETMESSAGE_PLAYERSTATE_MINIMAL *messagePtr, DPID senderId, BOOL orientation)
+static void ProcessNetMsg_PlayerState_Minimal(NETMESSAGE_PLAYERSTATE_MINIMAL *messagePtr, NetID senderId, BOOL orientation)
 {
 	int playerIndex;
 	STRATEGYBLOCK *sbPtr;
@@ -6523,7 +6526,7 @@ static void ProcessNetMsg_PlayerState_Minimal(NETMESSAGE_PLAYERSTATE_MINIMAL *me
 	}
 }
 
-static void ProcessNetMsg_FrameTimer(unsigned short frame_time, DPID senderId)
+static void ProcessNetMsg_FrameTimer(unsigned short frame_time, NetID senderId)
 {
 	int senderPlayerIndex;
 
@@ -6543,7 +6546,7 @@ static void ProcessNetMsg_FrameTimer(unsigned short frame_time, DPID senderId)
 	netGameData.playerData[senderPlayerIndex].timer += frame_time;
 }
 
-static void ProcessNetMsg_PlayerKilled(NETMESSAGE_PLAYERKILLED *messagePtr, DPID senderId)
+static void ProcessNetMsg_PlayerKilled(NETMESSAGE_PLAYERKILLED *messagePtr, NetID senderId)
 {
 	STRATEGYBLOCK *sbPtr;
 	int senderPlayerIndex;
@@ -6616,7 +6619,7 @@ static void ProcessNetMsg_PlayerKilled(NETMESSAGE_PLAYERKILLED *messagePtr, DPID
 	}
 }
 
-static void ProcessNetMsg_PlayerDeathAnim(NETMESSAGE_CORPSEDEATHANIM *messagePtr, DPID senderId)
+static void ProcessNetMsg_PlayerDeathAnim(NETMESSAGE_CORPSEDEATHANIM *messagePtr, NetID senderId)
 {
 	STRATEGYBLOCK *sbPtr;
 
@@ -6784,7 +6787,7 @@ static void ProcessNetMsg_LocalRicochet(NETMESSAGE_LOCALRICOCHET *messagePtr)
 {
 }
 
-static void ProcessNetMsg_LocalObjectState(NETMESSAGE_LOBSTATE *messagePtr, DPID senderId)
+static void ProcessNetMsg_LocalObjectState(NETMESSAGE_LOBSTATE *messagePtr, NetID senderId)
 {
 	STRATEGYBLOCK *sbPtr;
 	int objectId;
@@ -6951,7 +6954,7 @@ static int GetSizeOfLocalObjectDamagedMessage(char *messagePtr)
 	return size;
 }
 
-static void ProcessNetMsg_LocalObjectDamaged(char *messagePtr, DPID senderId)
+static void ProcessNetMsg_LocalObjectDamaged(char *messagePtr, NetID senderId)
 {
 	NETMESSAGE_LOBDAMAGED_HEADER *messageHeader = 0;
 	NETMESSAGE_DAMAGE_PROFILE *messageProfile = 0;
@@ -7180,7 +7183,7 @@ static void ProcessNetMsg_LocalObjectDamaged(char *messagePtr, DPID senderId)
 }
 
 
-static void ProcessNetMsg_LocalObjectDestroyed_Request(NETMESSAGE_LOBDESTROYED_REQUEST *messagePtr, DPID senderId)
+static void ProcessNetMsg_LocalObjectDestroyed_Request(NETMESSAGE_LOBDESTROYED_REQUEST *messagePtr, NetID senderId)
 {
 	/* only do this if we're playing */
 	if (netGameData.myGameState != NGS_Playing)
@@ -7220,7 +7223,7 @@ static void ProcessNetMsg_LocalObjectDestroyed_Request(NETMESSAGE_LOBDESTROYED_R
 	}
 }
 
-static void ProcessNetMsg_LocalObjectDestroyed(NETMESSAGE_LOBDESTROYED *messagePtr, DPID senderId)
+static void ProcessNetMsg_LocalObjectDestroyed(NETMESSAGE_LOBDESTROYED *messagePtr, NetID senderId)
 {
 	STRATEGYBLOCK *sbPtr;
 	int objectId;
@@ -7473,7 +7476,7 @@ static void ProcessNetMsg_EndGame(void)
 	AvP.MainLoopRunning = 0;
 }
 
-static void ProcessNetMsg_PlayerLeaving(DPID senderId)
+static void ProcessNetMsg_PlayerLeaving(NetID senderId)
 {
 	/* only do this if we're playing or in startup */
 	if (netGameData.myGameState == NGS_Playing || netGameData.myGameState == NGS_EndGameScreen)
@@ -7589,7 +7592,7 @@ static void ProcessNetMsg_RequestPlatformLiftActivate(NETMESSAGE_REQUESTPLATFORM
 	}
 }
 
-static void ProcessNetMsg_PlayerAutoGunState(NETMESSAGE_AGUNSTATE *messagePtr, DPID senderId)
+static void ProcessNetMsg_PlayerAutoGunState(NETMESSAGE_AGUNSTATE *messagePtr, NetID senderId)
 {
 	STRATEGYBLOCK *sbPtr;
 	int objectId;
@@ -7653,7 +7656,7 @@ static void ProcessNetMsg_MakeDecal(NETMESSAGE_MAKEDECAL *messagePtr)
 }
 
 
-static unsigned char *ProcessNetMsg_ChatBroadcast(unsigned char *subMessagePtr, DPID senderId)
+static unsigned char *ProcessNetMsg_ChatBroadcast(unsigned char *subMessagePtr, NetID senderId)
 {
 	BOOL same_species_only;
 	/* get player index from dpid */
@@ -7754,7 +7757,7 @@ static void ProcessNetMsg_MakePlasmaExplosion(NETMESSAGE_MAKEPLASMAEXPLOSION *me
 	MakePlasmaExplosion(&(messagePtr->Position), &(messagePtr->FromPosition), messagePtr->ExplosionID);
 }
 
-static void ProcessNetMsg_PredatorSights(NETMESSAGE_PREDATORSIGHTS *messagePtr, DPID senderId)
+static void ProcessNetMsg_PredatorSights(NETMESSAGE_PREDATORSIGHTS *messagePtr, NetID senderId)
 {
 	extern THREE_LASER_DOT_DESC PredatorLaserSights[];
 	int playerIndex = PlayerIdInPlayerList(senderId);
@@ -7980,7 +7983,7 @@ static void ProcessNetMsg_StrategySynch(NETMESSAGE_STRATEGYSYNCH *messagePtr)
 	}
 }
 
-static void ProcessNetMsg_LocalObjectOnFire(NETMESSAGE_LOBONFIRE *messagePtr, DPID senderId)
+static void ProcessNetMsg_LocalObjectOnFire(NETMESSAGE_LOBONFIRE *messagePtr, NetID senderId)
 {
 	/* only do this if we're playing */
 	if (netGameData.myGameState != NGS_Playing)
@@ -8023,7 +8026,7 @@ static void ProcessNetMsg_LocalObjectOnFire(NETMESSAGE_LOBONFIRE *messagePtr, DP
 	}
 }
 
-static void ProcessNetMsg_AlienAIState(NETMESSAGE_ALIENAISTATE *messagePtr, DPID senderId)
+static void ProcessNetMsg_AlienAIState(NETMESSAGE_ALIENAISTATE *messagePtr, NetID senderId)
 {
 	STRATEGYBLOCK *sbPtr;
 	int objectId;
@@ -8126,7 +8129,7 @@ static void ProcessNetMsg_AlienAIState(NETMESSAGE_ALIENAISTATE *messagePtr, DPID
 }
 
 /* CDF 24/8/98 A better message. */
-static void ProcessNetMsg_AlienAISequenceChange(NETMESSAGE_ALIENSEQUENCECHANGE *messagePtr, DPID senderId)
+static void ProcessNetMsg_AlienAISequenceChange(NETMESSAGE_ALIENSEQUENCECHANGE *messagePtr, NetID senderId)
 {
 	STRATEGYBLOCK *sbPtr;
 	int objectId;
@@ -8173,7 +8176,7 @@ static void ProcessNetMsg_AlienAISequenceChange(NETMESSAGE_ALIENSEQUENCECHANGE *
 	}
 }
 
-static void ProcessNetMsg_AlienAIKilled(NETMESSAGE_ALIENAIKILLED *messagePtr, DPID senderId)
+static void ProcessNetMsg_AlienAIKilled(NETMESSAGE_ALIENAIKILLED *messagePtr, NetID senderId)
 {
 	STRATEGYBLOCK *sbPtr;
 	int objectId;
@@ -8209,7 +8212,7 @@ static void ProcessNetMsg_AlienAIKilled(NETMESSAGE_ALIENAIKILLED *messagePtr, DP
 	}
 }
 
-static void ProcessNetMsg_FarAlienPosition(NETMESSAGE_FARALIENPOSITION *messagePtr, DPID senderId)
+static void ProcessNetMsg_FarAlienPosition(NETMESSAGE_FARALIENPOSITION *messagePtr, NetID senderId)
 {
 	STRATEGYBLOCK *sbPtr;
 	EULER orientation = {0, 0, 0};
@@ -8342,7 +8345,7 @@ static int GetSizeOfGhostHierarchyDamagedMessage(char *messagePtr)
 	return size;
 }
 
-static void ProcessNetMsg_GhostHierarchyDamaged(char *messagePtr, DPID senderId)
+static void ProcessNetMsg_GhostHierarchyDamaged(char *messagePtr, NetID senderId)
 {
 	NETMESSAGE_GHOSTHIERARCHYDAMAGED_HEADER *messageHeader = 0;
 	NETMESSAGE_DAMAGE_PROFILE *messageProfile = 0;
@@ -8487,7 +8490,7 @@ static void ProcessNetMsg_GhostHierarchyDamaged(char *messagePtr, DPID senderId)
 }
 
 
-static void ProcessNetMsg_Gibbing(NETMESSAGE_GIBBING *messagePtr, DPID senderId)
+static void ProcessNetMsg_Gibbing(NETMESSAGE_GIBBING *messagePtr, NetID senderId)
 {
 	STRATEGYBLOCK *sbPtr;
 	int objectId;
@@ -8535,7 +8538,7 @@ static void ProcessNetMsg_Gibbing(NETMESSAGE_GIBBING *messagePtr, DPID senderId)
 	}
 }
 
-static void ProcessNetMsg_SpotAlienSound(NETMESSAGE_SPOTALIENSOUND *messagePtr, DPID senderId)
+static void ProcessNetMsg_SpotAlienSound(NETMESSAGE_SPOTALIENSOUND *messagePtr, NetID senderId)
 {
 	VECTORCH position;
 
@@ -8564,7 +8567,7 @@ static void ProcessNetMsg_CreateWeapon(NETMESSAGE_CREATEWEAPON *messagePtr)
 	CreateMultiplayerWeaponPickup(&messagePtr->location, messagePtr->type, &messagePtr->name[0]);
 }
 
-static void ProcessNetMsg_SpotOtherSound(NETMESSAGE_SPOTOTHERSOUND *messagePtr, DPID senderId)
+static void ProcessNetMsg_SpotOtherSound(NETMESSAGE_SPOTOTHERSOUND *messagePtr, NetID senderId)
 {
 	VECTORCH position;
 
@@ -8585,8 +8588,8 @@ static void ProcessNetMsg_SpotOtherSound(NETMESSAGE_SPOTOTHERSOUND *messagePtr, 
   These support functions are used to examine the current game state
   ----------------------------------------------------------------------*/
 
-/* returns index if the given DPID is in the player list */
-int PlayerIdInPlayerList(DPID Id)
+/* returns index if the given NetID is in the player list */
+int PlayerIdInPlayerList(NetID Id)
 {
 	int i;
 
@@ -8713,7 +8716,7 @@ void AddNetGameObjectID(STRATEGYBLOCK *sbPtr)
 /* called by host only: updates the scores for a described kill, and sends a
 game score update message */
 
-static void UpdateNetworkGameScores(DPID playerKilledId, DPID killerId, NETGAME_CHARACTERTYPE playerKilledType, NETGAME_CHARACTERTYPE killerType)
+static void UpdateNetworkGameScores(NetID playerKilledId, NetID killerId, NETGAME_CHARACTERTYPE playerKilledType, NETGAME_CHARACTERTYPE killerType)
 {
 	int playerKilledIndex;
 	int killerIndex;
@@ -10577,7 +10580,7 @@ void RestartNetworkGame(int seed)
 
 /* KJL 15:46:19 09/04/98 - processing info pertaining to multiplayer games */
 
-static void Inform_PlayerHasDied(DPID killer, DPID victim, NETGAME_CHARACTERTYPE killerType, char weaponIcon)
+static void Inform_PlayerHasDied(NetID killer, NetID victim, NETGAME_CHARACTERTYPE killerType, char weaponIcon)
 {
 	int victimIndex = PlayerIdInPlayerList(victim);
 
@@ -10637,7 +10640,7 @@ static void Inform_PlayerHasDied(DPID killer, DPID victim, NETGAME_CHARACTERTYPE
 	}
 }
 
-static void Inform_AiHasDied(DPID killer, ALIEN_TYPE type, char weaponIcon)
+static void Inform_AiHasDied(NetID killer, ALIEN_TYPE type, char weaponIcon)
 {
 	int killerIndex = PlayerIdInPlayerList(killer);
 
@@ -10673,7 +10676,7 @@ static void Inform_AiHasDied(DPID killer, ALIEN_TYPE type, char weaponIcon)
 	}
 }
 
-static void Inform_PlayerHasLeft(DPID player)
+static void Inform_PlayerHasLeft(NetID player)
 {
 	int playerIndex = PlayerIdInPlayerList(player);
 
@@ -10685,7 +10688,7 @@ static void Inform_PlayerHasLeft(DPID player)
 
 	NetworkGameConsoleMessage(TEXTSTRING_MULTIPLAYERCONSOLE_LEAVEGAME, netGameData.playerData[playerIndex].name, 0);
 }
-static void Inform_PlayerHasJoined(DPID player)
+static void Inform_PlayerHasJoined(NetID player)
 {
 	int playerIndex = PlayerIdInPlayerList(player);
 
@@ -10697,7 +10700,7 @@ static void Inform_PlayerHasJoined(DPID player)
 
 	NetworkGameConsoleMessage(TEXTSTRING_MULTIPLAYERCONSOLE_JOINGAME, netGameData.playerData[playerIndex].name, 0);
 }
-static void Inform_PlayerHasConnected(DPID player)
+static void Inform_PlayerHasConnected(NetID player)
 {
 	int playerIndex = PlayerIdInPlayerList(player);
 
@@ -11066,7 +11069,7 @@ static void CheckLastManStandingState()
 	}
 }
 
-static void Handle_LastManStanding_Restart(DPID alienID, int seed)
+static void Handle_LastManStanding_Restart(NetID alienID, int seed)
 {
 	int i;
 
@@ -11113,7 +11116,7 @@ static void Handle_LastManStanding_Restart(DPID alienID, int seed)
 	PrintStringTableEntryInConsole(TEXTSTRING_MULTIPLAYER_LMS_GO);
 }
 
-static void Handle_LastManStanding_RestartInfo(DPID alienID)
+static void Handle_LastManStanding_RestartInfo(NetID alienID)
 {
 	int i;
 
@@ -11133,7 +11136,7 @@ static void Handle_LastManStanding_RestartInfo(DPID alienID)
 	}
 }
 
-static void Handle_LastManStanding_LastMan(DPID marineID)
+static void Handle_LastManStanding_LastMan(NetID marineID)
 {
 	int i;
 
@@ -11219,7 +11222,7 @@ static void CheckSpeciesTagState()
 	//we need to choose a predator player
 	//make it the person with the lowest score
 	{
-		DPID predID = 0;
+		NetID predID = 0;
 		int lowScore = 1000000000;
 
 		for (i = 0; i < (NET_MAXPLAYERS); i++)
@@ -11240,7 +11243,7 @@ static void CheckSpeciesTagState()
 }
 
 
-static void Handle_SpeciesTag_NewPersonIt(DPID predatorID)
+static void Handle_SpeciesTag_NewPersonIt(NetID predatorID)
 {
 	/* if we're not playing, ignore it */
 	if (netGameData.myGameState != NGS_Playing)
@@ -11867,7 +11870,7 @@ void ShowNearestPlayersName()
 	extern DISPLAYBLOCK *OnScreenBlockList[];
 	extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 	int numberOfObjects = NumOnScreenBlocks;
-	DPID nearestID = 0;
+	NetID nearestID = 0;
 	int nearestDist = 0x7fffffff;
 
 	//search through all the nearby objects for players

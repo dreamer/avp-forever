@@ -10,10 +10,11 @@
 #include <stdlib.h>
 #include <stdarg.h>
 #include <stdio.h>
+#include <stdint.h>
 
 #include "os_header.h"
 
-typedef unsigned int DPID;
+typedef uint32_t NetID;
 
 #include "aw.h"
 

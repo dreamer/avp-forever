@@ -915,8 +915,8 @@ void AlienBehaviour(STRATEGYBLOCK *sbPtr)
 		//for multiplayer games it is necessary to say who is doing this damage
 		//(that would be the person who set the alien on fire in the first place)
 		{
-			extern DPID myNetworkKillerId;
-			extern DPID AvPNetID;
+			extern NetID myNetworkKillerId;
+			extern NetID AvPNetID;
 
 			myNetworkKillerId=alienStatusPointer->aliensIgniterId;
 			CauseDamageToObject(sbPtr,&firedamage,NormalFrameTime,NULL);

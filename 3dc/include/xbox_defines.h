@@ -5,7 +5,6 @@
 extern "C" { 
 #endif
 
-typedef int DPID;
 #define D3DLOCK_DISCARD	0
 #define _fseeki64 fseek // ensure libvorbis uses fseek and not _fseeki64 for xbox
 

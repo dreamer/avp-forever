@@ -84,7 +84,7 @@ typedef struct
 	VECTORCH Normal[3];
 	VECTORCH LightSource;
 	char DotIsOnPlayer;
-	DPID TargetID;
+	NetID TargetID;
 	int ShouldBeDrawn;
 
 } THREE_LASER_DOT_DESC;

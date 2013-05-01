@@ -134,7 +134,7 @@
 
 	STRATEGYBLOCK* generator_sbptr;//0 unless created by a generator
 
-	DPID aliensIgniterId;//Which player in a multiplayer game toasted this poor beast?
+	NetID aliensIgniterId;//Which player in a multiplayer game toasted this poor beast?
 
 	int soundHandle;
 	int soundHandle2;

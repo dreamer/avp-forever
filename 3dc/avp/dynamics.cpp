@@ -5961,7 +5961,7 @@ int ParticleDynamics(PARTICLE *particlePtr, VECTORCH *obstacleNormalPtr, int *mo
 							{
 								if(dispPtr==Player)
 								{
-									extern DPID myIgniterId;
+									extern NetID myIgniterId;
 									myIgniterId=0; //the player hasn't been set alight by a network opponent
 								}
 								else if(sbPtr->I_SBtype==I_BehaviourAlien)
@@ -5970,7 +5970,7 @@ int ParticleDynamics(PARTICLE *particlePtr, VECTORCH *obstacleNormalPtr, int *mo
 									ALIEN_STATUS_BLOCK *alienStatus = (ALIEN_STATUS_BLOCK *)sbPtr->SBdataptr;
 									if(particlePtr->ParticleID==PARTICLE_FLAME)
 									{
-										extern DPID AvPNetID;
+										extern NetID AvPNetID;
 										alienStatus->aliensIgniterId=AvPNetID;
 									}
 									else

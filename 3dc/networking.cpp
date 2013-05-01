@@ -677,7 +677,7 @@ void Net_ServiceNetwork()
 	}
 }
 
-int Net_Receive(int &fromID, int &toID, int flags, uint8_t *messageData, size_t &dataSize)
+int Net_Receive(NetID &fromID, NetID &toID, uint8_t *messageData, size_t &dataSize)
 {
 	// this function is called from a loop. only return something other than NET_OK when we've no more messages
 	bool isInternalOnly  = false;
@@ -704,7 +704,6 @@ int Net_Receive(int &fromID, int &toID, int flags, uint8_t *messageData, size_t 
 						std::stringstream sstream;
 						sstream << "Enet got a connection from " << /*std::string(ipaddr)*/ipaddr << ":" << eEvent.peer->address.port;
 						OutputDebugString(sstream.str().c_str());
-
 						continue; // this is still fine, we might have more messages
 					}
 					case ENET_EVENT_TYPE_RECEIVE:
@@ -715,7 +714,7 @@ int Net_Receive(int &fromID, int &toID, int flags, uint8_t *messageData, size_t 
 						memcpy(messageData, static_cast<uint8_t*> (eEvent.packet->data), eEvent.packet->dataLength);
 						dataSize = eEvent.packet->dataLength;
 						enet_packet_destroy(eEvent.packet);
-						break; // break so we fall down to "switch (messageType)"
+						continue;
 					}
 					case ENET_EVENT_TYPE_DISCONNECT:
 					{
@@ -735,6 +734,7 @@ int Net_Receive(int &fromID, int &toID, int flags, uint8_t *messageData, size_t 
 			return NET_NO_MESSAGES;
 		}
 
+#if 0
 		// we broke from recieve above and got here as we have some data to process (move this to a separate funtion?)
 		MessageHeader newHeader;
 
@@ -892,6 +892,7 @@ int Net_Receive(int &fromID, int &toID, int flags, uint8_t *messageData, size_t 
 				return NET_FAIL;
 			}
 		}
+#endif
 	}
 	while (isInternalOnly);
 
@@ -940,7 +941,7 @@ int Net_SendSystemMessage(int messageType, int fromID, int toID, uint8_t *messag
 	return NET_OK;
 }
 
-int Net_Send(int fromID, int toID, int flags, uint8_t *messageData, size_t dataSize)
+int Net_Send(int fromID, int toID, uint8_t *messageData, size_t dataSize)
 {
 	if (messageData == NULL) 
 	{

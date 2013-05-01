@@ -59,9 +59,9 @@ int CloakDrain=12000;
 int CloakThreshold=(5*ONE_FIXED);
 int CloakPowerOnDrain=(2*ONE_FIXED);
 
-extern DPID myNetworkKillerId;
-extern DPID myIgniterId;
-extern DPID AvPNetID; // bjd
+extern NetID myNetworkKillerId;
+extern NetID myIgniterId;
+extern NetID AvPNetID; // bjd
 
 extern int MyHitBodyPartId;
 extern HMODELCONTROLLER PlayersWeaponHModelController;

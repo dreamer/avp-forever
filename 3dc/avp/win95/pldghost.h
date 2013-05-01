@@ -13,7 +13,7 @@
 
 typedef struct netghostdatablock
 {
-	DPID playerId;
+	NetID playerId;
 	signed int playerObjectId; /* -1 == player, all other numbers used for objects */
 	AVP_BEHAVIOUR_TYPE type;
 	INANIMATEOBJECT_TYPE IOType;
@@ -67,10 +67,10 @@ typedef struct netghostdatablock
   ----------------------------------------------------------------------*/
 extern void UpdateGhost(STRATEGYBLOCK *sbPtr,VECTORCH *position,EULER *orientation,int sequence, int special);
 extern void RemoveGhost(STRATEGYBLOCK *sbPtr);
-extern void RemovePlayersGhosts(DPID id);
-extern void RemovePlayerGhost(DPID id);
-extern STRATEGYBLOCK *FindGhost(DPID Id, int obId);
-extern STRATEGYBLOCK *CreateNetGhost(DPID playerId, int objectId, VECTORCH *position, EULER* orientation, AVP_BEHAVIOUR_TYPE type, unsigned char IOType, unsigned char subtype);
+extern void RemovePlayersGhosts(NetID id);
+extern void RemovePlayerGhost(NetID id);
+extern STRATEGYBLOCK *FindGhost(NetID Id, int obId);
+extern STRATEGYBLOCK *CreateNetGhost(NetID playerId, int objectId, VECTORCH *position, EULER* orientation, AVP_BEHAVIOUR_TYPE type, unsigned char IOType, unsigned char subtype);
 extern void MakeGhostNear(STRATEGYBLOCK *sbPtr);
 extern void MakeGhostFar(STRATEGYBLOCK *sbPtr);
 extern void DamageNetworkGhost(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multiple, SECTION_DATA *section,VECTORCH* incoming);

@@ -54,7 +54,7 @@ static int TooManyDecalsOfThisType(enum DECAL_ID decalID, VECTORCH *positionPtr)
 
 extern int NumActiveBlocks;
 extern DISPLAYBLOCK *ActiveBlockList[];
-extern DPID AvPNetID;
+extern NetID AvPNetID;
 extern void RenderLightFlare(VECTORCH *positionPtr, unsigned int colour);
 
 #define MAX_NO_OF_SIMILAR_DECALS_IN_ONE_PLACE 4

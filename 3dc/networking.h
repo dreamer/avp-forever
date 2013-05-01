@@ -33,8 +33,8 @@
 int Net_Initialise();
 int Net_Deinitialise();
 int Net_ConnectingToSession();
-int Net_Send(int fromID, int toID, int flags, uint8_t *messageData, size_t dataSize);
-int Net_Receive(int &fromID, int &toID, int flags, uint8_t *messageData, size_t &dataSize);
+int Net_Send(int fromID, int toID, uint8_t *messageData, size_t dataSize);
+int Net_Receive(NetID &fromID, NetID &toID, uint8_t *messageData, size_t &dataSize);
 int Net_SendSystemMessage(int messageType, int fromID, int toID, uint8_t *messageData, size_t dataSize);
 int Net_InitLobbiedGame();
 void Net_ServiceNetwork();

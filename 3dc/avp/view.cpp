@@ -38,7 +38,7 @@ int NumOnScreenBlocks;
 extern DISPLAYBLOCK *ActiveBlockList[];
 extern int NumActiveBlocks;
 
-extern DPID MultiplayerObservedPlayer;
+extern NetID MultiplayerObservedPlayer;
 
 #if SupportMorphing
 MORPHDISPLAY MorphDisplay;

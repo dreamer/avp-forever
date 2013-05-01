@@ -2068,21 +2068,20 @@ static void ActUponUsersInput(void)
 		}
 		else
 		{
-			char c=0;
-			
+			char c = 0;
+
 			KeyboardEntryQueue_StartProcessing();
-			while (c=KeyboardEntryQueue_ProcessCharacter())
+			while (c = KeyboardEntryQueue_ProcessCharacter())
 			{
 				if (AvPMenus.PositionInTextField<elementPtr->MaxTextLength)
 				{
-					if (c>='0' && c<='9')
+					if (c >= '0' && c <= '9')
 					{
 						(*elementPtr->NumberPtr)*=10;
 						(*elementPtr->NumberPtr)+=c-'0';
 
-						if ((*elementPtr->NumberPtr)>elementPtr->MaxValue)
-						{
-							(*elementPtr->NumberPtr)=elementPtr->MaxValue;
+						if ((*elementPtr->NumberPtr) > elementPtr->MaxValue) {
+							(*elementPtr->NumberPtr) = elementPtr->MaxValue;
 						}
 					}
 				}
