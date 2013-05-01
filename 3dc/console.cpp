@@ -440,7 +440,7 @@ size_t Con_GetNumArguments()
 
 void Con_PrintError(const std::string &errorString)
 {
-	console.text.push_back(errorString);
+// disable for now	console.text.push_back(errorString);
 
 	// write to log file for now
 	LogErrorString(errorString);
@@ -448,7 +448,7 @@ void Con_PrintError(const std::string &errorString)
 
 void Con_PrintMessage(const std::string &messageString)
 {
-	console.text.push_back(messageString);
+// disable for now	console.text.push_back(messageString);
 
 	// write to log file for now
 	LogString(messageString);
@@ -462,7 +462,7 @@ void Con_PrintDebugMessage(const std::string &messageString)
 
 void Con_AddLine(const std::string &temp)
 {
-	console.text.push_back(temp);
+// disable for now	console.text.push_back(temp);
 }
 
 void Con_AddCommand(char *command, funcPointer function)
@@ -512,8 +512,9 @@ void Con_Init()
 void Con_ProcessCommand()
 {
 	// if nothing typed, don't bother doing anything
-	if (console.inputLine.length() == 0)
+	if (console.inputLine.length() == 0) {
 		return;
+	}
 
 	// clear the arg vector
 	cmdArgs.clear();
@@ -565,11 +566,13 @@ void Con_ProcessCommand()
 
 void Con_ProcessInput()
 {
-	if (DebouncedKeyboardInput[KEY_BACKSPACE])
+	if (DebouncedKeyboardInput[KEY_BACKSPACE]) {
 		Con_RemoveTypedChar();
+	}
 
-	if (DebouncedKeyboardInput[KEY_CR])
+	if (DebouncedKeyboardInput[KEY_CR]) {
 		Con_ProcessCommand();
+	}
 }
 
 void Con_Toggle()

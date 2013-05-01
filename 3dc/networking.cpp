@@ -99,13 +99,13 @@ extern int DetermineAvailableCharacterTypes(bool ConsiderUsedCharacters);
 extern char* GetCustomMultiplayerLevelName(int index, int gameType);
 extern unsigned char DebouncedKeyboardInput[];
 
-static bool Net_CreatePlayer(char *playerName, char *clanTag);
+static bool Net_CreatePlayer(char *playerName);
 uint32_t Net_GetNextPlayerID();
 void Net_FindAvPSessions();
-void Net_Disconnect();
 void Net_ConnectToAddress();
-int Net_CreateSession(const char* sessionName, int maxPlayers, int version, int level);
-int Net_UpdateSessionDescForLobbiedGame(int gamestyle, int level);
+
+static NetResult Net_CreateSession(const char* sessionName, int maxPlayers, int version, uint16_t gameStyle, uint16_t level);
+static NetResult Net_UpdateSessionDescForLobbiedGame(uint16_t gameStyle, uint16_t level);
 
 /* KJL 14:58:18 03/07/98 - AvP's Guid */
 // {379CCA80-8BDD-11d0-A078-004095E16EA5}
@@ -199,7 +199,7 @@ bool Net_CheckSessionDetails(const ENetEvent &eEvent)
 	MessageHeader newHeader;
 	memcpy(&newHeader, static_cast<uint8_t*> (eEvent.packet->data), sizeof(MessageHeader));
 
-	if (AVP_SESSIONDATA != newHeader.messageType) {
+	if (AVP_SESSION_DATA != newHeader.messageType) {
 		return false;
 	}
 
@@ -222,8 +222,6 @@ bool Net_CheckSessionDetails(const ENetEvent &eEvent)
 		}
 	}
 #endif
-
-
 
 	return true;
 }
@@ -289,11 +287,10 @@ bool Net_UpdateSessionList(int *SelectedItem)
 	return changed;
 }
 
-int Net_Initialise()
+NetResult Net_Initialise()
 {
 	Con_PrintMessage("Initialising ENet networking");
 
-	// initialise ENet
 	if (enet_initialize() != 0)
 	{
 		Con_PrintError("Failed to initialise ENet networking");
@@ -316,18 +313,16 @@ int Net_Initialise()
 	return NET_OK;
 }
 
-int Net_Deinitialise()
+void Net_Deinitialise()
 {
 	Con_PrintMessage("Deinitialising ENet networking");
 
+	// let everyone know we're disconnecting and destroy the host
 	Net_Disconnect();
 
-	// de-initialise ENet
 	enet_deinitialize();
 
 	net_IsInitialised = false;
-
-	return NET_OK;
 }
 
 int Net_ConnectingToSession()
@@ -345,7 +340,7 @@ int Net_ConnectingToSession()
 		}
 		//DPlayClose();
 		AvP.Network = I_No_Network;	
-		return NET_FAIL;
+		return 0; // this shouldn't really be a failure as such
 	}
 
 	MinimalNetCollectMessages();
@@ -354,7 +349,7 @@ int Net_ConnectingToSession()
 	  	// we now have the game description , so we can go to the configuration menu
 	  	return AVPMENU_MULTIPLAYER_CONFIG_JOIN;
 	}
-	return NET_OK;
+	return 1;
 }
 
 int Net_ConnectingToLobbiedGame(char* playerName)
@@ -363,7 +358,7 @@ int Net_ConnectingToLobbiedGame(char* playerName)
 	return 0;
 }
 
-int Net_HostGame(char *playerName, char *sessionName, int species, int gamestyle, int level)
+NetResult Net_HostGame(char *playerName, char *sessionName, int species, uint16_t gameStyle, uint16_t level)
 {
 	if (!net_IsInitialised)
 	{
@@ -401,19 +396,19 @@ int Net_HostGame(char *playerName, char *sessionName, int species, int gamestyle
 			}
 
 			// create session
-			char *customLevelName = GetCustomMultiplayerLevelName(level, gamestyle);
+			char *customLevelName = GetCustomMultiplayerLevelName(level, gameStyle);
 			if (customLevelName[0])
 			{
 				// add the level name to the beginning of the session name
 				char name_buffer[100];
 				sprintf(name_buffer, "%s:%s", customLevelName, sessionName);
-				if ((Net_CreateSession(name_buffer, maxPlayers, kMultiplayerVersion, (gamestyle<<8) | 100)) != NET_OK) {
+				if ((Net_CreateSession(name_buffer, maxPlayers, kMultiplayerVersion, gameStyle, 100)) != NET_OK) {
 					return NET_FAIL;
 				}
 			}
 			else
 			{
-				if ((Net_CreateSession(sessionName, maxPlayers, kMultiplayerVersion, (gamestyle<<8) | level)) != NET_OK) {
+				if ((Net_CreateSession(sessionName, maxPlayers, kMultiplayerVersion, gameStyle, level)) != NET_OK) {
 					return NET_FAIL;
 				}
 			}
@@ -421,7 +416,7 @@ int Net_HostGame(char *playerName, char *sessionName, int species, int gamestyle
 		else
 		{
 			// for lobbied games we need to fill in the level number into the existing session description
-			if (Net_UpdateSessionDescForLobbiedGame(gamestyle, level) != NET_OK) {
+			if (Net_UpdateSessionDescForLobbiedGame(gameStyle, level) != NET_OK) {
 				return NET_FAIL;
 			}
 		}
@@ -429,7 +424,7 @@ int Net_HostGame(char *playerName, char *sessionName, int species, int gamestyle
 		// we're the host
 		AvP.Network = I_Host;
 
-		if (!Net_CreatePlayer(playerName, /*clanTag - ADDME!*/ NULL)) {
+		if (!Net_CreatePlayer(playerName)) {
 			return NET_FAIL;
 		}
 	}
@@ -445,7 +440,7 @@ int Net_HostGame(char *playerName, char *sessionName, int species, int gamestyle
 		thisClientPlayer.playerType = 0; // ??
 	}
 
-	InitAVPNetGameForHost(species, gamestyle, level);
+	InitAVPNetGameForHost(species, gameStyle, level);
 
 	Con_PrintMessage("Server running...");
 
@@ -484,7 +479,7 @@ void Net_Disconnect()
 	return;
 }
 
-int Net_JoinGame()
+uint32_t Net_JoinGame()
 {	
 	char buf[100];
 	sprintf(buf, "Net_JoinGame at %d\n", timeGetTime());
@@ -493,7 +488,7 @@ int Net_JoinGame()
 	if (!net_IsInitialised)
 	{
 		Con_PrintError("Networking is not initialisedr");
-		return NET_FAIL;
+		return 0;
 	}
 
 	// enumerate sessions
@@ -579,7 +574,7 @@ void Net_ConnectToAddress()
 		MessageHeader newHeader;
 		memcpy(&newHeader, &receiveBuffer[0], sizeof(MessageHeader));
 
-		if (newHeader.messageType == AVP_SESSIONDATA)
+		if (newHeader.messageType == AVP_SESSION_DATA)
 		{
 			// get the hosts ip address for later use
 			enet_address_get_host_ip(&eEvent.peer->address, SessionData[NumberOfSessionsFound].hostAddress, 16);
@@ -590,8 +585,8 @@ void Net_ConnectToAddress()
 			assert(sizeof(SessionDescription) == (size - kMessageHeaderSize));
 			memcpy(&tempSession, &receiveBuffer[kMessageHeaderSize], sizeof(SessionDescription));
 
-			int gamestyle = (tempSession.level >> 8) & 0xff;
-			int level = tempSession.level & 0xff;
+			uint16_t gameStyle = tempSession.gameStyle;
+			uint16_t level     = tempSession.level;
 
 			char sessionName[100];
 			char levelName[100];
@@ -606,7 +601,7 @@ void Net_ConnectToAddress()
 				if (colon_pos)
 				{
 					*colon_pos = 0;
-					strcpy(sessionName,colon_pos+1);
+					strcpy(sessionName, colon_pos+1);
 				}
 				else
 				{
@@ -640,7 +635,7 @@ void Net_ConnectToAddress()
 			else
 			{
 				// get the level number in our list of levels (assuming we have the level)
-				int local_index = GetLocalMultiplayerLevelIndex(level, levelName, gamestyle);
+				int local_index = GetLocalMultiplayerLevelIndex(level, levelName, gameStyle);
 
 				if (local_index < 0)
 				{
@@ -651,7 +646,7 @@ void Net_ConnectToAddress()
 				SessionData[NumberOfSessionsFound].levelIndex = local_index;
 			}
 /*
-			if (!Net_CreatePlayer("TestName", NULL))
+			if (!Net_CreatePlayer("TestName"))
 				return;
 */
 			InitAVPNetGameForJoin();
@@ -677,7 +672,7 @@ void Net_ServiceNetwork()
 	}
 }
 
-int Net_Receive(NetID &fromID, NetID &toID, uint8_t *messageData, size_t &dataSize)
+NetResult Net_Receive(NetID &fromID, NetID &toID, uint8_t *messageData, size_t &dataSize)
 {
 	// this function is called from a loop. only return something other than NET_OK when we've no more messages
 	bool isInternalOnly  = false;
@@ -900,7 +895,7 @@ int Net_Receive(NetID &fromID, NetID &toID, uint8_t *messageData, size_t &dataSi
 }
 
 // used to send a message to the server only
-int Net_SendSystemMessage(int messageType, int fromID, int toID, uint8_t *messageData, size_t dataSize)
+NetResult Net_SendSystemMessage(int messageType, int fromID, int toID, uint8_t *messageData, size_t dataSize)
 {
 	// create a new header and copy it into the packet buffer
 	MessageHeader newMessageHeader;
@@ -941,7 +936,7 @@ int Net_SendSystemMessage(int messageType, int fromID, int toID, uint8_t *messag
 	return NET_OK;
 }
 
-int Net_Send(int fromID, int toID, uint8_t *messageData, size_t dataSize)
+NetResult Net_Send(NetID fromID, NetID toID, uint8_t *messageData, size_t dataSize)
 {
 	if (messageData == NULL) 
 	{
@@ -982,7 +977,7 @@ int Net_Send(int fromID, int toID, uint8_t *messageData, size_t dataSize)
 	return NET_OK;
 }
 
-int Net_ConnectToSession(int sessionNumber, char *playerName)
+NetResult Net_ConnectToSession(int sessionNumber, char *playerName)
 {
 	OutputDebugString("Step 1: Connect To Session\n");
 
@@ -993,7 +988,7 @@ int Net_ConnectToSession(int sessionNumber, char *playerName)
 	OutputDebugString("Step 2: Connecting to host: ");
 	OutputDebugString(SessionData[sessionNumber].hostAddress);
 
-	if (!Net_CreatePlayer(playerName, NULL)) {
+	if (!Net_CreatePlayer(playerName)) {
 		return NET_FAIL;
 	}
 
@@ -1006,7 +1001,7 @@ int Net_ConnectToSession(int sessionNumber, char *playerName)
 }
 
 // this function should be called for the host only?
-static bool Net_CreatePlayer(char *playerName, char *clanTag)
+static bool Net_CreatePlayer(char *playerName)
 {
 	// get next available player ID
 	if (AvP.Network != I_Host)
@@ -1050,14 +1045,10 @@ static bool Net_CreatePlayer(char *playerName, char *clanTag)
 */
 static uint32_t Net_GetNextPlayerID()
 {
-	uint32_t val = timeGetTime();
-//	char buf[100];
-//	sprintf(buf, "giving player id: %d\n", val);
-//	OutputDebugString(buf);
-	return val;
+	return timeGetTime();
 }
 
-int Net_OpenSession(const char *hostName)
+NetResult Net_OpenSession(const char *hostName)
 {
 	OutputDebugString("Net_OpenSession()\n");
 	ENetEvent eEvent;
@@ -1117,8 +1108,6 @@ void Net_FindAvPSessions()
 	SessionDescription tempSession;
 	char sessionName[100] = "";
 	char levelName[100]   = "";
-	int gamestyle;
-	int level;
 	char buf[100];
 
 //	if (!searchStarted)
@@ -1183,7 +1172,7 @@ void Net_FindAvPSessions()
 			MessageHeader newHeader;
 			ws.GetBytes((uint8_t*)&newHeader, sizeof(newHeader));
 
-			if (AVP_SESSIONDATA == newHeader.messageType)
+			if (AVP_SESSION_DATA == newHeader.messageType)
 			{
 				Con_PrintDebugMessage("Net - server sent us session data");
 
@@ -1194,8 +1183,8 @@ void Net_FindAvPSessions()
 				assert(sizeof(tempSession) == (eEvent.packet->dataLength - kMessageHeaderSize));
 				ws.GetBytes((uint8_t*)&tempSession, sizeof(tempSession));
 
-				gamestyle = (tempSession.level >> 8) & 0xff;
-				level = tempSession.level  & 0xff;
+				uint16_t gameStyle = tempSession.gameStyle;
+				uint16_t level     = tempSession.level;
 
 				// split the session name up into its parts
 				if (level >= 100)
@@ -1241,7 +1230,7 @@ void Net_FindAvPSessions()
 				else
 				{
 					// get the level number in our list of levels (assuming we have the level)
-					int local_index = GetLocalMultiplayerLevelIndex(level, levelName, gamestyle);
+					int local_index = GetLocalMultiplayerLevelIndex(level, levelName, gameStyle);
 
 					if (local_index < 0)
 					{
@@ -1273,7 +1262,7 @@ void Net_FindAvPSessions()
 	enet_host_destroy(searchHost);
 }
 
-int Net_CreateSession(const char* sessionName, int maxPlayers, int version, int level)
+static NetResult Net_CreateSession(const char* sessionName, int maxPlayers, int version, uint16_t gameStyle, uint16_t level)
 {
 	memset(&netSession, 0, sizeof(netSession));
 
@@ -1282,6 +1271,7 @@ int Net_CreateSession(const char* sessionName, int maxPlayers, int version, int 
 	netSession.maxPlayers = maxPlayers;
 
 	netSession.version = version;
+	netSession.gameStyle = gameStyle;
 	netSession.level = level;
 
 	// should this be done here?
@@ -1297,7 +1287,7 @@ int Net_CreateSession(const char* sessionName, int maxPlayers, int version, int 
 	return NET_OK;
 }
 
-int Net_UpdateSessionDescForLobbiedGame(int gamestyle, int level)
+NetResult Net_UpdateSessionDescForLobbiedGame(uint16_t gameStyle, uint16_t level)
 {
 #if 0
 	NET_SESSIONDESC sessionDesc;

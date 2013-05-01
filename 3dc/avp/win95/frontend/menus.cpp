@@ -122,8 +122,6 @@ void PlayMenuMusic(void);
 void ThisFramesRenderingHasFinished(void);
 void EndMenuMusic(void);
 void PlayFMV(const char *filenamePtr);
-int Net_ConnectingToLobbiedGame(char* playerName);
-int Net_ConnectingToSession();
 int NumberOfAvailableLevels(I_PLAYER_TYPE playerID);
 int LevelMostLikelyToPlay(I_PLAYER_TYPE playerID);
 void Net_EnumConnections();
@@ -548,8 +546,9 @@ extern void AvP_UpdateMenus(void)
 	}
 	else if (AvPMenus.CurrentMenu == AVPMENU_MULTIPLAYER_JOINING)
 	{
-		//check status of joining game
-		int retval=0;
+		int retval = 0;
+
+		// check status of joining game
 		if (LobbiedGame)
 		{
 			retval = Net_ConnectingToLobbiedGame(MP_PlayerName);

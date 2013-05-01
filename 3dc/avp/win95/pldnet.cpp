@@ -694,7 +694,7 @@ static uint8_t msg[NET_MESSAGEBUFFERSIZE];
   ----------------------------------------------------------------------*/
 void MinimalNetCollectMessages(void)
 {
-	int res = NET_OK;
+	NetResult res = NET_OK;
 	NetID fromID = 0;
 	NetID toID   = 0;
 	size_t msgSize  = 0;
@@ -731,7 +731,6 @@ void MinimalNetCollectMessages(void)
 
 void NetCollectMessages(void)
 {
-	int res = NET_OK;
 	NetID fromID = 0;
 	NetID toID   = 0;
 	size_t msgSize = 0;
@@ -756,9 +755,11 @@ void NetCollectMessages(void)
 	{
 		Net_ServiceNetwork();
 
+		NetResult res = NET_OK;
+
 		while ((NET_OK == res) && AvPNetID)
 		{
-			res = Net_Receive(fromID, toID, &msg[0], msgSize);
+			res = Net_Receive(fromID, toID, msg, msgSize);
 
 			if (NET_OK == res)
 			{
@@ -767,11 +768,11 @@ void NetCollectMessages(void)
 				// process last message, if there is one
 				if (NET_SYSTEM_MESSAGE == fromID)
 				{
-					ProcessSystemMessage(&msg[0], msgSize);
+					ProcessSystemMessage(msg, msgSize);
 				}
 				else
 				{
-					ProcessGameMessage(fromID, &msg[0], msgSize);
+					ProcessGameMessage(fromID, msg, msgSize);
 				}
 			}
 		}
@@ -977,10 +978,6 @@ void NetCollectMessages(void)
   ----------------------------------------------------------------------*/
 static void ProcessSystemMessage(uint8_t *msgP, size_t msgSize)
 {
-	int systemMessageType;
-	char buf[100];
-	MessageHeader newMessageHeader;
-
 	/* currently, only the host deals with system mesages */
 	/* check for invalid parameters */
 	if ((msgSize == 0) || (msgP == NULL)) {
@@ -989,12 +986,12 @@ static void ProcessSystemMessage(uint8_t *msgP, size_t msgSize)
 
 	MemoryReadStream rs(msgP, msgSize);
 
+	MessageHeader newMessageHeader;
 	rs.GetBytes((uint8_t*)&newMessageHeader, sizeof(MessageHeader));
 
-	systemMessageType = newMessageHeader.toID;
 	OutputDebugString("we're going to process a system message\n");
 
-	switch (systemMessageType)
+	switch (newMessageHeader.toID)
 	{
 		case NET_ADDPLAYERTOGROUP:
 		{
@@ -1120,7 +1117,8 @@ static void ProcessSystemMessage(uint8_t *msgP, size_t msgSize)
 
 		default:
 		{
-			sprintf(buf, "invalid system message type: %d\n", systemMessageType);
+			char buf[100];
+			sprintf(buf, "invalid system message type: %d\n", newMessageHeader.toID);
 			OutputDebugString(buf);
 			/* invalid system message type: ignore */
 			break;
@@ -1765,8 +1763,7 @@ void NetSendMessages(void)
 	         netGameData.myGameState == NGS_Joining ||
 	         netGameData.myGameState == NGS_StartUp)
 	{
-		if (AvP.Network == I_Host)
-		{
+		if (AvP.Network == I_Host) {
 			AddNetMsg_GameDescription();
 		}
 	}
@@ -1774,15 +1771,13 @@ void NetSendMessages(void)
 	{
 		/* send our message buffer...
 		NB it should always be non-empty, and always less than the maximum message size */
-		int res = NET_OK;
 		bool clearSendBuffer = true;
-		int numBytes = numBytes = (int)(endSendBuffer - &sendBuffer[0]);
+		uintptr_t numBytes = (endSendBuffer - sendBuffer);
 
 		if (netGameData.myGameState == NGS_EndGameScreen || netGameData.myGameState == NGS_Joining)
 		{
 			//there may not be any messages while showing the end game screen
-			if (numBytes == 0/*DPEXT_HEADER_SIZE*/)
-			{
+			if (0 == numBytes) {
 				return;
 			}
 		}
@@ -1793,21 +1788,21 @@ void NetSendMessages(void)
 		{
 			if (AvPNetID)
 			{
-				res = Net_Send(AvPNetID, NET_ID_ALLPLAYERS, &sendBuffer[0], numBytes);
+				NetResult res = Net_Send(AvPNetID, NET_ID_ALLPLAYERS, &sendBuffer[0], numBytes);
 
 				if (res != NET_OK)
 				{
-					//we have some problem sending...
+					// we have some problem sending...
 					switch (res)
 					{
 						case NET_FAIL:
 							OutputDebugString("some problem sending\n");
-
+							break;
 						case NET_ERR_BUSY :
 
 							/*
-							failed to send this frame , try preserving the contents of the send buffer ,
-							unless it is getting to full.
+								failed to send this frame , try preserving the contents of the send buffer,
+								unless it is getting to full.
 							*/
 							if (numBytes < NET_MESSAGEBUFFERSIZE / 2)
 							{
@@ -1848,8 +1843,7 @@ void NetSendMessages(void)
 
 		/* re-initialise the send message buffer */
 		/*(unless the send failed because it was to busy)*/
-		if (clearSendBuffer)
-		{
+		if (clearSendBuffer) {
 			InitialiseSendMessageBuffer();
 		}
 
@@ -5828,7 +5822,7 @@ static void ProcessNetMsg_GameDescription(NETMESSAGE_GAMEDESCRIPTION *messagePtr
 				// bjd - FIXME
 				if (messagePtr->players[i].playerId)
 				{
-					Net_SendSystemMessage(AVP_GETPLAYERNAME, AvPNetID, messagePtr->players[i].playerId, NULL, 0);
+					Net_SendSystemMessage(AVP_REQUEST_PLAYER_NAME, AvPNetID, messagePtr->players[i].playerId, NULL, 0);
 					strncpy(netGameData.playerData[i].name, "APLAYER", NET_PLAYERNAMELENGTH - 1);
 					netGameData.playerData[i].name[NET_PLAYERNAMELENGTH - 1] = '\0';
 					//AddNetMsg_PlayerGetName(messagePtr->players[i].playerId); // pass request through internal message system?

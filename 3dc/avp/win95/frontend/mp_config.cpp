@@ -816,7 +816,7 @@ char* GetCustomMultiplayerLevelName(int index, int gameType)
 	char* bracket_pos = strrchr(return_string,'(');
 	if (bracket_pos)
 	{
-		bracket_pos --; //to get back to the space
+		bracket_pos--; //to get back to the space
 		*bracket_pos = 0;
 	}
 

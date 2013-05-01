@@ -33,14 +33,14 @@
 	std::string logFilename = "avp_log.txt";
 #endif
 
-std::string lastError;
+static std::string lastError;
 
 const std::string& GetLastErrorMessage()
 {
 	return lastError;
 }
 
-void ClearLog() 
+void ClearLog()
 {
 	std::string filePath(GetSaveFolderPath());
 	filePath += logFilename;

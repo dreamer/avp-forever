@@ -30,18 +30,34 @@
 #include "equipment.h"
 #include "pldnet.h"
 
-int Net_Initialise();
-int Net_Deinitialise();
-int Net_ConnectingToSession();
-int Net_Send(int fromID, int toID, uint8_t *messageData, size_t dataSize);
-int Net_Receive(NetID &fromID, NetID &toID, uint8_t *messageData, size_t &dataSize);
-int Net_SendSystemMessage(int messageType, int fromID, int toID, uint8_t *messageData, size_t dataSize);
-int Net_InitLobbiedGame();
-void Net_ServiceNetwork();
-int Net_OpenSession(const char *hostName);
-int Net_JoinGame();
-int Net_ConnectToSession(int sessionNumber, char *playerName);
-int Net_HostGame(char *playerName, char *sessionName, int species, int gamestyle, int level);
+enum NetResult
+{
+	NET_OK,
+	NET_FAIL,
+	NET_NO_MESSAGES,
+	NET_ERR_BUSY,
+	NET_ERR_CONNECTIONLOST,
+	NET_ERR_INVALIDPARAMS,
+	NET_ERR_INVALIDPLAYER,
+	NET_ERR_NOTLOGGEDIN,
+	NET_ERR_SENDTOOBIG,
+	NET_ERR_BUFFERTOOSMALL
+};
+
+NetResult Net_Initialise();
+void      Net_Deinitialise();
+void      Net_Disconnect();
+int       Net_ConnectingToSession();
+NetResult Net_Send(NetID fromID, NetID toID, uint8_t *messageData, size_t dataSize);
+NetResult Net_Receive(NetID &fromID, NetID &toID, uint8_t *messageData, size_t &dataSize);
+NetResult Net_SendSystemMessage(int messageType, int fromID, int toID, uint8_t *messageData, size_t dataSize);
+int       Net_InitLobbiedGame();
+void      Net_ServiceNetwork();
+NetResult Net_OpenSession(const char *hostName);
+uint32_t  Net_JoinGame();
+NetResult Net_ConnectToSession(int sessionNumber, char *playerName);
+NetResult Net_HostGame(char *playerName, char *sessionName, int species, uint16_t gameStyle, uint16_t level);
+int       Net_ConnectingToLobbiedGame(char* playerName);
 
 extern uint32_t AvPNetID;
 
@@ -70,9 +86,6 @@ enum eMessageType
 
 enum
 {
-	NET_OK,
-	NET_FAIL,
-	NET_NO_MESSAGES,
 	NET_CREATEPLAYERORGROUP,
 	NET_DESTROYPLAYERORGROUP,
 	NET_ADDPLAYERTOGROUP,
@@ -95,13 +108,6 @@ enum
 	NET_SYSTEM_MESSAGE,
 	NET_ID_ALLPLAYERS,
 	NET_ID_SERVERPLAYER,
-	NET_ERR_BUSY,
-	NET_ERR_CONNECTIONLOST,
-	NET_ERR_INVALIDPARAMS,
-	NET_ERR_INVALIDPLAYER,
-	NET_ERR_NOTLOGGEDIN,
-	NET_ERR_SENDTOOBIG,
-	NET_ERR_BUFFERTOOSMALL
 };
 
 const int kBroadcastID = 255;
@@ -115,11 +121,11 @@ enum
 	AVP_REQUEST_SERVER_INFO,
 	AVP_REQUEST_SESSION_INFO,
 	AVP_SYSTEM_MESSAGE,
-	AVP_SESSIONDATA,
+	AVP_SESSION_DATA,
 	AVP_GAMEDATA = 666,
 	AVP_PING,
-	AVP_GETPLAYERNAME,
-	AVP_SENTPLAYERNAME
+	AVP_REQUEST_PLAYER_NAME,
+	AVP_RECEIVED_PLAYER_NAME
 };
 
 #pragma pack(1)
@@ -131,7 +137,8 @@ struct SessionDescription
 	uint8_t		maxPlayers;
 	uint8_t		currentPlayers;
 	uint8_t		version;
-	uint32_t	level;
+	uint16_t	gameStyle;
+	uint16_t    level;
 	char		sessionName[kSessionNameSize];
 };
 
