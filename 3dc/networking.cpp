@@ -31,51 +31,15 @@
 #include "mp_config.h"
 #include "networking.h"
 #include <assert.h>
-#include <queue>
 #include "MemoryStream.h"
 
-struct Message
-{
-	eMessageType type;
-};
-
-std::queue<Message> messageQueue;
-/*
-bool Net_QueueMessage()
-{
-	messageQueue.push();
-
-	return true;
-}
-
-void Net_ProcessQueue()
-{
-	if (!messageQueue.size())
-		return; // no messages to process
-
-	for (size_t i = 0; i < messageQueue.size(); ++i)
-	{
-		// get first-in message
-		Message currentMessage = messageQueue.front();
-
-		switch (currentMessage.type)
-		{
-
-		}
-	}
-}
-*/
-
-
-bool running = false;
-
-static ENetHost		*host = NULL;
+static ENetHost *host = NULL;
 static bool isHost = false;
 
-static ENetAddress	ServerAddress;
-static ENetAddress	ClientAddress;
-static ENetAddress	BroadcastAddress;
-static ENetPeer		*ServerPeer = NULL;
+static ENetAddress  ServerAddress;
+static ENetAddress  ClientAddress;
+static ENetAddress  BroadcastAddress;
+static ENetPeer     *ServerPeer = NULL;
 static bool net_IsInitialised = false;
 
 extern void NewOnScreenMessage(char *messagePtr);
@@ -339,15 +303,15 @@ int Net_ConnectingToSession()
 			AvPNetID = 0;
 		}
 		//DPlayClose();
-		AvP.Network = I_No_Network;	
-		return 0; // this shouldn't really be a failure as such
+		AvP.Network = I_No_Network;
+		return 0;
 	}
 
 	MinimalNetCollectMessages();
 	if (!netGameData.needGameDescription)
 	{
-	  	// we now have the game description , so we can go to the configuration menu
-	  	return AVPMENU_MULTIPLAYER_CONFIG_JOIN;
+		// we now have the game description , so we can go to the configuration menu
+		return AVPMENU_MULTIPLAYER_CONFIG_JOIN;
 	}
 	return 1;
 }
@@ -384,7 +348,7 @@ NetResult Net_HostGame(char *playerName, char *sessionName, int species, uint16_
 			ServerAddress.host = ENET_HOST_ANY;
 			ServerAddress.port = netPortNumber;
 
-			host = enet_host_create(&ServerAddress,    // the address to bind the server host to.
+			host = enet_host_create(&ServerAddress,      // the address to bind the server host to.
 								32,                      // allow up to 32 clients and/or outgoing connections.
 								0,                       // channel limit.
 								incomingBandwidth,       // assume any amount of incoming bandwidth.
@@ -531,7 +495,7 @@ void Net_ConnectToAddress()
 	connectionAddress.port = (uint16_t)Util::StringToInt(addressString.substr(colonPos + 1));
 
 	// try connect
-	host = enet_host_create(NULL,         // create a client host
+	host = enet_host_create(NULL,           // create a client host
 					1,                      // only allow 1 outgoing connection
 					0,                      // channel limit
 					incomingBandwidth,      // 57600 / 8 - 56K modem with 56 Kbps downstream bandwidth
@@ -680,7 +644,7 @@ NetResult Net_Receive(NetID &fromID, NetID &toID, uint8_t *messageData, size_t &
 
 	do
 	{
-		isInternalOnly = false;	// Default.
+		isInternalOnly = false; // Default.
 
 		ENetEvent eEvent;
 
@@ -938,7 +902,7 @@ NetResult Net_SendSystemMessage(int messageType, int fromID, int toID, uint8_t *
 
 NetResult Net_Send(NetID fromID, NetID toID, uint8_t *messageData, size_t dataSize)
 {
-	if (messageData == NULL) 
+	if (messageData == NULL)
 	{
 		Con_PrintError("Net_Send - messageData was NULL");
 		return NET_FAIL;
@@ -972,7 +936,7 @@ NetResult Net_Send(NetID fromID, NetID toID, uint8_t *messageData, size_t dataSi
 		//enet_peer_send(
 	}
 
- 	enet_host_flush(host);
+	enet_host_flush(host);
 
 	return NET_OK;
 }
@@ -1038,10 +1002,10 @@ static bool Net_CreatePlayer(char *playerName)
 	return true;
 }
 
-/*	
+/*
 	just grab the value from timeGetTime as the player id
-	it's probably fairly safe to assume two players will never 
-	get the same values for this... 
+	it's probably fairly safe to assume two players will never
+	get the same values for this...
 */
 static uint32_t Net_GetNextPlayerID()
 {
@@ -1057,17 +1021,17 @@ NetResult Net_OpenSession(const char *hostName)
 	ServerAddress.port = netPortNumber;
 
 	// create Enet client
-	host = enet_host_create(NULL,     // create a client host
-                1,                      // only allow 1 outgoing connection
+	host = enet_host_create(NULL,       // create a client host
+				1,                      // only allow 1 outgoing connection
 				0,                      // channel limit
-                incomingBandwidth,      // 57600 / 8 /* 56K modem with 56 Kbps downstream bandwidth
-                outgoingBandwidth);     // 14400 / 8 /* 56K modem with 14 Kbps upstream bandwidth
+				incomingBandwidth,      // 57600 / 8 /* 56K modem with 56 Kbps downstream bandwidth
+				outgoingBandwidth);     // 14400 / 8 /* 56K modem with 14 Kbps upstream bandwidth
 
 	if (host == NULL)
-    {
+	{
 		Con_PrintError("Net_OpenSession - Failed to create Enet client");
 		return NET_FAIL;
-    }
+	}
 	
 	ServerPeer = enet_host_connect(host, &ServerAddress, 2, 0);
 	if (ServerPeer == NULL)
@@ -1079,7 +1043,7 @@ NetResult Net_OpenSession(const char *hostName)
 	/* see if we actually connected */
 	/* Wait up to 3 seconds for the connection attempt to succeed. */
 	if ((enet_host_service (host, &eEvent, 3000) > 0) && (eEvent.type == ENET_EVENT_TYPE_CONNECT))
-	{	
+	{
 		Con_PrintDebugMessage("Net_OpenSession - we connected to server!");
 	}
 	else

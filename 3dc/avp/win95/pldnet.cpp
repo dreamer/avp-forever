@@ -706,7 +706,7 @@ void MinimalNetCollectMessages(void)
 
 		while ((NET_OK == res) && AvPNetID)
 		{
-			res = Net_Receive(fromID, toID, &msg[0], msgSize);
+			res = Net_Receive(fromID, toID, msg, msgSize);
 
 			MessageHeader newHeader;
 			MemoryReadStream rs(msg, msgSize);
@@ -719,10 +719,10 @@ void MinimalNetCollectMessages(void)
 			{
 				// process last message, if there is one
 				if (NET_SYSTEM_MESSAGE == fromID) {
-					ProcessSystemMessage(&msg[0], msgSize);
+					ProcessSystemMessage(msg, msgSize);
 				}
 				else {
-					ProcessGameMessage(fromID, &msg[0], msgSize);
+					ProcessGameMessage(fromID, msg, msgSize);
 				}
 			}
 		}
@@ -766,12 +766,10 @@ void NetCollectMessages(void)
 				numMessagesReceived++;
 
 				// process last message, if there is one
-				if (NET_SYSTEM_MESSAGE == fromID)
-				{
+				if (NET_SYSTEM_MESSAGE == fromID) {
 					ProcessSystemMessage(msg, msgSize);
 				}
-				else
-				{
+				else {
 					ProcessGameMessage(fromID, msg, msgSize);
 				}
 			}

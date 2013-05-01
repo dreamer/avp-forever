@@ -77,12 +77,14 @@ const int kMultiplayerVersion = 101; // bjd - my version, not directplay compati
 struct MessageHeader; // forward declare the structure
 extern const uint32_t kMessageHeaderSize;
 
+/*
 // system messages
 enum eMessageType
 {
 	nRequestSessionDetails,
 	nSendConnectRequest
 };
+*/
 
 enum
 {
