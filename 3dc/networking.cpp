@@ -155,6 +155,7 @@ bool Net_SessionPoll()
 }
 #endif
 
+#if 0
 bool Net_CheckSessionDetails(const ENetEvent &eEvent)
 {
 	assert(sizeof(SessionDescription) == (eEvent.packet->dataLength - kMessageHeaderSize));
@@ -189,6 +190,7 @@ bool Net_CheckSessionDetails(const ENetEvent &eEvent)
 
 	return true;
 }
+#endif
 
 bool Net_UpdateSessionList(int *SelectedItem)
 {
@@ -484,7 +486,6 @@ void Net_ConnectToAddress()
 	static ENetAddress connectionAddress;
 	size_t colonPos = 0;
 	ENetEvent eEvent;
-	uint8_t receiveBuffer[3072];
 
 	colonPos = addressString.find(":");
 	tempString = addressString.substr(0, colonPos);
@@ -531,12 +532,10 @@ void Net_ConnectToAddress()
 	if ((enet_host_service (host, &eEvent, 3000) > 0) && (eEvent.type == ENET_EVENT_TYPE_RECEIVE))
 	{
 		Con_PrintDebugMessage("Net_ConnectToAddress - we got something from the server!");
-		memcpy(&receiveBuffer[0], static_cast<uint8_t*> (eEvent.packet->data), eEvent.packet->dataLength);
-		size_t size = eEvent.packet->dataLength;
-		enet_packet_destroy(eEvent.packet);
+		MemoryReadStream rs(eEvent.packet->data, eEvent.packet->dataLength);
 
 		MessageHeader newHeader;
-		memcpy(&newHeader, &receiveBuffer[0], sizeof(MessageHeader));
+		rs.GetBytes((uint8_t*)&newHeader, kMessageHeaderSize);
 
 		if (newHeader.messageType == AVP_SESSION_DATA)
 		{
@@ -546,8 +545,7 @@ void Net_ConnectToAddress()
 			SessionDescription tempSession;
 
 			// grab the session description struct
-			assert(sizeof(SessionDescription) == (size - kMessageHeaderSize));
-			memcpy(&tempSession, &receiveBuffer[kMessageHeaderSize], sizeof(SessionDescription));
+			rs.GetBytes((uint8_t*)&tempSession, sizeof(SessionDescription));
 
 			uint16_t gameStyle = tempSession.gameStyle;
 			uint16_t level     = tempSession.level;
@@ -618,6 +616,8 @@ void Net_ConnectToAddress()
 			netGameData.levelNumber = SessionData[NumberOfSessionsFound].levelIndex;
 			netGameData.joiningGameStatus = JOINNETGAME_WAITFORSTART;
 		}
+
+		enet_packet_destroy(eEvent.packet);
 	}
 }
 
@@ -1068,7 +1068,6 @@ void Net_FindAvPSessions()
 
 	ENetPeer *Peer = NULL;
 	ENetEvent eEvent;
-//	uint8_t receiveBuffer[NET_MESSAGEBUFFERSIZE]; // can reduce this in size?
 	SessionDescription tempSession;
 	char sessionName[100] = "";
 	char levelName[100]   = "";
