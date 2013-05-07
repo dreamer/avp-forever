@@ -23,7 +23,7 @@
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "db.h"
-#include <windows.h>
+#include "os_header.h"
 #include <math.h>
 #include <new>
 #include "FileStream.h"

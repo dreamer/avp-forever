@@ -44,7 +44,7 @@ static bool net_IsInitialised = false;
 
 extern void NewOnScreenMessage(char *messagePtr);
 
-uint32_t AvPNetID = 0;
+NetID AvPNetID = 0; // rename this
 PlayerDetails thisClientPlayer;
 
 // used to hold message data
@@ -64,7 +64,7 @@ extern char* GetCustomMultiplayerLevelName(int index, int gameType);
 extern unsigned char DebouncedKeyboardInput[];
 
 static bool Net_CreatePlayer(char *playerName);
-uint32_t Net_GetNextPlayerID();
+NetID Net_GetNextPlayerID();
 void Net_FindAvPSessions();
 void Net_ConnectToAddress();
 
@@ -402,8 +402,8 @@ NetResult Net_HostGame(char *playerName, char *sessionName, int species, uint16_
 		memset(&thisClientPlayer, 0, sizeof(PlayerDetails));
 		strncpy(thisClientPlayer.name, playerName, kPlayerNameSize-1);
 		thisClientPlayer.name[kPlayerNameSize-1] = '\0';
-		thisClientPlayer.playerID   = AvPNetID;
-		thisClientPlayer.playerType = 0; // ??
+		thisClientPlayer.ID   = AvPNetID;
+		thisClientPlayer.type = 0; // ??
 	}
 
 	InitAVPNetGameForHost(species, gameStyle, level);
@@ -419,9 +419,8 @@ void Net_Disconnect()
 
 	// need to let everyone know we're disconnecting
 	DestroyPlayerOrGroup destroyPlayer;
-	destroyPlayer.ID = AvPNetID;
-	destroyPlayer.playerType = NET_PLAYERTYPE_PLAYER;
-	destroyPlayer.type = 0; // ?
+	destroyPlayer.ID   = AvPNetID;
+	destroyPlayer.type = NET_PLAYERTYPE_PLAYER;
 
 	if (AvP.Network != I_Host) // don't do this if this is the host
 	{
@@ -859,7 +858,7 @@ NetResult Net_Receive(NetID &fromID, NetID &toID, uint8_t *messageData, size_t &
 }
 
 // used to send a message to the server only
-NetResult Net_SendSystemMessage(int messageType, int fromID, int toID, uint8_t *messageData, size_t dataSize)
+NetResult Net_SendSystemMessage(int messageType, NetID fromID, NetID toID, uint8_t *messageData, size_t dataSize)
 {
 	// create a new header and copy it into the packet buffer
 	MessageHeader newMessageHeader;
@@ -945,7 +944,40 @@ NetResult Net_ConnectToSession(int sessionNumber, char *playerName)
 {
 	OutputDebugString("Step 1: Connect To Session\n");
 
-	if (Net_OpenSession(SessionData[sessionNumber].hostAddress) != NET_OK) {
+	enet_address_set_host(&ServerAddress, SessionData[sessionNumber].hostAddress);
+	ServerAddress.port = netPortNumber;
+
+	// create Enet client
+	host = enet_host_create(NULL,       // create a client host
+				1,                      // only allow 1 outgoing connection
+				0,                      // channel limit
+				incomingBandwidth,      // 57600 / 8 /* 56K modem with 56 Kbps downstream bandwidth
+				outgoingBandwidth);     // 14400 / 8 /* 56K modem with 14 Kbps upstream bandwidth
+
+	if (host == NULL)
+	{
+		Con_PrintError("Net_OpenSession - Failed to create Enet client");
+		return NET_FAIL;
+	}
+	
+	ServerPeer = enet_host_connect(host, &ServerAddress, 2, 0);
+	if (ServerPeer == NULL)
+	{
+		Con_PrintError("Net_OpenSession - Failed to init connection to server host");
+		return NET_FAIL;
+	}
+
+	ENetEvent eEvent;
+
+	/* see if we actually connected */
+	/* Wait up to 3 seconds for the connection attempt to succeed. */
+	if ((enet_host_service (host, &eEvent, 3000) > 0) && (eEvent.type == ENET_EVENT_TYPE_CONNECT))
+	{
+		Con_PrintDebugMessage("Net_OpenSession - we connected to server!");
+	}
+	else
+	{
+		Con_PrintError("Net_OpenSession - failed to connect to server!\n");
 		return NET_FAIL;
 	}
 
@@ -980,8 +1012,8 @@ static bool Net_CreatePlayer(char *playerName)
 	// Initialise static name structure to refer to the names:
 	memset(&thisClientPlayer, 0, sizeof(PlayerDetails));
 	strncpy(thisClientPlayer.name, playerName, kPlayerNameSize);
-	thisClientPlayer.playerType = NET_PLAYERTYPE_PLAYER;
-	thisClientPlayer.playerID	= AvPNetID;
+	thisClientPlayer.ID	  = AvPNetID;
+	thisClientPlayer.type = NET_PLAYERTYPE_PLAYER;
 
 	// do we need to do this as host? (call AddPlayer()..)
 	if (AvP.Network != I_Host)
@@ -1007,52 +1039,9 @@ static bool Net_CreatePlayer(char *playerName)
 	it's probably fairly safe to assume two players will never
 	get the same values for this...
 */
-static uint32_t Net_GetNextPlayerID()
+static NetID Net_GetNextPlayerID()
 {
-	return timeGetTime();
-}
-
-NetResult Net_OpenSession(const char *hostName)
-{
-	OutputDebugString("Net_OpenSession()\n");
-	ENetEvent eEvent;
-
-	enet_address_set_host(&ServerAddress, hostName);
-	ServerAddress.port = netPortNumber;
-
-	// create Enet client
-	host = enet_host_create(NULL,       // create a client host
-				1,                      // only allow 1 outgoing connection
-				0,                      // channel limit
-				incomingBandwidth,      // 57600 / 8 /* 56K modem with 56 Kbps downstream bandwidth
-				outgoingBandwidth);     // 14400 / 8 /* 56K modem with 14 Kbps upstream bandwidth
-
-	if (host == NULL)
-	{
-		Con_PrintError("Net_OpenSession - Failed to create Enet client");
-		return NET_FAIL;
-	}
-	
-	ServerPeer = enet_host_connect(host, &ServerAddress, 2, 0);
-	if (ServerPeer == NULL)
-	{
-		Con_PrintError("Net_OpenSession - Failed to init connection to server host");
-		return NET_FAIL;
-	}
-
-	/* see if we actually connected */
-	/* Wait up to 3 seconds for the connection attempt to succeed. */
-	if ((enet_host_service (host, &eEvent, 3000) > 0) && (eEvent.type == ENET_EVENT_TYPE_CONNECT))
-	{
-		Con_PrintDebugMessage("Net_OpenSession - we connected to server!");
-	}
-	else
-	{
-		Con_PrintError("Net_OpenSession - failed to connect to server!\n");
-		return NET_FAIL;
-	}
-
-	return NET_OK;
+	return (NetID)timeGetTime();
 }
 
 // try to make this re-entrant

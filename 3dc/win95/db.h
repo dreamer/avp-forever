@@ -69,16 +69,7 @@
 
 /* I N C L U D E D S ************************************************** */
 #ifndef DB_NOWINDOWS
-	#ifdef WIN32
-		#include <windows.h>
-	#endif
-	#ifdef _XBOX
-		#include "xbox_defines.h"
-	#endif
-#endif
-
-#ifdef _XBOX
-	#include <xtl.h>
+	#include "os_header.h"
 #endif
 
 /* ******************************************************************** *

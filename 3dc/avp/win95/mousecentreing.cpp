@@ -1,7 +1,7 @@
 
 // only for windows
 #ifdef WIN32
-#include <windows.h>
+#include "os_header.h"
 #include <process.h>
 
 extern bool bActive;

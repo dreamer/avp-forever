@@ -50,22 +50,21 @@ void      Net_Disconnect();
 int       Net_ConnectingToSession();
 NetResult Net_Send(NetID fromID, NetID toID, uint8_t *messageData, size_t dataSize);
 NetResult Net_Receive(NetID &fromID, NetID &toID, uint8_t *messageData, size_t &dataSize);
-NetResult Net_SendSystemMessage(int messageType, int fromID, int toID, uint8_t *messageData, size_t dataSize);
+NetResult Net_SendSystemMessage(int messageType, NetID fromID, NetID toID, uint8_t *messageData, size_t dataSize);
 int       Net_InitLobbiedGame();
 void      Net_ServiceNetwork();
-NetResult Net_OpenSession(const char *hostName);
 uint32_t  Net_JoinGame();
 NetResult Net_ConnectToSession(int sessionNumber, char *playerName);
 NetResult Net_HostGame(char *playerName, char *sessionName, int species, uint16_t gameStyle, uint16_t level);
 int       Net_ConnectingToLobbiedGame(char* playerName);
 
-extern uint32_t AvPNetID;
+extern NetID AvPNetID;
 
 struct MessageHeader
 {
 	uint32_t messageType;
-	uint32_t fromID;
-	uint32_t toID;
+	NetID fromID;
+	NetID toID;
 };
 
 /*
@@ -76,15 +75,6 @@ const int kMultiplayerVersion = 101; // bjd - my version, not directplay compati
 
 struct MessageHeader; // forward declare the structure
 extern const uint32_t kMessageHeaderSize;
-
-/*
-// system messages
-enum eMessageType
-{
-	nRequestSessionDetails,
-	nSendConnectRequest
-};
-*/
 
 enum
 {
@@ -146,16 +136,15 @@ struct SessionDescription
 
 struct PlayerDetails
 {
-	uint32_t	playerID;
-	uint8_t		playerType;
-	char		name[kPlayerNameSize];
+	NetID	ID;
+	uint8_t	type;
+	char	name[kPlayerNameSize];
 };
 
 struct DestroyPlayerOrGroup
 {
-	uint32_t	type;
-	uint32_t	ID;
-	uint32_t	playerType;
+	NetID	ID;
+	uint8_t	type;
 };
 
 #pragma pack()

@@ -28,9 +28,7 @@
 
 /* Windows includes. Actually internal, but here to allow pre-compilation. */
 #ifndef DB_NOWINDOWS
-#ifdef WIN32
-	#include <windows.h>
-#endif
+#include "os_header.h"
 #endif
 #include "db.h"	 /* Contains most off the interface. */
 

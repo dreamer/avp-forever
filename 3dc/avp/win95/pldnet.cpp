@@ -1012,7 +1012,7 @@ static void ProcessSystemMessage(uint8_t *msgP, size_t msgSize)
 
 				// FIXME if (DPPLAYERTYPE_PLAYER == newPlayer.playerType)
 
-				AddPlayerToGame(newPlayer.playerID, newPlayer.name);
+				AddPlayerToGame(newPlayer.ID, newPlayer.name);
 			}
 
 			LogNetInfo("system message:  NET_CREATEPLAYERORGROUP \n");
@@ -1042,7 +1042,7 @@ static void ProcessSystemMessage(uint8_t *msgP, size_t msgSize)
 				DestroyPlayerOrGroup destroyMessage;
 				rs.GetBytes((uint8_t*)&destroyMessage, sizeof(DestroyPlayerOrGroup));
 
-				if (destroyMessage.playerType == NET_PLAYERTYPE_PLAYER)
+				if (destroyMessage.type == NET_PLAYERTYPE_PLAYER)
 				{
 					OutputDebugString("going to drop a player as they disconnected\n");
 					RemovePlayerFromGame(destroyMessage.ID);

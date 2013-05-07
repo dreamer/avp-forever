@@ -25,6 +25,7 @@
 #include "MemoryStream.h"
 #include <stdlib.h>
 #include <cstring>
+#include <algorithm>
 
 MemoryReadStream::MemoryReadStream(uint8_t *buffer, size_t size)
 {
@@ -106,7 +107,7 @@ uint64_t MemoryReadStream::GetUint64BE()
 
 uint8_t MemoryReadStream::PeekByte()
 {
-	return (uint8_t)*_currentOffset;
+	return *_currentOffset;
 }
 
 size_t MemoryReadStream::GetBytes(uint8_t *buffer, size_t nBytes)
@@ -115,9 +116,11 @@ size_t MemoryReadStream::GetBytes(uint8_t *buffer, size_t nBytes)
 		return 0;
 	}
 
-	memcpy(buffer, _currentOffset, nBytes);
-	_currentOffset += nBytes;
-	return nBytes;
+	size_t count = std::min((size_t)(_end - _currentOffset), nBytes);
+
+	memcpy(_currentOffset, buffer, count);
+	_currentOffset += count;
+	return count;
 }
 
 // Write stream implementation
@@ -189,7 +192,9 @@ size_t MemoryWriteStream::PutBytes(uint8_t *buffer, size_t nBytes)
 		return 0;
 	}
 
-	memcpy(_currentOffset, buffer, nBytes);
-	_currentOffset += nBytes;
-	return nBytes;
+	size_t count = std::min((size_t)(_end - _currentOffset), nBytes);
+
+	memcpy(_currentOffset, buffer, count);
+	_currentOffset += count;
+	return count;
 }
