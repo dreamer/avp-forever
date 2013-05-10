@@ -47,6 +47,7 @@ enum NetResult
 NetResult Net_Initialise();
 void      Net_Deinitialise();
 void      Net_Disconnect();
+void      Net_FindAvPSessions();
 int       Net_ConnectingToSession();
 NetResult Net_Send(NetID fromID, NetID toID, uint8_t *messageData, size_t dataSize);
 NetResult Net_Receive(NetID &fromID, NetID &toID, uint8_t *messageData, size_t &dataSize);
@@ -56,7 +57,7 @@ void      Net_ServiceNetwork();
 uint32_t  Net_JoinGame();
 NetResult Net_ConnectToSession(int sessionNumber, char *playerName);
 NetResult Net_HostGame(char *playerName, char *sessionName, int species, uint16_t gameStyle, uint16_t level);
-int       Net_ConnectingToLobbiedGame(char* playerName);
+int       Net_ConnectingToLobbiedGame(char *playerName);
 
 extern NetID AvPNetID;
 
@@ -126,11 +127,11 @@ struct SessionDescription
 {
 	GUID		guidInstance;
 	GUID		guidApplication;
-	uint8_t		maxPlayers;
-	uint8_t		currentPlayers;
-	uint8_t		version;
+	uint32_t	version;
 	uint16_t	gameStyle;
 	uint16_t    level;
+	uint8_t		nPlayers;
+	uint8_t		maxPlayers;
 	char		sessionName[kSessionNameSize];
 };
 

@@ -852,6 +852,9 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 		}
 		case AVPMENU_MULTIPLAYERSELECTSESSION:
 		{
+			// send broadcast message to find servers
+			Net_FindAvPSessions();
+
 			if (previousMenuID != AVPMENU_MULTIPLAYERSELECTSESSION)
 			{
 				// save ip address (if it has been set)

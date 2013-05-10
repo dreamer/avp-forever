@@ -60,7 +60,7 @@ extern void MinimalNetCollectMessages(void);
 extern void InitAVPNetGameForHost(int species, int gamestyle, int level);
 extern void InitAVPNetGameForJoin(void);
 extern int DetermineAvailableCharacterTypes(bool ConsiderUsedCharacters);
-extern char* GetCustomMultiplayerLevelName(int index, int gameType);
+extern char *GetCustomMultiplayerLevelName(int index, int gameType);
 extern unsigned char DebouncedKeyboardInput[];
 
 static bool Net_CreatePlayer(char *playerName);
@@ -68,7 +68,7 @@ NetID Net_GetNextPlayerID();
 void Net_FindAvPSessions();
 void Net_ConnectToAddress();
 
-static NetResult Net_CreateSession(const char* sessionName, int maxPlayers, int version, uint16_t gameStyle, uint16_t level);
+static NetResult Net_CreateSession(const char *sessionName, int maxPlayers, int version, uint16_t gameStyle, uint16_t level);
 static NetResult Net_UpdateSessionDescForLobbiedGame(uint16_t gameStyle, uint16_t level);
 
 /* KJL 14:58:18 03/07/98 - AvP's Guid */
@@ -76,6 +76,13 @@ static NetResult Net_UpdateSessionDescForLobbiedGame(uint16_t gameStyle, uint16_
 static const GUID AvPGuid = { 0x379cca80, 0x8bdd, 0x11d0, { 0xa0, 0x78, 0x0, 0x40, 0x95, 0xe1, 0x6e, 0xa5 } };
 
 const uint32_t kMessageHeaderSize = sizeof(MessageHeader);
+
+/* Some notes on how DirectPlay worked (and what AvP might be expecting)
+
+	System messages are sent to ALL players
+
+
+*/
 
 #if 0
 bool Net_SessionPoll()
@@ -318,7 +325,7 @@ int Net_ConnectingToSession()
 	return 1;
 }
 
-int Net_ConnectingToLobbiedGame(char* playerName)
+int Net_ConnectingToLobbiedGame(char *playerName)
 {
 	OutputDebugString("Net_ConnectingToLobbiedGame\n");
 	return 0;
@@ -575,11 +582,11 @@ void Net_ConnectToAddress()
 				strcpy(sessionName, tempSession.sessionName);
 			}
 
-			sprintf(SessionData[NumberOfSessionsFound].Name,"%s (%d/%d)", sessionName, tempSession.currentPlayers, tempSession.maxPlayers);
+			sprintf(SessionData[NumberOfSessionsFound].Name,"%s (%d/%d)", sessionName, tempSession.nPlayers, tempSession.maxPlayers);
 
 			SessionData[NumberOfSessionsFound].Guid	= tempSession.guidInstance;
 
-			if (tempSession.currentPlayers < tempSession.maxPlayers) {
+			if (tempSession.nPlayers < tempSession.maxPlayers) {
 				SessionData[NumberOfSessionsFound].AllowedToJoin = true;
 			}
 			else {
@@ -633,6 +640,8 @@ void Net_ServiceNetwork()
 	if (host) {
 		enet_host_service(host, NULL, 0);
 	}
+
+	// what if we're a client?
 }
 
 NetResult Net_Receive(NetID &fromID, NetID &toID, uint8_t *messageData, size_t &dataSize)
@@ -999,21 +1008,10 @@ NetResult Net_ConnectToSession(int sessionNumber, char *playerName)
 // this function should be called for the host only?
 static bool Net_CreatePlayer(char *playerName)
 {
-	// get next available player ID
-	if (AvP.Network != I_Host)
-	{
-		AvPNetID = Net_GetNextPlayerID();
-	}
-	else
-	{
-		AvPNetID = 1; // host is always 1?
-	}
-
-	// Initialise static name structure to refer to the names:
 	memset(&thisClientPlayer, 0, sizeof(PlayerDetails));
-	strncpy(thisClientPlayer.name, playerName, kPlayerNameSize);
-	thisClientPlayer.ID	  = AvPNetID;
+	thisClientPlayer.ID	  = Net_GetNextPlayerID();
 	thisClientPlayer.type = NET_PLAYERTYPE_PLAYER;
+	strncpy(thisClientPlayer.name, playerName, kPlayerNameSize);
 
 	// do we need to do this as host? (call AddPlayer()..)
 	if (AvP.Network != I_Host)
@@ -1047,6 +1045,62 @@ static NetID Net_GetNextPlayerID()
 // try to make this re-entrant
 void Net_FindAvPSessions()
 {
+	// set up broadcast address
+	BroadcastAddress.host = ENET_HOST_BROADCAST;
+	BroadcastAddress.port = netPortNumber; // can I reuse port?? :\
+
+	// create Enet client
+	ENetHost *searchHost = enet_host_create(NULL,    // create a client host
+				1,                         // only allow 1 outgoing connection
+				0,                         // channel limit
+				incomingBandwidth,         // 57600 / 8 - 56K modem with 56 Kbps downstream bandwidth
+				outgoingBandwidth);        // 14400 / 8 - 56K modem with 14 Kbps upstream bandwidth
+
+	if (NULL == searchHost)
+	{
+		Con_PrintError("Failed to create ENet client");
+		return;
+	}
+
+	ENetPeer *Peer = enet_host_connect(searchHost, &BroadcastAddress, 2, 0);
+	if (NULL == Peer)
+	{
+		Con_PrintError("Failed to connect to ENet Broadcast peer");
+		return;
+	}
+
+	ENetEvent eEvent;
+	const int kWaitTime = 3000; // in ms
+
+	// lets send a message out saying we're looking for available game sessions
+	if (enet_host_service(searchHost, &eEvent, kWaitTime) > 0) // this could probably be lower?
+	{
+		if (ENET_EVENT_TYPE_CONNECT == eEvent.type)
+		{
+			Con_PrintDebugMessage("Net - Connected for Broadcast");
+
+            // create broadcast header
+			MessageHeader newHeader;
+			newHeader.messageType = AVP_REQUEST_SERVER_INFO;
+			newHeader.fromID      = kBroadcastID;
+			newHeader.toID        = kBroadcastID;
+
+			MemoryWriteStream ws(packetBuffer, NET_MESSAGEBUFFERSIZE);
+			ws.PutBytes((uint8_t*)&newHeader, sizeof(newHeader));
+
+			// create ENet packet
+			ENetPacket *packet = enet_packet_create(packetBuffer, ws.GetBytesWritten(), ENET_PACKET_FLAG_RELIABLE);
+
+			enet_peer_send(Peer, 0, packet);
+			enet_host_flush(searchHost);
+		}
+	}
+
+
+
+
+
+#if 0
 //	OutputDebugString("Net_FindAvPSessions called\n");
 	NumberOfSessionsFound = 0;
 
@@ -1161,11 +1215,11 @@ void Net_FindAvPSessions()
 					strcpy(sessionName, tempSession.sessionName);
 				}
 
-				sprintf(SessionData[NumberOfSessionsFound].Name,"%s (%d/%d)", sessionName, tempSession.currentPlayers, tempSession.maxPlayers);
+				sprintf(SessionData[NumberOfSessionsFound].Name,"%s (%d/%d)", sessionName, tempSession.nPlayers, tempSession.maxPlayers);
 
 				SessionData[NumberOfSessionsFound].Guid	= tempSession.guidInstance;
 
-				if (tempSession.currentPlayers < tempSession.maxPlayers) {
+				if (tempSession.nPlayers < tempSession.maxPlayers) {
 					SessionData[NumberOfSessionsFound].AllowedToJoin = true;
 				}
 				else {
@@ -1183,7 +1237,6 @@ void Net_FindAvPSessions()
 				{
 					// get the level number in our list of levels (assuming we have the level)
 					int local_index = GetLocalMultiplayerLevelIndex(level, levelName, gameStyle);
-
 					if (local_index < 0)
 					{
 						// we don't have the level, so ignore this session
@@ -1212,9 +1265,10 @@ void Net_FindAvPSessions()
 	
 	// close connection
 	enet_host_destroy(searchHost);
+#endif
 }
 
-static NetResult Net_CreateSession(const char* sessionName, int maxPlayers, int version, uint16_t gameStyle, uint16_t level)
+static NetResult Net_CreateSession(const char *sessionName, int maxPlayers, int version, uint16_t gameStyle, uint16_t level)
 {
 	memset(&netSession, 0, sizeof(netSession));
 
@@ -1226,8 +1280,8 @@ static NetResult Net_CreateSession(const char* sessionName, int maxPlayers, int 
 	netSession.gameStyle = gameStyle;
 	netSession.level = level;
 
-	// should this be done here?
-	netSession.currentPlayers = 1;
+	// should this be done here? we might want a dedicated server. perhaps a host should be 'connecting' to themselves
+	netSession.nPlayers = 1;
 
 #ifdef WIN32
 	CoCreateGuid(&netSession.guidInstance);

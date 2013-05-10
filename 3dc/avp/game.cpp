@@ -55,7 +55,6 @@ extern int LeanScale;
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 
 // extern functions
-extern void CheckCDStatus(void);
 extern void CreateGameSpecificConsoleVariables(void);
 extern void CreateGameSpecificConsoleCommands(void);
 extern void CreateMoreGameSpecificConsoleVariables(void);
@@ -141,10 +140,11 @@ void DetermineGameVersion()
 
 bool IsDemoVersion()
 {
-	if ((gameVersion == eRetailStandard) || (gameVersion == eRetailGold))
+	if ((gameVersion == eRetailStandard) || (gameVersion == eRetailGold)) {
 		return false;
-	else
+	} else {
 		return true;
+	}
 }
 
 /*********************************************
@@ -267,8 +267,6 @@ void StartGame(void)
 
 	/* KJL 16:13:30 01/05/98 - rubber ducks! */
 	CreateRubberDucks();
-	
-	CheckCDStatus();
 
 	if (AvP.PlayerType==I_Alien)
 	{
@@ -362,16 +360,16 @@ void UpdateGame(void)
 	/* netgame support: it seems necessary to collect all our messages here, as some
 	things depend on the player's behaviour running before anything else... 
 	including firing the player's weapon */
-	if (AvP.Network != I_No_Network) NetCollectMessages();
+	if (AvP.Network != I_No_Network) {
+		NetCollectMessages();
+	}
 
 	RemoveDestroyedStrategyBlocks();
 	{
-		if (SaveGameRequest != SAVELOAD_REQUEST_NONE)
-		{
+		if (SaveGameRequest != SAVELOAD_REQUEST_NONE) {
 			SaveGame();
 		}
-		else if (LoadGameRequest != SAVELOAD_REQUEST_NONE)
-		{
+		else if (LoadGameRequest != SAVELOAD_REQUEST_NONE) {
 			LoadSavedGame();
 		}
 	}
@@ -379,13 +377,14 @@ void UpdateGame(void)
 	ObjectDynamics();
 
 	// now for the env teleports
-	if (RequestEnvChangeViaLift)
-	{
+	if (RequestEnvChangeViaLift) {
 		CleanUpLiftControl();
 	}
 
 	/* netgame support */
-	if (AvP.Network != I_No_Network) NetSendMessages();
+	if (AvP.Network != I_No_Network) {
+		NetSendMessages();
+	}
 
 	/* KJL 11:50:18 03/21/97 - cheat modes */
 	HandleCheatModes();
@@ -394,8 +393,7 @@ void UpdateGame(void)
 	New sound system
 	-------------------------------------------*/
 	
-	if (playerPherModule)
-	{
+	if (playerPherModule) {
 		PlatSetEnviroment(playerPherModule->m_sound_env_index, playerPherModule->m_sound_reverb);
 	}
 
@@ -411,8 +409,7 @@ void UpdateGame(void)
 		level completion.
 		*/
 		PLAYER_STATUS* PlayerStatusPtr = (PLAYER_STATUS*) Player->ObStrategyBlock->SBdataptr;
-		if (!PlayerStatusPtr->IsAlive)
-		{
+		if (!PlayerStatusPtr->IsAlive) {
 			AvP.LevelCompleted=0;
 		}
 	}
@@ -427,16 +424,14 @@ void UpdateGame(void)
 		TimeScaleThingy();
 		
 		//in john woo mode leanscale is dependent on the TimeScale
-		if (AvP.PlayerType==I_Alien)
-		{
+		if (AvP.PlayerType == I_Alien) {
 			LeanScale=ONE_FIXED*3;
 		}
-		else
-		{
-			LeanScale=ONE_FIXED;
+		else {
+			LeanScale = ONE_FIXED;
 		}
 
-		LeanScale+=(ONE_FIXED-TimeScale)*5;
+		LeanScale += (ONE_FIXED - TimeScale) * 5;
 	}
 }
 
@@ -457,24 +452,16 @@ void ModuleObjectAboutToBeDeallocated(MODULE *mptr)
 {
 }
 
-
 void NewAndOldModules(int num_new, MODULE **m_new, int num_old, MODULE **m_old, char *m_currvis)
 {
 	/* this is the important bit */
 	DoObjectVisibilities();
 }
 
-extern void CheckCDStatus(void)
-{
-	#if PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO
-//	CDCommand_PlayLoop(2);
-	#endif	
-}
-
 void TimeStampedMessage(char *stringPtr)
 {
 	static int time=0;
-	int t=timeGetTime();
+	int t = timeGetTime();
 	LOGDXFMT(("%s %fs\n",stringPtr,(float)(t-time)/1000.0f ));
 	time = t;
 }
