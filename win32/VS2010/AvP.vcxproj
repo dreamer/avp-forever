@@ -417,7 +417,6 @@
     <ClCompile Include="..\..\3dc\win95\chunk_textures.cpp" />
     <ClCompile Include="..\..\3dc\win95\chunk_type.cpp" />
     <ClCompile Include="..\..\3dc\win95\chunk_waypoint.cpp" />
-    <ClCompile Include="..\..\3dc\win95\db.cpp" />
     <ClCompile Include="..\..\3dc\win95\debuglog.cpp" />
     <ClCompile Include="..\..\3dc\win95\dxlog.cpp" />
     <ClCompile Include="..\..\3dc\win95\enumsch.cpp" />
@@ -619,7 +618,6 @@
     <ClInclude Include="..\..\3dc\win95\chunk_textures.h" />
     <ClInclude Include="..\..\3dc\win95\chunk_type.hpp" />
     <ClInclude Include="..\..\3dc\win95\chunk_waypoint.hpp" />
-    <ClInclude Include="..\..\3dc\win95\db.h" />
     <ClInclude Include="..\..\3dc\win95\debuglog.h" />
     <ClInclude Include="..\..\3dc\win95\debuglog.hpp" />
     <ClInclude Include="..\..\3dc\win95\dxlog.h" />

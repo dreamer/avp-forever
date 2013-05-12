@@ -30,7 +30,6 @@
 #include "targeting.h"
 #include "dxlog.h"
 #include <math.h>
-#include "db.h"
 #include "io.h"
 #include "los.h"
 #include "bh_track.h"
@@ -4166,7 +4165,7 @@ void QueenBehaviour(STRATEGYBLOCK *sbPtr)
 			{
 				
 				textprint("Queen State: Standby\n");
-				db_log3(("Queen State: Standby\n"));
+//				db_log3(("Queen State: Standby\n"));
 				
 				if (queenStatusPointer->next_move==QM_Standby || queenStatusPointer->PlayingHitDelta) 
 				{
@@ -4224,7 +4223,7 @@ void QueenBehaviour(STRATEGYBLOCK *sbPtr)
 			case (QM_ComeToPoint):
 			{
 				textprint("Queen State: Come To Point\n");
-				db_log3(("Queen State: Come To Point\n"));
+//				db_log3(("Queen State: Come To Point\n"));
 				/* Move function. */
 			
 				if(JumpDesired)
@@ -4244,7 +4243,7 @@ void QueenBehaviour(STRATEGYBLOCK *sbPtr)
 			case (QM_Taunt):
 			{
 				textprint("Queen State: Taunt\n");
-				db_log3(("Queen State: Taunt\n"));
+//				db_log3(("Queen State: Taunt\n"));
 				/* Move function. */
 				QueenMove_Taunt(sbPtr);
 				break;
@@ -4272,7 +4271,7 @@ void QueenBehaviour(STRATEGYBLOCK *sbPtr)
 			case (QM_ButtAttack):
 			{
 				textprint("Queen State: Butt attack\n");
-				db_log3(("Queen State: Butt attack\n"));
+//				db_log3(("Queen State: Butt attack\n"));
 				QueenMove_ButtAttack(sbPtr);
 				break;
 			}
@@ -4280,7 +4279,7 @@ void QueenBehaviour(STRATEGYBLOCK *sbPtr)
 			case (QM_Charge):
 			{
 				textprint("Queen State: Charging\n");
-				db_log3(("Queen State: Charging\n"));
+//				db_log3(("Queen State: Charging\n"));
 				/* Move function. */
 				
 				if(JumpDesired)
@@ -4301,7 +4300,7 @@ void QueenBehaviour(STRATEGYBLOCK *sbPtr)
 			case (QM_Close):
 			{
 				textprint("Queen State: Closing\n");
-				db_log3(("Queen State: Closing\n"));
+//				db_log3(("Queen State: Closing\n"));
 				/* Move function. */
 
 
@@ -4323,7 +4322,7 @@ void QueenBehaviour(STRATEGYBLOCK *sbPtr)
 			case (QM_ButtCharge) :
 			{
 				textprint("Queen State: Butt charging\n");
-				db_log3(("Queen State: Butt charging\n"));
+//				db_log3(("Queen State: Butt charging\n"));
 				/* Move function. */
 
 
@@ -4345,7 +4344,7 @@ void QueenBehaviour(STRATEGYBLOCK *sbPtr)
 			case (QM_Jump):
 			{
 				textprint("Queen State: Jumping\n");
-				db_log3(("Queen State: Jumping\n"));
+//				db_log3(("Queen State: Jumping\n"));
 				//stay in jump mode until queen hits the floor again
 				if(!dynPtr->IsInContactWithFloor)
 				{

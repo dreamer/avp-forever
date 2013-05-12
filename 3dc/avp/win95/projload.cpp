@@ -42,7 +42,6 @@
 #include "d3d_hud.h"
 #include "decal.h"
 #include "mempool.h"
-#include "db.h"
 #include "pldnet.h"
 #include "inventory.h"
 #include <vector>
@@ -1822,11 +1821,11 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 				{
 					//only create one copy of the shape for imported objects	
 					#if SupportMorphing && LOAD_MORPH_SHAPES
-					db_logf3(("Copying shape to shape list"));
+//					db_logf3(("Copying shape to shape list"));
 					CTM_ReturnType rt_temp = copy_to_mainshapelist(h,shplif(),flags,0);
 					int start_shape_no = rt_temp.start_list_pos;
 					int list_pos = rt_temp.main_list_pos;
-					db_logf3(("Shape copied to %d",list_pos));
+//					db_logf3(("Shape copied to %d",list_pos));
 					#else
 					int list_pos = copy_to_mainshapelist(h,shplif(),flags,&ob->object_data);
 					int start_shape_no = list_pos;
@@ -1858,11 +1857,11 @@ BOOL copy_rif_data (RIFFHANDLE h, int flags, int progress_start, int progress_in
 					{
 						Object_Chunk* ob=oblif();
 						#if SupportMorphing && LOAD_MORPH_SHAPES
-						db_logf3(("Copying shape for object %s",ob->object_data.o_name));
+//						db_logf3(("Copying shape for object %s",ob->object_data.o_name));
 						CTM_ReturnType rt_temp = copy_to_mainshapelist(h,shplif(),flags,&ob->object_data);
 						int start_shape_no = rt_temp.start_list_pos;
 						int list_pos = rt_temp.main_list_pos;
-						db_logf3(("Shape copied to %d",list_pos));
+//						db_logf3(("Shape copied to %d",list_pos));
 						MORPHCTRL * mc = rt_temp.mc;
 						#else
 						int list_pos = copy_to_mainshapelist(h,shplif(),flags,&ob->object_data);

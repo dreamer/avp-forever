@@ -16,7 +16,6 @@
 #include "psndplat.h"
 #define UseLocalAssert TRUE
 #include "ourasert.h"
-#include "db.h"
 #include <math.h>
 #include <new>
 #include "FileStream.h"
@@ -1368,12 +1367,12 @@ void PlatSetEnviroment(unsigned int env_index, float reverb_mix)
 
 	if ((reverb_mix < 0.0f) || (reverb_mix > 1.0f))
 	{
-		db_log3("Using EAX,");
+//		db_log3("Using EAX,");
 		SoundConfig.reverb_mix = 0.0f; //EAX_REVERBMIX_USEDISTANCE;	
 	}
 	else
 	{
-		db_log3("Using reverb_mix,");
+//		db_log3("Using reverb_mix,");
 		SoundConfig.reverb_mix = reverb_mix;
 	}
 

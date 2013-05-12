@@ -7,7 +7,6 @@
 #ifndef DB_LEVEL
 	#define DB_LEVEL 4
 #endif
-#include "db.h"
 #include "awTexLd.h"
 #include "chunk_load.hpp"
 #include "chunk_palette.hpp"

@@ -47,6 +47,7 @@ enum NetResult
 NetResult Net_Initialise();
 void      Net_Deinitialise();
 void      Net_Disconnect();
+void      Net_ConnectToAddress();
 void      Net_FindAvPSessions();
 int       Net_ConnectingToSession();
 NetResult Net_Send(NetID fromID, NetID toID, uint8_t *messageData, size_t dataSize);
@@ -77,8 +78,18 @@ const int kMultiplayerVersion = 101; // bjd - my version, not directplay compati
 struct MessageHeader; // forward declare the structure
 extern const uint32_t kMessageHeaderSize;
 
-enum
+enum NetMessageTypes
 {
+	NET_SYSTEM_MESSAGE,
+	NET_GAME_MESSAGE
+};
+
+enum NetSystemMessages
+{
+	NETSYS_REQUEST_SERVER_INFO, // is this required?
+	NETSYS_REQUEST_SESSION_INFO,
+	NETSYS_SESSION_INFO,
+
 	NET_CREATEPLAYERORGROUP,
 	NET_DESTROYPLAYERORGROUP,
 	NET_ADDPLAYERTOGROUP,
@@ -98,7 +109,7 @@ enum
 	NET_PLAYERTYPE_GROUP,
 	NET_PLAYERTYPE_PLAYER,
 	NET_RECEIVE_ALL,
-	NET_SYSTEM_MESSAGE,
+//	NET_SYSTEM_MESSAGE,
 	NET_ID_ALLPLAYERS,
 	NET_ID_SERVERPLAYER,
 };

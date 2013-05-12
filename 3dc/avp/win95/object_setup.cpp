@@ -56,7 +56,6 @@
 #include "psndplat.h"
 #include "dxlog.h"
 #include "mempool.h"
-#include "db.h"
 #include "pldnet.h"
 #include "3dc.h"
 
@@ -154,7 +153,7 @@ void setup_track_sound(Object_Chunk* oc,TRACK_SOUND** start_sound,TRACK_SOUND** 
 	if(mid_sound)*mid_sound=0;
 	if(end_sound)*end_sound=0;
 
-	db_logf3(("Setting up track sound"));
+//	db_logf3(("Setting up track sound"));
 
 	List<Chunk*> chlist;
 	oc->lookup_child("TRAKSOUN",chlist);
@@ -179,9 +178,9 @@ void setup_track_sound(Object_Chunk* oc,TRACK_SOUND** start_sound,TRACK_SOUND** 
 		if(*sound_ptr) continue;
 		
 		
-		db_logf3(("Getting %s",otsc->wav_name));
+//		db_logf3(("Getting %s",otsc->wav_name));
 		LOADED_SOUND const * ls=GetSoundForMainRif(otsc->wav_name);
-		db_logf3(("Finished getting %s",otsc->wav_name));
+//		db_logf3(("Finished getting %s",otsc->wav_name));
 		if(ls)
 		{
 			
@@ -2230,7 +2229,7 @@ static void add_simpleobject(Object_Chunk * ob, int list_pos, AVP_Strategy_Chunk
 
 void deal_with_placed_object(Object_Chunk * ob, int shape1, int /*AnimationShape*/)
 {
-	db_logf3(("Dealing with object %s , shape %d",ob->object_data.o_name,shape1));
+//	db_logf3(("Dealing with object %s , shape %d",ob->object_data.o_name,shape1));
 	Chunk * pChunk = ob->lookup_single_child("OBJPRJDT");
 	
 	AVP_Strategy_Chunk * asc = 0;
@@ -2333,7 +2332,7 @@ void deal_with_placed_object(Object_Chunk * ob, int shape1, int /*AnimationShape
 		 	}
 		}
 	}
-	db_logf3(("Finished with object %s , shape %d",ob->object_data.o_name,shape1));
+//	db_logf3(("Finished with object %s , shape %d",ob->object_data.o_name,shape1));
 }
 
 static void add_alien(AVP_Generator_Chunk * agc)

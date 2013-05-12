@@ -55,7 +55,6 @@
 #include "psnd.h"
 #include "plat_shp.h"
 #include "savegame.h"
-#include "db.h"
 #include "pldghost.h"
 #include "bh_corpse.h"
 
@@ -2065,7 +2064,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 		//target doesn't exist anymore so ignore request.
 		return;
 	}
-
+/*
 	#if DB_LEVEL >=3
 	{
 		//add details of request to logfile
@@ -2077,7 +2076,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 		db_logf3(("Frame %d  : %s sent %s message to %s%s",GlobalFrameCounter,name2, state ? "'on'" : "'off'",name1,(message>>1)? " with extra message data" : ""));
 	}
 	#endif
-
+*/
 
 	switch (sbptr->I_SBtype)
 	  {

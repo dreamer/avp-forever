@@ -11,7 +11,6 @@
 #include "ourasert.h"
 #include "mempool.h"
 #include "io.h"
-#include "db.h"
 #include "tables.h"
 #include "savegame.h"
 #include <math.h>
@@ -159,7 +158,7 @@ void Start_Track_Sound(TRACK_SOUND* ts,VECTORCH * location)
 	}
 	ts->time_left=GameSounds[ts->sound_loaded->sound_num].length;
 
-	db_logf3(("Playing sound %d\t%s",ts->sound_loaded->sound_num,GameSounds[ts->sound_loaded->sound_num].wavName.c_str()));
+//	db_logf3(("Playing sound %d\t%s",ts->sound_loaded->sound_num,GameSounds[ts->sound_loaded->sound_num].wavName.c_str()));
 }
 
 void Stop_Track_Sound(TRACK_SOUND* ts)

@@ -40,8 +40,6 @@
 #define UseLocalAssert TRUE
 #include "ourasert.h"
 #include "showcmds.h"
-#define DB_LEVEL 3
-#include "db.h"
 
 #define CalculateBytesSentPerSecond 0
 
@@ -991,6 +989,20 @@ static void ProcessSystemMessage(uint8_t *msgP, size_t msgSize)
 
 	switch (newMessageHeader.toID)
 	{
+		case NETSYS_REQUEST_SERVER_INFO:
+		{
+			// only handle this if we're a host
+			if ((AvP.Network == I_Host))
+			{
+				MessageHeader newReplyHeader;
+				newReplyHeader.messageType = NETSYS_SESSION_INFO;
+				newReplyHeader.fromID = AvPNetID;
+				newReplyHeader.toID   = 0;
+
+				NetResult Net_SendSystemMessage(int messageType, NetID fromID, NetID toID, uint8_t *messageData, size_t dataSize);
+			}
+			break;
+		}
 		case NET_ADDPLAYERTOGROUP:
 		{
 			/* ignore */

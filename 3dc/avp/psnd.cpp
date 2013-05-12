@@ -13,7 +13,6 @@
 #include "psndplat.h"
 #define UseLocalAssert TRUE
 #include "ourasert.h"
-#include "db.h"
 #include "showcmds.h"
 #include "user_profile.h"
 #include "MusicPlayer.h"
@@ -350,7 +349,7 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 	if (!(GameSounds[soundNumber].loaded)) return;
 	if (!(GameSounds[soundNumber].activeInstances<SOUND_MAXINSTANCES)) return;
 
-	db_logf5(("About to play sound %i", soundNumber));
+//	db_logf5(("About to play sound %i", soundNumber));
 
 	/* initialise volume and pitch from game sound data */
 	volume = GameSounds[soundNumber].volume;
@@ -436,7 +435,7 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 	/* check for invalid parameter combinations */
 	if ((loop)&&(externalRef==NULL))
 	{
-		db_log5("SoundPlay bad params.");
+//		db_log5("SoundPlay bad params.");
 		return;
 	}
 
@@ -466,7 +465,7 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 		}
 		if (newIndex==SOUND_NOACTIVEINDEX)
 		{
-			db_log3("Having to stop another sound.");
+//			db_log3("Having to stop another sound.");
 			/* try to find an existing sound with a lower priority */
 			newIndex = FindLowerPriorityActiveSound(priority, min, max);
 			if (newIndex==SOUND_NOACTIVEINDEX && !(GameSounds[soundNumber].flags & SAMPLE_IN_SW))
@@ -478,16 +477,16 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 
 			if (newIndex==SOUND_NOACTIVEINDEX)
 			{
-				db_log3("Failed to find a lower priority sound.");
+//				db_log3("Failed to find a lower priority sound.");
 				return; /* give up */
 			}
 			/* remove it, and use it's slot */
-			db_log3("Stopping a lower priority sound.");
+//			db_log3("Stopping a lower priority sound.");
 			Sound_Stop(newIndex);
 		}
 		else
 		{
-			db_log3("Found a free slot.");
+//			db_log3("Found a free slot.");
 		}
 	}
 
@@ -530,7 +529,7 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 		/* the sound failed to play: any platform cleanups should have been done,
 		so just bank the sound slot */
 		ActiveSounds[newIndex] = BlankActiveSound;
-		db_log5("Error: PlatPlaySound failed.");
+//		db_log5("Error: PlatPlaySound failed.");
 		return;
 	}
 
@@ -566,7 +565,7 @@ void Sound_Stop(int activeSoundNumber)
 	/* update game sound instances, and external reference */
 	soundNo = ActiveSounds[activeSoundNumber].soundIndex;
 	GameSounds[soundNo].activeInstances--;
-	db_assert1((GameSounds[soundNo].activeInstances>=0) && (GameSounds[soundNo].activeInstances<SOUND_MAXINSTANCES));
+//	db_assert1((GameSounds[soundNo].activeInstances>=0) && (GameSounds[soundNo].activeInstances<SOUND_MAXINSTANCES));
 
 	if (ActiveSounds[activeSoundNumber].externalRef)
 		*(ActiveSounds[activeSoundNumber].externalRef) = SOUND_NOACTIVEINDEX;

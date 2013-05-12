@@ -64,10 +64,7 @@ extern char *GetCustomMultiplayerLevelName(int index, int gameType);
 extern unsigned char DebouncedKeyboardInput[];
 
 static bool Net_CreatePlayer(char *playerName);
-NetID Net_GetNextPlayerID();
-void Net_FindAvPSessions();
-void Net_ConnectToAddress();
-
+static NetID Net_GetNextPlayerID();
 static NetResult Net_CreateSession(const char *sessionName, int maxPlayers, int version, uint16_t gameStyle, uint16_t level);
 static NetResult Net_UpdateSessionDescForLobbiedGame(uint16_t gameStyle, uint16_t level);
 
@@ -201,11 +198,9 @@ bool Net_CheckSessionDetails(const ENetEvent &eEvent)
 
 bool Net_UpdateSessionList(int *SelectedItem)
 {
-//	return false;
-
-	char buf[100];
-	sprintf(buf, "Net_UpdateSessionList at %d\n", timeGetTime());
-	OutputDebugString(buf);
+//	char buf[100];
+//	sprintf(buf, "Net_UpdateSessionList at %d\n", timeGetTime());
+//	OutputDebugString(buf);
 
 	GUID OldSessionGuids[MAX_NO_OF_SESSIONS];
 	uint32_t OldNumberOfSessions = NumberOfSessionsFound;
@@ -216,13 +211,12 @@ bool Net_UpdateSessionList(int *SelectedItem)
 	static int32_t startTime = timeGetTime();
 
 	// take a list of the old session guids
-	for (uint32_t i = 0; i < NumberOfSessionsFound; i++)
-	{
+	for (uint32_t i = 0; i < NumberOfSessionsFound; i++) {
 		OldSessionGuids[i] = SessionData[i].Guid;
 	}
 
 	// do the session enumeration thing
-	Net_FindAvPSessions();
+//	Net_FindAvPSessions();
 
 	// Have the available sessions changed? first check number of sessions
 	if (NumberOfSessionsFound != OldNumberOfSessions)
@@ -453,9 +447,9 @@ void Net_Disconnect()
 
 uint32_t Net_JoinGame()
 {	
-	char buf[100];
-	sprintf(buf, "Net_JoinGame at %d\n", timeGetTime());
-	OutputDebugString(buf);
+//	char buf[100];
+//	sprintf(buf, "Net_JoinGame at %d\n", timeGetTime());
+//	OutputDebugString(buf);
 
 	if (!net_IsInitialised)
 	{
@@ -1049,6 +1043,30 @@ void Net_FindAvPSessions()
 	BroadcastAddress.host = ENET_HOST_BROADCAST;
 	BroadcastAddress.port = netPortNumber; // can I reuse port?? :\
 
+	ENetSocket socket = enet_socket_create(ENET_SOCKET_TYPE_DATAGRAM);
+	if (socket == ENET_SOCKET_NULL) {
+		int error = -1;
+	}
+
+	enet_socket_set_option(socket, ENET_SOCKOPT_NONBLOCK, 1);
+	enet_socket_set_option(socket, ENET_SOCKOPT_BROADCAST, 1);
+
+	enet_socket_bind(socket, &BroadcastAddress);
+
+	ENetBuffer buf;
+
+	// create broadcast header
+	MessageHeader newHeader;
+	newHeader.messageType = NETSYS_REQUEST_SESSION_INFO;
+	newHeader.fromID      = kBroadcastID;
+	newHeader.toID        = kBroadcastID;
+
+	buf.data = &newHeader;
+	buf.dataLength = sizeof(MessageHeader);
+
+	enet_socket_send(socket, &BroadcastAddress, &buf, 1);
+	
+#if 0
 	// create Enet client
 	ENetHost *searchHost = enet_host_create(NULL,    // create a client host
 				1,                         // only allow 1 outgoing connection
@@ -1081,21 +1099,25 @@ void Net_FindAvPSessions()
 
             // create broadcast header
 			MessageHeader newHeader;
-			newHeader.messageType = AVP_REQUEST_SERVER_INFO;
+			newHeader.messageType = NETSYS_REQUEST_SESSION_INFO;
 			newHeader.fromID      = kBroadcastID;
 			newHeader.toID        = kBroadcastID;
 
 			MemoryWriteStream ws(packetBuffer, NET_MESSAGEBUFFERSIZE);
 			ws.PutBytes((uint8_t*)&newHeader, sizeof(newHeader));
 
+			int size = ws.GetBytesWritten();
+
 			// create ENet packet
 			ENetPacket *packet = enet_packet_create(packetBuffer, ws.GetBytesWritten(), ENET_PACKET_FLAG_RELIABLE);
 
-			enet_peer_send(Peer, 0, packet);
+			if (enet_peer_send(Peer, 0, packet) != 0) {
+				Con_PrintDebugMessage("Couldn't send broadcast packet");
+			}
 			enet_host_flush(searchHost);
 		}
 	}
-
+#endif
 
 
 

@@ -17,7 +17,6 @@
 #include "io.h"
 #define UseLocalAssert TRUE
 #include "ourasert.h"
-#include "db.h"
 #include "dxlog.h"
 #include "FileStream.h"
 

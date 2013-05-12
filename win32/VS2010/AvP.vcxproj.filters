@@ -180,9 +180,6 @@
     <ClCompile Include="..\..\3dc\win95\bitmap_names.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
-    <ClCompile Include="..\..\3dc\win95\db.cpp">
-      <Filter>Source Files</Filter>
-    </ClCompile>
     <ClCompile Include="..\..\3dc\win95\debuglog.cpp">
       <Filter>Source Files</Filter>
     </ClCompile>
@@ -768,9 +765,6 @@
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\3dc\win95\bitmap_names.hpp">
-      <Filter>Header Files</Filter>
-    </ClInclude>
-    <ClInclude Include="..\..\3dc\win95\db.h">
       <Filter>Header Files</Filter>
     </ClInclude>
     <ClInclude Include="..\..\3dc\win95\debuglog.h">
