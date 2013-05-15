@@ -240,8 +240,8 @@ bool Font_Load(const std::string &fontFile, enum eFontTypes fontType)
 		Fonts[fontType].cellWidth  = file.GetUint32LE();
 		Fonts[fontType].cellHeight = file.GetUint32LE();
 		Fonts[fontType].startChar  = file.GetByte();
-		for (int i = 0; i < kNumChars; i++)
-		{
+		
+		for (int i = 0; i < kNumChars; i++) {
 			Fonts[fontType].charWidths[i] = file.GetByte();
 		}
 	}
@@ -267,13 +267,13 @@ uint32_t Font_GetCharHeight(enum eFontTypes fontType)
 
 uint32_t Font_GetStringWidth(const std::string &text, enum eFontTypes fontType)
 {	
-	if (!Fonts[fontType].isValid)
+	if (!Fonts[fontType].isValid) {
 		return 0;
+	}
 
 	uint32_t width = 0;
 
-	for (size_t i = 0; i < text.size(); i++)
-	{
+	for (size_t i = 0; i < text.size(); i++) {
 		width += Fonts[fontType].charWidths[text[i]];
 	}
 
@@ -282,8 +282,9 @@ uint32_t Font_GetStringWidth(const std::string &text, enum eFontTypes fontType)
 
 uint32_t Font_DrawCenteredText(const std::string &text, enum eFontTypes fontType)
 {
-	if (!Fonts[fontType].isValid)
+	if (!Fonts[fontType].isValid) {
 		return 0;
+	}
 
 	uint32_t textWidth = Font_GetStringWidth(text, fontType);
 
@@ -295,8 +296,9 @@ uint32_t Font_DrawCenteredText(const std::string &text, enum eFontTypes fontType
 
 uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, RCOLOR colour, enum eFontTypes fontType)
 {
-	if (!Fonts[fontType].isValid)
+	if (!Fonts[fontType].isValid) {
 		return 0;
+	}
 
 	float RecipW = (1.0f / Fonts[fontType].mapWidth);
 	float RecipH = (1.0f / Fonts[fontType].mapHeight);
@@ -342,12 +344,10 @@ uint32_t Font_DrawText(const std::string &text, uint32_t x, uint32_t y, RCOLOR c
 
 		bool fixedWidth = false;
 
-		if (fixedWidth)
-		{
+		if (fixedWidth) {
 			x += Fonts[fontType].cellWidth;
 		}
-		else
-		{
+		else {
 			x += charWidth;
 		}
 

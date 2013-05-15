@@ -32,6 +32,7 @@
 #include <vector>
 #include <algorithm>
 #include <assert.h>
+#include "platform.h"
 
 /* TODO:
 
@@ -42,10 +43,8 @@
 	- xbox specific graphics to indicate press B to go back, A to select..
 */
 
-#include "platform.h"
-
 static int Osk_GetCurrentLocation();
-std::string Osk_GetKeyLabel(uint32_t buttonIndex);
+static std::string Osk_GetKeyLabel(uint32_t buttonIndex);
 
 #ifdef _XBOX
 extern void AddKeyToQueue(char virtualKeyCode);
@@ -57,24 +56,24 @@ static int currentColumn = 0;
 static int currentValue = 0;
 
 static uint16_t osk_x = 320;
-static uint16_t osk_y = 280;
-static uint16_t oskWidth = 400;
+static const uint16_t osk_y = 280;
+static uint16_t oskWidth  = 400;
 static uint16_t oskHeight = 200;
 
-static const uint8_t keyWidth = 30;
+static const uint8_t keyWidth  = 30;
 static const uint8_t keyHeight = 30;
 
-static const uint8_t space_between_keys = 3;
+static const uint8_t space_between_keys  = 3;
 static const uint8_t outline_border_size = 1;
 static const uint8_t indent_space = 5;
 
-static const uint8_t numVerticalKeys = 5;
-static const uint8_t numHorizontalKeys = 12;
-static const uint8_t numKeys = numVerticalKeys * numHorizontalKeys;
+static const uint8_t nVerticalKeys   = 5;
+static const uint8_t nHorizontalKeys = 12;
+static const uint8_t nKeys = nVerticalKeys * nHorizontalKeys;
 
 struct ButtonStruct
 {
-	uint32_t	numWidthBlocks;
+	uint32_t	nWidthBlocks;
 	uint32_t	width;
 	uint32_t	height;
 	uint32_t	positionOffset;
@@ -89,35 +88,33 @@ std::vector<std::string> stringVector;
 static bool isActive = false;
 static bool isInitialised = false;
 
-bool shift = false;
-bool capsLock = false;
+static bool shift = false;
+static bool capsLock = false;
 
-uint32_t buttonID = 0;
+static uint32_t buttonID = 0;
 
-template <class T> void Osk_AddKey(T buttonLabel, uint32_t numWidthBlocks)
+template <class T> void Osk_AddKey(T buttonLabel, uint32_t nWidthBlocks)
 {
 	ButtonStruct newButton = {0};
 
-	std::stringstream stringStream;
-
-	stringStream << buttonLabel;
+	std::stringstream ss;
+	ss << buttonLabel;
 
 	newButton.stringID = buttonID;
-	newButton.numWidthBlocks = numWidthBlocks;
-	newButton.width = (numWidthBlocks * keyWidth) + space_between_keys * (numWidthBlocks - 1);
+	newButton.nWidthBlocks = nWidthBlocks;
+	newButton.width = (nWidthBlocks * keyWidth) + space_between_keys * (nWidthBlocks - 1);
 	newButton.height = keyHeight;
 
 	// store the string in its own vector
-	stringVector.push_back(stringStream.str());
+	stringVector.push_back(ss.str());
 
-	if (stringStream.str() == "BLANK")
-	{
+	if (ss.str() == "BLANK") {
 		newButton.isBlank = true;
 	}
 
 	uint32_t positionOffset = 0;
 
-	uint32_t blockCount = numWidthBlocks;
+	uint32_t blockCount = nWidthBlocks;
 
 	// for each block in a button, add it to the key vector
 	while (blockCount)
@@ -136,7 +133,6 @@ void Osk_Init()
 {
 	// disable for now
 	return;
-
 
 	currentRow = 0;
 	currentColumn = 0;
@@ -187,8 +183,8 @@ void Osk_Init()
 
 	currentValue = 0;
 
-	oskWidth = (keyWidth * numHorizontalKeys) + (space_between_keys * numHorizontalKeys) + (indent_space * 2);
-	oskHeight = (keyHeight * numVerticalKeys) + (space_between_keys * numVerticalKeys) + (indent_space * 2);
+	oskWidth = (keyWidth * nHorizontalKeys) + (space_between_keys * nHorizontalKeys) + (indent_space * 2);
+	oskHeight = (keyHeight * nVerticalKeys) + (space_between_keys * nVerticalKeys)   + (indent_space * 2);
 
 	isInitialised = true;
 }
@@ -198,9 +194,9 @@ void Osk_Draw()
 	// disable for now
 	return;
 
-
-	if (!Osk_IsActive())
+	if (!Osk_IsActive()) {
 		return;
+	}
 
 	osk_x = (640 - oskWidth) / 2;
 
@@ -216,11 +212,11 @@ void Osk_Draw()
 
 	size_t index = 0;
 
-	for (uint32_t y = 0; y < numVerticalKeys; y++)
+	for (uint32_t y = 0; y < nVerticalKeys; y++)
 	{
 		pos_x = osk_x + indent_space;
 
-		int widthCount = numHorizontalKeys;
+		int widthCount = nHorizontalKeys;
 
 		while (widthCount)
 		{
@@ -246,9 +242,9 @@ void Osk_Draw()
 			}
 
 			pos_x += (thisButton.width + space_between_keys);
-			widthCount -= thisButton.numWidthBlocks;
+			widthCount -= thisButton.nWidthBlocks;
 
-			index += thisButton.numWidthBlocks;
+			index += thisButton.nWidthBlocks;
 		}
 		pos_y += (keyHeight + space_between_keys);
 	}
@@ -279,9 +275,9 @@ void Osk_Activate()
 	// disable for now
 	return;
 
-
-	if (isInitialised == false)
+	if (isInitialised == false) {
 		Osk_Init();
+	}
 
 	isActive = true;
 }
@@ -290,7 +286,6 @@ void Osk_Deactivate()
 {
 	// disable for now
 	return;
-
 
 	isActive = false;
 }
@@ -312,8 +307,9 @@ KEYPRESS Osk_HandleKeypress()
 		shift = !shift;
 
 		// if capslock on, turn it off?
-		if (capsLock)
+		if (capsLock) {
 			capsLock = false;
+		}
 
 		return newKeypress;
 	}
@@ -323,8 +319,9 @@ KEYPRESS Osk_HandleKeypress()
 		capsLock = !capsLock;
 
 		// if shift is on, turn it off?
-		if (shift)
+		if (shift) {
 			shift = false;
+		}
 
 		return newKeypress;
 	}
@@ -360,8 +357,9 @@ KEYPRESS Osk_HandleKeypress()
 	{
 		newKeypress.asciiCode = buttonLabel.at(0);
 
-		if (shift) // turn it off, as it's a use-once thing
+		if (shift) { // turn it off, as it's a use-once thing
 			shift = false;
+		}
 
 		return newKeypress;
 	}
@@ -377,7 +375,7 @@ static int Osk_GetCurrentLocation()
 void Osk_MoveLeft()
 {
 	// where are we now?
-	int currentPosition = (currentRow * numHorizontalKeys) + currentColumn;
+	int currentPosition = (currentRow * nHorizontalKeys) + currentColumn;
 
 	// store some information about current key
 	int buttonOffset = keyVector.at(currentPosition).positionOffset;
@@ -386,11 +384,12 @@ void Osk_MoveLeft()
 	currentColumn -= buttonOffset + 1;
 
 	// wrap?
-	if (currentColumn < 0)
-		currentColumn = numHorizontalKeys - 1;
+	if (currentColumn < 0) {
+		currentColumn = nHorizontalKeys - 1;
+	}
 
 	// where are we now?
-	currentPosition = (currentRow * numHorizontalKeys) + currentColumn;
+	currentPosition = (currentRow * nHorizontalKeys) + currentColumn;
 
 	// handle moving over any blank keys
 	while (keyVector.at(currentPosition).isBlank)
@@ -400,11 +399,12 @@ void Osk_MoveLeft()
 		currentColumn -= buttonOffset + 1;
 
 		// wrap?
-		if (currentColumn < 0)
-			currentColumn = numHorizontalKeys - 1;
+		if (currentColumn < 0) {
+			currentColumn = nHorizontalKeys - 1;
+		}
 
 		// where are we now?
-		currentPosition = (currentRow * numHorizontalKeys) + currentColumn;
+		currentPosition = (currentRow * nHorizontalKeys) + currentColumn;
 	}
 
 	currentValue = currentPosition;
@@ -416,22 +416,22 @@ void Osk_MoveLeft()
 void Osk_MoveRight()
 {
 	// where are we now?
-	int currentPosition = (currentRow * numHorizontalKeys) + currentColumn;
+	int currentPosition = (currentRow * nHorizontalKeys) + currentColumn;
 
 	ButtonStruct &thisButton = keyVector.at(currentPosition);
 
 	int buttonOffset = thisButton.positionOffset;
-	int width		 = thisButton.numWidthBlocks;
+	int width		 = thisButton.nWidthBlocks;
 
 	currentColumn += width - buttonOffset;
 
 	// wrap?
-	if (currentColumn >= numHorizontalKeys) { // add some sort of numColumns?
+	if (currentColumn >= nHorizontalKeys) { // add some sort of numColumns?
 		currentColumn = 0;
 	}
 
 	// where are we now?
-	currentPosition = (currentRow * numHorizontalKeys) + currentColumn;
+	currentPosition = (currentRow * nHorizontalKeys) + currentColumn;
 
 	// handle moving over any blank keys
 	while (thisButton.isBlank)
@@ -441,12 +441,12 @@ void Osk_MoveRight()
 		currentColumn += width - buttonOffset;
 
 		// wrap?
-		if (currentColumn >= numHorizontalKeys) { // add some sort of numColumns?
+		if (currentColumn >= nHorizontalKeys) { // add some sort of numColumns?
 			currentColumn = 0;
 		}
 
 		// where are we now?
-		currentPosition = (currentRow * numHorizontalKeys) + currentColumn;
+		currentPosition = (currentRow * nHorizontalKeys) + currentColumn;
 	}
 
 	currentValue = currentPosition;
@@ -460,11 +460,12 @@ void Osk_MoveUp()
 	currentRow--;
 
 	// make sure we're not outside the grid
-	if (currentRow < 0)
+	if (currentRow < 0) {
 		currentRow = 4;
+	}
 
 	// where are we now?
-	int currentPosition = (currentRow * numHorizontalKeys) + currentColumn;
+	int currentPosition = (currentRow * nHorizontalKeys) + currentColumn;
 
 	// handle moving over any blank keys
 	while (keyVector.at(currentPosition).isBlank)
@@ -476,7 +477,7 @@ void Osk_MoveUp()
 			currentRow = 4;
 
 		// where are we now?
-		currentPosition = (currentRow * numHorizontalKeys) + currentColumn;
+		currentPosition = (currentRow * nHorizontalKeys) + currentColumn;
 	}
 
 	currentValue = currentPosition;
@@ -490,11 +491,12 @@ void Osk_MoveDown()
 	currentRow++;
 
 	// make sure we're not outside the grid
-	if (currentRow > 4)
+	if (currentRow > 4) {
 		currentRow = 0;
+	}
 
 	// where are we now?
-	int currentPosition = (currentRow * numHorizontalKeys) + currentColumn;
+	int currentPosition = (currentRow * nHorizontalKeys) + currentColumn;
 
 	// handle moving over any blank keys
 	while (keyVector.at(currentPosition).isBlank)
@@ -502,11 +504,12 @@ void Osk_MoveDown()
 		currentRow++;
 
 		// make sure we're not outside the grid
-		if (currentRow > 4)
+		if (currentRow > 4) {
 			currentRow = 0;
+		}
 
 		// where are we now?
-		currentPosition = (currentRow * numHorizontalKeys) + currentColumn;
+		currentPosition = (currentRow * nHorizontalKeys) + currentColumn;
 	}
 
 	currentValue = currentPosition;
