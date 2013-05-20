@@ -708,7 +708,7 @@ void MinimalNetCollectMessages(void)
 
 			MessageHeader newHeader;
 			MemoryReadStream rs(msg, msgSize);
-			rs.GetBytes((uint8_t*)&newHeader, sizeof(MessageHeader));
+			rs.GetBytes(&newHeader, sizeof(MessageHeader));
 
 			fromID = newHeader.fromID;
 			toID   = newHeader.toID;
@@ -983,7 +983,7 @@ static void ProcessSystemMessage(uint8_t *msgP, size_t msgSize)
 	MemoryReadStream rs(msgP, msgSize);
 
 	MessageHeader newMessageHeader;
-	rs.GetBytes((uint8_t*)&newMessageHeader, sizeof(MessageHeader));
+	rs.GetBytes(&newMessageHeader, sizeof(MessageHeader));
 
 	OutputDebugString("we're going to process a system message\n");
 
@@ -1020,7 +1020,7 @@ static void ProcessSystemMessage(uint8_t *msgP, size_t msgSize)
 				PlayerDetails newPlayer;
 
 				// copy message data to player struct
-				rs.GetBytes((uint8_t*)&newPlayer, sizeof(PlayerDetails));
+				rs.GetBytes(&newPlayer, sizeof(PlayerDetails));
 
 				// FIXME if (DPPLAYERTYPE_PLAYER == newPlayer.playerType)
 
@@ -1052,7 +1052,7 @@ static void ProcessSystemMessage(uint8_t *msgP, size_t msgSize)
 			if ((AvP.Network == I_Host))
 			{
 				DestroyPlayerOrGroup destroyMessage;
-				rs.GetBytes((uint8_t*)&destroyMessage, sizeof(DestroyPlayerOrGroup));
+				rs.GetBytes(&destroyMessage, sizeof(DestroyPlayerOrGroup));
 
 				if (destroyMessage.type == NET_PLAYERTYPE_PLAYER)
 				{

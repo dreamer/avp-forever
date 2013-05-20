@@ -110,7 +110,7 @@ uint8_t MemoryReadStream::PeekByte()
 	return *_currentOffset;
 }
 
-size_t MemoryReadStream::GetBytes(uint8_t *buffer, size_t nBytes)
+size_t MemoryReadStream::GetBytes(void *buffer, size_t nBytes)
 {
 	if (!buffer) {
 		return 0;
@@ -186,7 +186,7 @@ size_t MemoryWriteStream::GetBytesWritten()
 	return _currentOffset - _start;
 }
 
-size_t MemoryWriteStream::PutBytes(uint8_t *buffer, size_t nBytes)
+size_t MemoryWriteStream::PutBytes(const void *buffer, size_t nBytes)
 {
 	if (!buffer) {
 		return 0;

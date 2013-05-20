@@ -42,7 +42,7 @@ class MemoryReadStream
 		uint64_t GetUint64BE();
 		uint8_t  PeekByte();
 		size_t   GetBytesRead();
-		size_t   GetBytes(uint8_t *buffer, size_t nBytes);
+		size_t   GetBytes(void *buffer, size_t nBytes);
 		void     SkipBytes(size_t nBytes);
 
 	private:
@@ -66,7 +66,7 @@ class MemoryWriteStream
 		void PutUint64LE(uint64_t v);
 		void PutUint64BE(uint64_t v);
 		size_t GetBytesWritten();
-		size_t PutBytes(uint8_t *buffer, size_t nBytes);
+		size_t PutBytes(const void *buffer, size_t nBytes);
 
 	private:
 		size_t   _size;
