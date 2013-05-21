@@ -256,7 +256,7 @@ extern void NewOnScreenMessage(char *messagePtr);
   ----------------------------------------------------------------------*/
 static void ProcessSystemMessage(uint8_t *msgP, size_t msgSize);
 static void ProcessGameMessage(NetID senderId, uint8_t *msgP, size_t msgSize);
-static void AddPlayerToGame(int id, char *name);
+static void AddPlayerToGame(NetID id, char *name);
 static void AddPlayerAndObjectUpdateMessages(void);
 static void UpdateNetworkGameScores(NetID playerKilledId, NetID killerId, NETGAME_CHARACTERTYPE playerKilledType, NETGAME_CHARACTERTYPE killerType);
 static void InitFinalNetGameScores(void);
@@ -369,20 +369,18 @@ void InitAVPNetGame(void)
 	InitialiseSendMessageBuffer();
 	/* base initialisation of game description */
 	{
-		int i, j;
-
-		for (i = 0; i < (NET_MAXPLAYERS); i++)
+		for (int i = 0; i < (NET_MAXPLAYERS); i++)
 		{
 			netGameData.playerData[i].playerId = 0;
 
-			for (j = 0; j < (NET_PLAYERNAMELENGTH); j++) {
+			for (int j = 0; j < (NET_PLAYERNAMELENGTH); j++) {
 				netGameData.playerData[i].name[j] = '\0';
 			}
 
 			netGameData.playerData[i].characterType = NGCT_Marine;
 			netGameData.playerData[i].characterSubType = NGSCT_General;
 
-			for (j = 0; j < (NET_MAXPLAYERS); j++) {
+			for (int j = 0; j < (NET_MAXPLAYERS); j++) {
 				netGameData.playerData[i].playerFrags[j] = 0;
 			}
 
@@ -397,7 +395,7 @@ void InitAVPNetGame(void)
 			netGameData.playerData[i].startFlag = 0;
 		}
 
-		for (j = 0; j < 3; j++) {
+		for (int j = 0; j < 3; j++) {
 			netGameData.teamScores[j] = 0;
 		}
 
@@ -488,8 +486,7 @@ void InitAVPNetGameForHost(int species, int gamestyle, int level)
 			netGameData.playerData[i].startFlag = 0;
 		}
 
-		for (int j = 0; j < 3; j++)
-		{
+		for (int j = 0; j < 3; j++) {
 			netGameData.teamScores[j] = 0;
 		}
 
@@ -549,7 +546,7 @@ void InitAVPNetGameForHost(int species, int gamestyle, int level)
 		netGameData.gameDescriptionTimeDelay = 0;
 		netGameData.sendTimer = 0;
 
-		if (LobbiedGame/* || netGameData.connectionType==CONN_Modem*/)
+		if (LobbiedGame)
 		{
 			netGameData.sendFrequency = ONE_FIXED / 15;
 			netGameData.sendDecals = FALSE;
@@ -622,16 +619,14 @@ void InitAVPNetGameForJoin(void)
 		{
 			netGameData.playerData[i].playerId = 0;
 
-			for (int j = 0; j < (NET_PLAYERNAMELENGTH); j++)
-			{
+			for (int j = 0; j < (NET_PLAYERNAMELENGTH); j++) {
 				netGameData.playerData[i].name[j] = '\0';
 			}
 
 			netGameData.playerData[i].characterType = NGCT_Marine;
 			netGameData.playerData[i].characterSubType = NGSCT_General;
 
-			for (int j = 0; j < (NET_MAXPLAYERS); j++)
-			{
+			for (int j = 0; j < (NET_MAXPLAYERS); j++) {
 				netGameData.playerData[i].playerFrags[j] = 0;
 			}
 
@@ -646,8 +641,7 @@ void InitAVPNetGameForJoin(void)
 			netGameData.playerData[i].startFlag       = 0;
 		}
 
-		for (int j = 0; j < 3; j++)
-		{
+		for (int j = 0; j < 3; j++) {
 			netGameData.teamScores[j] = 0;
 		}
 
@@ -659,7 +653,7 @@ void InitAVPNetGameForJoin(void)
 		netGameData.stateCheckTimeDelay = 0;
 		netGameData.gameDescriptionTimeDelay = 0;
 
-		if (LobbiedGame/* || netGameData.connectionType==CONN_Modem*/)
+		if (LobbiedGame)
 		{
 			netGameData.sendFrequency = ONE_FIXED / 15;
 			netGameData.sendDecals = FALSE;
@@ -697,7 +691,7 @@ void MinimalNetCollectMessages(void)
 	NetID toID   = 0;
 	size_t msgSize  = 0;
 
-	/* collects messages until something other than NET_OK is returned (eg NET_NO_MESSAGES) */
+	// collects messages until something other than NET_OK is returned (eg NET_NO_MESSAGES)
 	if (!netGameData.skirmishMode)
 	{
 		Net_ServiceNetwork();
@@ -803,16 +797,14 @@ void NetCollectMessages(void)
 			if (netGameData.scoreLimit > 0)
 			{
 				/* nb this doesn't check team scores */
-				int i, j;
 
-				for (i = 0; i < NET_MAXPLAYERS; i++)
+				for (int i = 0; i < NET_MAXPLAYERS; i++)
 				{
 					if (netGameData.playerData[i].playerId)
 					{
 						int score = 0;
 
-						for (j = 0; j < 3; j++)
-						{
+						for (int j = 0; j < 3; j++) {
 							score += netGameData.playerData[i].aliensKilled[j] * netGameData.aiKillValues[j];
 						}
 
@@ -830,7 +822,6 @@ void NetCollectMessages(void)
 
 			if (netGameData.maxLives > 0)
 			{
-				int i;
 				int numPlayers = 0;
 				int numPlayersWithLifeLeft = 0;
 				int numAliens = 0;
@@ -841,7 +832,7 @@ void NetCollectMessages(void)
 				int numPredatorsWithLifeLeft = 0;
 				BOOL gameOver = FALSE;
 
-				for (i = 0; i < NET_MAXPLAYERS; i++)
+				for (int i = 0; i < NET_MAXPLAYERS; i++)
 				{
 					if (netGameData.playerData[i].playerId)
 					{
@@ -891,38 +882,31 @@ void NetCollectMessages(void)
 					int numTeams = 0;
 					int numTeamsWithLifeLeft = 0;
 
-					if (numAliens)
-					{
+					if (numAliens) {
 						numTeams++;
 					}
 
-					if (numAliensWithLifeLeft)
-					{
+					if (numAliensWithLifeLeft) {
 						numTeamsWithLifeLeft++;
 					}
 
-					if (numPredators)
-					{
+					if (numPredators) {
 						numTeams++;
 					}
 
-					if (numPredatorsWithLifeLeft)
-					{
+					if (numPredatorsWithLifeLeft) {
 						numTeamsWithLifeLeft++;
 					}
 
-					if (numMarines)
-					{
+					if (numMarines) {
 						numTeams++;
 					}
 
-					if (numMarinesWithLifeLeft)
-					{
+					if (numMarinesWithLifeLeft) {
 						numTeamsWithLifeLeft++;
 					}
 
-					if (numTeams > 1 && numTeamsWithLifeLeft <= 1)
-					{
+					if (numTeams > 1 && numTeamsWithLifeLeft <= 1) {
 						gameOver = TRUE;
 					}
 				}
@@ -1136,13 +1120,12 @@ static void ProcessSystemMessage(uint8_t *msgP, size_t msgSize)
 	}
 }
 
-static void AddPlayerToGame(int id, char *name)
+static void AddPlayerToGame(NetID id, char *name)
 {
-	int freePlayerIndex;
 	OutputDebugString("AddPlayerToGame() called\n");
 	LOCALASSERT(AvP.Network == I_Host);
 	/* find a free slot for the player */
-	freePlayerIndex = EmptySlotInPlayerList();
+	int freePlayerIndex = EmptySlotInPlayerList();
 
 	if (freePlayerIndex == NET_NOEMPTYSLOTINPLAYERLIST) {
 		return;
@@ -1610,7 +1593,6 @@ static void ProcessGameMessage(NetID senderId, uint8_t *msgP, size_t msgSize)
 					RespawnAllPickups();
 					PrintStringTableEntryInConsole(TEXTSTRING_MULTIPLAYER_WEAPON_RESPAWN);
 				}
-
 				break;
 			}
 
@@ -1676,7 +1658,6 @@ int GetBytesPerSecond(int bytesThisFrame)
 void NetSendMessages(void)
 {
 	/* some assertions about our game state */
-	//LOCALASSERT(!((AvP.Network==I_Host)&&(netGameData.myGameState==NGS_Leaving)));
 	LOCALASSERT(!((AvP.Network == I_Host) && (netGameData.myGameState == NGS_Error_GameFull)));
 	LOCALASSERT(!((AvP.Network == I_Host) && (netGameData.myGameState == NGS_Error_GameStarted)));
 	LOCALASSERT(!((AvP.Network == I_Host) && (netGameData.myGameState == NGS_Error_HostLost)));
@@ -1756,12 +1737,10 @@ void NetSendMessages(void)
 
 				PeriodicScoreUpdate();
 
-				if (netGameData.gameType == NGT_LastManStanding)
-				{
+				if (netGameData.gameType == NGT_LastManStanding) {
 					CheckLastManStandingState();
 				}
-				else if (netGameData.gameType == NGT_PredatorTag || netGameData.gameType == NGT_AlienTag)
-				{
+				else if (netGameData.gameType == NGT_PredatorTag || netGameData.gameType == NGT_AlienTag) {
 					CheckSpeciesTagState();
 				}
 
@@ -1814,11 +1793,9 @@ void NetSendMessages(void)
 								failed to send this frame , try preserving the contents of the send buffer,
 								unless it is getting to full.
 							*/
-							if (numBytes < NET_MESSAGEBUFFERSIZE / 2)
-							{
+							if (numBytes < NET_MESSAGEBUFFERSIZE / 2) {
 								clearSendBuffer = false;
 							}
-
 							break;
 
 						case NET_ERR_CONNECTIONLOST :
@@ -1881,12 +1858,9 @@ behaviour functions, but would involve a lag
   ----------------------------------------------------------------------*/
 static void AddPlayerAndObjectUpdateMessages(void)
 {
-	int sbIndex = 0;
-
 	/* don't bother adding these if we're finishing
 	(host gets here even if finishing, but doesn't need to send these messages) */
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
@@ -1896,6 +1870,8 @@ static void AddPlayerAndObjectUpdateMessages(void)
 #if EXTRAPOLATION_TEST
 	AddNetMsg_FrameTimer();
 #endif
+
+	int sbIndex = 0;
 
 	while (sbIndex < NumActiveStBlocks)
 	{
@@ -1938,8 +1914,7 @@ static void AddPlayerAndObjectUpdateMessages(void)
 				DYNAMICSBLOCK *dynPtr = sbPtr->DynPtr;
 
 				//only send messages for flares while they are moving
-				if (!dynPtr->IsStatic || bbPtr->becomeStuck)
-				{
+				if (!dynPtr->IsStatic || bbPtr->becomeStuck) {
 					AddNetMsg_LocalObjectState(sbPtr);
 				}
 
@@ -1950,8 +1925,7 @@ static void AddPlayerAndObjectUpdateMessages(void)
 			{
 				INANIMATEOBJECT_STATUSBLOCK *objStatPtr = static_cast<INANIMATEOBJECT_STATUSBLOCK *>(sbPtr->SBdataptr);
 
-				if (objStatPtr->ghosted_object)
-				{
+				if (objStatPtr->ghosted_object) {
 					AddNetMsg_LocalObjectState(sbPtr);
 				}
 
@@ -1961,8 +1935,6 @@ static void AddPlayerAndObjectUpdateMessages(void)
 			case (I_BehaviourAutoGun):
 			{
 				/* this MUST be a player placed autogun */
-				{
-				}
 				/* the autogun update message */
 				AddNetMsg_PlayerAutoGunState(sbPtr);
 				break;
@@ -1971,8 +1943,7 @@ static void AddPlayerAndObjectUpdateMessages(void)
 			case (I_BehaviourAlien):
 			{
 				//only add alien details , if it is near (to someone)
-				if (sbPtr->SBdptr)
-				{
+				if (sbPtr->SBdptr) {
 					AddNetMsg_AlienAIState(sbPtr);
 				}
 
@@ -1992,33 +1963,13 @@ static void AddPlayerAndObjectUpdateMessages(void)
   ----------------------------------------------------------------------*/
 void EndAVPNetGame(void)
 {
-	//netGameData.myGameState=NGS_Leaving;
 	RemovePlayerFromGame(AvPNetID);
 	TransmitPlayerLeavingNetMsg();
 
-	if (!netGameData.skirmishMode)
-	{
+	if (!netGameData.skirmishMode) {
 		Net_Disconnect();
 	}
 
-#if 0
-
-	/* terminate our player */
-	if (AvPNetID)
-	{
-		hres = IDirectPlay4_DestroyPlayer(glpDP, AvPNetID);
-		AvPNetID = NULL;
-	}
-
-	/* terminate the dp object */
-	if (glpDP)
-	{
-		hres = IDirectPlay4_Close(lpDPlay3AAVP);
-		IDirectPlay4_Release(lpDPlay3AAVP);
-		lpDPlay3AAVP = NULL;
-	}
-
-#endif
 	/* reset our game mode here */
 	AvP.Network = I_No_Network;
 	AvP.NetworkAIServer = 0;
@@ -2345,46 +2296,37 @@ void AddNetMsg_PlayerState(STRATEGYBLOCK *sbPtr)
 		LOCALASSERT((dynPtr->OrientEuler.EulerZ >= 0) && (dynPtr->OrientEuler.EulerZ < 4096));  /* 9 bits of signed data */
 
 		/* NB we can fit +-4194303 into 23 bits */
-		if (dynPtr->Position.vx < -4100000)
-		{
+		if (dynPtr->Position.vx < -4100000) {
 			messagePtr->xPos = -4100000;
 		}
-		else if (dynPtr->Position.vx > 4100000)
-		{
+		else if (dynPtr->Position.vx > 4100000) {
 			messagePtr->xPos = 4100000;
 		}
-		else
-		{
+		else {
 			messagePtr->xPos = dynPtr->Position.vx;
 		}
 
 		messagePtr->xOrient = (dynPtr->OrientEuler.EulerX >> NET_EULERSCALESHIFT);
 
-		if (dynPtr->Position.vy < -4100000)
-		{
+		if (dynPtr->Position.vy < -4100000) {
 			messagePtr->yPos = -4100000;
 		}
-		else if (dynPtr->Position.vy > 4100000)
-		{
+		else if (dynPtr->Position.vy > 4100000) {
 			messagePtr->yPos = 4100000;
 		}
-		else
-		{
+		else {
 			messagePtr->yPos = dynPtr->Position.vy;
 		}
 
 		messagePtr->yOrient = (dynPtr->OrientEuler.EulerY >> NET_EULERSCALESHIFT);
 
-		if (dynPtr->Position.vz < -4100000)
-		{
+		if (dynPtr->Position.vz < -4100000) {
 			messagePtr->zPos = -4100000;
 		}
-		else if (dynPtr->Position.vz > 4100000)
-		{
+		else if (dynPtr->Position.vz > 4100000) {
 			messagePtr->zPos = 4100000;
 		}
-		else
-		{
+		else {
 			messagePtr->zPos = dynPtr->Position.vz;
 		}
 
@@ -2500,12 +2442,10 @@ void AddNetMsg_PlayerState(STRATEGYBLOCK *sbPtr)
 			}
 		}
 
-		if (PlayerStatusPtr->ShapeState != PMph_Standing)
-		{
+		if (PlayerStatusPtr->ShapeState != PMph_Standing) {
 			messagePtr->IAmCrouched = 1;
 		}
-		else
-		{
+		else {
 			messagePtr->IAmCrouched = 0;
 		}
 	}
@@ -2540,12 +2480,9 @@ void AddNetMsg_PlayerState(STRATEGYBLOCK *sbPtr)
 			}
 
 			/* Whether in tertiary fire */
-			if (AreTwoPistolsInTertiaryFire())
-			{
+			if (AreTwoPistolsInTertiaryFire()) {
 				messagePtr->Special = 1;
-			}
-			else
-			{
+			} else {
 				messagePtr->Special = 0;
 			}
 
@@ -2559,73 +2496,53 @@ void AddNetMsg_PlayerState(STRATEGYBLOCK *sbPtr)
 			   )
 			{
 				messagePtr->Special = 1;
-			}
-			else
-			{
+			} else {
 				messagePtr->Special = 0;
 			}
 
-			if ((weaponPtr->CurrentState == WEAPONSTATE_FIRING_PRIMARY) && (PlayerStatusPtr->IsAlive))
-			{
+			if ((weaponPtr->CurrentState == WEAPONSTATE_FIRING_PRIMARY) && (PlayerStatusPtr->IsAlive)) {
 				messagePtr->IAmFiringPrimary = 1;
-			}
-			else
-			{
+			} else {
 				messagePtr->IAmFiringPrimary = 0;
 			}
 
-			if ((weaponPtr->CurrentState == WEAPONSTATE_FIRING_SECONDARY) && (PlayerStatusPtr->IsAlive))
-			{
+			if ((weaponPtr->CurrentState == WEAPONSTATE_FIRING_SECONDARY) && (PlayerStatusPtr->IsAlive)) {
 				messagePtr->IAmFiringSecondary = 1;
-			}
-			else
-			{
+			} else {
 				messagePtr->IAmFiringSecondary = 0;
 			}
 
 			/* whether or not I'm displaying a gun flash */
-			if (MyPlayerHasAMuzzleFlash(sbPtr))
-			{
+			if (MyPlayerHasAMuzzleFlash(sbPtr)) {
 				messagePtr->IHaveAMuzzleFlash = 1;
-			}
-			else
-			{
+			} else {
 				messagePtr->IHaveAMuzzleFlash = 0;
 			}
 		}
 	}
 
 	/* whether or not I'm alive */
-	if (PlayerStatusPtr->IsAlive)
-	{
+	if (PlayerStatusPtr->IsAlive) {
 		messagePtr->IAmAlive = 1;
-	}
-	else
-	{
+	} else {
 		messagePtr->IAmAlive = 0;
 	}
 
 	netGameData.playerData[playerIndex].playerAlive = messagePtr->IAmAlive;
 
 	//Is the player alive or in possesion of extra lives?
-	if (messagePtr->IAmAlive)
-	{
+	if (messagePtr->IAmAlive) {
 		messagePtr->IHaveLifeLeft = 1;
-	}
-	else
-	{
+	} else {
 		messagePtr->IHaveLifeLeft = AreThereAnyLivesLeft();
 	}
 
 	netGameData.playerData[playerIndex].playerHasLives = messagePtr->IHaveLifeLeft;
 
 	/*Am I currently invulnerable?*/
-	if (PlayerStatusPtr->invulnerabilityTimer > 0)
-	{
+	if (PlayerStatusPtr->invulnerabilityTimer > 0) {
 		messagePtr->IAmInvulnerable = 1;
-	}
-	else
-	{
+	} else {
 		messagePtr->IAmInvulnerable = 0;
 	}
 
@@ -2641,28 +2558,20 @@ void AddNetMsg_PlayerState(STRATEGYBLOCK *sbPtr)
 		{
 			LOCALASSERT(AvP.PlayerType == I_Predator);
 
-			if (playerStatusPtr->CloakingEffectiveness > 65535)
-			{
+			if (playerStatusPtr->CloakingEffectiveness > 65535) {
 				messagePtr->CloakingEffectiveness = 65535;
-			}
-			else
-			{
+			} else {
 				messagePtr->CloakingEffectiveness = (unsigned short)(playerStatusPtr->CloakingEffectiveness);
 			}
-		}
-		else
-		{
+		} else {
 			messagePtr->CloakingEffectiveness = 0;
 		}
 	}
 
 	/* Am I on fire? */
-	if (sbPtr->SBDamageBlock.IsOnFire)
-	{
+	if (sbPtr->SBDamageBlock.IsOnFire) {
 		messagePtr->IAmOnFire = 1;
-	}
-	else
-	{
+	} else {
 		messagePtr->IAmOnFire = 0;
 	}
 
@@ -2679,9 +2588,7 @@ void AddNetMsg_PlayerState(STRATEGYBLOCK *sbPtr)
 				disc_section = GetThisSectionData(PlayersWeapon.HModelControlBlock->section_data, "disk");
 				GLOBALASSERT(disc_section);
 
-				if ((disc_section->flags & section_data_notreal) == 0)
-				{
-					/* We have a disk! */
+				if ((disc_section->flags & section_data_notreal) == 0) {
 					messagePtr->IHaveADisk = 1;
 				}
 			}
@@ -2689,12 +2596,9 @@ void AddNetMsg_PlayerState(STRATEGYBLOCK *sbPtr)
 	}
 
 	//have we been screaming?
-	if (netGameData.myLastScream != -1)
-	{
+	if (netGameData.myLastScream != -1) {
 		messagePtr->scream = netGameData.myLastScream;
-	}
-	else
-	{
+	} else {
 		messagePtr->scream = 31;
 	}
 
@@ -2715,13 +2619,11 @@ void AddNetMsg_PlayerState_Minimal(STRATEGYBLOCK *sbPtr, BOOL sendOrient)
 	int headerSize = sizeof(NETMESSAGEHEADER);
 	int messageSize = sizeof(NETMESSAGE_PLAYERSTATE_MINIMAL);
 
-	if (sendOrient)
-	{
+	if (sendOrient) {
 		messageSize = sizeof(NETMESSAGE_PLAYERSTATE_MEDIUM);
 	}
 
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
@@ -2744,12 +2646,10 @@ void AddNetMsg_PlayerState_Minimal(STRATEGYBLOCK *sbPtr, BOOL sendOrient)
 	endSendBuffer += messageSize;
 
 	/* fill out the header */
-	if (sendOrient)
-	{
+	if (sendOrient) {
 		headerPtr->type = (unsigned char)NetMT_PlayerState_Medium;
 	}
-	else
-	{
+	else {
 		headerPtr->type = (unsigned char)NetMT_PlayerState_Minimal;
 	}
 
@@ -2792,55 +2692,40 @@ void AddNetMsg_PlayerState_Minimal(STRATEGYBLOCK *sbPtr, BOOL sendOrient)
 		}
 		else
 		{
-			if ((weaponPtr->CurrentState == WEAPONSTATE_FIRING_PRIMARY) && (PlayerStatusPtr->IsAlive))
-			{
+			if ((weaponPtr->CurrentState == WEAPONSTATE_FIRING_PRIMARY) && (PlayerStatusPtr->IsAlive)) {
 				messagePtr->IAmFiringPrimary = 1;
-			}
-			else
-			{
+			} else {
 				messagePtr->IAmFiringPrimary = 0;
 			}
 
-			if ((weaponPtr->CurrentState == WEAPONSTATE_FIRING_SECONDARY) && (PlayerStatusPtr->IsAlive))
-			{
+			if ((weaponPtr->CurrentState == WEAPONSTATE_FIRING_SECONDARY) && (PlayerStatusPtr->IsAlive)) {
 				messagePtr->IAmFiringSecondary = 1;
-			}
-			else
-			{
+			} else {
 				messagePtr->IAmFiringSecondary = 0;
 			}
 
 			/* whether or not I'm displaying a gun flash */
-			if (MyPlayerHasAMuzzleFlash(sbPtr))
-			{
+			if (MyPlayerHasAMuzzleFlash(sbPtr)) {
 				messagePtr->IHaveAMuzzleFlash = 1;
-			}
-			else
-			{
+			} else {
 				messagePtr->IHaveAMuzzleFlash = 0;
 			}
 		}
 	}
 
 	/* whether or not I'm alive */
-	if (PlayerStatusPtr->IsAlive)
-	{
+	if (PlayerStatusPtr->IsAlive) {
 		messagePtr->IAmAlive = 1;
-	}
-	else
-	{
+	} else {
 		messagePtr->IAmAlive = 0;
 	}
 
 	netGameData.playerData[playerIndex].playerAlive = (unsigned char)(messagePtr->IAmAlive);
 
 	//Is the player alive or in possesion of extra lives?
-	if (messagePtr->IAmAlive)
-	{
+	if (messagePtr->IAmAlive) {
 		messagePtr->IHaveLifeLeft = 1;
-	}
-	else
-	{
+	} else {
 		messagePtr->IHaveLifeLeft = AreThereAnyLivesLeft();
 	}
 
@@ -2854,28 +2739,20 @@ void AddNetMsg_PlayerState_Minimal(STRATEGYBLOCK *sbPtr, BOOL sendOrient)
 		{
 			LOCALASSERT(AvP.PlayerType == I_Predator);
 
-			if (playerStatusPtr->CloakingEffectiveness > 65535)
-			{
+			if (playerStatusPtr->CloakingEffectiveness > 65535) {
 				messagePtr->CloakingEffectiveness = 65535 >> 8;
-			}
-			else
-			{
+			} else {
 				messagePtr->CloakingEffectiveness = (unsigned short)(playerStatusPtr->CloakingEffectiveness >> 8);
 			}
-		}
-		else
-		{
+		} else {
 			messagePtr->CloakingEffectiveness = 0;
 		}
 	}
 
 	/* Am I on fire? */
-	if (sbPtr->SBDamageBlock.IsOnFire)
-	{
+	if (sbPtr->SBDamageBlock.IsOnFire) {
 		messagePtr->IAmOnFire = 1;
-	}
-	else
-	{
+	} else {
 		messagePtr->IAmOnFire = 0;
 	}
 
@@ -2892,9 +2769,7 @@ void AddNetMsg_PlayerState_Minimal(STRATEGYBLOCK *sbPtr, BOOL sendOrient)
 				disc_section = GetThisSectionData(PlayersWeapon.HModelControlBlock->section_data, "disk");
 				GLOBALASSERT(disc_section);
 
-				if ((disc_section->flags & section_data_notreal) == 0)
-				{
-					/* We have a disk! */
+				if ((disc_section->flags & section_data_notreal) == 0) {
 					messagePtr->IHaveADisk = 1;
 				}
 			}
@@ -2918,8 +2793,7 @@ void AddNetMsg_FrameTimer()
 	int messageSize = sizeof(NETMESSAGE_FRAMETIMER);
 
 	/* only send this if we are playing */
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
@@ -2958,13 +2832,11 @@ static int MyPlayerHasAMuzzleFlash(STRATEGYBLOCK *sbPtr)
 	twPtr = &TemplateWeapon[weaponPtr->WeaponIDNumber];
 
 	/* first check if we are displaying a muzle flash ourselves */
-	if (twPtr->MuzzleFlashShapeName == NULL)
-	{
+	if (twPtr->MuzzleFlashShapeName == NULL) {
 		return 0;
 	}
 
-	if (twPtr->PrimaryIsMeleeWeapon)
-	{
+	if (twPtr->PrimaryIsMeleeWeapon) {
 		return 0;
 	}
 
@@ -2972,23 +2844,17 @@ static int MyPlayerHasAMuzzleFlash(STRATEGYBLOCK *sbPtr)
 	{
 		if (weaponPtr->CurrentState == WEAPONSTATE_FIRING_PRIMARY)
 		{
-			if (LastHand)
-			{
+			if (LastHand) {
 				return 2;
-			}
-			else
-			{
+			} else {
 				return 1;
 			}
 		}
 		else if (weaponPtr->CurrentState == WEAPONSTATE_FIRING_SECONDARY)
 		{
-			if (LastHand)
-			{
+			if (LastHand) {
 				return 2;
-			}
-			else
-			{
+			} else {
 				return 1;
 			}
 
@@ -3000,19 +2866,14 @@ static int MyPlayerHasAMuzzleFlash(STRATEGYBLOCK *sbPtr)
 	{
 		if ((weaponPtr->CurrentState == WEAPONSTATE_FIRING_PRIMARY)
 		    || (weaponPtr->CurrentState == WEAPONSTATE_FIRING_SECONDARY))
-		{
-			//ReleasePrintDebuggingText("Pistol Muzzle Flash 1\n");
-			return 1;
-		}
-		else
-		{
-			//ReleasePrintDebuggingText("Pistol Muzzle Flash 0\n");
-			return 0;
+		{	
+			return 1; //ReleasePrintDebuggingText("Pistol Muzzle Flash 1\n");
+		} else {	
+			return 0; //ReleasePrintDebuggingText("Pistol Muzzle Flash 0\n");
 		}
 	}
 
-	if (weaponPtr->CurrentState != WEAPONSTATE_FIRING_PRIMARY)
-	{
+	if (weaponPtr->CurrentState != WEAPONSTATE_FIRING_PRIMARY) {
 		return 0;
 	}
 
@@ -3057,8 +2918,7 @@ char GetWeaponIconFromDamage(DAMAGE_PROFILE *damage)
 #define ICON_SPEARGUN 155
 #define ICON_DISC 157
 
-	if (!damage)
-	{
+	if (!damage) {
 		return 0;
 	}
 
@@ -3152,8 +3012,7 @@ void AddNetMsg_PlayerKilled(int objectId, DAMAGE_PROFILE *damage)
 	int messageSize = sizeof(NETMESSAGE_PLAYERKILLED);
 
 	/* only send this if we are playing */
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
@@ -3188,12 +3047,10 @@ void AddNetMsg_PlayerKilled(int objectId, DAMAGE_PROFILE *damage)
 	{
 		int killer_index = PlayerIdInPlayerList(myNetworkKillerId);
 
-		if (killer_index != NET_IDNOTINPLAYERLIST)
-		{
+		if (killer_index != NET_IDNOTINPLAYERLIST) {
 			messagePtr->killerType = netGameData.playerData[killer_index].characterType;
 		}
-		else
-		{
+		else {
 			//the player doing the damage has either left the game , or never existed.
 			//call it suicide then.
 			myNetworkKillerId = AvPNetID;
@@ -3237,8 +3094,7 @@ void AddNetMsg_PlayerKilled(int objectId, DAMAGE_PROFILE *damage)
 
 	Inform_PlayerHasDied(myNetworkKillerId, AvPNetID, messagePtr->killerType, messagePtr->weaponIcon);
 
-	if (AvP.Network == I_Host)
-	{
+	if (AvP.Network == I_Host) {
 		DoNetScoresForHostDeath(messagePtr->myType, messagePtr->killerType);
 	}
 }
@@ -3337,20 +3193,16 @@ void AddNetMsg_AllGameScores(void)
 	headerPtr->type = (unsigned char)NetMT_AllGameScores;
 	/*fill out the message */
 	{
-		int i, j;
-
-		for (i = 0; i < NET_MAXPLAYERS; i++)
+		for (int i = 0; i < NET_MAXPLAYERS; i++)
 		{
-			for (j = 0; j < NET_MAXPLAYERS; j++)
-			{
+			for (int j = 0; j < NET_MAXPLAYERS; j++) {
 				messagePtr->playerFrags[i][j] = netGameData.playerData[i].playerFrags[j];
 			}
 
 			messagePtr->playerScores[i] = netGameData.playerData[i].playerScore;
 			messagePtr->playerScoresAgainst[i] = netGameData.playerData[i].playerScoreAgainst;
 
-			for (j = 0; j < 3; j++)
-			{
+			for (int j = 0; j < 3; j++) {
 				messagePtr->aliensKilled[i][j] = netGameData.playerData[i].aliensKilled[j];
 			}
 
@@ -3390,18 +3242,14 @@ void AddNetMsg_PlayerScores(int playerId)
 	/*fill out the message */
 	messagePtr->playerId = (unsigned char)playerId;
 	{
-		int i;
-
-		for (i = 0; i < NET_MAXPLAYERS; i++)
-		{
+		for (int i = 0; i < NET_MAXPLAYERS; i++) {
 			messagePtr->playerFrags[i] = netGameData.playerData[playerId].playerFrags[i];
 		}
 
 		messagePtr->playerScore = netGameData.playerData[playerId].playerScore;
 		messagePtr->playerScoreAgainst = netGameData.playerData[playerId].playerScoreAgainst;
 
-		for (i = 0; i < 3; i++)
-		{
+		for (int i = 0; i < 3; i++) {
 			messagePtr->aliensKilled[i] = netGameData.playerData[playerId].aliensKilled[i];
 		}
 
@@ -3459,19 +3307,18 @@ void AddNetMsg_SpeciesScores()
 	NETMESSAGE_SPECIESSCORES *messagePtr;
 	int headerSize = sizeof(NETMESSAGEHEADER);
 	int messageSize = sizeof(NETMESSAGE_SPECIESSCORES);
-	int i;
-	/* check there's enough room in the send buffer */
-	{
-		int numBytesReqd = headerSize + messageSize;
-		int numBytesLeft = NET_MESSAGEBUFFERSIZE - ((int)(endSendBuffer - &sendBuffer[0]));
 
-		if (numBytesReqd > numBytesLeft)
-		{
-			LOCALASSERT(1 == 0);
-			/* don't add it */
-			return;
-		}
+	/* check there's enough room in the send buffer */
+	int numBytesReqd = headerSize + messageSize;
+	int numBytesLeft = NET_MESSAGEBUFFERSIZE - ((int)(endSendBuffer - &sendBuffer[0]));
+
+	if (numBytesReqd > numBytesLeft)
+	{
+		LOCALASSERT(1 == 0);
+		/* don't add it */
+		return;
 	}
+
 	/* set up pointers to header and message structures */
 	headerPtr = (NETMESSAGEHEADER *)endSendBuffer;
 	endSendBuffer += headerSize;
@@ -3481,8 +3328,7 @@ void AddNetMsg_SpeciesScores()
 	headerPtr->type = (unsigned char)NetMT_SpeciesScores;
 
 	/* Fill in message. */
-	for (i = 0; i < 3; i++)
-	{
+	for (int i = 0; i < 3; i++) {
 		messagePtr->teamScores[i] = netGameData.teamScores[i];
 	}
 }
@@ -3500,8 +3346,7 @@ void AddNetMsg_LocalObjectState(STRATEGYBLOCK *sbPtr)
 	int messageSize = sizeof(NETMESSAGE_LOBSTATE);
 
 	/* only send this if we are playing */
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
@@ -3536,46 +3381,37 @@ void AddNetMsg_LocalObjectState(STRATEGYBLOCK *sbPtr)
 		LOCALASSERT((dynPtr->OrientEuler.EulerZ >= 0) && (dynPtr->OrientEuler.EulerZ < 4096));  /* 9 bits of signed data */
 
 		/* NB we can fit +-4194303 into 23 bits */
-		if (dynPtr->Position.vx < -4100000)
-		{
+		if (dynPtr->Position.vx < -4100000) {
 			messagePtr->xPos = -4100000;
 		}
-		else if (dynPtr->Position.vx > 4100000)
-		{
+		else if (dynPtr->Position.vx > 4100000) {
 			messagePtr->xPos = 4100000;
 		}
-		else
-		{
+		else {
 			messagePtr->xPos = dynPtr->Position.vx;
 		}
 
 		messagePtr->xOrient = (dynPtr->OrientEuler.EulerX >> NET_EULERSCALESHIFT);
 
-		if (dynPtr->Position.vy < -4100000)
-		{
+		if (dynPtr->Position.vy < -4100000) {
 			messagePtr->yPos = -4100000;
 		}
-		else if (dynPtr->Position.vy > 4100000)
-		{
+		else if (dynPtr->Position.vy > 4100000) {
 			messagePtr->yPos = 4100000;
 		}
-		else
-		{
+		else {
 			messagePtr->yPos = dynPtr->Position.vy;
 		}
 
 		messagePtr->yOrient = (dynPtr->OrientEuler.EulerY >> NET_EULERSCALESHIFT);
 
-		if (dynPtr->Position.vz < -4100000)
-		{
+		if (dynPtr->Position.vz < -4100000) {
 			messagePtr->zPos = -4100000;
 		}
-		else if (dynPtr->Position.vz > 4100000)
-		{
+		else if (dynPtr->Position.vz > 4100000) {
 			messagePtr->zPos = 4100000;
 		}
-		else
-		{
+		else {
 			messagePtr->zPos = dynPtr->Position.vz;
 		}
 
@@ -3686,8 +3522,7 @@ void AddNetMsg_LocalObjectDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, 
 	                     sizeof(NETMESSAGE_DAMAGE_DIRECTION);
 
 	/* only send this if we are playing */
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
@@ -3712,8 +3547,7 @@ void AddNetMsg_LocalObjectDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, 
 		NETGHOSTDATABLOCK *ghostData = (NETGHOSTDATABLOCK *)sbPtr->SBdataptr;
 		LOCALASSERT(ghostData);
 
-		if (sbPtr->I_SBtype != I_BehaviourNetGhost)
-		{
+		if (sbPtr->I_SBtype != I_BehaviourNetGhost) {
 			LOCALASSERT(1 == 0);
 		}
 
@@ -3732,13 +3566,11 @@ void AddNetMsg_LocalObjectDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, 
 
 		if (damage->Id > AMMO_NONE && damage->Id < MAX_NO_OF_AMMO_TEMPLATES)
 		{
-			if (AreDamageProfilesEqual(damage, &TemplateAmmo[damage->Id].MaxDamage[AvP.Difficulty]))
-			{
+			if (AreDamageProfilesEqual(damage, &TemplateAmmo[damage->Id].MaxDamage[AvP.Difficulty])) {
 				messageHeader->damageProfile = 0;
 			}
 		}
-		else if (damage->Id == AMMO_FLECHETTE_POSTMAX)
-		{
+		else if (damage->Id == AMMO_FLECHETTE_POSTMAX) {
 			messageHeader->damageProfile = 0;
 		}
 
@@ -3771,8 +3603,7 @@ void AddNetMsg_LocalObjectDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, 
 			endSendBuffer += sizeof(NETMESSAGE_DAMAGE_MULTIPLE);
 			messageMultiple->multiple = multiple;
 		}
-		else
-		{
+		else {
 			messageHeader->multiple = 0;
 		}
 
@@ -3786,8 +3617,7 @@ void AddNetMsg_LocalObjectDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, 
 			endSendBuffer += sizeof(NETMESSAGE_DAMAGE_SECTION);
 			messageSection->SectionID = (short)sectionID;
 		}
-		else
-		{
+		else {
 			messageHeader->sectionID = 0;
 		}
 
@@ -3802,8 +3632,7 @@ void AddNetMsg_LocalObjectDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, 
 			messageDelta->Delta_Sequence = (char)delta_seq;
 			messageDelta->Delta_Sub_Sequence = (char)delta_sub_seq;
 		}
-		else
-		{
+		else {
 			messageHeader->delta_seq = 0;
 		}
 
@@ -3824,12 +3653,10 @@ void AddNetMsg_LocalObjectDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, 
 			messageDirection->direction_y = direction.vy >> 7;
 			messageDirection->direction_z = direction.vz >> 7;
 		}
-		else
-		{
+		else {
 			messageHeader->direction = 0;
 		}
 	}
-	//that's it
 }
 
 void AddNetMsg_LocalObjectDestroyed_Request(STRATEGYBLOCK *sbPtr)
@@ -3840,8 +3667,7 @@ void AddNetMsg_LocalObjectDestroyed_Request(STRATEGYBLOCK *sbPtr)
 	int messageSize = sizeof(NETMESSAGE_LOBDESTROYED_REQUEST);
 
 	/* only send this if we are playing */
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
@@ -3869,20 +3695,12 @@ void AddNetMsg_LocalObjectDestroyed_Request(STRATEGYBLOCK *sbPtr)
 		NETGHOSTDATABLOCK *ghostData = (NETGHOSTDATABLOCK *)sbPtr->SBdataptr;
 		LOCALASSERT(ghostData);
 
-		if (sbPtr->I_SBtype != I_BehaviourNetGhost)
-		{
+		if (sbPtr->I_SBtype != I_BehaviourNetGhost) {
 			LOCALASSERT(1 == 0);
 		}
 
 		messagePtr->playerId = ghostData->playerId;
-		/*
-		        if((ghostData->playerObjectId < -NET_MAXOBJECTID)||(ghostData->playerObjectId > NET_MAXOBJECTID))
-		        {
-		            LOCALASSERT(1==0);
-		        }
-		*/
 		messagePtr->objectId = ghostData->playerObjectId;
-		/* That's it. */
 	}
 }
 
@@ -3894,8 +3712,7 @@ void AddNetMsg_LocalObjectDestroyed(STRATEGYBLOCK *sbPtr)
 	int messageSize = sizeof(NETMESSAGE_LOBDESTROYED);
 
 	/* only send this if we are playing */
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
@@ -3938,8 +3755,7 @@ void AddNetMsg_InanimateObjectDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *dama
 	                     sizeof(NETMESSAGE_DAMAGE_MULTIPLE);
 
 	/* only send this if we are playing */
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
@@ -3979,8 +3795,7 @@ void AddNetMsg_InanimateObjectDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *dama
 
 	if (damage->Id > AMMO_NONE && damage->Id < MAX_NO_OF_AMMO_TEMPLATES)
 	{
-		if (AreDamageProfilesEqual(damage, &TemplateAmmo[damage->Id].MaxDamage[AvP.Difficulty]))
-		{
+		if (AreDamageProfilesEqual(damage, &TemplateAmmo[damage->Id].MaxDamage[AvP.Difficulty])) {
 			messageHeader->damageProfile = 0;
 		}
 	}
@@ -4014,8 +3829,7 @@ void AddNetMsg_InanimateObjectDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *dama
 		endSendBuffer += sizeof(NETMESSAGE_DAMAGE_MULTIPLE);
 		messageMultiple->multiple = multiple;
 	}
-	else
-	{
+	else {
 		messageHeader->multiple = 0;
 	}
 }
@@ -4029,8 +3843,7 @@ void AddNetMsg_InanimateObjectDestroyed(STRATEGYBLOCK *sbPtr)
 	int messageSize = sizeof(NETMESSAGE_INANIMATEDESTROYED);
 
 	/* only send this if we are playing */
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
@@ -4058,9 +3871,8 @@ void AddNetMsg_InanimateObjectDestroyed(STRATEGYBLOCK *sbPtr)
 	/* fill out the header */
 	headerPtr->type = (unsigned char)NetMT_InanimateObjectDestroyed;
 	/* fill out message */
-	{
-		COPY_NAME(&(messagePtr->name), &(sbPtr->SBname));
-	}
+	
+	COPY_NAME(&(messagePtr->name), &(sbPtr->SBname));
 }
 
 void AddNetMsg_ObjectPickedUp(char *objectName)
@@ -4071,8 +3883,7 @@ void AddNetMsg_ObjectPickedUp(char *objectName)
 	int messageSize = sizeof(NETMESSAGE_OBJECTPICKEDUP);
 
 	/* only send this if we are playing */
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
@@ -4135,14 +3946,12 @@ void AddNetMsg_LOSRequestBinarySwitch(STRATEGYBLOCK *sbPtr)
 	int messageSize = sizeof(NETMESSAGE_LOSREQUESTBINARYSWITCH);
 
 	/* only send this if we are playing */
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
 	/* also, the object must be a binary switch */
-	if (sbPtr->I_SBtype != I_BehaviourBinarySwitch && sbPtr->I_SBtype != I_BehaviourLinkSwitch)
-	{
+	if (sbPtr->I_SBtype != I_BehaviourBinarySwitch && sbPtr->I_SBtype != I_BehaviourLinkSwitch) {
 		return;
 	}
 
@@ -4180,13 +3989,11 @@ void AddNetMsg_PlatformLiftState(STRATEGYBLOCK *sbPtr)
 	LOCALASSERT(AvP.Network == I_Host);
 
 	/* only send this if we are playing */
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
-	if (sbPtr->I_SBtype != I_BehaviourPlatform)
-	{
+	if (sbPtr->I_SBtype != I_BehaviourPlatform) {
 		return;
 	}
 
@@ -4227,13 +4034,11 @@ void AddNetMsg_RequestPlatformLiftActivate(STRATEGYBLOCK *sbPtr)
 	LOCALASSERT(AvP.Network == I_Peer);
 
 	/* only send this if we are playing */
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
-	if (sbPtr->I_SBtype != I_BehaviourPlatform)
-	{
+	if (sbPtr->I_SBtype != I_BehaviourPlatform) {
 		return;
 	}
 
@@ -4270,8 +4075,7 @@ void AddNetMsg_PlayerAutoGunState(STRATEGYBLOCK *sbPtr)
 	int messageSize = sizeof(NETMESSAGE_AGUNSTATE);
 
 	/* only send this if we are playing */
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
@@ -4306,46 +4110,37 @@ void AddNetMsg_PlayerAutoGunState(STRATEGYBLOCK *sbPtr)
 		LOCALASSERT((dynPtr->OrientEuler.EulerZ >= 0) && (dynPtr->OrientEuler.EulerZ < 4096));  /* 9 bits of signed data */
 
 		/* NB we can fit +-4194303 into 23 bits */
-		if (dynPtr->Position.vx < -4100000)
-		{
+		if (dynPtr->Position.vx < -4100000) {
 			messagePtr->xPos = -4100000;
 		}
-		else if (dynPtr->Position.vx > 4100000)
-		{
+		else if (dynPtr->Position.vx > 4100000) {
 			messagePtr->xPos = 4100000;
 		}
-		else
-		{
+		else {
 			messagePtr->xPos = dynPtr->Position.vx;
 		}
 
 		messagePtr->xOrient = (dynPtr->OrientEuler.EulerX >> NET_EULERSCALESHIFT);
 
-		if (dynPtr->Position.vy < -4100000)
-		{
+		if (dynPtr->Position.vy < -4100000) {
 			messagePtr->yPos = -4100000;
 		}
-		else if (dynPtr->Position.vy > 4100000)
-		{
+		else if (dynPtr->Position.vy > 4100000) {
 			messagePtr->yPos = 4100000;
 		}
-		else
-		{
+		else {
 			messagePtr->yPos = dynPtr->Position.vy;
 		}
 
 		messagePtr->yOrient = (dynPtr->OrientEuler.EulerY >> NET_EULERSCALESHIFT);
 
-		if (dynPtr->Position.vz < -4100000)
-		{
+		if (dynPtr->Position.vz < -4100000) {
 			messagePtr->zPos = -4100000;
 		}
-		else if (dynPtr->Position.vz > 4100000)
-		{
+		else if (dynPtr->Position.vz > 4100000) {
 			messagePtr->zPos = 4100000;
 		}
-		else
-		{
+		else {
 			messagePtr->zPos = dynPtr->Position.vz;
 		}
 
@@ -4363,21 +4158,17 @@ void AddNetMsg_PlayerAutoGunState(STRATEGYBLOCK *sbPtr)
 		agData = (AUTOGUN_STATUS_BLOCK *)(sbPtr->SBdataptr);
 		LOCALASSERT(agData);
 
-		if (agData->Firing)
-		{
+		if (agData->Firing) {
 			messagePtr->IAmFiring = 1;
 		}
-		else
-		{
+		else {
 			messagePtr->IAmFiring = 0;
 		}
 
-		if (agData->behaviourState == I_disabled)
-		{
+		if (agData->behaviourState == I_disabled) {
 			messagePtr->IAmEnabled = 0;
 		}
-		else
-		{
+		else {
 			messagePtr->IAmEnabled = 1;
 		}
 	}
@@ -4395,8 +4186,7 @@ void AddNetMsg_MakeDecal(enum DECAL_ID decalID, VECTORCH *normalPtr, VECTORCH *p
 	static int FrameStamp;
 
 	/* only send this if we are playing */
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
@@ -4408,8 +4198,7 @@ void AddNetMsg_MakeDecal(enum DECAL_ID decalID, VECTORCH *normalPtr, VECTORCH *p
 
 	/*Limit the decal count per frame, even in lan games. Otherwise it is easy to get assertions from having tons
 	of alien blood particles*/
-	if (DecalCountThisFrame >= 10)
-	{
+	if (DecalCountThisFrame >= 10) {
 		return;
 	}
 
@@ -4450,29 +4239,24 @@ void AddNetMsg_ChatBroadcast(char *string, BOOL same_species_only)
 	unsigned char stringLength = 1;
 
 	//remove the console (assuming it is on screen)
-	if (IOFOCUS_AcceptTyping())
-	{
+	if (IOFOCUS_AcceptTyping()) {
 		IOFOCUS_Toggle();
 	}
 
 	/* only send this if we are playing */
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
-	{
-		char *ptr = string;
+	char *ptr = string;
 
-		while (*ptr && stringLength < 255)
-		{
-			stringLength++;
-			ptr++;
-		}
+	while (*ptr && stringLength < 255)
+	{
+		stringLength++;
+		ptr++;
 	}
 
-	if (stringLength == 1 || stringLength >= 255)
-	{
+	if (stringLength == 1 || stringLength >= 255) {
 		return;
 	}
 
@@ -4502,16 +4286,13 @@ void AddNetMsg_ChatBroadcast(char *string, BOOL same_species_only)
 		//first byte used to distinguish between SAY and SPECIES_SAY
 		*messagePtr++ = (char)same_species_only;
 
-		do
-		{
+		do {
 			*messagePtr++ = *ptr;
 		}
 		while (*ptr++);
 	}
-	{
-		sprintf(OnScreenMessageBuffer, "%s: %s", netGameData.playerData[PlayerIdInPlayerList(AvPNetID)].name, string);
-		NewOnScreenMessage(OnScreenMessageBuffer);
-	}
+	sprintf(OnScreenMessageBuffer, "%s: %s", netGameData.playerData[PlayerIdInPlayerList(AvPNetID)].name, string);
+	NewOnScreenMessage(OnScreenMessageBuffer);
 }
 
 /* KJL 11:28:44 27/04/98 - make an explosion (just the sfx; damage is handled separately */
@@ -4523,8 +4304,7 @@ void AddNetMsg_MakeExplosion(VECTORCH *positionPtr, enum EXPLOSION_ID explosionI
 	int messageSize = sizeof(NETMESSAGE_MAKEEXPLOSION);
 
 	/* only send this if we are playing */
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
@@ -4559,8 +4339,7 @@ void AddNetMsg_MakeFlechetteExplosion(VECTORCH *positionPtr, int seed)
 	int messageSize = sizeof(NETMESSAGE_MAKEFLECHETTEEXPLOSION);
 
 	/* only send this if we are playing */
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
@@ -4596,8 +4375,7 @@ void AddNetMsg_MakePlasmaExplosion(VECTORCH *positionPtr, VECTORCH *fromPosition
 	int messageSize = sizeof(NETMESSAGE_MAKEPLASMAEXPLOSION);
 
 	/* only send this if we are playing */
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
@@ -4635,8 +4413,7 @@ void AddNetMsg_PredatorLaserSights(VECTORCH *positionPtr, VECTORCH *normalPtr, D
 	int messageSize = sizeof(NETMESSAGE_PREDATORSIGHTS);
 
 	/* only send this if we are playing */
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
@@ -4667,46 +4444,37 @@ void AddNetMsg_PredatorLaserSights(VECTORCH *positionPtr, VECTORCH *normalPtr, D
 		MatrixToEuler(&orientMat, &orientation);
 
 		/* NB we can fit +-4194303 into 23 bits */
-		if (positionPtr->vx < -4100000)
-		{
+		if (positionPtr->vx < -4100000) {
 			messagePtr->xPos = -4100000;
 		}
-		else if (positionPtr->vx > 4100000)
-		{
+		else if (positionPtr->vx > 4100000) {
 			messagePtr->xPos = 4100000;
 		}
-		else
-		{
+		else {
 			messagePtr->xPos = positionPtr->vx;
 		}
 
 		messagePtr->xOrient = (orientation.EulerX >> NET_EULERSCALESHIFT);
 
-		if (positionPtr->vy < -4100000)
-		{
+		if (positionPtr->vy < -4100000) {
 			messagePtr->yPos = -4100000;
 		}
-		else if (positionPtr->vy > 4100000)
-		{
+		else if (positionPtr->vy > 4100000) {
 			messagePtr->yPos = 4100000;
 		}
-		else
-		{
+		else {
 			messagePtr->yPos = positionPtr->vy;
 		}
 
 		messagePtr->yOrient = (orientation.EulerY >> NET_EULERSCALESHIFT);
 
-		if (positionPtr->vz < -4100000)
-		{
+		if (positionPtr->vz < -4100000) {
 			messagePtr->zPos = -4100000;
 		}
-		else if (positionPtr->vz > 4100000)
-		{
+		else if (positionPtr->vz > 4100000) {
 			messagePtr->zPos = 4100000;
 		}
-		else
-		{
+		else {
 			messagePtr->zPos = positionPtr->vz;
 		}
 
@@ -4721,8 +4489,7 @@ void AddNetMsg_PredatorLaserSights(VECTORCH *positionPtr, VECTORCH *normalPtr, D
 				{
 					NETGHOSTDATABLOCK *ghostDataPtr = (NETGHOSTDATABLOCK *)dispPtr->ObStrategyBlock->SBdataptr;
 
-					if (ghostDataPtr->playerObjectId == GHOST_PLAYEROBJECTID)
-					{
+					if (ghostDataPtr->playerObjectId == GHOST_PLAYEROBJECTID) {
 						messagePtr->TargetID = ghostDataPtr->playerId;
 					}
 				}
@@ -4739,8 +4506,7 @@ void AddNetMsg_LocalObjectOnFire(STRATEGYBLOCK *sbPtr)
 	int messageSize = sizeof(NETMESSAGE_LOBONFIRE);
 
 	/* only send this if we are playing */
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
@@ -4768,8 +4534,7 @@ void AddNetMsg_LocalObjectOnFire(STRATEGYBLOCK *sbPtr)
 		NETGHOSTDATABLOCK *ghostData = (NETGHOSTDATABLOCK *)sbPtr->SBdataptr;
 		LOCALASSERT(ghostData);
 
-		if (sbPtr->I_SBtype != I_BehaviourNetGhost)
-		{
+		if (sbPtr->I_SBtype != I_BehaviourNetGhost) {
 			LOCALASSERT(1 == 0);
 		}
 
@@ -4824,8 +4589,7 @@ void AddNetMsg_FragmentalObjectsStatus(void)
 	static int object_batch = 0;
 
 	/* only send this if we are playing */
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
@@ -4853,12 +4617,12 @@ void AddNetMsg_FragmentalObjectsStatus(void)
 	messagePtr->BatchNumber = object_batch;
 	/* fill out the message */
 	{
-		int i;
 		int fragNumber = 0;
 		int objectsToSkip = object_batch * (NUMBER_OF_FRAGMENTAL_OBJECTS << 3);
 		int noPlacedLights = 0;
 		LOCALASSERT(AvP.Network != I_No_Network);
 
+		int i;
 		for (i = 0; i < NumActiveStBlocks; i++)
 		{
 			STRATEGYBLOCK *sbPtr = ActiveStBlockList[i];
@@ -4896,18 +4660,15 @@ void AddNetMsg_FragmentalObjectsStatus(void)
 				}
 			}
 
-			if (fragNumber >= (NUMBER_OF_FRAGMENTAL_OBJECTS << 3))
-			{
+			if (fragNumber >= (NUMBER_OF_FRAGMENTAL_OBJECTS << 3)) {
 				break;
 			}
 		}
 
-		if (i == NumActiveStBlocks)
-		{
+		if (i == NumActiveStBlocks) {
 			object_batch = 0;
 		}
-		else
-		{
+		else {
 			//there are more objects to look at , so increment batch
 			object_batch++;
 		}
@@ -4915,8 +4676,7 @@ void AddNetMsg_FragmentalObjectsStatus(void)
 		textprint("noPlacedLights %d\n", noPlacedLights);
 		textprint("fragNumber %d\n", fragNumber);
 
-		for (i = 0; i < NUMBER_OF_FRAGMENTAL_OBJECTS; i++)
-		{
+		for (i = 0; i < NUMBER_OF_FRAGMENTAL_OBJECTS; i++) {
 			messagePtr->StatusBitfield[i] = FragmentalObjectStatus[i];
 		}
 	}
@@ -4936,8 +4696,7 @@ void AddNetMsg_StrategySynch(void)
 	static int object_batch = 0;
 
 	/* only send this if we are playing */
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
@@ -5000,14 +4759,12 @@ void AddNetMsg_StrategySynch(void)
 				}
 			}
 
-			if (objectNumber >= (NUMBER_OF_STRATEGIES_TO_SYNCH))
-			{
+			if (objectNumber >= (NUMBER_OF_STRATEGIES_TO_SYNCH)) {
 				break;
 			}
 		}
 
-		if (i == NumActiveStBlocks)
-		{
+		if (i == NumActiveStBlocks) {
 			object_batch = 0;
 		}
 		else
@@ -5016,14 +4773,12 @@ void AddNetMsg_StrategySynch(void)
 			object_batch++;
 		}
 
-		for (i = 0; i<NUMBER_OF_STRATEGIES_TO_SYNCH >> 2; i++)
-		{
+		for (i = 0; i<NUMBER_OF_STRATEGIES_TO_SYNCH >> 2; i++) {
 			messagePtr->StatusBitfield[i] = StrategySynchArray[i];
 		}
 	}
 
-	if (!netGameData.myStrategyCheckSum)
-	{
+	if (!netGameData.myStrategyCheckSum) {
 		netGameData.myStrategyCheckSum = GetStrategySynchObjectChecksum();
 	}
 
@@ -5038,8 +4793,7 @@ void AddNetMsg_CreateWeapon(char *objectName, int type, VECTORCH *location)
 	int messageSize = sizeof(NETMESSAGE_CREATEWEAPON);
 
 	/* only send this if we are playing */
-	if (netGameData.myGameState != NGS_Playing)
-	{
+	if (netGameData.myGameState != NGS_Playing) {
 		return;
 	}
 
@@ -5067,6 +4821,7 @@ void AddNetMsg_CreateWeapon(char *objectName, int type, VECTORCH *location)
 	messagePtr->location = *location;
 	messagePtr->type = type;
 }
+
 /* KJL 16:32:06 17/06/98 - alien AI network messages */
 void AddNetMsg_AlienAIState(STRATEGYBLOCK *sbPtr)
 {
@@ -5104,8 +4859,7 @@ void AddNetMsg_AlienAIState(STRATEGYBLOCK *sbPtr)
 		{
 			int diff = Magnitude(&dynPtr->LinVelocity) - Magnitude(&alienStatusPtr->lastVelocitySent);
 
-			if (diff > 500 || -diff > 500)
-			{
+			if (diff > 500 || -diff > 500) {
 				updateRequired = TRUE;
 			}
 		}
@@ -5117,14 +4871,12 @@ void AddNetMsg_AlienAIState(STRATEGYBLOCK *sbPtr)
 		//has the facing changed
 		if (!updateRequired)
 		{
-			if (DotProduct(&facing, &alienStatusPtr->lastFacingSent) < 64000)
-			{
+			if (DotProduct(&facing, &alienStatusPtr->lastFacingSent) < 64000) {
 				updateRequired = TRUE;
 			}
 		}
 
-		if (!updateRequired)
-		{
+		if (!updateRequired) {
 			return;
 		}
 
