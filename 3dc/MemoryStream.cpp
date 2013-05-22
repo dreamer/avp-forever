@@ -118,7 +118,7 @@ size_t MemoryReadStream::GetBytes(void *buffer, size_t nBytes)
 
 	size_t count = std::min((size_t)(_end - _currentOffset), nBytes);
 
-	memcpy(_currentOffset, buffer, count);
+	memcpy(buffer, _currentOffset, count);
 	_currentOffset += count;
 	return count;
 }
