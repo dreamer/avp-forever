@@ -757,15 +757,15 @@ void BuildMultiplayerLevelNameArray()
 	elementPtr->TextSliderStringPointer = MultiplayerLevelNames;
 }
 
-//returns local index of a custom level (if it is a custom level)
+// returns local index of a custom level (if it is a custom level)
 int GetCustomMultiplayerLevelIndex(char* name,int gameType)
 {
 	char buffer[256];
-	//tack ( custom) onto the end of the name , before doing the string compare
+	// tack ( custom) onto the end of the name, before doing the string compare
 	char* custom_string = GetTextString(TEXTSTRING_CUSTOM_LEVEL); 
-	sprintf(buffer,"%s (%s)",name,custom_string);
+	sprintf(buffer,"%s (%s)", name, custom_string);
 
-	//find the index of a custom level from its name
+	// find the index of a custom level from its name
 	if (gameType == NGT_Coop)
 	{
 		for (int i = MAX_NO_OF_COOPERATIVE_EPISODES; i < NumCoopLevels; i++)
@@ -846,7 +846,7 @@ int GetLocalMultiplayerLevelIndex(int index, char* customLevelName, int gameType
  	}
 	else
 	{
-		//see if we have the named level
+		// see if we have the named level
 		return GetCustomMultiplayerLevelIndex(customLevelName, gameType);
 	}
 

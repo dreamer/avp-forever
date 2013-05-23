@@ -390,7 +390,6 @@ typedef struct netmessage_playerstate
 	unsigned int IAmFiringPrimary: 1;
 	unsigned int IAmFiringSecondary: 1;
 	unsigned int IAmAlive: 1;
-//	unsigned int IAmHost: 1;
 	unsigned int IAmOnFire: 1;
 	unsigned int IHaveADisk: 1;
 	unsigned int IHaveLifeLeft: 1;
@@ -732,10 +731,10 @@ typedef struct netmessage_alienaistate
 
 	unsigned char sequence_type;
 	unsigned char sub_sequence;
-	unsigned short sequence_length:13; //in 256ths of a second , up to ~32 seconds
+	unsigned short sequence_length:13; // in 256ths of a second , up to ~32 seconds
 
 	unsigned short IAmOnFire: 1;
-	unsigned short AlienType: 2;//alien/predalien/praetorian
+	unsigned short AlienType: 2; // alien/predalien/praetorian
 
 	#if EXTRAPOLATION_TEST
 	unsigned short speed:15;

@@ -578,6 +578,9 @@ extern void AvP_UpdateMenus(void)
 	}
 	else if (AvPMenus.CurrentMenu == AVPMENU_MULTIPLAYERSELECTSESSION)
 	{
+		// this is probably not the most ideal place for this..
+		Net_ServiceNetwork();
+
 		int selection = AvPMenus.CurrentlySelectedElement;
 
 		if (Net_UpdateSessionList(&selection))
