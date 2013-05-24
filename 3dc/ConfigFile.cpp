@@ -46,7 +46,7 @@ bool Config_Load()
 	std::string filePath(GetSaveFolderPath());
 	filePath += kCfgFileName;
 
-	std::ifstream file(filePath);
+	std::ifstream file(filePath.c_str());
 
 	std::string tempLine;
 	std::string currentHeading;
@@ -62,7 +62,7 @@ bool Config_Load()
 		}
 		else
 		{
-			file.open(filePath);
+			file.open(filePath.c_str());
 			if (!file.is_open())
 			{
 				LogErrorString("Error opening config file!");
@@ -119,7 +119,8 @@ bool Config_Load()
 
 bool Config_Save()
 {
-	std::ofstream file(GetSaveFolderPath() + kCfgFileName);
+	std::string filePath = GetSaveFolderPath() + kCfgFileName;
+	std::ofstream file(filePath.c_str());
 	if (!file.is_open())
 	{
 		std::cout << "Error opening config file " << kCfgFileName << " for save!" << std::endl;
@@ -288,10 +289,9 @@ void Config_SetBool(const std::string &heading, const std::string &variable, boo
 // create a new config file if one doesn't exist. defaults will be added when values are requested
 static bool Config_CreateDefault()
 {
-	std::string filePath(GetSaveFolderPath());
-	filePath += kCfgFileName;
+	std::string filePath(GetSaveFolderPath() + kCfgFileName);
 
-	std::ofstream file(filePath);
+	std::ofstream file(filePath.c_str());
 	if (!file.is_open())
 	{
 		LogErrorString("Couldn't create default config file!");
