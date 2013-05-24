@@ -788,9 +788,29 @@ int GetCustomMultiplayerLevelIndex(char* name,int gameType)
 	return -1;
 }
 
+bool IsCustomLevel(int index, int gameType)
+{
+	bool isCustom = false;
+	if (gameType == NGT_Coop)
+	{
+		if (index >= MAX_NO_OF_COOPERATIVE_EPISODES) {
+			isCustom = true;
+		}
+	}
+	else
+	{
+		if (index >= MAX_NO_OF_MULTIPLAYER_EPISODES) {
+			isCustom = true;
+		}
+	}
+	return isCustom;
+}
+
 // returns name of custom level (without stuff tacked on the end)
 char* GetCustomMultiplayerLevelName(int index, int gameType)
 {
+	bool isCustom = false;
+
 	static char return_string[100];
 	return_string[0] = 0;
 	
@@ -798,22 +818,28 @@ char* GetCustomMultiplayerLevelName(int index, int gameType)
 	if (gameType == NGT_Coop)
 	{
 		if (index >= MAX_NO_OF_COOPERATIVE_EPISODES) {
-			strcpy(return_string, CoopLevelNames[index]);
+			isCustom = true;
 		}
+
+		strcpy(return_string, CoopLevelNames[index]);
 	}
 	else
 	{
 		if (index >= MAX_NO_OF_MULTIPLAYER_EPISODES) {
-			strcpy(return_string, MultiplayerLevelNames[index]);
+			isCustom = true;
 		}
+
+		strcpy(return_string, MultiplayerLevelNames[index]);
 	}
 
 	// need to remove ' (custom)' from the end of the level name
-	char *bracket_pos = strrchr(return_string,'(');
-	if (bracket_pos)
-	{
-		bracket_pos--; //to get back to the space
-		*bracket_pos = 0;
+	if (isCustom) {
+		char *bracket_pos = strrchr(return_string,'(');
+		if (bracket_pos)
+		{
+			bracket_pos--; //to get back to the space
+			*bracket_pos = 0;
+		}
 	}
 
 	return return_string;

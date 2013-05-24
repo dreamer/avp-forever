@@ -114,9 +114,8 @@ enum NetSystemMessages
 	NET_ID_SERVERPLAYER,
 };
 
-const int kBroadcastID = 255;
-
 const int kPlayerNameSize  = 40;
+const int kLevelNameSize   = 40;
 const int kSessionNameSize = 40;
 
 // enum for message types
@@ -143,6 +142,7 @@ struct SessionDescription
 	uint16_t    level;
 	uint8_t		nPlayers;
 	uint8_t		maxPlayers;
+	char        levelName[kLevelNameSize];
 	char		sessionName[kSessionNameSize];
 };
 

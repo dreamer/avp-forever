@@ -41,9 +41,6 @@ static ENetAddress  ClientAddress;
 static ENetPeer     *ServerPeer = NULL;
 static bool net_IsInitialised = false;
 
-//static ENetSocket sessionCheckSocket = ENET_SOCKET_NULL;
-//static ENetSocket sessionFindSocket  = ENET_SOCKET_NULL;
-
 static ENetSocket broadcastSocket = ENET_SOCKET_NULL;
 
 extern void NewOnScreenMessage(char *messagePtr);
@@ -56,7 +53,11 @@ const int kPacketBufferSize = NET_MESSAGEBUFFERSIZE;
 static uint8_t packetBuffer[kPacketBufferSize];
 
 static uint32_t netPortNumber = 23513;
-static uint32_t broadcastPort = 23514; // checkme
+static const uint32_t broadcastPort = 23514; // checkme
+
+const int kBroadcastID = 255;
+static uint32_t sessionCheckTimer = 0;
+const uint32_t  sessionCheckTimeout = 5000; // 5 second timeout
 
 static uint32_t incomingBandwidth = 0;
 static uint32_t outgoingBandwidth = 0;
@@ -72,7 +73,7 @@ extern unsigned char DebouncedKeyboardInput[];
 
 static bool Net_CreatePlayer(char *playerName);
 static NetID Net_GetNextPlayerID();
-static NetResult Net_CreateSession(const char *sessionName, int maxPlayers, int version, uint16_t gameStyle, uint16_t level);
+static NetResult Net_CreateSession(const char *sessionName, const char *levelName, int maxPlayers, int version, uint16_t gameStyle, uint16_t level);
 static NetResult Net_UpdateSessionDescForLobbiedGame(uint16_t gameStyle, uint16_t level);
 
 /* KJL 14:58:18 03/07/98 - AvP's Guid */
@@ -93,9 +94,10 @@ static void Net_AddSession(SessionDescription &session)
 	uint16_t gameStyle = session.gameStyle;
 	uint16_t level     = session.level;
 
-	char sessionName[100];
-	char levelName[100];
+//	char sessionName[100];
+//	char levelName[100];
 
+#if 0
 	// split the session name up into its parts
 	if (level >= 100)
 	{
@@ -117,8 +119,9 @@ static void Net_AddSession(SessionDescription &session)
 	else {
 		strcpy(sessionName, session.sessionName);
 	}
+#endif
 
-	sprintf(SessionData[NumberOfSessionsFound].Name,"%s (%d/%d)", sessionName, session.nPlayers, session.maxPlayers);
+	sprintf(SessionData[NumberOfSessionsFound].Name,"%s (%d/%d)", session.sessionName, session.nPlayers, session.maxPlayers);
 
 	SessionData[NumberOfSessionsFound].Guid	= session.guidInstance;
 
@@ -134,16 +137,16 @@ static void Net_AddSession(SessionDescription &session)
 	{
 		float version = 1.0f + session.version / 100.0f;
 		SessionData[NumberOfSessionsFound].AllowedToJoin = false;
- 		sprintf(SessionData[NumberOfSessionsFound].Name, "%s (V %.2f)", sessionName, version);
+ 		sprintf(SessionData[NumberOfSessionsFound].Name, "%s (V %.2f)", session.sessionName, version);
 	}
 	else
 	{
 		// get the level number in our list of levels (assuming we have the level)
-		int local_index = GetLocalMultiplayerLevelIndex(level, levelName, gameStyle);
+		int local_index = GetLocalMultiplayerLevelIndex(level, session.levelName, gameStyle); // bjd - CHECKME
 		if (local_index < 0)
 		{
 			// we don't have the level, so ignore this session
-			return;
+//			return;
 		}
 						
 		SessionData[NumberOfSessionsFound].levelIndex = local_index;
@@ -154,20 +157,14 @@ static void Net_AddSession(SessionDescription &session)
 
 bool Net_UpdateSessionList(int *SelectedItem)
 {
-	// only run this code every n frames/seconds?
-//	char buf[100];
-//	sprintf(buf, "Net_UpdateSessionList at %d\n", timeGetTime());
-//	OutputDebugString(buf);
-
-	uint8_t bigBuffer[3072];
+	if (timeGetTime() - sessionCheckTimer >= sessionCheckTimeout) {
+		sessionCheckTimer = 0;
+		return false;
+	}
 
 	GUID OldSessionGuids[MAX_NO_OF_SESSIONS];
 	uint32_t OldNumberOfSessions = NumberOfSessionsFound;
 	bool changed = false;
-
-	const int32_t waitTime = 5000; // in ms, 5 ms
-
-	static int32_t startTime = timeGetTime();
 
 	// take a list of the old session guids
 	for (uint32_t i = 0; i < NumberOfSessionsFound; i++) {
@@ -177,16 +174,14 @@ bool Net_UpdateSessionList(int *SelectedItem)
 	// poll network for session data
 	{
 		MessageHeader header;
-
-		memset(bigBuffer, 0, sizeof(bigBuffer));
 		
 		ENetBuffer buf;
-		buf.data = &bigBuffer;
-		buf.dataLength = sizeof(bigBuffer);
+		buf.data = &packetBuffer;
+		buf.dataLength = kPacketBufferSize;
 
 		enet_uint32 events = ENET_SOCKET_WAIT_RECEIVE;
 
-		MemoryReadStream rs(bigBuffer, sizeof(bigBuffer));
+		MemoryReadStream rs(packetBuffer, kPacketBufferSize);
 
 		while (enet_socket_wait(broadcastSocket, &events, 0) >= 0 && events)
 		{
@@ -275,9 +270,27 @@ NetResult Net_Initialise()
 
 	// get user config data
 	netPortNumber = Config_GetInt("[Networking]", "PortNumber", netPortNumber);
-	broadcastPort = Config_GetInt("[Networking]", "BroadcastPort", broadcastPort);
+//	broadcastPort = Config_GetInt("[Networking]", "BroadcastPort", broadcastPort);
 	incomingBandwidth = Config_GetInt("[Networking]", "IncomingBandwidth", 0);
 	outgoingBandwidth = Config_GetInt("[Networking]", "OutgoingBandwidth", 0);
+
+	broadcastSocket = enet_socket_create(ENET_SOCKET_TYPE_DATAGRAM);
+	if (ENET_SOCKET_NULL == broadcastSocket) {
+		Con_PrintError("Net_Initialise - Couldn't create broadcast socket");
+	}
+	else {
+		enet_socket_set_option(broadcastSocket, ENET_SOCKOPT_NONBLOCK,  1);
+		enet_socket_set_option(broadcastSocket, ENET_SOCKOPT_BROADCAST, 1);
+
+		ENetAddress thisHost;
+		thisHost.host = ENET_HOST_ANY;
+		thisHost.port = broadcastPort;
+		if (enet_socket_bind(broadcastSocket, &thisHost) < 0) {
+			Con_PrintError("Net_Initialise - Couldn't bind broadcast socket");
+			enet_socket_destroy(broadcastSocket);
+			broadcastSocket = ENET_SOCKET_NULL;
+		}
+	}
 
 	// register console commands
 	Con_AddCommand("connect", Net_ConnectToAddress);
@@ -373,19 +386,16 @@ NetResult Net_HostGame(char *playerName, char *sessionName, int species, uint16_
 			}
 
 			// create session
-			char *customLevelName = GetCustomMultiplayerLevelName(level, gameStyle);
-			if (customLevelName[0])
+			char *levelName = GetCustomMultiplayerLevelName(level, gameStyle);
+			if (IsCustomLevel(level, gameStyle))
 			{
-				// add the level name to the beginning of the session name
-				char name_buffer[100];
-				sprintf(name_buffer, "%s:%s", customLevelName, sessionName);
-				if ((Net_CreateSession(name_buffer, maxPlayers, kMultiplayerVersion, gameStyle, 100)) != NET_OK) {
+				if ((Net_CreateSession(sessionName, levelName, maxPlayers, kMultiplayerVersion, gameStyle, 100)) != NET_OK) {
 					return NET_FAIL;
 				}
 			}
-			else
+			else 
 			{
-				if ((Net_CreateSession(sessionName, maxPlayers, kMultiplayerVersion, gameStyle, level)) != NET_OK) {
+				if ((Net_CreateSession(sessionName, levelName, maxPlayers, kMultiplayerVersion, gameStyle, level)) != NET_OK) {
 					return NET_FAIL;
 				}
 			}
@@ -452,6 +462,8 @@ void Net_Disconnect()
 		host = NULL;
 	}
 
+	enet_socket_destroy(broadcastSocket);
+
 	return;
 }
 
@@ -468,7 +480,6 @@ uint32_t Net_JoinGame()
 	}
 
 	// enumerate sessions
-//	Net_FindAvPSessions();
 	return NumberOfSessionsFound;
 }
 
@@ -560,6 +571,7 @@ void Net_ConnectToAddress()
 			uint16_t gameStyle = tempSession.gameStyle;
 			uint16_t level     = tempSession.level;
 
+#if 0
 			char sessionName[100];
 			char levelName[100];
 
@@ -585,8 +597,9 @@ void Net_ConnectToAddress()
 			{
 				strcpy(sessionName, tempSession.sessionName);
 			}
+#endif
 
-			sprintf(SessionData[NumberOfSessionsFound].Name,"%s (%d/%d)", sessionName, tempSession.nPlayers, tempSession.maxPlayers);
+			sprintf(SessionData[NumberOfSessionsFound].Name,"%s (%d/%d)", tempSession.sessionName, tempSession.nPlayers, tempSession.maxPlayers);
 
 			SessionData[NumberOfSessionsFound].Guid	= tempSession.guidInstance;
 
@@ -602,12 +615,12 @@ void Net_ConnectToAddress()
 			{
 				float version = 1.0f + tempSession.version / 100.0f;
 				SessionData[NumberOfSessionsFound].AllowedToJoin = false;
-				sprintf(SessionData[NumberOfSessionsFound].Name, "%s (V %.2f)", sessionName, version);
+				sprintf(SessionData[NumberOfSessionsFound].Name, "%s (V %.2f)", tempSession.sessionName, version);
 			}
 			else
 			{
 				// get the level number in our list of levels (assuming we have the level)
-				int local_index = GetLocalMultiplayerLevelIndex(level, levelName, gameStyle);
+				int local_index = GetLocalMultiplayerLevelIndex(level, tempSession.levelName, gameStyle); // bjd - CHECKME
 
 				if (local_index < 0)
 				{
@@ -1121,6 +1134,7 @@ static NetID Net_GetNextPlayerID()
 
 void Net_FindAvPSessions()
 {
+#if 0
 	// set up broadcast address
 	ENetAddress destAddress;
 	destAddress.host = ENET_HOST_BROADCAST;
@@ -1142,8 +1156,23 @@ void Net_FindAvPSessions()
 		Con_PrintError("Net_FindAvPSessions - Couldn't bind socket");
 		return;
 	}
-	
-	enet_socket_listen(broadcastSocket, 1);
+#endif
+
+	// stop this function being called if we're already searching.
+	// this is a bit hacky but needs to be here for the moment due to
+	// the horrible menu system
+	if (sessionCheckTimer != 0) {
+		return;
+	}
+
+	if (ENET_SOCKET_NULL == broadcastSocket) {
+		sessionCheckTimer = 0;
+		return;
+	}
+
+	ENetAddress destAddress;
+	destAddress.host = ENET_HOST_BROADCAST;
+	destAddress.port = broadcastPort;
 
 	// create broadcast header
 	MessageHeader newHeader;
@@ -1154,13 +1183,6 @@ void Net_FindAvPSessions()
 	ENetBuffer buf;
 	buf.data = &newHeader;
 	buf.dataLength = sizeof(MessageHeader);
-
-		char ipaddr[32];
-		enet_address_get_host_ip(&thisHost, ipaddr, sizeof(ipaddr));
-
-		std::stringstream sstream;
-		sstream << "Sending from " << ipaddr << ":" << thisHost.port << "\n";
-		OutputDebugString(sstream.str().c_str());
 
 	for (int i = 0; i < 5; i++) 
 	{
@@ -1179,32 +1201,14 @@ void Net_FindAvPSessions()
 		}
 	}
 
-//	enet_socket_destroy(broadcastSocket);
-
-#if 0
-
-
-	// setup listen socket
-	sessionCheckSocket = enet_socket_create(ENET_SOCKET_TYPE_DATAGRAM);
-	if (sessionCheckSocket == ENET_SOCKET_NULL) {
-		int error = -1;
-	}
-
-	enet_socket_set_option(sessionCheckSocket, ENET_SOCKOPT_NONBLOCK,  1);
-	enet_socket_set_option(sessionCheckSocket, ENET_SOCKOPT_REUSEADDR, 1);
-
-	ENetAddress address;
-	address.host = ENET_HOST_ANY;
-	address.port = broadcastPort;
-
-	enet_socket_bind(sessionCheckSocket, &address);
-#endif
+	sessionCheckTimer = timeGetTime();
 }
 
-static NetResult Net_CreateSession(const char *sessionName, int maxPlayers, int version, uint16_t gameStyle, uint16_t level)
+static NetResult Net_CreateSession(const char *sessionName, const char *levelName, int maxPlayers, int version, uint16_t gameStyle, uint16_t level)
 {
 	memset(&netSession, 0, sizeof(netSession));
 
+	strncpy(netSession.levelName  , levelName,   sizeof(netSession.levelName)   - 1);
 	strncpy(netSession.sessionName, sessionName, sizeof(netSession.sessionName) - 1);
 
 	netSession.maxPlayers = maxPlayers;
