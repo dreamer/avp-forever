@@ -2880,12 +2880,14 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 			{
 				extern int MP_LevelNumber;
 				AvPMenus.MenusState = MENUSSTATE_STARTGAME;
-				netGameData.myStartFlag = 1;	    
-//				netGameData.myGameState = NGS_Playing;
-				if(netGameData.gameType==NGT_Coop)
+				netGameData.myStartFlag = 1;
+
+				if (netGameData.gameType==NGT_Coop) {
 					SetLevelToLoadForCooperative(netGameData.levelNumber);
-				else
+				}
+				else {
 					SetLevelToLoadForMultiplayer(netGameData.levelNumber);
+				}
 				SetBriefingTextForMultiplayer();
 			}
 			break;
@@ -2899,12 +2901,12 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 				if (SessionData[s].AllowedToJoin)
 				{
 					// copy the session name, leaving of the player count information
-					char *braket_pos;
+					char *bracket_pos;
 					strcpy(MP_SessionName, SessionData[s].Name);
 
-					braket_pos = strrchr(MP_SessionName,'(');
-					if (braket_pos) {
-						*braket_pos = 0;
+					bracket_pos = strrchr(MP_SessionName,'(');
+					if (bracket_pos) {
+						*bracket_pos = 0;
 					}
 
 					if (Net_ConnectToSession(s, MP_PlayerName) != NET_FAIL) {

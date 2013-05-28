@@ -50,9 +50,10 @@ void      Net_Disconnect();
 void      Net_ConnectToAddress();
 void      Net_FindAvPSessions();
 int       Net_ConnectingToSession();
+NetID     Net_GetNextPlayerID();
 NetResult Net_Send(NetID fromID, NetID toID, uint8_t *messageData, size_t dataSize);
-NetResult Net_Receive(NetID &fromID, NetID &toID, uint8_t *messageData, size_t &dataSize);
-NetResult Net_SendSystemMessage(int messageType, NetID fromID, NetID toID, uint8_t *messageData, size_t dataSize);
+NetResult Net_Receive(uint8_t *messageData, size_t &dataSize);
+NetResult Net_SendSystemMessage(NetID fromID, NetID toID, const void *messageData, size_t dataSize);
 int       Net_InitLobbiedGame();
 void      Net_ServiceNetwork();
 uint32_t  Net_JoinGame();
@@ -86,11 +87,10 @@ enum NetMessageTypes
 
 enum NetSystemMessages
 {
-	NETSYS_REQUEST_SERVER_INFO, // is this required?
 	NETSYS_REQUEST_SESSION_INFO,
 	NETSYS_SESSION_INFO,
-
 	NET_CREATEPLAYERORGROUP,
+
 	NET_DESTROYPLAYERORGROUP,
 	NET_ADDPLAYERTOGROUP,
 	NET_DELETEPLAYERFROMGROUP,
@@ -135,15 +135,17 @@ enum
 
 struct SessionDescription
 {
-	GUID		guidInstance;
-	GUID		guidApplication;
-	uint32_t	version;
-	uint16_t	gameStyle;
-	uint16_t    level;
-	uint8_t		nPlayers;
-	uint8_t		maxPlayers;
-	char        levelName[kLevelNameSize];
-	char		sessionName[kSessionNameSize];
+	GUID      guidInstance;
+	GUID      guidApplication;
+	uint32_t  host;
+	uint16_t  port;
+	uint32_t  version;
+	uint16_t  gameStyle;
+	uint16_t  level;
+	uint8_t   nPlayers;
+	uint8_t   maxPlayers;
+	char      levelName[kLevelNameSize];
+	char      sessionName[kSessionNameSize];
 };
 
 struct PlayerDetails

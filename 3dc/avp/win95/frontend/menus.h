@@ -318,7 +318,8 @@ typedef struct
 {
 	char Name[40];
 	char levelIndex; //local level index
-	char hostAddress[16];
+	uint32_t host;
+	uint16_t port;
 	GUID Guid;
 	bool AllowedToJoin;
 } SESSION_DESC;
