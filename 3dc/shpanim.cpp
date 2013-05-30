@@ -7,7 +7,6 @@
 extern int NumActiveBlocks;
 extern DISPLAYBLOCK * ActiveBlockList[];
 
-
 void CopyAnimationFrameToShape (SHAPEANIMATIONCONTROLDATA *sacd, DISPLAYBLOCK * dptr)
 {
 	SHAPEHEADER * shp = dptr->ObShapeData;
@@ -19,7 +18,7 @@ void CopyAnimationFrameToShape (SHAPEANIMATIONCONTROLDATA *sacd, DISPLAYBLOCK * 
 	shp->sh_normals[0] = sacd->sequence->anim_frames[sacd->current_frame].item_normals;
 }
 
-static void CopyAnimationSequenceDataToObject (SHAPEANIMATIONSEQUENCE * sas, DISPLAYBLOCK * dptr)
+static void CopyAnimationSequenceDataToObject (SHAPEANIMATIONSEQUENCE *sas, DISPLAYBLOCK *dptr)
 {
 	dptr->ObRadius = sas->radius;
 
@@ -33,29 +32,25 @@ static void CopyAnimationSequenceDataToObject (SHAPEANIMATIONSEQUENCE * sas, DIS
 	dptr->ObMinZ = sas->min_z;
 }
 
-static void ChooseNextFrame (SHAPEANIMATIONCONTROLDATA *current)
+static void ChooseNextFrame(SHAPEANIMATIONCONTROLDATA *current)
 {
 	while (current->time_to_next_frame <= 0)
 	{
 		current->time_to_next_frame += current->seconds_per_frame;
 
-		if (current->reversed)
-		{
+		if (current->reversed) {
 			current->current_frame--;
 		}
-		else
-		{
+		else {
 			current->current_frame++;
 		}
 
 		current->done_a_frame = 1;
 
-		if (current->current_frame >= (signed)current->sequence->num_frames)
-		{
+		if (current->current_frame >= (signed)current->sequence->num_frames) {
 			current->current_frame = 0;
 		}
-		else if (current->current_frame < 0)
-		{
+		else if (current->current_frame < 0) {
 			current->current_frame = current->sequence->num_frames-1;
 		}
 
@@ -68,23 +63,26 @@ static void ChooseNextFrame (SHAPEANIMATIONCONTROLDATA *current)
 	}
 }
 
-void DoShapeAnimation (DISPLAYBLOCK * dptr)
+void DoShapeAnimation(DISPLAYBLOCK *dptr)
 {
 	SHAPEANIMATIONCONTROLLER * sac = dptr->ShapeAnimControlBlock;
 	SHAPEANIMATIONCONTROLDATA * active_sequence = &sac->current;
 
 	GLOBALASSERT (sac);
 
-	if (!sac->playing)
+	if (!sac->playing) {
 		return;
+	}
 
-	if (active_sequence->empty)
+	if (active_sequence->empty) {
 		return;
+	}
 
 	active_sequence->time_to_next_frame -= NormalFrameTime;
 
-	if (active_sequence->time_to_next_frame > 0)
+	if (active_sequence->time_to_next_frame > 0) {
 		return;
+	}
 
 	// At this point we may have switched to the last frame
 	// but still had a bit of time left on it
@@ -149,7 +147,6 @@ void DoShapeAnimation (DISPLAYBLOCK * dptr)
 				sac->current = sac->next;
 				CopyAnimationSequenceDataToObject (active_sequence->sequence, dptr);
 
-
 				// If I had a linked list (or queue) of sequences
 				// I may want to put the next bit of code differently
 
@@ -177,22 +174,19 @@ void DoShapeAnimation (DISPLAYBLOCK * dptr)
 	}
 }
 
-
 void DoAllShapeAnimations()
 {
 	for (int i = 0; i < NumActiveBlocks; i++)
 	{
 		DISPLAYBLOCK *dptr = ActiveBlockList[i];
 
-		if (dptr->ShapeAnimControlBlock)
-		{
+		if (dptr->ShapeAnimControlBlock) {
 			DoShapeAnimation(dptr);
 		}
 	}
 }
 
-
-unsigned int SetShapeAnimationSequence(DISPLAYBLOCK * dptr, SHAPEANIMATIONCONTROLDATA * sacd)
+unsigned int SetShapeAnimationSequence(DISPLAYBLOCK *dptr, SHAPEANIMATIONCONTROLDATA *sacd)
 {
 	SHAPEANIMATIONCONTROLLER * sac = dptr->ShapeAnimControlBlock;
 
@@ -209,7 +203,6 @@ unsigned int SetShapeAnimationSequence(DISPLAYBLOCK * dptr, SHAPEANIMATIONCONTRO
 
 	sac->current.reversed = sacd->reversed;
 	sac->current.stop_at_end = sacd->stop_at_end;
-
 
 	sac->current.empty = 0;
 	sac->current.done_a_frame = 0;
@@ -247,8 +240,7 @@ unsigned int SetShapeAnimationSequence(DISPLAYBLOCK * dptr, SHAPEANIMATIONCONTRO
 	return 1;
 }
 
-
-unsigned int SetNextShapeAnimationSequence(DISPLAYBLOCK * dptr, SHAPEANIMATIONCONTROLDATA * sacd)
+unsigned int SetNextShapeAnimationSequence(DISPLAYBLOCK *dptr, SHAPEANIMATIONCONTROLDATA *sacd)
 {
 	SHAPEANIMATIONCONTROLLER * sac = dptr->ShapeAnimControlBlock;
 
@@ -256,13 +248,11 @@ unsigned int SetNextShapeAnimationSequence(DISPLAYBLOCK * dptr, SHAPEANIMATIONCO
 	GLOBALASSERT(sacd);
 	GLOBALASSERT(sacd->sequence_no < sac->anim_header->num_sequences);
 
-	if (sac->current.empty)
-	{
+	if (sac->current.empty) {
 		return(SetShapeAnimationSequence (dptr,sacd));
 	}
 
-	if (sac->finished)
-	{
+	if (sac->finished) {
 		return 0;
 	}
 	
@@ -305,7 +295,7 @@ unsigned int SetNextShapeAnimationSequence(DISPLAYBLOCK * dptr, SHAPEANIMATIONCO
 	return 1;
 }
 
-void InitShapeAnimationController(SHAPEANIMATIONCONTROLLER * sac, SHAPEHEADER * shd)
+void InitShapeAnimationController(SHAPEANIMATIONCONTROLLER *sac, SHAPEHEADER *shd)
 {
 	GLOBALASSERT(shd);
 	GLOBALASSERT(shd->animation_header);
@@ -318,7 +308,7 @@ void InitShapeAnimationController(SHAPEANIMATIONCONTROLLER * sac, SHAPEHEADER * 
 	sac->playing = 0;
 }
 
-void SetCurrentShapeAnimationToStop(DISPLAYBLOCK * dptr, unsigned long stop_now, signed long end_frame)
+void SetCurrentShapeAnimationToStop(DISPLAYBLOCK *dptr, unsigned long stop_now, signed long end_frame)
 {
 	SHAPEANIMATIONCONTROLLER * sac = dptr->ShapeAnimControlBlock;
 
@@ -341,36 +331,35 @@ void SetCurrentShapeAnimationToStop(DISPLAYBLOCK * dptr, unsigned long stop_now,
 	sac->current.stop_at_end = 1;
 }
 
-
-SHAPEANIMATIONCONTROLDATA const * GetCurrentShapeAnimationSequenceData (DISPLAYBLOCK * dptr)
+SHAPEANIMATIONCONTROLDATA const *GetCurrentShapeAnimationSequenceData (DISPLAYBLOCK * dptr)
 {
 	SHAPEANIMATIONCONTROLLER * sac = dptr->ShapeAnimControlBlock;
 
 	if (sac)
 	{
-		if (!sac->current.empty)
+		if (!sac->current.empty) {
 			return(&sac->current);
+		}
 	}
 
 	return 0;
 }
 
-
-SHAPEANIMATIONCONTROLDATA const * GetNextShapeAnimationSequenceData (DISPLAYBLOCK * dptr)
+SHAPEANIMATIONCONTROLDATA const *GetNextShapeAnimationSequenceData (DISPLAYBLOCK * dptr)
 {
 	SHAPEANIMATIONCONTROLLER * sac = dptr->ShapeAnimControlBlock;
 
 	if (sac)
 	{
-		if (!sac->next.empty)
+		if (!sac->next.empty) {
 			return(&sac->next);
+		}
 	}
 
 	return 0;
 }
 
-
-void PauseCurrentShapeAnimation (DISPLAYBLOCK * dptr, unsigned long pause_now, signed long end_frame)
+void PauseCurrentShapeAnimation(DISPLAYBLOCK * dptr, unsigned long pause_now, signed long end_frame)
 {
 	SHAPEANIMATIONCONTROLLER * sac = dptr->ShapeAnimControlBlock;
 
@@ -393,7 +382,7 @@ void PauseCurrentShapeAnimation (DISPLAYBLOCK * dptr, unsigned long pause_now, s
 	sac->current.pause_at_end = 1;
 }
 
-void RestartCurrentShapeAnimation (DISPLAYBLOCK * dptr)
+void RestartCurrentShapeAnimation(DISPLAYBLOCK * dptr)
 {
 	SHAPEANIMATIONCONTROLLER * sac = dptr->ShapeAnimControlBlock;
 
@@ -404,7 +393,7 @@ void RestartCurrentShapeAnimation (DISPLAYBLOCK * dptr)
 	sac->current.pause_at_end = 0;
 }
 
-void InitShapeAnimationControlData (SHAPEANIMATIONCONTROLDATA * sacd)
+void InitShapeAnimationControlData(SHAPEANIMATIONCONTROLDATA * sacd)
 {
 	GLOBALASSERT(sacd);
 	
@@ -418,7 +407,7 @@ void InitShapeAnimationControlData (SHAPEANIMATIONCONTROLDATA * sacd)
 	sacd->stop_at_end = 0;
 }
 
-unsigned int SetOrphanedShapeAnimationSequence (SHAPEANIMATIONCONTROLLER * sac, SHAPEANIMATIONCONTROLDATA * sacd)
+unsigned int SetOrphanedShapeAnimationSequence(SHAPEANIMATIONCONTROLLER * sac, SHAPEANIMATIONCONTROLDATA * sacd)
 {
 	GLOBALASSERT(sac);
 	GLOBALASSERT(sacd);
@@ -464,8 +453,6 @@ unsigned int SetOrphanedShapeAnimationSequence (SHAPEANIMATIONCONTROLLER * sac, 
 	sac->current.current_frame = sac->current.start_frame;
 
 	sac->current.time_to_next_frame = sac->current.seconds_per_frame;
-
-	/* CopyAnimationSequenceDataToObject (sac->current.sequence, dptr); */
 
 	return 1;
 }
