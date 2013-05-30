@@ -53,7 +53,7 @@ extern void Show_WinnerScreen(void);
 extern void AvP_UpdateMenus(void);
 extern void GetNextAllowedSpecies(int* species,BOOL search_forwards);
 static void SetBriefingTextForMultiplayer();
-extern bool Net_UpdateSessionList(int * SelectedItem);
+extern bool Net_UpdateSessionList(int &SelectedItem);
 extern void SelectMenuDisplayMode(void);
 extern void DrawMainMenusBackdrop(void);
 extern void GetFilenameForSaveSlot(int i, char *filenamePtr);
@@ -554,7 +554,7 @@ extern void AvP_UpdateMenus(void)
 			retval = Net_ConnectingToLobbiedGame(MP_PlayerName);
 			if (retval == NET_FAIL)
 			{
-				//player has aborted, go back a menu
+				// player has aborted, go back a menu
 				SetupNewMenu(AVPMENU_MULTIPLAYER_LOBBIEDCLIENT);
 				return;
 			}
@@ -564,7 +564,7 @@ extern void AvP_UpdateMenus(void)
 			retval = Net_ConnectingToSession();
 			if (retval == NET_FAIL)
 			{
-				//player has aborted, go back a menu
+				// player has aborted, go back a menu
 				SetupNewMenu(AVPMENU_MULTIPLAYER);
 				return;
 			}
@@ -572,7 +572,7 @@ extern void AvP_UpdateMenus(void)
 
 		if (retval == AVPMENU_MULTIPLAYER_CONFIG_JOIN)
 		{
-			//successfully joined
+			// successfully joined
 			SetupNewMenu(AVPMENU_MULTIPLAYER_CONFIG_JOIN);
 		}
 	}
@@ -580,7 +580,7 @@ extern void AvP_UpdateMenus(void)
 	{
 		int selection = AvPMenus.CurrentlySelectedElement;
 
-		if (Net_UpdateSessionList(&selection))
+		if (Net_UpdateSessionList(selection))
 		{
 			// session list has changed, so we need to set the menu again
 			SetupNewMenu(AVPMENU_MULTIPLAYERSELECTSESSION);
@@ -1016,8 +1016,8 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 
 		case AVPMENU_MULTIPLAYER_CONFIG_JOIN:
 		{
-			//need to set the menu we return to , according to whether this is
-			//a lobbied game or not.
+			// need to set the menu we return to, according to whether this is
+			// a lobbied game or not.
 			if (LobbiedGame)
 			{
 				AvPMenusData[AvPMenus.CurrentMenu].ParentMenu = AVPMENU_MULTIPLAYER_LOBBIEDCLIENT;
@@ -1031,7 +1031,6 @@ static void SetupNewMenu(enum AVPMENU_ID menuID)
 
 		case AVPMENU_MULTIPLAYER_LOADIPADDRESS:
 		{
-
 			AvPMenus.MenuElements = AvPMenu_Multiplayer_LoadIPAddress;
 			break;
 		}
@@ -2763,18 +2762,18 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 			the current episode, not start playing the current episode */
 			if (interactionID == AVPMENU_ELEMENT_INTERACTION_INCREASE)
 			{
-				if (*elementPtr->SliderValuePtr<elementPtr->MaxSliderValue)
+				if (*elementPtr->SliderValuePtr < elementPtr->MaxSliderValue)
 				{
-					*elementPtr->SliderValuePtr+=1;
-					EpisodeSelectScrollOffset-=ONE_FIXED;
+					*elementPtr->SliderValuePtr += 1;
+					EpisodeSelectScrollOffset -= ONE_FIXED;
 				}
 			}
 			else
 			{
-				if (*elementPtr->SliderValuePtr>0)
+				if (*elementPtr->SliderValuePtr > 0)
 				{
-					*elementPtr->SliderValuePtr-=1;
-					EpisodeSelectScrollOffset+=ONE_FIXED;
+					*elementPtr->SliderValuePtr -= 1;
+					EpisodeSelectScrollOffset += ONE_FIXED;
 				}
 			}
 			break;
@@ -2782,26 +2781,24 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 		case AVPMENU_ELEMENT_BUTTONSETTING:
 		{
 			
-			if (interactionID == AVPMENU_ELEMENT_INTERACTION_SELECT)
-			{
+			if (interactionID == AVPMENU_ELEMENT_INTERACTION_SELECT) {
 				break;
 			}
 			/* else let it fall through */
-
 			if (interactionID == AVPMENU_ELEMENT_INTERACTION_INCREASE)
 			{
-				if (*elementPtr->SliderValuePtr<elementPtr->MaxSliderValue)
+				if (*elementPtr->SliderValuePtr < elementPtr->MaxSliderValue)
 				{
-					*elementPtr->SliderValuePtr+=1;
-					EpisodeSelectScrollOffset-=ONE_FIXED;
+					*elementPtr->SliderValuePtr += 1;
+					EpisodeSelectScrollOffset -= ONE_FIXED;
 				}
 			}
 			else
 			{
-				if (*elementPtr->SliderValuePtr>0)
+				if (*elementPtr->SliderValuePtr > 0)
 				{
-					*elementPtr->SliderValuePtr-=1;
-					EpisodeSelectScrollOffset+=ONE_FIXED;
+					*elementPtr->SliderValuePtr -= 1;
+					EpisodeSelectScrollOffset += ONE_FIXED;
 				}
 			}
 			break;
@@ -2855,7 +2852,7 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 		{
 			if (interactionID == AVPMENU_ELEMENT_INTERACTION_SELECT)
 			{
-				//save the 'Previous Game' multiplayer configuration
+				// save the 'Previous Game' multiplayer configuration
 				strcpy(MP_Config_Description,GetTextString(TEXTSTRING_PREVIOUSGAME_FILENAME));
 				SaveMultiplayerConfiguration(GetTextString(TEXTSTRING_PREVIOUSGAME_FILENAME));
 				
@@ -2864,10 +2861,12 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 				if (Net_HostGame(MP_PlayerName, MP_SessionName, MP_Species, netGameData.gameType, netGameData.levelNumber) != NET_FAIL)
 				{
 					AvPMenus.MenusState = MENUSSTATE_STARTGAME;
-					if (netGameData.gameType == NGT_Coop)
+					if (netGameData.gameType == NGT_Coop) {
 						SetLevelToLoadForCooperative(netGameData.levelNumber);
-					else
+					}
+					else {
 						SetLevelToLoadForMultiplayer(netGameData.levelNumber);
+					}
 					
 					SetBriefingTextForMultiplayer();
 				}
@@ -2878,7 +2877,6 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 		{
 			if (interactionID == AVPMENU_ELEMENT_INTERACTION_SELECT)
 			{
-				extern int MP_LevelNumber;
 				AvPMenus.MenusState = MENUSSTATE_STARTGAME;
 				netGameData.myStartFlag = 1;
 
@@ -2920,7 +2918,7 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 		{
 			if (interactionID == AVPMENU_ELEMENT_INTERACTION_SELECT)
 			{
-				//save profile , so that multiplayer name is remembered
+				//save profile, so that multiplayer name is remembered
 				SaveUserProfile(UserProfilePtr);
 
 				InitAVPNetGameForJoin();

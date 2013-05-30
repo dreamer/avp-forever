@@ -206,6 +206,7 @@ int LobbiedGame = 0;
 
 static uint8_t sendBuffer[NET_MESSAGEBUFFERSIZE];
 static uint8_t *endSendBuffer = NULL;
+
 static int netNextLocalObjectId = 1;
 NetID myNetworkKillerId = 0;
 NetID myIgniterId = 0;
@@ -267,10 +268,11 @@ extern void ChangeToPredator();
 extern void ChangeToAlien();
 extern void ChangeToMarine();
 extern void ChangeToAlien();
-extern void NetworkPeerChangePlatformLiftState(STRATEGYBLOCK * sbPtr, PLATFORMLIFT_STATES new_state);
-extern void MakeFlechetteExplosionAt(VECTORCH * positionPtr, int seed);
-extern void KillFragmentalObjectForRespawn(STRATEGYBLOCK * sbPtr);
+extern void NetworkPeerChangePlatformLiftState(STRATEGYBLOCK *sbPtr, PLATFORMLIFT_STATES new_state);
+extern void MakeFlechetteExplosionAt(VECTORCH *positionPtr, int seed);
+extern void KillFragmentalObjectForRespawn(STRATEGYBLOCK *sbPtr);
 extern void PostDynamicsExtrapolationUpdate();
+extern void PlayerGhostExtrapolation();
 
 /*----------------------------------------------------------------------
   Some protoypes for this file
@@ -733,7 +735,7 @@ void MinimalNetCollectMessages(void)
 					toID   = newHeader.toID;
 
 					// process last message, if there is one
-					if (NET_SYSTEM_MESSAGE == newHeader.messageType) {
+					if (newHeader.isSystemMessage) {
 						ProcessSystemMessage(msg, msgSize);
 					}
 					else {
@@ -789,7 +791,8 @@ void NetCollectMessages(void)
 					toID   = newHeader.toID;
 
 					// process last message, if there is one
-					if (NET_SYSTEM_MESSAGE == newHeader.messageType) {
+//					if (NET_SYSTEM_MESSAGE == newHeader.messageType) {
+					if (newHeader.isSystemMessage) {
 						ProcessSystemMessage(msg, msgSize);
 					}
 					else {
@@ -971,10 +974,7 @@ void NetCollectMessages(void)
 #else
 #endif
 #if EXTRAPOLATION_TEST
-		{
-			extern void PlayerGhostExtrapolation();
-			PlayerGhostExtrapolation();
-		}
+		PlayerGhostExtrapolation();
 #endif
 	}
 
@@ -995,6 +995,7 @@ static void ProcessSystemMessage(uint8_t *msgP, size_t msgSize)
 	/* currently, only the host deals with system mesages */
 	/* check for invalid parameters */
 	if ((msgSize == 0) || (msgP == NULL)) {
+		NewOnScreenMessage("Invalid system message!");
 		return;
 	}
 
@@ -1003,7 +1004,7 @@ static void ProcessSystemMessage(uint8_t *msgP, size_t msgSize)
 	MessageHeader newMessageHeader;
 	rs.GetBytes(&newMessageHeader, sizeof(MessageHeader));
 
-	switch (newMessageHeader.toID)
+	switch (newMessageHeader.messageType)
 	{
 		case NET_ADDPLAYERTOGROUP:
 		{
@@ -1012,7 +1013,7 @@ static void ProcessSystemMessage(uint8_t *msgP, size_t msgSize)
 
 		case NET_CREATEPLAYERORGROUP:
 		{
-			NewOnScreenMessage("in NET_CREATEPLAYERORGROUP\n");
+			NewOnScreenMessage("in NET_CREATEPLAYERORGROUP");
 
 			/* only useful during startup: during main game, connecting player should
 			detect game state and exit immediately */
@@ -1116,23 +1117,23 @@ static void ProcessSystemMessage(uint8_t *msgP, size_t msgSize)
 			*/
 			break;
 		}
-
+/*
 		case NET_SETPLAYERORGROUPDATA:
 		{
-			/* ignore */
+			// ignore
 			break;
 		}
 
 		case NET_SETPLAYERORGROUPNAME:
 		{
-			/* ignore */
+			// ignore
 			break;
 		}
-
+*/
 		default:
 		{
 			char buf[100];
-			sprintf(buf, "invalid system message type: %d\n", newMessageHeader.toID);
+			sprintf(buf, "invalid system message type: %d\n", newMessageHeader.messageType);
 			OutputDebugString(buf);
 			/* invalid system message type: ignore */
 			break;
@@ -1700,20 +1701,18 @@ void NetSendMessages(void)
 		GameTimeSinceLastSend += NormalFrameTime;
 		TimeCounterForExtrapolation += NormalFrameTime;
 #if EXTRAPOLATION_TEST
-		//update muzzle flashes here , since this happens after dynamics
-		{
-			PostDynamicsExtrapolationUpdate();
-		}
+		// update muzzle flashes here, since this happens after dynamics
+		PostDynamicsExtrapolationUpdate();
 #endif
 
 		if (netGameData.sendFrequency)
 		{
-			//check to see if messages should be sent this frame
+			// check to see if messages should be sent this frame
 			netGameData.sendTimer -= RealFrameTime;
 
 			if (netGameData.sendTimer > 0)
 			{
-				//don't send messages this frame
+				// don't send messages this frame
 #if CalculateBytesSentPerSecond
 				PrintDebuggingText("Bytes/Second: %d\n", GetBytesPerSecond(0));
 #endif
@@ -1730,7 +1729,7 @@ void NetSendMessages(void)
 			{
 				PeriodicScoreUpdate();
 
-				//send game description once per second
+				// send game description once per second
 				if (netGameData.gameDescriptionTimeDelay < 0)
 				{
 					netGameData.gameDescriptionTimeDelay += 2 * ONE_FIXED;
@@ -1740,13 +1739,13 @@ void NetSendMessages(void)
 				}
 			}
 		}
-		else //game state is NGS_Playing
+		else // game state is NGS_Playing
 		{
 			AddPlayerAndObjectUpdateMessages();
 
 			if (AvP.Network == I_Host)
 			{
-				//send game description once per second
+				// send game description once per second
 				if (netGameData.gameDescriptionTimeDelay < 0)
 				{
 					netGameData.gameDescriptionTimeDelay += ONE_FIXED;
@@ -1785,7 +1784,7 @@ void NetSendMessages(void)
 
 		if (netGameData.myGameState == NGS_EndGameScreen || netGameData.myGameState == NGS_Joining)
 		{
-			//there may not be any messages while showing the end game screen
+			// there may not be any messages while showing the end game screen
 			if (0 == numBytes) {
 				return;
 			}
@@ -1797,7 +1796,7 @@ void NetSendMessages(void)
 		{
 			if (AvPNetID)
 			{
-				NetResult res = Net_Send(AvPNetID, NET_ID_ALLPLAYERS, sendBuffer, numBytes);
+				NetResult res = Net_Send(NET_ID_ALLPLAYERS, AvPNetID, 0, sendBuffer, numBytes);
 
 				if (res != NET_OK)
 				{
@@ -1805,7 +1804,7 @@ void NetSendMessages(void)
 					switch (res)
 					{
 						case NET_FAIL:
-							OutputDebugString("some problem sending\n");
+							NewOnScreenMessage("some problem sending");
 							break;
 						case NET_ERR_BUSY :
 
@@ -2023,14 +2022,16 @@ void AddNetMsg_GameDescription(void)
 			return;
 		}
 	}
-	/* set up pointers to header and message structures */
+	// set up pointers to header and message structures
 	headerPtr = (NETMESSAGEHEADER *)endSendBuffer;
 	endSendBuffer += headerSize;
 	messagePtr = (NETMESSAGE_GAMEDESCRIPTION *)endSendBuffer;
 	endSendBuffer += messageSize;
-	/* fill out the header */
+	
+	// fill out the header
 	headerPtr->type = (unsigned char)NetMT_GameDescription;
-	/*fill out the message */
+
+	// fill out the message
 	{
 		for (int i = 0; i < NET_MAXPLAYERS; i++)
 		{

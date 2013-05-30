@@ -117,11 +117,12 @@ static void Net_AddSession(SessionDescription &session)
 	else
 	{
 		// get the level number in our list of levels (assuming we have the level)
-		int local_index = GetLocalMultiplayerLevelIndex(level, session.levelName, gameStyle); // bjd - CHECKME
+
+		int local_index = GetLocalMultiplayerLevelIndex(level, session.levelName, gameStyle);
 		if (local_index < 0)
 		{
 			// we don't have the level, so ignore this session
-//			return;
+			return;
 		}
 						
 		SessionData[NumberOfSessionsFound].levelIndex = local_index;
@@ -130,7 +131,7 @@ static void Net_AddSession(SessionDescription &session)
 	NumberOfSessionsFound++;
 }
 
-bool Net_UpdateSessionList(int *SelectedItem)
+bool Net_UpdateSessionList(int &SelectedItem)
 {
 	if (timeGetTime() - sessionCheckTimer >= sessionCheckTimeout) {
 		sessionCheckTimer = 0;
@@ -168,7 +169,7 @@ bool Net_UpdateSessionList(int *SelectedItem)
 			}
 
 			// hack - I think we'll receive our own broadcast?
-			if (len == 12) {
+			if (len == sizeof(MessageHeader)) {
 				OutputDebugString("We received our request back\n");
 			}
 
@@ -216,15 +217,15 @@ bool Net_UpdateSessionList(int *SelectedItem)
 	if (changed && OldNumberOfSessions > 0)
 	{
 		// See if our previously selected session is in the new session list
-		int OldSelection = *SelectedItem;
-		*SelectedItem=0;
+		int OldSelection = SelectedItem;
+		SelectedItem = 0;
 
 		for (uint32_t i = 0; i < NumberOfSessionsFound; i++)
 		{
 			if (IsEqualGUID(OldSessionGuids[OldSelection], SessionData[i].Guid))
 			{
 				// found the session
-				*SelectedItem = i;
+				SelectedItem = i;
 				break;
 			}
 		}
@@ -290,10 +291,9 @@ void Net_Deinitialise()
 	net_IsInitialised = false;
 }
 
+// Called in a loop while we wait for the server to send us the game details (not session description)
 int Net_ConnectingToSession()
 {
-	OutputDebugString("Net_ConnectingToSession\n");
-
 	// see if the player has got bored of waiting
 	if (DebouncedKeyboardInput[KEY_ESCAPE])
 	{
@@ -305,22 +305,23 @@ int Net_ConnectingToSession()
 		}
 		//DPlayClose();
 		AvP.Network = I_No_Network;
-		return 0;
+		return NET_FAIL;
 	}
 
 	MinimalNetCollectMessages();
 	if (!netGameData.needGameDescription)
 	{
-		// we now have the game description , so we can go to the configuration menu
+		// we now have the game description, so we can go to the configuration menu
+		OutputDebugString("returning AVPMENU_MULTIPLAYER_CONFIG_JOIN");
 		return AVPMENU_MULTIPLAYER_CONFIG_JOIN;
 	}
-	return 1;
+	return NET_OK;
 }
 
 int Net_ConnectingToLobbiedGame(char *playerName)
 {
 	OutputDebugString("Net_ConnectingToLobbiedGame\n");
-	return 0;
+	return NET_FAIL;
 }
 
 NetResult Net_HostGame(char *playerName, char *sessionName, int species, uint16_t gameStyle, uint16_t level)
@@ -420,7 +421,8 @@ void Net_Disconnect()
 
 	if (AvP.Network != I_Host) // don't do this if this is the host
 	{
-		if (Net_SendSystemMessage(NET_SYSTEM_MESSAGE, NET_DESTROYPLAYERORGROUP, &destroyPlayer, sizeof(DestroyPlayerOrGroup)) != NET_OK)
+		// TODO - from and to IDs
+		if (Net_SendSystemMessage(NET_DESTROYPLAYERORGROUP, 0, 0, &destroyPlayer, sizeof(DestroyPlayerOrGroup)) != NET_OK)
 		{
 			Con_PrintError("Net_Disconnect - Problem sending destroy player system message!");
 			return; // what do we do in this case?
@@ -629,6 +631,8 @@ static void Net_CheckForSessionRequest()
 				NewOnScreenMessage("Got asked for session information. sending...");
 				MemoryWriteStream ws(packetBuffer, kPacketBufferSize);
 
+				header.marker = kMarker;
+				header.isSystemMessage = true;
 				header.messageType = NETSYS_SESSION_INFO;
 				ws.PutBytes(&header, sizeof(header));
 				ws.PutBytes(&netSession, sizeof(SessionDescription));
@@ -664,17 +668,19 @@ void Net_ServiceNetwork()
 		enet_host_service(host, NULL, 0);
 
 		// also check for session data requests
-		Net_CheckForSessionRequest();
+		if (AvP.Network == I_Host) {
+			Net_CheckForSessionRequest();
+		}
 	}
 }
 
 NetResult Net_Receive(uint8_t *messageData, size_t &dataSize)
 {
+	dataSize = 0;
+
 	// this function is called from a loop. only return something other than NET_OK when we've no more messages
 	if (host)
 	{
-		dataSize = 0;
-
 		ENetEvent eEvent;
 		if (enet_host_check_events(host, &eEvent) > 0) // check server events
 		{
@@ -710,7 +716,9 @@ NetResult Net_Receive(uint8_t *messageData, size_t &dataSize)
 				case ENET_EVENT_TYPE_NONE:
 						return NET_NO_MESSAGES;
 					break;
-				default: break;
+				default:
+						return NET_NO_MESSAGES;
+					break;
 			}
 		}
 		else
@@ -723,11 +731,13 @@ NetResult Net_Receive(uint8_t *messageData, size_t &dataSize)
 }
 
 // used to send a message to the server only
-NetResult Net_SendSystemMessage(NetID fromID, NetID toID, const void *messageData, size_t dataSize)
+NetResult Net_SendSystemMessage(uint32_t messageType, NetID fromID, NetID toID, const void *messageData, size_t dataSize)
 {
 	// create a new header and copy it into the packet buffer
 	MessageHeader newMessageHeader;
-	newMessageHeader.messageType = NET_SYSTEM_MESSAGE;
+	newMessageHeader.marker = kMarker;
+	newMessageHeader.isSystemMessage = true;
+	newMessageHeader.messageType = messageType;
 	newMessageHeader.fromID = fromID;
 	newMessageHeader.toID   = toID;
 
@@ -757,12 +767,12 @@ NetResult Net_SendSystemMessage(NetID fromID, NetID toID, const void *messageDat
 		Con_PrintError("Net_SendSystemMessage - can't send peer packet");
 	}
 
-	enet_host_flush(host);
+//	enet_host_flush(host);
 
 	return NET_OK;
 }
 
-NetResult Net_Send(NetID fromID, NetID toID, uint8_t *messageData, size_t dataSize)
+NetResult Net_Send(uint32_t messageType, NetID fromID, NetID toID, uint8_t *messageData, size_t dataSize)
 {
 	if (messageData == NULL)
 	{
@@ -771,7 +781,9 @@ NetResult Net_Send(NetID fromID, NetID toID, uint8_t *messageData, size_t dataSi
 	}
 
 	MessageHeader newMessageHeader;
-	newMessageHeader.messageType = AVP_GAMEDATA;
+	newMessageHeader.marker = kMarker;
+	newMessageHeader.isSystemMessage = false;
+	newMessageHeader.messageType = messageType;
 	newMessageHeader.fromID = fromID;
 	newMessageHeader.toID   = toID;
 
@@ -789,17 +801,20 @@ NetResult Net_Send(NetID fromID, NetID toID, uint8_t *messageData, size_t dataSi
 	}
 
 	// send to all peers
-	if (toID == NET_ID_ALLPLAYERS)
+//	if (toID == NET_ID_ALLPLAYERS)
 	{
 		enet_host_broadcast(host, 0, packet);
 	}
+//	else {
+//		assert(1==0); // not implemented yet
+//	}
+/*
 	else if (toID == NET_ID_SERVERPLAYER)
 	{
-		//enet_peer_send(
-		enet_host_broadcast(host, 0, packet); // FIXME
+		enet_host_broadcast(host, 0, packet);
 	}
-
-	enet_host_flush(host);
+*/
+//	enet_host_flush(host);
 
 	return NET_OK;
 }
@@ -836,7 +851,7 @@ NetResult Net_ConnectToSession(int sessionNumber, char *playerName)
 	ServerPeer = enet_host_connect(host, &ServerAddress, 2, 0);
 	if (ServerPeer == NULL)
 	{
-		Con_PrintError("Net_ConnectToSession - Failed to init connection to server host");
+		Con_PrintError("Net_ConnectToSession - Failed to connect to server host");
 		return NET_FAIL;
 	}
 
@@ -850,7 +865,7 @@ NetResult Net_ConnectToSession(int sessionNumber, char *playerName)
 	}
 	else
 	{
-		Con_PrintError("Net_ConnectToSession - failed to connect to server!\n");
+		Con_PrintError("Net_ConnectToSession - failed to connect to server!");
 		return NET_FAIL;
 	}
 
@@ -878,21 +893,22 @@ static bool Net_CreatePlayer(char *playerName)
 	
 	thisClientPlayer.type = NET_PLAYERTYPE_PLAYER;
 	strncpy(thisClientPlayer.name, playerName, kPlayerNameSize - 1);
+	thisClientPlayer.name[kPlayerNameSize-1] = 0;
 
-	// do we need to do this as host? (call AddPlayer()..)
+	// don't do this as the host
 	if (AvP.Network != I_Host)
 	{
 		OutputDebugString("Net_CreatePlayer - Sending player struct\n");
 
-		// send struct as system message
-		if (Net_SendSystemMessage(NET_SYSTEM_MESSAGE, NET_CREATEPLAYERORGROUP, &thisClientPlayer, sizeof(PlayerDetails)) != NET_OK)
+		// send struct as system message 
+		// FIXME - to and from IDs
+		if (Net_SendSystemMessage(NET_CREATEPLAYERORGROUP, 0, 0, &thisClientPlayer, sizeof(PlayerDetails)) != NET_OK)
 		{
-			Con_PrintError("Net_CreatePlayer - Problem sending create player system message!\n");
+			Con_PrintError("Net_CreatePlayer - Problem sending create player system message!");
 			return false;
 		}
-		else
-		{
-			Con_PrintMessage("Net_CreatePlayer - sent create player system message!\n");
+		else {
+			Con_PrintMessage("Net_CreatePlayer - sent create player system message!");
 		}
 	}
 	return true;
@@ -928,6 +944,8 @@ void Net_FindAvPSessions()
 
 	// create broadcast header
 	MessageHeader newHeader;
+	newHeader.marker = kMarker;
+	newHeader.isSystemMessage = true;
 	newHeader.messageType = NETSYS_REQUEST_SESSION_INFO;
 	newHeader.fromID      = kBroadcastID;
 	newHeader.toID        = kBroadcastID;

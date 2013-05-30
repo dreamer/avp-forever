@@ -807,7 +807,7 @@ bool IsCustomLevel(int index, int gameType)
 }
 
 // returns name of custom level (without stuff tacked on the end)
-char* GetCustomMultiplayerLevelName(int index, int gameType)
+char *GetCustomMultiplayerLevelName(int index, int gameType)
 {
 	bool isCustom = false;
 
@@ -846,9 +846,10 @@ char* GetCustomMultiplayerLevelName(int index, int gameType)
 }
 
 
-int GetLocalMultiplayerLevelIndex(int index, char* customLevelName, int gameType)
+int GetLocalMultiplayerLevelIndex(int index, char* levelName, int gameType)
 {
-	if (customLevelName[0] == 0)
+//	if (levelName[0] == 0)
+	if (index < 100)
 	{
 		// not a custom level, just need to check to see if the level index is in range
 		if (gameType == NGT_Coop)
@@ -867,7 +868,7 @@ int GetLocalMultiplayerLevelIndex(int index, char* customLevelName, int gameType
 	else
 	{
 		// see if we have the named level
-		return GetCustomMultiplayerLevelIndex(customLevelName, gameType);
+		return GetCustomMultiplayerLevelIndex(levelName, gameType);
 	}
 
 	return -1;

@@ -34,6 +34,6 @@ int GetCustomMultiplayerLevelIndex(char* name, int gameType);
 // returns name of custom level (without stuff tacked on the end)
 char *GetCustomMultiplayerLevelName(int index, int gameType);
 
-int GetLocalMultiplayerLevelIndex(int index, char* customLevelName, int gameType);
+int GetLocalMultiplayerLevelIndex(int index, char *levelName, int gameType);
 
 #endif // _included_AvP_MP_Config_h_

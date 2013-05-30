@@ -51,9 +51,9 @@ void      Net_ConnectToAddress();
 void      Net_FindAvPSessions();
 int       Net_ConnectingToSession();
 NetID     Net_GetNextPlayerID();
-NetResult Net_Send(NetID fromID, NetID toID, uint8_t *messageData, size_t dataSize);
+NetResult Net_Send(uint32_t messageType, NetID fromID, NetID toID, uint8_t *messageData, size_t dataSize);
 NetResult Net_Receive(uint8_t *messageData, size_t &dataSize);
-NetResult Net_SendSystemMessage(NetID fromID, NetID toID, const void *messageData, size_t dataSize);
+NetResult Net_SendSystemMessage(uint32_t messageType, NetID fromID, NetID toID, const void *messageData, size_t dataSize);
 int       Net_InitLobbiedGame();
 void      Net_ServiceNetwork();
 uint32_t  Net_JoinGame();
@@ -63,8 +63,12 @@ int       Net_ConnectingToLobbiedGame(char *playerName);
 
 extern NetID AvPNetID;
 
+static const int kMarker = 'xPvA'; // AvPx
+
 struct MessageHeader
 {
+	int marker;
+	bool isSystemMessage;
 	uint32_t messageType;
 	NetID fromID;
 	NetID toID;
@@ -96,40 +100,26 @@ enum NetSystemMessages
 	NET_DELETEPLAYERFROMGROUP,
 	NET_SESSIONLOST,
 	NET_HOST,
-	NET_SETPLAYERORGROUPDATA,
-	NET_SETPLAYERORGROUPNAME,
-	NET_SETSESSIONDESC,
-	NET_ADDGROUPTOGROUP,
-	NET_DELETEGROUPFROMGROUP,
-	NET_SECUREMESSAGE,
-	NET_STARTSESSION,
-	NET_CHAT,
-	NET_SETGROUPOWNER,
-	NET_SENDCOMPLETE,
-	NET_PLAYERTYPE_GROUP,
+//	NET_SETPLAYERORGROUPDATA,
+//	NET_SETPLAYERORGROUPNAME,
+//	NET_SETSESSIONDESC,
+//	NET_ADDGROUPTOGROUP,
+//	NET_DELETEGROUPFROMGROUP,
+//	NET_SECUREMESSAGE,
+//	NET_STARTSESSION,
+//	NET_CHAT,
+//	NET_SETGROUPOWNER,
+//	NET_SENDCOMPLETE,
+//	NET_PLAYERTYPE_GROUP,
 	NET_PLAYERTYPE_PLAYER,
-	NET_RECEIVE_ALL,
-//	NET_SYSTEM_MESSAGE,
-	NET_ID_ALLPLAYERS,
-	NET_ID_SERVERPLAYER,
+//	NET_RECEIVE_ALL,
+	NET_ID_ALLPLAYERS
+//	NET_ID_SERVERPLAYER,
 };
 
 const int kPlayerNameSize  = 40;
 const int kLevelNameSize   = 40;
 const int kSessionNameSize = 40;
-
-// enum for message types
-enum
-{
-	AVP_REQUEST_SERVER_INFO,
-	AVP_REQUEST_SESSION_INFO,
-	AVP_SYSTEM_MESSAGE,
-	AVP_SESSION_DATA,
-	AVP_GAMEDATA = 666,
-	AVP_PING,
-	AVP_REQUEST_PLAYER_NAME,
-	AVP_RECEIVED_PLAYER_NAME
-};
 
 #pragma pack(1)
 
