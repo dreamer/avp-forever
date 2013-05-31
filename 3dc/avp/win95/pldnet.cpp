@@ -45,7 +45,7 @@
 
 int IsThisObjectVisibleFromThisPosition_WithIgnore(DISPLAYBLOCK *objectPtr, DISPLAYBLOCK *ignoredObjectPtr, VECTORCH *positionPtr, int maxRange);
 
-#include "networking.h" // new net
+#include "networking.h"
 #include "MemoryStream.h"
 
 /*----------------------------------------------------------------------
@@ -53,103 +53,95 @@ int IsThisObjectVisibleFromThisPosition_WithIgnore(DISPLAYBLOCK *objectPtr, DISP
   ----------------------------------------------------------------------*/
 NETGAME_GAMEDATA netGameData =
 {
-	NGS_StartUp,    //NETGAME_STATES myGameState;
-	NGCT_Marine,    //NETGAME_CHARACTERTYPE myCharacterType;
-	NGCT_Marine,    //NETGAME_CHARACTERTYPE myNextCharacterType; //if player is currently dead and about to become a new character
-	NGSCT_General,  //NETGAME_SPECIALISTCHARACTERTYPE myCharacterSubType;
-	0,  //unsigned char myStartFlag;
-	{0,},   //NETGAME_PLAYERDATA playerData[NET_MAXPLAYERS];
-	{0,},   //int teamScores[3];
-	NGT_Individual, //NETGAME_TYPE gameType;
-	0,  //unsigned char levelNumber;
-	1000000,    //unsigned int scoreLimit;
-	255,    //unsigned char timeLimit;
-	5,  //int invulnerableTime;//in seconds after respawn
-	0,  //int GameTimeElapsed;
+	NGS_StartUp,    // NETGAME_STATES myGameState;
+	NGCT_Marine,    // NETGAME_CHARACTERTYPE myCharacterType;
+	NGCT_Marine,    // NETGAME_CHARACTERTYPE myNextCharacterType; - if player is currently dead and about to become a new character
+	NGSCT_General,  // NETGAME_SPECIALISTCHARACTERTYPE myCharacterSubType;
+	0,      // unsigned char myStartFlag;
+	{0,},   // NETGAME_PLAYERDATA playerData[NET_MAXPLAYERS];
+	{0,},   // int teamScores[3];
+	NGT_Individual, // NETGAME_TYPE gameType;
+	0,  // unsigned char levelNumber;
+	1000000,    // unsigned int scoreLimit;
+	255,    // unsigned char timeLimit;
+	5,  // int invulnerableTime;//in seconds after respawn
+	0,  // int GameTimeElapsed;
 
-	//scoring system stuff
-	{100, 150, 75}, //int characterKillValues[3];
-	100,    //int baseKillValue;
-	TRUE,   //BOOL useDynamicScoring;
-	TRUE,   //BOOL useCharacterKillValues;
+	// scoring system stuff
+	{100, 150, 75}, // int characterKillValues[3];
+	100,    // int baseKillValue;
+	TRUE,   // BOOL useDynamicScoring;
+	TRUE,   // BOOL useCharacterKillValues;
 
-	{75, 100, 150}, //int aiKillValues[3];
+	{75, 100, 150}, // int aiKillValues[3];
 
-	//for last man standing game
-	-1, //int LMS_AlienIndex;
-	0,  //int LMS_RestartTimer;
+	// for last man standing game
+	-1, // int LMS_AlienIndex;
+	0,  // int LMS_RestartTimer;
 
-	0,  //int stateCheckTimeDelay;
+	0,  // int stateCheckTimeDelay;
 
 	/*following timer used to prevent the game description from being sent every frame*/
-	0,  //int gameDescriptionTimeDelay;
+	0,  // int gameDescriptionTimeDelay;
 
 	/*sendFrequencey - how often to send messages in fixed point seconds*/
-	0,  //int sendFrequency;
-	0,  //int sendTimer;
+	0,  // int sendFrequency;
+	0,  // int sendTimer;
 
-	//player type limits
-	8,  //unsigned int maxPredator;
-	8,  //unsigned int maxAlien;
-	8,  //unsigned int maxMarine;
+	// player type limits
+	8,  // unsigned int maxPredator;
+	8,  // unsigned int maxAlien;
+	8,  // unsigned int maxMarine;
 
-	8,  //unsigned int maxMarineGeneral;
-	8,  //unsigned int maxMarinePulseRifle;
-	8,  //unsigned int maxMarineSmartgun;
-	8,  //unsigned int maxMarineFlamer;
-	8,  //unsigned int maxMarineSadar;
-	8,  //unsigned int maxMarineGrenade;
-	8,  //unsigned int maxMarineMinigun;
-	8,  //unsigned int maxMarineSmartDisc;
-	8,  //unsigned int maxMarinePistols;
+	8,  // unsigned int maxMarineGeneral;
+	8,  // unsigned int maxMarinePulseRifle;
+	8,  // unsigned int maxMarineSmartgun;
+	8,  // unsigned int maxMarineFlamer;
+	8,  // unsigned int maxMarineSadar;
+	8,  // unsigned int maxMarineGrenade;
+	8,  // unsigned int maxMarineMinigun;
+	8,  // unsigned int maxMarineSmartDisc;
+	8,  // unsigned int maxMarinePistols;
 
-	//weapons allowed
-	TRUE,   //BOOL allowSmartgun;
-	TRUE,   //BOOL allowFlamer;
-	TRUE,   //BOOL allowSadar;
-	TRUE,   //BOOL allowGrenadeLauncher;
-	TRUE,   //BOOL allowMinigun;
-	TRUE,   //BOOL allowDisc;
-	TRUE,   //BOOL allowPistol;
-	TRUE,   //BOOL allowPlasmaCaster;
-	TRUE,   //BOOL allowSpeargun;
-	TRUE,   //BOOL allowMedicomp;
-	TRUE,   //BOOL allowSmartDisc;
-	TRUE,   //BOOL allowPistols;
+	// weapons allowed
+	TRUE,   // BOOL allowSmartgun;
+	TRUE,   // BOOL allowFlamer;
+	TRUE,   // BOOL allowSadar;
+	TRUE,   // BOOL allowGrenadeLauncher;
+	TRUE,   // BOOL allowMinigun;
+	TRUE,   // BOOL allowDisc;
+	TRUE,   // BOOL allowPistol;
+	TRUE,   // BOOL allowPlasmaCaster;
+	TRUE,   // BOOL allowSpeargun;
+	TRUE,   // BOOL allowMedicomp;
+	TRUE,   // BOOL allowSmartDisc;
+	TRUE,   // BOOL allowPistols;
 
-	0,      //int maxLives;
-	FALSE,  //BOOL useSharedLives;
-	{0, 0, 0}, //int numDeaths[3];
+	0,         // int maxLives;
+	FALSE,     // BOOL useSharedLives;
+	{0, 0, 0}, // int numDeaths[3];
 
-	0,      //int pointsForResapwn;
-	40,     //int timeForRespawn; //seconds
+	0,      // int pointsForResapwn;
+	40,     // int timeForRespawn; //seconds
 
-	0,      //int lastPointsBasedRespawn;
+	0,      // int lastPointsBasedRespawn;
 
-	TRUE,   //BOOL sendDecals;
-	0,  //unsigned int needGameDescription :1;
-	FALSE,  //BOOL skirmishMode
+	TRUE,   // BOOL sendDecals;
+	0,      // unsigned int needGameDescription :1;
+	FALSE,  // BOOL skirmishMode
 
-	-1, //char myLastScream;
+	-1, // char myLastScream;
 
-	NETGAMESPEED_100PERCENT, //int gameSpeed;
-	0,  //BOOL preDestroyLights;
-	0,  //BOOL disableFriendlyFire;
-	1,  //BOOL fallingDamage;
-	1,  //BOOL pistolInfiniteAmmo;
-	1,  //BOOL specialistPistols;
-	0,  //int myStrategyCheckSum;
-	/*
-	    0,  //unsigned int tcpip_available :1;
-	    0,  //unsigned int ipx_available :1;
-	    0,  //unsigned int modem_available :1;
-	    0,  //unsigned int serial_available :1;
-	*/
-	//  0,  //NETGAME_CONNECTIONTYPE connectionType;
-
-	0,  //landingNoise:1;
-	0,  //int joiningGameStatus;
-	"", //char customLevelName[];
+	NETGAMESPEED_100PERCENT, // int gameSpeed;
+	0,  // BOOL preDestroyLights;
+	0,  // BOOL disableFriendlyFire;
+	1,  // BOOL fallingDamage;
+	1,  // BOOL pistolInfiniteAmmo;
+	1,  // BOOL specialistPistols;
+	0,  // int myStrategyCheckSum;
+	0,  // landingNoise:1;
+	0,  // int joiningGameStatus;
+	"", // char customLevelName[];
 };
 
 void SetDefaultMultiplayerConfig()
@@ -382,95 +374,10 @@ static int CalculateMyScore();
 static void PeriodicScoreUpdate();
 
 void CheckStateOfObservedPlayer();
+
 /*----------------------------------------------------------------------
   Initalisation of net game
   ----------------------------------------------------------------------*/
-void InitAVPNetGame(void)
-{
-	extern int QuickStartMultiplayer;
-	/* init the send message buffer */
-	InitialiseSendMessageBuffer();
-	/* base initialisation of game description */
-	{
-		for (int i = 0; i < (NET_MAXPLAYERS); i++)
-		{
-			netGameData.playerData[i].playerId = 0;
-
-			for (int j = 0; j < (NET_PLAYERNAMELENGTH); j++) {
-				netGameData.playerData[i].name[j] = '\0';
-			}
-
-			netGameData.playerData[i].characterType = NGCT_Marine;
-			netGameData.playerData[i].characterSubType = NGSCT_General;
-
-			for (int j = 0; j < (NET_MAXPLAYERS); j++) {
-				netGameData.playerData[i].playerFrags[j] = 0;
-			}
-
-			netGameData.playerData[i].playerScore = 0;
-			netGameData.playerData[i].playerScoreAgainst = 0;
-			netGameData.playerData[i].aliensKilled[0] = 0;
-			netGameData.playerData[i].aliensKilled[1] = 0;
-			netGameData.playerData[i].aliensKilled[2] = 0;
-			netGameData.playerData[i].deathsFromAI = 0;
-			netGameData.playerData[i].playerAlive = 1;
-			netGameData.playerData[i].playerHasLives = 1;
-			netGameData.playerData[i].startFlag = 0;
-		}
-
-		for (int j = 0; j < 3; j++) {
-			netGameData.teamScores[j] = 0;
-		}
-
-		netGameData.myGameState = NGS_Joining;
-
-		switch (QuickStartMultiplayer)
-		{
-			default:
-			case 1:
-				netGameData.myCharacterType = NGCT_Marine;
-				netGameData.myNextCharacterType = NGCT_Marine;
-				break;
-
-			case 2:
-				netGameData.myCharacterType = NGCT_Alien;
-				netGameData.myNextCharacterType = NGCT_Alien;
-				break;
-
-			case 3:
-				netGameData.myCharacterType = NGCT_Predator;
-				netGameData.myNextCharacterType = NGCT_Predator;
-				break;
-		}
-
-		netGameData.myStartFlag = 0;
-		netGameData.gameType = NGT_Individual;
-		netGameData.levelNumber = 0;
-		netGameData.scoreLimit = 0;
-		netGameData.timeLimit = 0;
-		netGameData.invulnerableTime = 5;
-		netGameData.GameTimeElapsed = 0;
-		netGameData.LMS_AlienIndex = -1;
-		netGameData.stateCheckTimeDelay = 0;
-		netGameData.LMS_RestartTimer = 0;
-	}
-	myNetworkKillerId = AvPNetID;   /* init global id of player who killed me last */
-	netNextLocalObjectId = 1;   /* init local object network id */
-	numMessagesReceived = 0;    /* these are for testing */
-	numMessagesTransmitted = 0;
-
-	/* If I'm the host, add myself to the game data */
-	if (AvP.Network == I_Host)
-	{
-		netGameData.playerData[0].playerId = AvPNetID;
-		strncpy(netGameData.playerData[0].name, thisClientPlayer.name, NET_PLAYERNAMELENGTH - 1);
-		netGameData.playerData[0].name[NET_PLAYERNAMELENGTH - 1] = '\0';
-		//      ConvertNetNameToUpperCase(netGameData.playerData[0].name);
-	}
-
-	InitNetLog();
-}
-
 void InitAVPNetGameForHost(int species, int gamestyle, int level)
 {
 	AvP.GameMode = I_GM_Playing;
@@ -791,7 +698,6 @@ void NetCollectMessages(void)
 					toID   = newHeader.toID;
 
 					// process last message, if there is one
-//					if (NET_SYSTEM_MESSAGE == newHeader.messageType) {
 					if (newHeader.isSystemMessage) {
 						ProcessSystemMessage(msg, msgSize);
 					}
@@ -1011,6 +917,16 @@ static void ProcessSystemMessage(uint8_t *msgP, size_t msgSize)
 			break; // ignore
 		}
 
+		case NET_SETPLAYERID:
+		{
+			OutputDebugString("in NET_SETPLAYERID\n");
+			// FIXME
+			if ((AvP.Network != I_Host)) {
+				AvPNetID = rs.GetUint32LE();
+			}
+			break;
+		}
+
 		case NET_CREATEPLAYERORGROUP:
 		{
 			NewOnScreenMessage("in NET_CREATEPLAYERORGROUP");
@@ -1030,11 +946,11 @@ static void ProcessSystemMessage(uint8_t *msgP, size_t msgSize)
 				AddPlayerToGame(newPlayer.ID, newPlayer.name);
 
 				// TODO - inform the player that they've joined
+				Net_SendSystemMessage(NET_SETPLAYERID, AvPNetID, 0, &newPlayer.ID, sizeof(newPlayer.ID));
 			}
 
 			LogNetInfo("system message:  NET_CREATEPLAYERORGROUP \n");
 			NewOnScreenMessage("A PLAYER HAS CONNECTED");
-			OutputDebugString("A PLAYER HAS CONNECTED\n");
 			break;
 		}
 
@@ -1780,23 +1696,23 @@ void NetSendMessages(void)
 		/* send our message buffer...
 		NB it should always be non-empty, and always less than the maximum message size */
 		bool clearSendBuffer = true;
-		uintptr_t numBytes = (endSendBuffer - sendBuffer);
+		uintptr_t nBytes = (endSendBuffer - sendBuffer);
 
 		if (netGameData.myGameState == NGS_EndGameScreen || netGameData.myGameState == NGS_Joining)
 		{
 			// there may not be any messages while showing the end game screen
-			if (0 == numBytes) {
+			if (0 == nBytes) {
 				return;
 			}
 		}
 
-		LOCALASSERT(numBytes <= NET_MESSAGEBUFFERSIZE);
+		LOCALASSERT(nBytes <= NET_MESSAGEBUFFERSIZE);
 
 		if (!netGameData.skirmishMode)
 		{
-			if (AvPNetID)
+//			if (AvPNetID)
 			{
-				NetResult res = Net_Send(NET_ID_ALLPLAYERS, AvPNetID, 0, sendBuffer, numBytes);
+				NetResult res = Net_Send(NET_ID_ALLPLAYERS, AvPNetID, 0, sendBuffer, nBytes);
 
 				if (res != NET_OK)
 				{
@@ -1812,7 +1728,7 @@ void NetSendMessages(void)
 								failed to send this frame , try preserving the contents of the send buffer,
 								unless it is getting to full.
 							*/
-							if (numBytes < NET_MESSAGEBUFFERSIZE / 2) {
+							if (nBytes < NET_MESSAGEBUFFERSIZE / 2) {
 								clearSendBuffer = false;
 							}
 							break;
@@ -3051,13 +2967,15 @@ void AddNetMsg_PlayerKilled(int objectId, DAMAGE_PROFILE *damage)
 			return;
 		}
 	}
-	/* set up pointers to header and message structures */
+	// set up pointers to header and message structures
 	headerPtr = (NETMESSAGEHEADER *)endSendBuffer;
 	endSendBuffer += headerSize;
 	messagePtr = (NETMESSAGE_PLAYERKILLED *)endSendBuffer;
 	endSendBuffer += messageSize;
-	/* fill out the header */
+	
+	// fill out the header
 	headerPtr->type = (unsigned char)NetMT_PlayerKilled;
+	
 	/* fill out the message: myNetworkkillerId should either be NULL indicating that player
 	has killed himself, or the NetID of the killer (which may in fact be the player's NetID)*/
 	messagePtr->objectId = objectId; /* ID of the new corpse. */
@@ -3072,8 +2990,8 @@ void AddNetMsg_PlayerKilled(int objectId, DAMAGE_PROFILE *damage)
 			messagePtr->killerType = netGameData.playerData[killer_index].characterType;
 		}
 		else {
-			//the player doing the damage has either left the game , or never existed.
-			//call it suicide then.
+			// the player doing the damage has either left the game , or never existed.
+			// call it suicide then.
 			myNetworkKillerId = AvPNetID;
 			messagePtr->killerId = 0;
 		}
@@ -3081,11 +2999,11 @@ void AddNetMsg_PlayerKilled(int objectId, DAMAGE_PROFILE *damage)
 
 	if (!myNetworkKillerId || myNetworkKillerId == AvPNetID)
 	{
-		//suicide (or killed by alien , in which case this will be corrected a few lines later)
+		// suicide (or killed by alien , in which case this will be corrected a few lines later)
 		messagePtr->killerType = messagePtr->myType;
 	}
 
-	//find the icon for the weapon used
+	// find the icon for the weapon used
 	messagePtr->weaponIcon = GetWeaponIconFromDamage(damage);
 
 	/*look at the damage type to see if the damage was done by an ai alien*/
@@ -5533,6 +5451,8 @@ void AddNetMsg_SpotOtherSound(enum soundindex SoundIndex, VECTORCH *position, in
   ----------------------------------------------------------------------*/
 static void ProcessNetMsg_GameDescription(NETMESSAGE_GAMEDESCRIPTION *messagePtr)
 {
+	OutputDebugString("ProcessNetMsg_GameDescription\n");
+
 	/* should only get this if we're not the host, and we're in start-up state */
 	if (AvP.Network != I_Peer)
 	{

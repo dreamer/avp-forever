@@ -2918,7 +2918,7 @@ static void InteractWithMenuElement(enum AVPMENU_ELEMENT_INTERACTION_ID interact
 		{
 			if (interactionID == AVPMENU_ELEMENT_INTERACTION_SELECT)
 			{
-				//save profile, so that multiplayer name is remembered
+				// save profile, so that multiplayer name is remembered
 				SaveUserProfile(UserProfilePtr);
 
 				InitAVPNetGameForJoin();

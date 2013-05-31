@@ -887,7 +887,7 @@ static bool Net_CreatePlayer(char *playerName)
 	memset(&thisClientPlayer, 0, sizeof(PlayerDetails));
 
 	if (AvP.Network == I_Host) {
-		thisClientPlayer.ID	  = Net_GetNextPlayerID();
+		thisClientPlayer.ID = Net_GetNextPlayerID();
 		AvPNetID = thisClientPlayer.ID;
 	}	
 	

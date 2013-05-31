@@ -262,7 +262,7 @@ typedef struct netgame_gamedata
 	int gameSpeed; //0 to 3, for 70,80,90 or 100 percent speed
 
 	BOOL preDestroyLights;
-	BOOL disableFriendlyFire; //stops people on the same team from hurting each other
+	BOOL disableFriendlyFire; // stops people on the same team from hurting each other
 	BOOL fallingDamage;
 	BOOL pistolInfiniteAmmo;
 	BOOL specialistPistols;
@@ -860,7 +860,6 @@ typedef struct multiplayer_start
 /* ---------------------------------------------------------------------
    Some prototypes
   ----------------------------------------------------------------------*/
-extern void InitAVPNetGame(void);
 extern void NetCollectMessages(void);
 extern void NetSendMessages(void);
 extern void EndAVPNetGame(void);
