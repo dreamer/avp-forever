@@ -243,13 +243,15 @@ void SoundSys_PauseOff(void)
 void SoundSys_StopAll(void)
 {
 	/* if we're not switched on, should be nothing playing */
-	if (!SoundSwitchedOn) 
+	if (!SoundSwitchedOn) {
 		return;
+	}
 
 	for (int i = 0;i < SOUND_MAXACTIVE; i++)
 	{
-		if (ActiveSounds[i].soundIndex != SID_NOSOUND)
+		if (ActiveSounds[i].soundIndex != SID_NOSOUND) {
 			Sound_Stop(i);
+		}
 	}
 }
 
@@ -678,7 +680,7 @@ unsigned int SoundNumActiveVoices()
   ----------------------------------------------------------------------------*/
 static int FindFreeActiveSound(unsigned int min, unsigned int max)
 {
-	for (int i = min; (i < max); i++) 
+	for (unsigned int i = min; (i < max); i++) 
 	{
 		if (ActiveSounds[i].soundIndex == SID_NOSOUND) return i;
 	}
@@ -687,8 +689,7 @@ static int FindFreeActiveSound(unsigned int min, unsigned int max)
 
 static int FindLowerPriorityActiveSound(ACTIVESOUNDPRIORITY testPriority, unsigned int min, unsigned int max)
 {
-	int i;
-	for(i = min; (i < max); i++) 
+	for(unsigned int i = min; (i < max); i++) 
 	{
 		if((ActiveSounds[i].soundIndex != SID_NOSOUND)&&
 		   (ActiveSounds[i].priority < testPriority)) return i;

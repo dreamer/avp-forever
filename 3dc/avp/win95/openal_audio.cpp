@@ -369,9 +369,6 @@ extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 extern int DopplerShiftIsOn;
 extern int SoundSwitchedOn;
 
-#define ALFAILED(function) 
-
-//#define FAILED(hr) (((HRESULT)(hr)) < 0)
 
 ALenum AlCheckError()
 {
@@ -403,6 +400,8 @@ ALenum AlCheckError()
   ----------------------------------------------------------------------------*/
 int PlatStartSoundSys()
 {
+	char buf[256];
+
 	Con_PrintMessage("Starting to initialise OpenAL");
 
 	uint32_t sampleRate = Config_GetInt("[Audio]", "SampleRate", 44100);
@@ -412,12 +411,20 @@ int PlatStartSoundSys()
 	SoundConfig.reverb_mix		= 0.0f;
 	SoundConfig.env_index		= 1000;
 
+	char* DefaultDevice = (char*)alcGetString(NULL, ALC_DEFAULT_DEVICE_SPECIFIER);
+	sprintf(buf, "Using default device \"%s\" for OpenAL", DefaultDevice);
+	Con_PrintMessage(buf);
+
+	alGetError(); // clear error stack
+
 	device = alcOpenDevice(NULL);
 	if (device == NULL) {
 		Con_PrintError("alcOpenDevice failed for OpenAL");
 		PlatEndSoundSys();
 		return 0;
 	}
+
+	alGetError(); // clear error stack
 
 	context = alcCreateContext(device, NULL);
 	if (context == NULL) {
@@ -426,10 +433,12 @@ int PlatStartSoundSys()
 		return 0;
 	}
 
+	alGetError(); // clear error stack
+
 	alcMakeContextCurrent(context);
 	AlCheckError();
 
-	// check for EAX
+	// check for effects support
 	if (alcIsExtensionPresent(device, "ALC_EXT_EFX")) {
 		Con_PrintMessage("ALC_EXT_EFX is supported for OpenAL");
 		efxAvailable = true;
@@ -512,10 +521,14 @@ int PlatStartSoundSys()
 		alGenAuxiliaryEffectSlots(1, &effectSlot);
 	}
 
+	alGetError(); // clear error stack
+
 	// try create up to 255 sources
-	for (size_t i = 0; i < 255; i++) {
+	for (size_t i = 0; i < 255; i++)
+	{
 		sndSource newSource;
 		alGenSources(1, &newSource._alSource);
+
 		if (alGetError() != AL_NO_ERROR) {
 			break;
 		}
@@ -525,9 +538,26 @@ int PlatStartSoundSys()
 		alSourcef(newSource._alSource, AL_GAIN,  1.0f);
 		alSourcef(newSource._alSource, AL_ROLLOFF_FACTOR,    0.01f);
 		alSourcef(newSource._alSource, AL_REFERENCE_DISTANCE, 1.0f);
+		alSource3f(newSource._alSource, AL_POSITION, 0.0f, 0.0f, 0.0f);
+		alSource3f(newSource._alSource, AL_VELOCITY, 0.0f, 0.0f, 0.0f);
+		alSourcei(newSource._alSource, AL_LOOPING, AL_FALSE);
 
 		sourceList.push_back(newSource);
+		alGetError(); // clear error stack
 	}
+
+	if (sourceList.size() == 0) { // should we allow less than 255? 32 sources?
+		Con_PrintError("Source creation failed for OpenAL");
+		PlatEndSoundSys();
+		return 0;
+	}
+	else 
+	{
+		sprintf(buf, "Created %u sources for OpenAL", sourceList.size());
+		Con_PrintMessage(buf);
+	}
+
+	alGetError(); // clear error stack
 
 	playerPosition.x = 0.0f;
 	playerPosition.y = 0.0f;
@@ -550,6 +580,9 @@ int PlatStartSoundSys()
 	alListenerfv(AL_ORIENTATION, (ALfloat*)&playerOrientation);
 	
 	alDistanceModel(AL_NONE);
+
+	AlCheckError();
+
 /*
 	ALCint nummono, numstereo;
 	alcGetIntegerv(device, ALC_MONO_SOURCES, 1, &nummono);
@@ -621,16 +654,17 @@ int PlatChangeGlobalVolume(int volume)
 
 	// set the volume
 	alListenerf(AL_GAIN, vol_to_gain_table[volume]);
+	AlCheckError();
 
 	return 1;
 }
 
 static sndSource* FindFreeSource()
 {
-	for (size_t i = 0; i < sourceList.size(); i++) {
-		if (sourceList[i]._isFree) {
-			sourceList[i]._isFree = false;
-
+	for (size_t i = 0; i < sourceList.size(); i++) 
+	{
+		if (sourceList[i]._isFree) 
+		{
 			// set some default values
 			alSourcef (sourceList[i]._alSource, AL_PITCH,           1.0f);
 			alSourcef (sourceList[i]._alSource, AL_GAIN,            1.0f);
@@ -641,6 +675,8 @@ static sndSource* FindFreeSource()
 			alSourcef (sourceList[i]._alSource, AL_ROLLOFF_FACTOR,  0.0f);
 			alSourcei (sourceList[i]._alSource, AL_SOURCE_RELATIVE, AL_TRUE);
 
+			sourceList[i]._isFree = false;
+			alGetError(); // clear error stack
 
 			return &sourceList[i];
 		}
@@ -674,7 +710,7 @@ int PlatPlaySound(int activeIndex)
 		int ok = PlatChangeSoundPitch(activeIndex, ActiveSounds[activeIndex].pitch);
 		if (ok == SOUND_PLATFORMERROR)
 		{
-			PlatStopSound (activeIndex);
+			PlatStopSound(activeIndex);
 			return SOUND_PLATFORMERROR;
 		}
 	}
@@ -703,7 +739,10 @@ int PlatPlaySound(int activeIndex)
 		ALfloat zero[3] = { 0.0f, 0.0f, 0.0f };
 		alSourcei (ActiveSounds[activeIndex].source->_alSource, AL_SOURCE_RELATIVE, AL_TRUE);
 		alSourcefv(ActiveSounds[activeIndex].source->_alSource, AL_POSITION, zero);
+		alSourcefv(ActiveSounds[activeIndex].source->_alSource, AL_DIRECTION, zero);
 		alSourcefv(ActiveSounds[activeIndex].source->_alSource, AL_VELOCITY, zero);
+
+		AlCheckError();
 
 		if (PlatChangeSoundVolume(activeIndex, ActiveSounds[activeIndex].volume) == SOUND_PLATFORMERROR)
 		{
@@ -733,7 +772,7 @@ int PlatPlaySound(int activeIndex)
 	}
 
 	// player the buffer
-	if (!ActiveSounds[activeIndex].paused)
+// FIXME	if (!ActiveSounds[activeIndex].paused)
 	{
 		alSourceStop(ActiveSounds[activeIndex].source->_alSource);
 		AlCheckError();
@@ -762,7 +801,7 @@ void PlatStopSound(int activeIndex)
 		return;
 	}
 
-	if (!ActiveSounds[activeIndex].paused)
+//	if (!ActiveSounds[activeIndex].paused)
 	{
 		alSourceStop(ActiveSounds[activeIndex].source->_alSource);
 		AlCheckError();
@@ -774,9 +813,16 @@ void PlatStopSound(int activeIndex)
 
 	if (efxAvailable) {
 		alSource3i(ActiveSounds[activeIndex].source->_alSource, AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 0, AL_FILTER_NULL);
+		AlCheckError();
 	}
 
+	ALint play;
+	alGetSourcei(ActiveSounds[activeIndex].source->_alSource, AL_SOURCE_STATE, &play);
+	AlCheckError();
+	assert(play == AL_STOPPED);
+
 	alSourcei(ActiveSounds[activeIndex].source->_alSource, AL_BUFFER, NULL);
+	AlCheckError();
 
 	// set source to free and invalidate local handle
 	ActiveSounds[activeIndex].source->_isFree = true;
@@ -811,6 +857,7 @@ int PlatChangeSoundPitch(int activeIndex, int pitch)
 	frequency = frequency / GameSounds[gameSoundIndex].dsFrequency;
 	
 	alSourcef(ActiveSounds[activeIndex].source->_alSource, AL_PITCH, frequency);
+	AlCheckError();
 
 	ActiveSounds[activeIndex].pitch = pitch;
 
@@ -820,6 +867,7 @@ int PlatChangeSoundPitch(int activeIndex, int pitch)
 int PlatSoundHasStopped(int activeIndex)
 {
 	ALint value;
+
 	alGetSourceiv(ActiveSounds[activeIndex].source->_alSource, AL_SOURCE_STATE, &value);
 	AlCheckError();
 
@@ -853,6 +901,8 @@ int PlatDo3dSound(int activeIndex)
 		{
 			alSourcei(ActiveSounds[activeIndex].source->_alSource, AL_LOOPING, ActiveSounds[activeIndex].loop ? AL_TRUE : AL_FALSE);
 			alSourcePlay(ActiveSounds[activeIndex].source->_alSource);
+			AlCheckError();
+
 			newVolume = 0;
 			ActiveSounds[activeIndex].paused = 0;
 		}
@@ -889,6 +939,8 @@ int PlatDo3dSound(int activeIndex)
 				ActiveSounds[activeIndex].loop)
 			{
 				alSourcePause(ActiveSounds[activeIndex].source->_alSource);
+				AlCheckError();
+
 				ActiveSounds[activeIndex].paused = 1;
 			}
 		}
@@ -911,6 +963,7 @@ int PlatDo3dSound(int activeIndex)
 
 		alSourcei (ActiveSounds[activeIndex].source->_alSource, AL_SOURCE_RELATIVE, AL_FALSE);
 		alSourcefv(ActiveSounds[activeIndex].source->_alSource, AL_POSITION, (ALfloat*)&position);
+		AlCheckError();
 
 		// TODO - velocity stuff?
 	}
@@ -923,7 +976,8 @@ void PlatUnloadGameSound(SOUNDINDEX index)
 		return; // no such sound
 	}
 
-	for (int i = 0; i < SOUND_MAXACTIVE; i++) {
+	for (int i = 0; i < SOUND_MAXACTIVE; i++) 
+	{
 		if (ActiveSounds[i].soundIndex == index) {
 //			alSourcei(ActiveSounds[i].source->_alSource, AL_BUFFER, 0);
 			PlatStopSound(i);
@@ -931,6 +985,7 @@ void PlatUnloadGameSound(SOUNDINDEX index)
 	}
 
 	alDeleteBuffers(1, &GameSounds[index].buffer);
+	AlCheckError();
 
 	delete[] GameSounds[index].audioBuffer;
 	GameSounds[index].audioBuffer = NULL;
@@ -1089,7 +1144,10 @@ int LoadWavFile(int soundNum, const std::string &fileName)
 
 	// create and store audio buffer
 	alGenBuffers(1, &GameSounds[soundNum].buffer);
+	AlCheckError();
+
 	alBufferData(GameSounds[soundNum].buffer, alFormat, GameSounds[soundNum].audioBuffer, nAudioBytes, nSamplesPerSec);
+	AlCheckError();
 
 	size_t lastSlash = fileName.find_last_of('/');
 	if (lastSlash != fileName.npos) // if we found '/'
@@ -1196,7 +1254,10 @@ int ExtractWavFile(int soundNum, FileStream &fStream)
 
 	// create and store audio buffer
 	alGenBuffers(1, &GameSounds[soundNum].buffer);
+	AlCheckError();
+
 	alBufferData(GameSounds[soundNum].buffer, alFormat, GameSounds[soundNum].audioBuffer, nAudioBytes, nSamplesPerSec);
+	AlCheckError();
 
 	// need to save this here for later use
 	GameSounds[soundNum].dsFrequency = nSamplesPerSec;
@@ -1303,15 +1364,20 @@ void PlatUpdatePlayer()
 			playerOrientation.up.z = -(float)(Global_VDB_Ptr->VDB_Mat.mat32) / 65536.0f;
 		}
 
+#if 0 // let's disable the non-working doppler code (and maybe fix it down the road..)
 		if (AvP.PlayerType == I_Alien && DopplerShiftIsOn && NormalFrameTime)
 		{
 			DYNAMICSBLOCK *dynPtr = Player->ObStrategyBlock->DynPtr;
 
 			float invFrameTime = 100000.0f / (float)NormalFrameTime;
 
-			playerVelocity.x = (float)(dynPtr->Position.vx - dynPtr->PrevPosition.vx) * invFrameTime;
-			playerVelocity.y = (float)(dynPtr->Position.vy - dynPtr->PrevPosition.vy) * invFrameTime;
-			playerVelocity.z = -(float)(dynPtr->Position.vz - dynPtr->PrevPosition.vz) * invFrameTime;
+			playerVelocity.x = (float)(dynPtr->Position.vx - dynPtr->PrevPosition.vx);// * invFrameTime;
+			playerVelocity.y = (float)(dynPtr->Position.vy - dynPtr->PrevPosition.vy);// * invFrameTime;
+			playerVelocity.z = -(float)(dynPtr->Position.vz - dynPtr->PrevPosition.vz);//* invFrameTime;
+
+			char buf[100];
+			sprintf(buf, "invFrameTime: %f, vel x: %f, vel y: %f, vel z: %f\n", invFrameTime, playerVelocity.x, playerVelocity.y, playerVelocity.z);
+			OutputDebugString(buf);
 		}
 		else
 		{
@@ -1319,6 +1385,7 @@ void PlatUpdatePlayer()
 			playerVelocity.y = 0.0f;
 			playerVelocity.z = 0.0f;
 		}
+#endif
 
 		// Reverb
 		if (efxAvailable && SoundConfig.reverb_changed)
@@ -1332,9 +1399,11 @@ void PlatUpdatePlayer()
 				{
 					if (ActiveSounds[count].reverb_off) {
 						alSource3i(ActiveSounds[count].source->_alSource, AL_AUXILIARY_SEND_FILTER, AL_EFFECTSLOT_NULL, 0, AL_FILTER_NULL);	
+						AlCheckError();
 					}
 					else {
 						alSource3i(ActiveSounds[count].source->_alSource, AL_AUXILIARY_SEND_FILTER, effectSlot, 0, AL_FILTER_NULL);
+						AlCheckError();
 					}
 				}
 			}
@@ -1342,8 +1411,13 @@ void PlatUpdatePlayer()
 		}
 
 		alListenerfv(AL_ORIENTATION, (ALfloat*)&playerOrientation);
+		AlCheckError();
+/* disabled as per above
 		alListenerfv(AL_VELOCITY,    (ALfloat*)&playerVelocity);
+		AlCheckError();
+*/
 		alListenerfv(AL_POSITION,    (ALfloat*)&playerPosition);
+		AlCheckError();
 	}
 }
 
@@ -1354,10 +1428,12 @@ void PlatSetEnviroment(unsigned int env_index, float reverb_mix)
 	}
 
 	// Set up the enviroment.
-	if (SoundConfig.env_index != env_index) {
-
+	if (SoundConfig.env_index != env_index)
+	{
 		// set 
 		alAuxiliaryEffectSloti(effectSlot, AL_EFFECTSLOT_EFFECT, Sound_Enviroments[env_index].effect);
+		AlCheckError();
+
 		SoundConfig.env_index = env_index;
 	}
 
@@ -1554,16 +1630,17 @@ void *CheckProcessedBuffers(void *args)
 
 	while (stream->_isPlaying)
 	{
-		if (!stream->_isPaused) {
-
+		if (!stream->_isPaused)
+		{
+			// clear OpenAL errors
 			alGetError();
 
 			ALint nProcessed;
 			alGetSourcei(stream->_source->_alSource, AL_BUFFERS_PROCESSED, &nProcessed);
 			AlCheckError();
 
-			if (nProcessed && (stream->_freeBufferQueue.size() < stream->_bufferCount)) {
-
+			if (nProcessed && (stream->_freeBufferQueue.size() < stream->_bufferCount))
+			{
 				pthread_mutex_lock(&stream->_bufferMutex);
 
 				ALuint buffer;
@@ -1613,6 +1690,8 @@ uint32_t AudioStream::GetWritableBufferSize()
 int32_t AudioStream::SetVolume(uint32_t volume)
 {
 	alSourcef(_source->_alSource, AL_GAIN, vol_to_gain_table[volume]);
+	alGetError();
+
 	return 1;
 }
 
@@ -1632,6 +1711,7 @@ int32_t AudioStream::Stop()
 	_isPlaying = false;
 
 	alSourceStop(_source->_alSource);
+	alGetError();
 
 	return AUDIOSTREAM_OK;
 }

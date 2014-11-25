@@ -93,6 +93,7 @@ typedef struct soundsampledata
 
 		#ifdef USE_OPENAL
 			audioBuffer = NULL;
+			buffer = 0;
 		#endif
 
 		flags = 0;
@@ -165,6 +166,7 @@ typedef struct activesoundsample
 		#ifdef USE_OPENAL
 			audioBuffer = NULL;
 			source = NULL;
+			buffer = 0;
 		#endif
 	}
 
