@@ -1524,8 +1524,12 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 		{
 			int newMouseVelY;
 
-			if (ControlMethods.FlipVerticalAxis) newMouseVelY = -MouseVelY;
-			else newMouseVelY = MouseVelY;
+			if (ControlMethods.FlipVerticalAxis) {
+				newMouseVelY = -MouseVelY;
+			}
+			else { 
+				newMouseVelY = MouseVelY;
+			}
 
 			if (newMouseVelY < 0)
 			{

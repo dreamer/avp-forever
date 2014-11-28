@@ -83,10 +83,11 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 		int volume = MUL_FIXED(FmvSoundVolume*256, GetVolumeOfNearestVideoScreen());
 
 		volume /= 256;
-
+#if 0 // CHECKME
 		char buf[100];
 		sprintf(buf, "fmv volume: %d\n", volume);
 		OutputDebugString(buf);
+#endif
 
 		// divide by 256?
 

@@ -21,6 +21,8 @@
 #include "iofocus.h"
 #include "showcmds.h"
 
+// #define USE_DIMOUSE
+
 extern void KeyboardEntryQueue_Add(char c);
 
 // DirectInput key down value
@@ -38,10 +40,19 @@ extern void KeyboardEntryQueue_Add(char c);
 	Globals
 */
 
-/*
+#ifdef USE_DIMOUSE
+
+#pragma comment(lib, "dinput8.lib")
+
 static LPDIRECTINPUT8           lpdi;          // DirectInput interface
-static LPDIRECTINPUTDEVICE8     lpdiKeyboard;  // keyboard device interface
+//static LPDIRECTINPUTDEVICE8     lpdiKeyboard;  // keyboard device interface
 static LPDIRECTINPUTDEVICE8     lpdiMouse;     // mouse device interface
+
+extern HINSTANCE hInst;
+extern HWND hWndMain;
+
+#endif
+/*
 static BOOL						DIKeyboardOkay;  // Is the keyboard acquired?
 
 static IDirectInputDevice*		g_pJoystick         = NULL;     
@@ -55,8 +66,6 @@ static IDirectInputDevice2*		g_pJoystickDevice2  = NULL;  // needed to poll joys
 	Externs for input communication
 */
 
-//extern HINSTANCE hInst;
-//extern HWND hWndMain;
 
 bool GotMouse;
 int MouseVelX;
@@ -159,21 +168,21 @@ extern void IngameKeyboardInput_ClearBuffer(void);
 
 BOOL InitialiseDirectInput(void)
 {
-	return FALSE;
-#if 0
-	// try to create di object
-	if(FAILED(DirectInput8Create(hInst, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&lpdi, NULL)))
-	//if (DirectInputCreate(hInst, DIRECTINPUT_VERSION, &lpdi, NULL) != DI_OK)
+#ifdef USE_DIMOUSE
+
+	if (FAILED(DirectInput8Create(hInst, DIRECTINPUT_VERSION, IID_IDirectInput8, (void**)&lpdi, NULL)))
 	{
 		LogErrorString("Can't create DirectInput8 object\n");
 		#if debug
-		ReleaseDirect3D();
-		exit(0x4111);
+//		ReleaseDirect3D();
+//		exit(0x4111);
 		#else
 		return FALSE;
 		#endif
 	}
 	return TRUE;
+#else
+	return FALSE;
 #endif
 }
 
@@ -185,7 +194,7 @@ BOOL InitialiseDirectInput(void)
 */
 void ReleaseDirectInput(void)
 {
-#if 0
+#ifdef USE_DIMOUSE
 	if (lpdi!= NULL)
 	{
 		lpdi->Release();
@@ -938,8 +947,7 @@ void ReleaseDirectKeyboard(void)
 
 BOOL InitialiseDirectMouse()
 {
-	return FALSE;
-#if 0
+#ifdef USE_DIMOUSE
     GUID    guid = GUID_SysMouse;
 	HRESULT hres;
 
@@ -1003,6 +1011,8 @@ BOOL InitialiseDirectMouse()
 	hres = lpdiMouse->Acquire();
 	
 	return TRUE;
+#else
+	return FALSE;
 #endif
 }
 
@@ -1012,7 +1022,7 @@ extern bool mouseMoved;
 
 void DirectReadMouse(void)
 {
-#if 1
+#ifndef USE_DIMOUSE
 	int OldMouseX, OldMouseY;
 
 	GotMouse = false;
@@ -1033,8 +1043,8 @@ void DirectReadMouse(void)
 
 	GotMouse = true;
 
-	MouseX += xPosRelative * 4;
-	MouseY += yPosRelative * 4;
+	MouseX += xPosRelative;// * 4;
+	MouseY += yPosRelative;// * 4;
 
 //	char buf[100];
 //	sprintf(buf, "x: %d, y: %d\n", xPosRelative, yPosRelative);
@@ -1042,6 +1052,9 @@ void DirectReadMouse(void)
 
 	MouseVelX = DIV_FIXED(MouseX-OldMouseX, NormalFrameTime);
 	MouseVelY = DIV_FIXED(MouseY-OldMouseY, NormalFrameTime);
+
+	xPosRelative = 0;
+	yPosRelative = 0;
 
 	mouseMoved = false;
 
@@ -1054,7 +1067,7 @@ void DirectReadMouse(void)
  	GotMouse = false;
 	MouseVelX = 0;
 	MouseVelY = 0;
-	MouseVelZ = 0;
+//	MouseVelZ = 0;
 
     hres = lpdiMouse->GetDeviceData(sizeof(DIDEVICEOBJECTDATA),&od[0],&dwElements, 0);
 
@@ -1076,7 +1089,7 @@ void DirectReadMouse(void)
     // Save mouse x and y for velocity determination
 	OldMouseX = MouseX;
 	OldMouseY = MouseY;
-	OldMouseZ = MouseZ;
+//	OldMouseZ = MouseZ;
 
     // Process all recovered elements and
 	// make appropriate modifications to mouse
@@ -1106,38 +1119,44 @@ void DirectReadMouse(void)
 			    break;
 
 			case DIMOFS_Z://DIMouseZOffset: 
-			    MouseZ += od[i].dwData;
-				textprint("z info received %d\n",MouseZ);
+//			    MouseZ += od[i].dwData;
+//				textprint("z info received %d\n",MouseZ);
 			    break;
 
 			// DIMOFS_BUTTON0: Button 0 pressed or released
 			case DIMOFS_BUTTON0://DIMouseButton0Offset:
+#if 0
 			    if (od[i].dwData & DikOn) 
 			      // Button pressed
 				  MouseButton |= LeftButton;
 				else
 			      // Button released
 				  MouseButton &= ~LeftButton;
+#endif
 			    break;
 
 			// DIMOFS_BUTTON1: Button 1 pressed or released
 			case DIMOFS_BUTTON1://DIMouseButton1Offset:
+#if 0
 			  if (od[i].dwData & DikOn)
 			      // Button pressed
 				  MouseButton |= RightButton;
 			  else
 			      // Button released
 				  MouseButton &= ~RightButton;
+#endif
 			  break;
 
 			case DIMOFS_BUTTON2://DIMouseButton2Offset:
 			case DIMOFS_BUTTON3://DIMouseButton3Offset:
+#if 0
 			  if (od[i].dwData & DikOn)
 			      // Button pressed
 				  MouseButton |= MiddleButton;
 			  else
 			      // Button released
 				  MouseButton &= ~MiddleButton;
+#endif
 			  break;
 			
 			default:
@@ -1161,7 +1180,7 @@ void DirectReadMouse(void)
 
 void ReleaseDirectMouse(void)
 {
-#if 0
+#ifdef USE_DIMOUSE
 	return;
 	if (lpdiMouse != NULL)
 	{

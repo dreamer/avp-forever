@@ -25,6 +25,7 @@ extern unsigned char KeyboardInput[256];
 #include "dxlog.h"
 #include <zmouse.h>
 #include "vdb.h"
+#include <assert.h>
 
 void MakeToAsciiTable(void);
 
@@ -52,6 +53,8 @@ const char *windowTitle = "AvP";
 //	Necessary globals
 
 HWND hWndMain;
+HINSTANCE hInst; // temp
+
 bool bActive  = true;   // is application active?
 bool bRunning = true;
 
@@ -87,6 +90,8 @@ int xPosRelative = 0;
 int yPosRelative = 0;
 bool mouseMoved = false;
 
+int inpcalls = 0;
+
 LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lParam)
 {
 	PAINTSTRUCT ps;
@@ -107,19 +112,23 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
 		case WM_INPUT:
 		{
+			inpcalls++;
+#if 1
 			UINT dwSize = 40;
 			static BYTE lpb[40];
 
 			::GetRawInputData((HRAWINPUT)lParam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER));
+			assert(dwSize == 40);
 
 			RAWINPUT *raw = (RAWINPUT*)lpb;
 
 			if (raw->header.dwType == RIM_TYPEMOUSE)
 			{
 				mouseMoved = true;
-				xPosRelative = raw->data.mouse.lLastX;
-				yPosRelative = raw->data.mouse.lLastY;
+				xPosRelative += raw->data.mouse.lLastX;
+				yPosRelative += raw->data.mouse.lLastY;
 			}
+#endif
 			break;
 		}
 
@@ -431,6 +440,8 @@ bool InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 	wcex.lpszMenuName  = NULL;
 	wcex.lpszClassName = className;
 
+	hInst = hInstance;
+
 	if (!RegisterClassEx(&wcex))
 	{
 		::MessageBox(NULL, "Could not register Window", "Error!", MB_ICONEXCLAMATION | MB_OK);
@@ -550,6 +561,7 @@ void ChangeWindowsSize(uint32_t width, uint32_t height)
 
 void InitialiseRawInput()
 {
+#if 1
 	#ifndef HID_USAGE_PAGE_GENERIC
 		#define HID_USAGE_PAGE_GENERIC			((USHORT) 0x01)
 	#endif
@@ -563,6 +575,7 @@ void InitialiseRawInput()
 	Rid[0].dwFlags = RIDEV_INPUTSINK;   
 	Rid[0].hwndTarget = hWndMain;
 	::RegisterRawInputDevices(Rid, 1, sizeof(Rid[0]));
+#endif
 }
 
 // Project specific to go with the initialiser
