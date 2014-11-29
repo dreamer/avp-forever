@@ -1016,8 +1016,8 @@ BOOL InitialiseDirectMouse()
 #endif
 }
 
-extern int xPosRelative;
-extern int yPosRelative;
+extern long xPosRelative;
+extern long yPosRelative;
 extern bool mouseMoved;
 
 void DirectReadMouse(void)
@@ -1034,17 +1034,14 @@ void DirectReadMouse(void)
 	MouseVelX = 0;
 	MouseVelY = 0;
 
-//	int tempX = (OldMouseX + MouseX) * 0.5f;
-//	int tempY = (OldMouseY + MouseY) * 0.5f;
-
 	// Save mouse x and y for velocity determination
 	OldMouseX = MouseX;
 	OldMouseY = MouseY;
 
 	GotMouse = true;
 
-	MouseX += xPosRelative;// * 4;
-	MouseY += yPosRelative;// * 4;
+	MouseX += xPosRelative;
+	MouseY += yPosRelative;
 
 //	char buf[100];
 //	sprintf(buf, "x: %d, y: %d\n", xPosRelative, yPosRelative);

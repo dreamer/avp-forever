@@ -462,17 +462,10 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 		IngameKeyboardInput_ClearBuffer();
 
-		extern int inpcalls;
-		extern int xPosRelative;
-		extern int yPosRelative;
-
 		while (AvP.MainLoopRunning && bRunning) 
 		{
-			inpcalls = 0;
-			xPosRelative = 0;
-			yPosRelative = 0;
-
 			CheckForWindowsMessages();
+
 			CursorHome();
 
 			#if debug
@@ -588,12 +581,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 				FixCheatModesInUserProfile(UserProfilePtr);
 				RestartLevel();
 			}
-
-			char buf[100];
-			sprintf(buf, "inpcalls: %d\n", inpcalls);
-			OutputDebugString(buf);
-
-		} // end of main game loop
+		} 
+		// end of main game loop
 
 		AvP.LevelCompleted = thisLevelHasBeenCompleted;
 		mainMenu = true;

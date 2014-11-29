@@ -20,9 +20,6 @@ void CheckForWindowsMessages(void)
 	
 	MouseWheelStatus = 0;
 
-	// Initialisation for the current embarassingly primitive mouse 
-	// handler...
-
 	do
 	{
 		while (PeekMessage(&msg, NULL, 0, 0, PM_NOREMOVE))

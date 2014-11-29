@@ -86,8 +86,8 @@ extern void IngameKeyboardInput_ClearBuffer(void);
 extern void Mouse_ButtonUp(unsigned char button);
 extern void Mouse_ButtonDown(unsigned char button);
 
-int xPosRelative = 0;
-int yPosRelative = 0;
+long xPosRelative = 0;
+long yPosRelative = 0;
 bool mouseMoved = false;
 
 int inpcalls = 0;
@@ -112,13 +112,12 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
 		case WM_INPUT:
 		{
-			inpcalls++;
-#if 1
-			UINT dwSize = 40;
-			static BYTE lpb[40];
-
-			::GetRawInputData((HRAWINPUT)lParam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER));
+			UINT dwSize;
+			::GetRawInputData((HRAWINPUT)lParam, RID_INPUT, NULL, &dwSize, sizeof(RAWINPUTHEADER));
 			assert(dwSize == 40);
+
+			static BYTE lpb[40];
+			::GetRawInputData((HRAWINPUT)lParam, RID_INPUT, lpb, &dwSize, sizeof(RAWINPUTHEADER));
 
 			RAWINPUT *raw = (RAWINPUT*)lpb;
 
@@ -128,7 +127,8 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 				xPosRelative += raw->data.mouse.lLastX;
 				yPosRelative += raw->data.mouse.lLastY;
 			}
-#endif
+
+			return 0;
 			break;
 		}
 
@@ -412,7 +412,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 		case WM_CLOSE:
 		{
 			bRunning = false;
-			return 0;
+			return 0; // TODO - check this
 		}
 
 		case WM_DESTROY:
