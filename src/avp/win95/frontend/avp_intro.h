@@ -6,6 +6,7 @@ extern "C"
 {
 #endif
 	void PlayMenuMusic(void);
+	void EndMenuMusic(void);
 	void PlayIntroSequence(void);
 	void WeWantAnIntro(void);
 #ifdef __cplusplus

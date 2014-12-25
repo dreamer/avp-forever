@@ -7,7 +7,7 @@ extern "C"
 	#include "avp_menus.h"
     #include "avp_intro.h"
 	extern int NormalFrameTime;
-	extern int GotAnyKey;
+	extern unsigned char GotAnyKey;
 	extern int DebouncedGotAnyKey;
 	extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 	extern AVPMENUGFX AvPMenuGfxStorage[];

@@ -91,7 +91,7 @@ Shape_Fragment_Type::~Shape_Fragment_Type()
 		#endif
 
 	}
-	if(name) delete name;
+	if(name) delete[] name;
 }
 
 void Shape_Fragment_Type::AddShape(SHAPEHEADER* shp)
@@ -2403,7 +2403,7 @@ BOOL copy_to_shapeheader (
 				uv_imnums[item_list[i*9+3]>>16]=local_tex_index_nos[texno];
 				item_list[i*9 + 3] += local_tex_index_nos[texno];
 
-				shphd->sh_textures[UVIndex] = (int *) PoolAllocateMem (sizeof(int) * cshp_ptr->uv_list[UVIndex].num_verts * 2);
+				shphd->sh_textures[UVIndex] = (int *) PoolAllocateMem (sizeof(int *) * cshp_ptr->uv_list[UVIndex].num_verts * 2);
 				for (j=0; j<cshp_ptr->uv_list[UVIndex].num_verts; j++) {
 					(shphd->sh_textures[UVIndex])[(j*2)] = ProcessUVCoord(h,UVC_POLY_U,(int)cshp_ptr->uv_list[UVIndex].vert[j].u,uv_imnums[UVIndex]);
 					(shphd->sh_textures[UVIndex])[(j*2)+1] = ProcessUVCoord(h,UVC_POLY_V,(int)cshp_ptr->uv_list[UVIndex].vert[j].v,uv_imnums[UVIndex]);
@@ -3444,7 +3444,7 @@ BOOL copy_to_mainshpl (Shape_Chunk * shp, int list_pos)
 	if (cshp.num_uvs)
 	{
 		for (i=0; i<cshp.num_uvs; i++) {
-			shphd->sh_textures[i] = (int *) AllocateMem (sizeof(int) * cshp.uv_list[i].num_verts * 2);
+			shphd->sh_textures[i] = (int *) AllocateMem (sizeof(int *) * cshp.uv_list[i].num_verts * 2);
 			for (j=0; j<cshp.uv_list[i].num_verts; j++) {
 				(shphd->sh_textures[i])[(j*2)] = (int)cshp.uv_list[i].vert[j].u;
 				(shphd->sh_textures[i])[(j*2)+1] = (int)cshp.uv_list[i].vert[j].v;
@@ -3738,7 +3738,7 @@ BOOL copy_to_mainshpl (Shape_Sub_Shape_Chunk * shp, int list_pos)
 	if (cshp.num_uvs)
 	{
 		for (i=0; i<cshp.num_uvs; i++) {
-			shphd->sh_textures[i] = (int *) AllocateMem (sizeof(int) * cshp.uv_list[i].num_verts * 2);
+			shphd->sh_textures[i] = (int *) AllocateMem (sizeof(int *) * cshp.uv_list[i].num_verts * 2);
 			for (j=0; j<cshp.uv_list[i].num_verts; j++) {
 				(shphd->sh_textures[i])[(j*2)] = (int)cshp.uv_list[i].vert[j].u;
 				(shphd->sh_textures[i])[(j*2)+1] = (int)cshp.uv_list[i].vert[j].v;
@@ -3957,7 +3957,7 @@ BOOL copy_to_mainshpl (Shape_Sub_Shape_Chunk * shp, int list_pos)
 	if (cshp.num_uvs)
 	{
 		for (i=0; i<cshp.num_uvs; i++) {
-			shphd->sh_textures[i] = (int *) AllocateMem (sizeof(int) * cshp.uv_list[i].num_verts * 2);
+			shphd->sh_textures[i] = (int *) AllocateMem (sizeof(int *) * cshp.uv_list[i].num_verts * 2);
 			for (j=0; j<cshp.uv_list[i].num_verts; j++) {
 				(shphd->sh_textures[i])[(j*2)] = (int)cshp.uv_list[i].vert[j].u;
 				(shphd->sh_textures[i])[(j*2)+1] = (int)cshp.uv_list[i].vert[j].v;

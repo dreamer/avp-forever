@@ -890,7 +890,7 @@ typedef struct txanimframe {
 	int txf_orienty;
 	int txf_numuvs;
 	int *txf_uvdata;
-	int txf_image;
+	intptr_t txf_image; // SBF: 64HACK - needed to match TXANIMFRAME_MVS
 
 } TXANIMFRAME;
 

@@ -8,13 +8,14 @@
 #include "win95/cd_player.h"
 #include "cdplayer.h"
 
+/* cd_player.cpp */
+int CDPlayerVolume;
+
+#if SDL_MAJOR_VERSION < 2
 static int HaveCDROM = 0;
 static SDL_CD *cdrom = NULL;
 
 /* ** */
-
-/* cd_player.cpp */
-int CDPlayerVolume;
 
 void CheckCDVolume()
 {
@@ -155,3 +156,58 @@ void CDDA_SwitchOn()
 	fprintf(stderr, "CDDA_SwitchOn()\n");
 */	
 }
+
+#else
+
+// What's a CD?
+
+void CheckCDVolume()
+{
+}
+
+/* ** */
+
+void CDDA_Start()
+{
+}
+
+void CDDA_End()
+{
+}
+
+void CDDA_ChangeVolume(int volume)
+{
+}
+
+int CDDA_CheckNumberOfTracks()
+{
+	return 0;
+}
+
+int CDDA_IsOn()
+{
+	return 0;
+}
+
+int CDDA_IsPlaying()
+{
+	return 0;
+}
+
+void CDDA_Play(int CDDATrack)
+{
+}
+
+void CDDA_PlayLoop(int CDDATrack)
+{
+}
+
+void CDDA_Stop()
+{
+}
+
+void CDDA_SwitchOn()
+{
+}
+
+#endif

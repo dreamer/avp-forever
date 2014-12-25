@@ -101,7 +101,7 @@ int predHUDSoundHandle=SOUND_NOACTIVEINDEX;
 static int HUD_PrimaryRounds;
 static int HUD_SecondaryRounds;
 /* numerics buffer - the marine has more digits on his HUD than the other species */
-char ValueOfHUDDigit[MAX_NO_OF_COMMON_HUD_DIGITS];
+char ValueOfHUDDigit[MAX_NO_OF_MARINE_HUD_DIGITS];
 
 
 #define PREDATOR_LOCK_ON_TIME (ONE_FIXED*5/3)
@@ -237,7 +237,7 @@ void InitMarineHUD(void)
 
 	{
 		int i;
-		for (i=0; i<MAX_NO_OF_MARINE_HUD_DIGITS; i++)
+		for (i=0; i<sizeof(ValueOfHUDDigit)/sizeof(ValueOfHUDDigit[0]); i++)
 			ValueOfHUDDigit[i]=0;
 	}
 	

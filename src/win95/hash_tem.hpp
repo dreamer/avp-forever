@@ -242,7 +242,7 @@
 	inline unsigned HashFunction(void const * const _vP)
 	{
 		// treat as integer
-		return HashFunction(reinterpret_cast<unsigned>(_vP));
+		return HashFunction(reinterpret_cast<uintptr_t>(_vP));
 	}
 
 	// a hash function for strings

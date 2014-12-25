@@ -1012,7 +1012,7 @@ Object_Track_Chunk2::Object_Track_Chunk2(Object_Chunk * parent)
 
 Object_Track_Chunk2::~Object_Track_Chunk2()
 {
-	if(sections) delete sections;
+	if(sections) delete [] sections;
 }
 
 void Object_Track_Chunk2::fill_data_block (char *data_start)
@@ -1132,7 +1132,7 @@ Object_Track_Sound_Chunk::Object_Track_Sound_Chunk(Chunk_With_Children* const pa
 
 Object_Track_Sound_Chunk::~Object_Track_Sound_Chunk()
 {
-	if(wav_name) delete wav_name;
+	if(wav_name) delete [] wav_name;
 }											 
 
 void Object_Track_Sound_Chunk::fill_data_block(char* data_start)

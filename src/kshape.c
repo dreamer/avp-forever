@@ -3015,8 +3015,11 @@ void CreateTxAnimUVArray(int *txa_data, int *uv_array, int *shapeitemptr)
 
 	/* The sequence # will have been copied across by the control block */
 
-	sequence = *txa_data++;
-
+	sequence = *txa_data;
+        
+        // SBF: 64HACK - skip over the rest of the int*
+        txa_data = (int *)((intptr_t) txa_data + sizeof(int *));
+        
 	#if 0
 	textprint("sequence = %d\n", sequence);
 	#endif
@@ -4027,7 +4030,7 @@ void AddShape(DISPLAYBLOCK *dptr, VIEWDESCRIPTORBLOCK *VDB_Ptr)
 	{
 		if (dptr->ObStrategyBlock->I_SBtype==I_BehaviourInanimateObject)
 		{
-			INANIMATEOBJECT_STATUSBLOCK* objStatPtr = dptr->ObStrategyBlock->SBdataptr;
+			INANIMATEOBJECT_STATUSBLOCK* objStatPtr = (INANIMATEOBJECT_STATUSBLOCK*) dptr->ObStrategyBlock->SBdataptr;
 			if(objStatPtr->typeId==IOT_FieldCharge)
 			{
 	

@@ -21,6 +21,7 @@
 #include "huddefs.h"
 #include "hud.h"
 //#include "hudgfx.h"
+#include "fmv.h"
 #include "font.h"
 #include "bh_gener.h"
 #include "pvisible.h"

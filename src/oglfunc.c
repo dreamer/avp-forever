@@ -42,6 +42,7 @@ PFNGLGETERRORPROC		pglGetError;
 PFNGLGETFLOATVPROC		pglGetFloatv;
 PFNGLGETINTEGERVPROC		pglGetIntegerv;
 PFNGLGETSTRINGPROC		pglGetString;
+PFNGLGETTEXPARAMETERFVPROC	pglGetTexParameterfv;
 PFNGLHINTPROC			pglHint;
 PFNGLLOADIDENTITYPROC		pglLoadIdentity;
 PFNGLLOADMATRIXFPROC		pglLoadMatrixf;
@@ -100,11 +101,15 @@ PFNGLSECONDARYCOLOR3UBEXTPROC		pglSecondaryColor3ubEXT;
 PFNGLSECONDARYCOLOR3UBVEXTPROC		pglSecondaryColor3ubvEXT;
 PFNGLSECONDARYCOLORPOINTEREXTPROC	pglSecondaryColorPointerEXT;
 
+int ogl_have_multisample_filter_hint;
 int ogl_have_paletted_texture;
 int ogl_have_secondary_color;
+int ogl_have_texture_filter_anisotropic;
 
+int ogl_use_multisample_filter_hint;
 int ogl_use_paletted_texture;
 int ogl_use_secondary_color;
+int ogl_use_texture_filter_anisotropic;
 
 static void dummyfunc()
 {
@@ -183,6 +188,7 @@ void load_ogl_functions(int mode)
 	LoadOGLProc(PFNGLGETFLOATVPROC, glGetFloatv);
 	LoadOGLProc(PFNGLGETINTEGERVPROC, glGetIntegerv);
 	LoadOGLProc(PFNGLGETSTRINGPROC, glGetString);
+	LoadOGLProc(PFNGLGETTEXPARAMETERFVPROC, glGetTexParameterfv);
 	LoadOGLProc(PFNGLHINTPROC, glHint);
 	LoadOGLProc(PFNGLLOADIDENTITYPROC, glLoadIdentity);
 	LoadOGLProc(PFNGLLOADMATRIXFPROC, glLoadMatrixf);
@@ -247,8 +253,10 @@ void load_ogl_functions(int mode)
 	
 	ext = (const char *) pglGetString(GL_EXTENSIONS);
 
+	ogl_have_multisample_filter_hint = check_token(ext, "GL_NV_multisample_filter_hint");
 	ogl_have_paletted_texture = check_token(ext, "GL_EXT_paletted_texture");	
 	ogl_have_secondary_color = check_token(ext, "GL_EXT_secondary_color");
+	ogl_have_texture_filter_anisotropic = check_token(ext, "GL_EXT_texture_filter_anisotropic");
 
 #ifndef GL_COLOR_TABLE_WIDTH_EXT
 #define GL_COLOR_TABLE_WIDTH_EXT	GL_COLOR_TABLE_WIDTH
@@ -287,11 +295,20 @@ void load_ogl_functions(int mode)
 			ogl_have_secondary_color = 0;
 		}
 	}
-	
+
+	ogl_use_multisample_filter_hint = ogl_have_multisample_filter_hint;
 	ogl_use_paletted_texture = ogl_have_paletted_texture;
 	ogl_use_secondary_color = ogl_have_secondary_color;
-
-	// fprintf(stderr, "RENDER DEBUG: pal:%d sec:%d\n", ogl_use_paletted_texture, ogl_use_secondary_color);
+	ogl_use_texture_filter_anisotropic = ogl_have_texture_filter_anisotropic;
+	
+#if 0
+	fprintf(stderr, "RENDER DEBUG: pal:%d sec:%d mfh:%d tfa:%d\n",
+		ogl_use_paletted_texture,
+		ogl_use_secondary_color,
+		ogl_use_multisample_filter_hint,
+		ogl_use_texture_filter_anisotropic
+		);
+#endif
 }
 
 int check_for_errors(const char *file, int line)

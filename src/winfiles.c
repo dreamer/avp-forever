@@ -678,7 +678,7 @@ static char* GetLocalDirectory(void)
 
 		if( homepath != NULL ) {
 
-			homedir = (unsigned char*)malloc(strlen(homedrive)+strlen(homepath)+1);
+			homedir = (char*)malloc(strlen(homedrive)+strlen(homepath)+1);
 			
 			strcpy(homedir, homedrive);
 			strcat(homedir, homepath);
@@ -704,7 +704,7 @@ static char* GetLocalDirectory(void)
 		homedir = _strdup(".");
 	}
 
-	localdir = (unsigned char*)malloc(strlen(homedir) + 10);
+	localdir = (char*)malloc(strlen(homedir) + 10);
 	strcpy(localdir, homedir);
 	strcat(localdir, "\\AvPLinux"); // temp name, maybe
 
@@ -762,11 +762,13 @@ static const char* GetGlobalDirectory(const char* argv0)
 /*
   Game-specific initialization
  */
+extern "C" {
+	extern char const *SecondTex_Directory;
+	extern char const *SecondSoundDir;
+}
+
 void InitGameDirectories(char *argv0)
 {
-	extern char *SecondTex_Directory;
-	extern char *SecondSoundDir;
-
 	const char* localdir;
 	const char* globaldir;
 

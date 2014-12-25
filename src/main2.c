@@ -45,6 +45,9 @@
 #include "version.h"
 #include "fmv.h"
 
+void RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR(char Ch);
+void RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_KEYDOWN(int wParam);
+
 char LevelName[] = {"predbit6\0QuiteALongNameActually"}; /* the real way to load levels */
 
 int DebouncedGotAnyKey;
@@ -61,6 +64,8 @@ extern unsigned char KeyboardInput[MAX_NUMBER_OF_INPUT_KEYS];
 extern unsigned char GotAnyKey;
 extern int NormalFrameTime;
 
+SDL_Window *window;
+SDL_GLContext context;
 SDL_Surface *surface;
 
 SDL_Joystick *joy;
@@ -69,9 +74,13 @@ JOYCAPS JoystickCaps;
 
 /* defaults */
 static int WantFullscreen = 0;
+static int WantMouseGrab = 0;
 int WantSound = 1;
 static int WantCDRom = 0;
 static int WantJoystick = 0;
+
+static int ViewportWidth;
+static int ViewportHeight;
 
 /* originally was "/usr/lib/libGL.so.1:/usr/lib/tls/libGL.so.1:/usr/X11R6/lib/libGL.so" */
 static const char * opengl_library = NULL;
@@ -162,6 +171,7 @@ void ReadJoysticks()
 
 unsigned char *GetScreenShot24(int *width, int *height)
 {
+#if 0//REVIEW
 	unsigned char *buf;
 //	Uint16 redtable[256], greentable[256], bluetable[256];
 	
@@ -171,7 +181,7 @@ unsigned char *GetScreenShot24(int *width, int *height)
 	
 	buf = (unsigned char *)malloc(surface->w * surface->h * 3);
 	
-	if (surface->flags & SDL_OPENGL) {
+	if (surface->flags & SDL_WINDOW_OPENGL) {
 		pglPixelStorei(GL_PACK_ALIGNMENT, 1);
 		pglPixelStorei(GL_UNPACK_ALIGNMENT, 1);
 		pglReadPixels(0, 0, surface->w, surface->h, GL_RGB, GL_UNSIGNED_BYTE, buf);
@@ -226,6 +236,8 @@ unsigned char *GetScreenShot24(int *width, int *height)
 	}
 #endif	
 	return buf;
+#endif
+	return NULL;
 }
 
 /* ** */
@@ -244,19 +256,16 @@ typedef struct VideoModeStruct
 	int available;
 } VideoModeStruct;
 VideoModeStruct VideoModeList[] = {
-{ 	512, 	384,	0	},
-{	640,	480,	0	},
-{   720,    480,    0   },
-{	800,	600,	0	},
-{	1024,	768,	0	},
-{	1152,	864,	0	},
-{   1280,   720,    0   },
-{   1280,   768,    0   },
-{	1280,	960,	0	},
-{	1280,	1024,	0	},
-{	1600,	1200,	0	},
-{   1920,   1080,   0   },
-{   1920,   1200,   0   }
+	{ 	512, 	384,	0	},
+	{	640,	480,	0	},
+	{	800,	600,	0	},
+	{	1024,	768,	0	},
+	{	1152,	864,	0	},
+	{	1280,   720,	0	},
+	{	1280,	960,	0	},
+	{	1280,	1024,	0	},
+	{	1600,	1200,	0	},
+	{	1920,	1080,	0	}
 };
 
 int CurrentVideoMode;
@@ -343,7 +352,7 @@ void NextVideoMode2()
 
 char *GetVideoModeDescription2()
 {
-	return "SDL";
+	return "SDL2";
 }
 
 char *GetVideoModeDescription3()
@@ -357,17 +366,16 @@ char *GetVideoModeDescription3()
 
 int InitSDL()
 {
-	SDL_Rect **SDL_AvailableVideoModes;
-
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		fprintf(stderr, "SDL Init failed: %s\n", SDL_GetError());
 		exit(EXIT_FAILURE);
 	}
 
 	atexit(SDL_Quit);
-	
-	// needs to be cleaned up; SDL_VideoModeOK and SDL_ListModes aren't compatible
-	SDL_AvailableVideoModes = (SDL_Rect **)-1; //SDL_ListModes(NULL, SDL_FULLSCREEN | SDL_OPENGL);
+
+#if 0
+	SDL_Rect **SDL_AvailableVideoModes;
+	SDL_AvailableVideoModes = SDL_ListModes(NULL, SDL_WINDOW_FULLSCREEN | SDL_WINDOW_OPENGL);
 	if (SDL_AvailableVideoModes == NULL)
 		return -1;
 	
@@ -409,7 +417,21 @@ int InitSDL()
 		if (foundit == 0)
 			return -1;
 	}
+#endif
+
+{
+	int i;
 	
+	for (i = 0; i < TotalVideoModes; i++) {
+		//if (SDL_VideoModeOK(VideoModeList[i].w, VideoModeList[i].h, 16, SDL_FULLSCREEN | SDL_OPENGL)) {
+			/* assume SDL isn't lying to us */
+			VideoModeList[i].available = 1;
+			
+			//foundit = 1;
+		//}
+	}
+}
+
 	LoadDeviceAndVideoModePreferences();
 
 	if (WantJoystick) {
@@ -434,14 +456,34 @@ int InitSDL()
 		}
 	}
 	
-	surface = NULL;
+	Uint32 rmask, gmask, bmask, amask;
 	
+	// pre-create the software surface in OpenGL RGBA order
+	// menus.c assumes RGB565; possible to support both?
+#if SDL_BYTEORDER == SDL_BIG_ENDIAN
+    rmask = 0xff000000;
+    gmask = 0x00ff0000;
+    bmask = 0x0000ff00;
+    amask = 0x000000ff;
+#else
+    rmask = 0x0000f800;
+    gmask = 0x000007e0;
+    bmask = 0x0000001f;
+    amask = 0x00000000;
+#endif
+
+	surface = SDL_CreateRGBSurface(0, 640, 480, 16, rmask, gmask, bmask, amask);
+	if (surface == NULL) {
+		return -1;
+	}
+
 	return 0;
 }
 
 /* ** */
 static void load_opengl_library(const char *lib)
 {
+#if 0//REVIEW
 	char tmppath[PATH_MAX];
 	size_t len, copylen;
 	
@@ -474,63 +516,18 @@ static void load_opengl_library(const char *lib)
 	
 	fprintf(stderr, "ERROR: unable to initialize opengl library: %s\n", SDL_GetError());
 	exit(EXIT_FAILURE);
+#endif
 }
 
 int SetSoftVideoMode(int Width, int Height, int Depth)
 {
-	SDL_GrabMode isgrab;
-	int flags;
-	
-	load_ogl_functions(0);
-	
-	/* 
-	  let sdl try loading the opengl library, to see if it is even available 
-	  this is definitely not enough, but it's a start...
-	*/
-	if (!surface || !(surface->flags & SDL_OPENGL)) {
-		load_opengl_library(opengl_library);
-	}
-	
+	//TODO: clear surface
+
 	ScanDrawMode = ScanDrawD3DHardwareRGB;
 	GotMouse = 1;
-	
-	flags = SDL_SWSURFACE|SDL_DOUBLEBUF;
-	if (surface != NULL) {
-	 	if (surface->flags & SDL_FULLSCREEN)
-	 		flags |= SDL_FULLSCREEN;
-		isgrab = SDL_WM_GrabInput(SDL_GRAB_QUERY);
 
-		SDL_FreeSurface(surface);
-	} else {
-		if (WantFullscreen)
-			flags |= SDL_FULLSCREEN;
-		isgrab = SDL_GRAB_OFF;
-	}
-	
 	// reset input
 	IngameKeyboardInput_ClearBuffer();
-	
-	// force restart the video system
-	SDL_QuitSubSystem(SDL_INIT_VIDEO);
-	SDL_InitSubSystem(SDL_INIT_VIDEO);
-	
-	if ((surface = SDL_SetVideoMode(Width, Height, Depth, flags)) == NULL) {
-		fprintf(stderr, "(Software) SDL SetVideoMode failed: %s\n", SDL_GetError());
-		exit(EXIT_FAILURE);
-	}
-	
-	SDL_WM_SetCaption("Aliens vs Predator", "Aliens vs Predator");
-
-	/* this is for supporting keyboard input processing with little hassle */
-	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
-	SDL_EnableUNICODE(1); /* toggle it to ON */
-      
-	if (isgrab == SDL_GRAB_ON)
-		SDL_WM_GrabInput(SDL_GRAB_ON);
-
-	if ((surface->flags & SDL_FULLSCREEN) || 
-	    (SDL_WM_GrabInput(SDL_GRAB_QUERY) == SDL_GRAB_ON))
-		SDL_ShowCursor(0);
 
 	ScreenDescriptorBlock.SDB_Width     = Width;
 	ScreenDescriptorBlock.SDB_Height    = Height;
@@ -542,77 +539,106 @@ int SetSoftVideoMode(int Width, int Height, int Depth)
 	ScreenDescriptorBlock.SDB_ClipRight = Width;
 	ScreenDescriptorBlock.SDB_ClipUp    = 0;
 	ScreenDescriptorBlock.SDB_ClipDown  = Height;
+
+	return 0;
+}
+
+static int SDLCALL SDLEventFilter(void* userData, SDL_Event* event) {
+	(void) userData;
+
+	//printf("SDLEventFilter: %d\n", event->type);
 	
-	return 0;	
+	switch (event->type) {
+		case SDL_APP_TERMINATING:
+			AvP.MainLoopRunning = 0; /* TODO */
+			break;
+	}
+	
+	return 1;
 }
 
 int SetOGLVideoMode(int Width, int Height)
 {
-	SDL_GrabMode isgrab;
+	int oldflags;
 	int flags;
 	
 	ScanDrawMode = ScanDrawD3DHardwareRGB;
 	GotMouse = 1;
-	
-	load_ogl_functions(0);
-	
-	flags = SDL_OPENGL;
-	if (surface != NULL) {
-		if (surface->flags & SDL_FULLSCREEN)
-			flags |= SDL_FULLSCREEN;
-		isgrab = SDL_WM_GrabInput(SDL_GRAB_QUERY);
 
-		SDL_FreeSurface(surface);
-	} else {
-		if (WantFullscreen) {
-			flags |= SDL_FULLSCREEN;
+	if (window == NULL) {
+		load_ogl_functions(0);
+
+		/*
+		if (window != NULL) {
+			oldflags = SDL_GetWindowFlags(window);
+
+			SDL_DestroyWindow(window);
 		}
 		
-		isgrab = SDL_GRAB_OFF;
+		 */
+		flags = SDL_WINDOW_OPENGL;
+		if (WantFullscreen) {
+			flags |= SDL_WINDOW_FULLSCREEN;
+		}
+
+		// reset input
+		IngameKeyboardInput_ClearBuffer();
+		
+		// force restart the video system
+		SDL_QuitSubSystem(SDL_INIT_VIDEO);
+		SDL_InitSubSystem(SDL_INIT_VIDEO);
+
+		load_opengl_library(opengl_library);
+		
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+
+		SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
+		SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
+		SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
+		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
+		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+
+		// These should be configurable video options.
+		//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
+		//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
+		SDL_GL_SetSwapInterval(1);
+		
+		window = SDL_CreateWindow("Aliens vs Predator",
+								  SDL_WINDOWPOS_UNDEFINED,
+								  SDL_WINDOWPOS_UNDEFINED,
+								  Width,
+								  Height,
+								  flags);
+		if (window == NULL) {
+			fprintf(stderr, "(OpenGL) SDL SDL_CreateWindow failed: %s\n", SDL_GetError());
+			exit(EXIT_FAILURE);
+		}
+		
+		context = SDL_GL_CreateContext(window);
+		if (context == NULL) {
+			fprintf(stderr, "(OpenGL) SDL SDL_GL_CreateContext failed: %s\n", SDL_GetError());
+			exit(EXIT_FAILURE);
+		}
+		SDL_GL_MakeCurrent(window, context);
+
+		SDL_AddEventWatch(SDLEventFilter, NULL); //TODO move this to startup?
+
+		load_ogl_functions(1);
+
+		///* this is for supporting keyboard input processing with little hassle */
+		//SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
+		
+		//SDL_SetRelativeMouseMode(isgrab);
 	}
-
-	// reset input
-	IngameKeyboardInput_ClearBuffer();
 	
-	// force restart the video system
-	SDL_QuitSubSystem(SDL_INIT_VIDEO);
-	SDL_InitSubSystem(SDL_INIT_VIDEO);
+	ViewportWidth = Width;
+	ViewportHeight = Height;
 
-	load_opengl_library(opengl_library);
-			
-	SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
-	SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
-	SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
-	SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
-	SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
+	SDL_SetWindowSize(window, Width, Height);
 
-	// These should be configurable video options.
-	//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
-	//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
-	SDL_GL_SetAttribute(SDL_GL_SWAP_CONTROL, 1);
-
-	if ((surface = SDL_SetVideoMode(Width, Height, 0, flags)) == NULL) {
-		fprintf(stderr, "(OpenGL) SDL SetVideoMode failed: %s\n", SDL_GetError());
-		exit(EXIT_FAILURE);
-	}
-	
-	load_ogl_functions(1);
-	
-	SDL_WM_SetCaption("Aliens vs Predator", "Aliens vs Predator");
-
-	/* this is for supporting keyboard input processing with little hassle */
-	SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
-	SDL_EnableUNICODE(1); /* toggle it to ON */
-      
-	if (isgrab == SDL_GRAB_ON)
-		SDL_WM_GrabInput(SDL_GRAB_ON);
-
-	if ((surface->flags & SDL_FULLSCREEN) || 
-	    (SDL_WM_GrabInput(SDL_GRAB_QUERY) == SDL_GRAB_ON))
-		SDL_ShowCursor(0);	
-	
 	pglViewport(0, 0, Width, Height);
-	
+		
 	pglMatrixMode(GL_PROJECTION);
 	pglLoadIdentity();
 	pglMatrixMode(GL_MODELVIEW);
@@ -620,12 +646,12 @@ int SetOGLVideoMode(int Width, int Height)
 
 	pglEnable(GL_BLEND);
 	pglBlendFunc(GL_SRC_ALPHA, GL_ONE);
-	
+		
 	pglEnable(GL_DEPTH_TEST);
 	pglDepthFunc(GL_LEQUAL);
 	pglDepthMask(GL_TRUE);
 	pglDepthRange(0.0, 1.0);
-	
+		
 	pglEnable(GL_TEXTURE_2D);
 
 	pglPolygonMode(GL_FRONT, GL_FILL);
@@ -633,7 +659,7 @@ int SetOGLVideoMode(int Width, int Height)
 	pglDisable(GL_CULL_FACE);
 	
 	pglClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-	
+
 	ScreenDescriptorBlock.SDB_Width     = Width;
 	ScreenDescriptorBlock.SDB_Height    = Height;
 	ScreenDescriptorBlock.SDB_CentreX   = Width/2;
@@ -645,8 +671,6 @@ int SetOGLVideoMode(int Width, int Height)
 	ScreenDescriptorBlock.SDB_ClipUp    = 0;
 	ScreenDescriptorBlock.SDB_ClipDown  = Height;
 	
-	load_ogl_functions(1);
-
 	InitOpenGL();
 	
 	return 0;
@@ -659,17 +683,26 @@ int InitialiseWindowsSystem(HANDLE hInstance, int nCmdShow, int WinInitMode)
 
 int ExitWindowsSystem()
 {
-	if (joy) {
+	if (joy != NULL) {
 		SDL_JoystickClose(joy);
 	}
 
 	load_ogl_functions(0);
 	
-	if (surface) {
+	if (surface != NULL) {
 		SDL_FreeSurface(surface);
 	}
-	
 	surface = NULL;
+
+	if (context != NULL) {
+		SDL_GL_DeleteContext(context);
+	}
+	context = NULL;
+
+	if (window != NULL) {
+		SDL_DestroyWindow(window);
+	}
+	window = NULL;
 
 	return 0;
 }
@@ -804,30 +837,30 @@ static int KeySymToKey(int keysym)
 
 		case SDLK_CAPSLOCK:
 			return KEY_CAPS;
-		case SDLK_NUMLOCK:
+		case SDLK_NUMLOCKCLEAR:
 			return KEY_NUMLOCK;
-		case SDLK_SCROLLOCK:
+		case SDLK_SCROLLLOCK:
 			return KEY_SCROLLOK;
 			
-		case SDLK_KP0:
+		case SDLK_KP_0:
 			return KEY_NUMPAD0;
-		case SDLK_KP1:
+		case SDLK_KP_1:
 			return KEY_NUMPAD1;
-		case SDLK_KP2:
+		case SDLK_KP_2:
 			return KEY_NUMPAD2;
-		case SDLK_KP3:
+		case SDLK_KP_3:
 			return KEY_NUMPAD3;
-		case SDLK_KP4:
+		case SDLK_KP_4:
 			return KEY_NUMPAD4;
-		case SDLK_KP5:
+		case SDLK_KP_5:
 			return KEY_NUMPAD5;
-		case SDLK_KP6:
+		case SDLK_KP_6:
 			return KEY_NUMPAD6;
-		case SDLK_KP7:
+		case SDLK_KP_7:
 			return KEY_NUMPAD7;
-		case SDLK_KP8:
+		case SDLK_KP_8:
 			return KEY_NUMPAD8;
-		case SDLK_KP9:
+		case SDLK_KP_9:
 			return KEY_NUMPAD9;
 		case SDLK_KP_MINUS:
 			return KEY_NUMPADSUB;
@@ -862,9 +895,9 @@ static int KeySymToKey(int keysym)
 			return KEY_MINUS;
 		case SDLK_EQUALS:
 			return KEY_EQUALS;
-		case SDLK_LSUPER:
+		case SDLK_LGUI:
 			return KEY_LWIN;
-		case SDLK_RSUPER:
+		case SDLK_RGUI:
 			return KEY_RWIN;
 /*		case SDLK_
 			return KEY_APPS; */
@@ -903,9 +936,6 @@ static int KeySymToKey(int keysym)
 
 static void handle_keypress(int key, int unicode, int press)
 {	
-	void RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR(char Ch);
-	void RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_KEYDOWN(int wParam);
-
 	if (key == -1)
 		return;
 
@@ -942,10 +972,6 @@ static void handle_keypress(int key, int unicode, int press)
 				RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_KEYDOWN(VK_TAB);
 				break;
 			default:
-				if (unicode && !(unicode & 0xFF80)) {
-					RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR(unicode);
-					KeyboardEntryQueue_Add(unicode);
-				}
 				break;
 		}
 	}
@@ -996,8 +1022,8 @@ void CheckForWindowsMessages()
 	DebouncedGotAnyKey = 0;
 	memset(DebouncedKeyboardInput, 0, sizeof(DebouncedKeyboardInput));
 	
-	wantmouse =	(surface->flags & SDL_FULLSCREEN) ||
-			(SDL_WM_GrabInput(SDL_GRAB_QUERY) == SDL_GRAB_ON);
+	wantmouse =	0; //(surface->flags & SDL_FULLSCREEN) ||
+			//(SDL_WM_GrabInput(SDL_GRAB_QUERY) == SDL_GRAB_ON);
 
 	KeyboardInput[KEY_MOUSEWHEELUP] = 0;
 	KeyboardInput[KEY_MOUSEWHEELDOWN] = 0;
@@ -1011,17 +1037,25 @@ void CheckForWindowsMessages()
 					break;
 				case SDL_MOUSEBUTTONUP:
 					break;
+				case SDL_TEXTINPUT: {
+						int unicode = event.text.text[0]; //TODO convert to utf-32
+						if (unicode && !(unicode & 0xFF80)) {
+							RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR(unicode);
+							KeyboardEntryQueue_Add(unicode);
+						}
+					}
+					break;
 				case SDL_KEYDOWN:
-					if (event.key.keysym.sym == SDLK_PRINT) {
+					if (event.key.keysym.sym == SDLK_PRINTSCREEN) {
 						if (HavePrintScn == 0)
 							GotPrintScn = 1;
 						HavePrintScn = 1;
 					} else {
-						handle_keypress(KeySymToKey(event.key.keysym.sym), event.key.keysym.unicode, 1);
+						handle_keypress(KeySymToKey(event.key.keysym.sym), 0, 1);
 					}
 					break;
 				case SDL_KEYUP:
-					if (event.key.keysym.sym == SDLK_PRINT) {
+					if (event.key.keysym.sym == SDLK_PRINTSCREEN) {
 						GotPrintScn = 0;
 						HavePrintScn = 0;
 					} else {
@@ -1030,6 +1064,7 @@ void CheckForWindowsMessages()
 					break;
 				case SDL_QUIT:
 					AvP.MainLoopRunning = 0; /* TODO */
+					exit(0); //TODO
 					break;
 			}
 		} while (SDL_PollEvent(&event));
@@ -1083,28 +1118,28 @@ void CheckForWindowsMessages()
 	}
 
 	if ((KeyboardInput[KEY_LEFTALT]||KeyboardInput[KEY_RIGHTALT]) && DebouncedKeyboardInput[KEY_CR]) {
-		SDL_GrabMode gm;
-
-		SDL_WM_ToggleFullScreen(surface);
-		
-		gm = SDL_WM_GrabInput(SDL_GRAB_QUERY);
-		if (gm == SDL_GRAB_OFF && !(surface->flags & SDL_FULLSCREEN))
-			SDL_ShowCursor(1);
-		else
-			SDL_ShowCursor(0);
+		//SDL_GrabMode gm;
+		//
+		//SDL_WM_ToggleFullScreen(surface);
+		//
+		//gm = SDL_WM_GrabInput(SDL_GRAB_QUERY);
+		//if (gm == SDL_GRAB_OFF && !(surface->flags & SDL_FULLSCREEN))
+		//	SDL_ShowCursor(1);
+		//else
+		//	SDL_ShowCursor(0);
 	}
 
 	if (KeyboardInput[KEY_LEFTCTRL] && DebouncedKeyboardInput[KEY_G]) {
-		SDL_GrabMode gm;
-		
-		gm = SDL_WM_GrabInput(SDL_GRAB_QUERY);
-		SDL_WM_GrabInput((gm == SDL_GRAB_ON) ? SDL_GRAB_OFF : SDL_GRAB_ON);
-		
-		gm = SDL_WM_GrabInput(SDL_GRAB_QUERY);
-		if (gm == SDL_GRAB_OFF && !(surface->flags & SDL_FULLSCREEN))
-			SDL_ShowCursor(1);
-		else
-			SDL_ShowCursor(0);
+		//SDL_GrabMode gm;
+		//
+		//gm = SDL_WM_GrabInput(SDL_GRAB_QUERY);
+		//SDL_WM_GrabInput((gm == SDL_GRAB_ON) ? SDL_GRAB_OFF : SDL_GRAB_ON);
+		//
+		//gm = SDL_WM_GrabInput(SDL_GRAB_QUERY);
+		//if (gm == SDL_GRAB_OFF && !(surface->flags & SDL_FULLSCREEN))
+		//	SDL_ShowCursor(1);
+		//else
+		//	SDL_ShowCursor(0);
 	}
 	
 	if (GotPrintScn) {
@@ -1116,12 +1151,92 @@ void CheckForWindowsMessages()
         
 void InGameFlipBuffers()
 {
-	SDL_GL_SwapBuffers();
+	if (window != NULL) {
+		SDL_GL_SwapWindow(window);
+	}
 }
 
 void FlipBuffers()
 {
-	SDL_Flip(surface);
+	// TODO: move this to init
+	static GLuint t;
+
+	if (t == 0) {
+		pglGenTextures(1, &t);
+
+		pglBindTexture(GL_TEXTURE_2D, t);
+
+		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
+		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
+
+		pglTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 640, 480, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, NULL);
+	}
+
+	pglDisableClientState(GL_VERTEX_ARRAY);
+	pglDisableClientState(GL_TEXTURE_COORD_ARRAY);
+	pglDisableClientState(GL_COLOR_ARRAY);
+
+	pglClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	pglMatrixMode(GL_PROJECTION);
+	pglLoadIdentity();
+	pglMatrixMode(GL_MODELVIEW);
+	pglLoadIdentity();
+
+	pglDisable(GL_ALPHA_TEST);
+	pglDisable(GL_BLEND);
+	pglDisable(GL_DEPTH_TEST);
+
+	pglBindTexture(GL_TEXTURE_2D, t);
+	pglTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
+	pglTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 640, 480, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, surface->pixels);
+
+	GLfloat x0;
+	GLfloat x1;
+	GLfloat y0;
+	GLfloat y1;
+
+	// figure out the best way to fit the 640x480 virtual window
+	GLfloat a = ViewportHeight * 640.0f / 480.0f;
+	GLfloat b = ViewportWidth * 480.0f / 640.0f;
+
+	if (a <= ViewportWidth) {
+		// a x ViewportHeight window
+		y0 = -1.0f;
+		y1 =  1.0f;
+
+		x1 = 1.0 - (ViewportWidth - a) / ViewportWidth;
+		x0 = -x1;
+	} else {
+		// ViewportWidth x b window
+		x0 = -1.0f;
+		x1 =  1.0f;
+
+		y1 = 1.0 - (ViewportHeight - b) / ViewportHeight;
+		y0 = -y1;
+	}
+
+	pglBegin(GL_QUADS);
+
+    pglTexCoord2f(0.0, 1.0);
+    pglVertex3f(x0, y0, -1.0);
+
+    pglTexCoord2f(1.0, 1.0);
+    pglVertex3f(x1, y0, -1.0);
+
+    pglTexCoord2f(1.0, 0.0);
+    pglVertex3f(x1, y1, -1.0);
+
+    pglTexCoord2f(0.0, 0.0);
+    pglVertex3f(x0, y1, -1.0);
+
+    pglEnd();
+
+	pglBindTexture(GL_TEXTURE_2D, 0);
+
+	SDL_GL_SwapWindow(window);
 }
 
 char *AvpCDPath = 0;
@@ -1224,6 +1339,10 @@ int main(int argc, char *argv[])
 #endif
 	InitGame();
 
+	//NEW
+	SetOGLVideoMode(VideoModeList[1].w, VideoModeList[1].h);
+	//NEW
+
 	SetSoftVideoMode(640, 480, 16);
 	
 	InitialVideoMode();
@@ -1273,8 +1392,16 @@ if (AvP_MainMenus())
 	/* turn off any special effects */
 	d3d_light_ctrl.ctrl = LCCM_NORMAL;
 	
+	//NEW
+	//TODO
+	// need to watch for CurrentVideoMode to change in all cases
+	// the menu will always render in a 640x480 virtual window
+	// game will render in a user-specified virtual window
+	// real window will be which ever size is available
+	//TODO
+	//NEW
 	SetOGLVideoMode(VideoModeList[CurrentVideoMode].w, VideoModeList[CurrentVideoMode].h);
-	
+
 	InitialiseGammaSettings(RequestedGammaSetting);
 	
 	start_of_loaded_shapes = load_precompiled_shapes();

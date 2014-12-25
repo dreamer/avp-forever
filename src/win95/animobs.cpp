@@ -153,9 +153,9 @@ void Object_Animation_Sequence_Header_Chunk::fill_data_block (char *data_start)
 Object_Animation_Sequence_Header_Chunk::~Object_Animation_Sequence_Header_Chunk()
 {
 	if (sequence_name)
-		delete sequence_name;
+		delete[] sequence_name;
 	if(extra_data)
-		delete extra_data;
+		delete[] extra_data;
 }
 
 Object_Animation_Sequence_Header_Chunk::Object_Animation_Sequence_Header_Chunk (Chunk_With_Children * parent,const char * data_start, size_t)

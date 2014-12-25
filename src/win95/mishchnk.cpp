@@ -639,7 +639,7 @@ void File_Chunk::post_input_processing()
 		ol()->assoc_with_shape(shape_array[ol()->get_header()->shape_id_no]);
 	}
 
-	delete shape_array;
+	delete [] shape_array;
 	
 
 	Chunk_With_Children::post_input_processing();	

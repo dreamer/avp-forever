@@ -54,7 +54,7 @@
 	#define UseLocalAssert Yes
 	#include "ourasert.h"
 
-#include "frontend/avp_menus.h"
+#include "avp_menus.h"
 /* Version settings ************************************************/
 
 /* Constants *******************************************************/

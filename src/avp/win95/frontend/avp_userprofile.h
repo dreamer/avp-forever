@@ -69,9 +69,10 @@ typedef struct
 {
 	char Name[MAX_SIZE_OF_USERS_NAME+1];
 
-	time_t FileTime;
+	// SBF: 32-bit time_t
+	uint32_t FileTime;
 
-	// used to be an incomplete SYSTEMTIME struct, TimeLastUpdated
+	// SBF: used to be an incomplete SYSTEMTIME struct, TimeLastUpdated
 	int unused[6];
 
 	/* KJL 15:14:12 10/12/98 - array to hold level completion data

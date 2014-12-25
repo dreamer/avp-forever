@@ -290,7 +290,7 @@ static void LoadMenuFont()
 {
 	AVPMENUGFX *gfxPtr;
 	char buffer[100];
-	unsigned int fastFileLength;
+	size_t fastFileLength;
 	void const *pFastFileData;
 	
 	IntroFont_Light.height = 33;
@@ -1050,7 +1050,7 @@ void LoadAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID)
 {
 	AVPMENUGFX *gfxPtr;
 	char buffer[100];
-	unsigned int fastFileLength;
+	size_t fastFileLength;
 	void const *pFastFileData;
 	
 	GLOBALASSERT(menuGfxID < MAX_NO_OF_AVPMENUGFXS);

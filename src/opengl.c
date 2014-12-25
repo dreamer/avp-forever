@@ -54,10 +54,6 @@ static D3DTexture *CurrentlyBoundTexture = NULL;
 #define TA_MAXVERTICES		2048
 #define TA_MAXTRIANGLES		2048
 
-#if GL_EXT_secondary_color
-extern PFNGLSECONDARYCOLORPOINTEREXTPROC pglSecondaryColorPointerEXT;
-#endif
-
 typedef struct VertexArray
 {
 	GLfloat v[4];
@@ -69,9 +65,9 @@ typedef struct VertexArray
 
 typedef struct TriangleArray
 {
-	int a;
-	int b;
-	int c;
+	unsigned short a;
+	unsigned short b;
+	unsigned short c;
 } TriangleArray;
 
 static VertexArray varr[TA_MAXVERTICES*2];
@@ -132,6 +128,14 @@ A few things:
 
 void InitOpenGL()
 {
+        pglHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
+        pglHint( GL_GENERATE_MIPMAP_HINT, GL_NICEST );
+
+        if ( ogl_use_multisample_filter_hint )
+        {
+                pglHint( GL_MULTISAMPLE_FILTER_HINT_NV, GL_NICEST );
+        }
+
 	CurrentTranslucencyMode = TRANSLUCENCY_OFF;
 	pglBlendFunc(GL_ONE, GL_ZERO);
 	
@@ -155,12 +159,12 @@ void InitOpenGL()
 
 #if 0		
 #if GL_EXT_secondary_color
-		if (useseparate) {
-			pglEnableClientState(GL_SEPARATE_COLOR_ARRAY_EXT);
-			pglSecondaryColorPointerEXT(4, GL_UNSIGNED_BYTE, sizeof(svarr[0]), svarr[0].c);
-		} else {
-			pglDisableClientState(GL_SEPARATE_COLOR_ARRAY_EXT);
-		}
+        if (ogl_use_secondary_color) {
+                pglEnableClientState(GL_SEPARATE_COLOR_ARRAY_EXT);
+                pglSecondaryColorPointerEXT(4, GL_UNSIGNED_BYTE, sizeof(svarr[0]), svarr[0].c);
+        } else {
+                pglDisableClientState(GL_SEPARATE_COLOR_ARRAY_EXT);
+        }
 #endif
 #endif
 
@@ -179,20 +183,8 @@ void InitOpenGL()
 
 static void FlushTriangleBuffers(int backup)
 {
-	int i;
-
 	if (tarrc) {
-#if 1
-		pglBegin(GL_TRIANGLES);
-		for (i = 0; i < tarrc; i++) {
-			pglArrayElement(tarr[i].a);
-			pglArrayElement(tarr[i].b);
-			pglArrayElement(tarr[i].c);
-		}
-		pglEnd();
-#else		
-		pglDrawElements(GL_TRIANGLES, tarrc*3, GL_UNSIGNED_INT, tarr);
-#endif
+		pglDrawElements(GL_TRIANGLES, tarrc*3, GL_UNSIGNED_SHORT, tarr);
 		
 		tarrc = 0;
 		tarrp = tarr;
@@ -217,17 +209,7 @@ static void FlushTriangleBuffers(int backup)
 
 		pglDisableClientState(GL_TEXTURE_COORD_ARRAY);
 
-#if 1		
-		pglBegin(GL_TRIANGLES);
-		for (i = 0; i < starrc; i++) {
-			pglArrayElement(starr[i].a);
-			pglArrayElement(starr[i].b);
-			pglArrayElement(starr[i].c);
-		}
-		pglEnd();
-#else
-		pglDrawElements(GL_TRIANGLES, starrc*3, GL_UNSIGNED_INT, starr);
-#endif
+		pglDrawElements(GL_TRIANGLES, starrc*3, GL_UNSIGNED_SHORT, starr);
 		
 		pglEnableClientState(GL_TEXTURE_COORD_ARRAY);
 		
@@ -339,7 +321,7 @@ static void CheckTriangleBuffer(int rver, int sver, int rtri, int stri, D3DTextu
 		FlushTriangleBuffers(0);
 	}
 
-	if ((int)tex != -1)
+	if ((intptr_t)tex != -1)
 		CheckBoundTextureIsCorrect(tex);
 	if (mode != -1)
 		CheckTranslucencyModeIsCorrect(mode);
@@ -450,17 +432,20 @@ static void SelectPolygonBeginType(int points)
 GLuint CreateOGLTexture(D3DTexture *tex, unsigned char *buf)
 {
 	GLuint h;
+	GLfloat max_anisotropy;
 	
 	FlushTriangleBuffers(1);
 	
 	pglGenTextures(1, &h);
 
 	pglBindTexture(GL_TEXTURE_2D, h);
+	pglTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
+	
 	pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
 	pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	
 	pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-	pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+	pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
 	
 	pglTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex->w, tex->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf);
 	
@@ -469,8 +454,17 @@ GLuint CreateOGLTexture(D3DTexture *tex, unsigned char *buf)
 	tex->id = h;
 	tex->filter = FILTERING_BILINEAR_ON;
 
-	if (CurrentlyBoundTexture)
-		pglBindTexture(GL_TEXTURE_2D, CurrentlyBoundTexture->id); /* restore current */
+	if ( ogl_use_texture_filter_anisotropic )
+	{
+        	pglGetFloatv(GL_MAX_TEXTURE_MAX_ANISOTROPY_EXT, &max_anisotropy);
+        	pglTexParameterf(GL_TEXTURE_2D, GL_TEXTURE_MAX_ANISOTROPY_EXT, max_anisotropy);
+        }
+	
+	if ( CurrentlyBoundTexture != NULL )
+	{
+		/* restore the previously-bound texture */
+		pglBindTexture(GL_TEXTURE_2D, CurrentlyBoundTexture->id);
+	}
 	
 	return h;
 }

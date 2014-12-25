@@ -1523,7 +1523,7 @@ Shape_Merge_Data_Chunk::Shape_Merge_Data_Chunk (Shape_Sub_Shape_Chunk * parent, 
 
 Shape_Merge_Data_Chunk::~Shape_Merge_Data_Chunk()
 {
-	if (num_polys) delete merge_data;
+	if (num_polys) delete [] merge_data;
 }
 
 void Shape_Merge_Data_Chunk::fill_data_block(char * data_start)
@@ -2575,7 +2575,7 @@ Shape_Fragment_Type_Chunk::Shape_Fragment_Type_Chunk(Chunk_With_Children* const 
 
 Shape_Fragment_Type_Chunk::~Shape_Fragment_Type_Chunk()
 {
-	if(frag_type_name) delete frag_type_name;
+	if(frag_type_name) delete [] frag_type_name;
 }											 
 
 void Shape_Fragment_Type_Chunk::fill_data_block(char* data_start)
@@ -3337,6 +3337,9 @@ void* Shape_Preprocessed_Data_Chunk::GetMemoryBlock()
 {
 	void* retval=memory_block;
 
+// 64HACK
+#pragma message ("64HACK")
+#if 0
 	unsigned int* current=(unsigned int*)&first_pointer;
 	unsigned int* next;
 	while((*current>>16)!=0xffff)
@@ -3346,7 +3349,7 @@ void* Shape_Preprocessed_Data_Chunk::GetMemoryBlock()
 		current=next;
 	}
 	*current=(unsigned int)&memory_block[(*current)&0xffff];
-
+#endif
 	memory_block=0;
 	block_size=0;
 	return retval;

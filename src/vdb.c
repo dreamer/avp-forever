@@ -19,7 +19,7 @@ extern int ScanDrawMode;
 
 */
 
-SCENE Global_Scene = 0;
+SCENE Global_Scene/* = 0*/;
 
 
 
@@ -386,37 +386,11 @@ static void CreateProjectorArray(VIEWDESCRIPTORBLOCK *vdb)
 
  SetVDB requires a VIEWDESCRIPTORBLOCK
 
- See the actual function code for what each parameter is
-
 */
 
-void SetVDB(vdb, fl, ty, d, cx,cy, prx,pry, mxp, cl,cr,cu,cd, h1,h2,hc, amb)
-
-	VIEWDESCRIPTORBLOCK *vdb;
-
-	int fl;
-	int ty;
-
-	int d;
-
-	int cx;
-	int cy;
-
-	int prx;
-	int pry;
-	int mxp;
-
-	int cl;
-	int cr;
-	int cu;
-	int cd;
-
-	int h1;
-	int h2;
-	int hc;
-
-	int amb;
-
+void SetVDB(VIEWDESCRIPTORBLOCK *vdb, int fl, int ty, int d, int cx, int cy, 
+    int prx, int pry, int mxp, int cl, int cr, int cu, int cd, 
+    int h1, int h2, int hc, int amb)
 {
 
 
@@ -729,10 +703,7 @@ VIEWDESCRIPTORBLOCK* CreateActiveVDB(void)
 
 */
 
-int DestroyActiveVDB(dblockptr)
-
-	VIEWDESCRIPTORBLOCK *dblockptr;
-
+int DestroyActiveVDB(VIEWDESCRIPTORBLOCK *dblockptr)
 {
 
 	int j = -1;

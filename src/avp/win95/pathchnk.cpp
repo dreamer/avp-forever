@@ -45,8 +45,8 @@ AVP_Path_Chunk::AVP_Path_Chunk(Chunk_With_Children* parent,const char* data,size
 
 AVP_Path_Chunk::~AVP_Path_Chunk()
 {
-	if(PathName) delete PathName;
-	if(Path) delete Path;
+	if(PathName) delete [] PathName;
+	if(Path) delete [] Path;
 }
 
 void AVP_Path_Chunk::fill_data_block(char* data_start)

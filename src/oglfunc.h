@@ -5,7 +5,8 @@
 #include <windows.h>
 #endif
 
-#include <GL/gl.h>
+#include "SDL_opengl.h"
+//#include <GL/gl.h>
 //#include <GL/glext.h>
 
 typedef void (APIENTRY *PFNGLALPHAFUNCPROC)(GLenum, GLclampf);
@@ -45,6 +46,7 @@ typedef GLenum (APIENTRY *PFNGLGETERRORPROC)(void);
 typedef void (APIENTRY *PFNGLGETFLOATVPROC)(GLenum, GLfloat *);
 typedef void (APIENTRY *PFNGLGETINTEGERVPROC)(GLenum, GLint *);
 typedef const GLubyte* (APIENTRY *PFNGLGETSTRINGPROC)(GLenum);
+typedef void (APIENTRY *PFNGLGETTEXPARAMETERFVPROC)(GLenum, GLenum, GLfloat*);
 typedef void (APIENTRY *PFNGLHINTPROC)(GLenum, GLenum);
 typedef void (APIENTRY *PFNGLLOADIDENTITYPROC)(void);
 typedef void (APIENTRY *PFNGLLOADMATRIXFPROC)(const GLfloat *);
@@ -119,6 +121,8 @@ typedef void (APIENTRY * PFNGLSECONDARYCOLOR3USVEXTPROC) (const GLushort *v);
 typedef void (APIENTRY * PFNGLSECONDARYCOLORPOINTEREXTPROC) (GLint size, GLenum type, GLsizei stride, const GLvoid *pointer);
 #endif
 
+typedef void (APIENTRY *PFNGLXSWAPINTERVALSGIPROC)(int interval);
+
 extern PFNGLALPHAFUNCPROC		pglAlphaFunc;
 extern PFNGLARRAYELEMENTPROC		pglArrayElement;
 extern PFNGLBEGINPROC			pglBegin;
@@ -156,6 +160,7 @@ extern PFNGLGETERRORPROC		pglGetError;
 extern PFNGLGETFLOATVPROC		pglGetFloatv;
 extern PFNGLGETINTEGERVPROC		pglGetIntegerv;
 extern PFNGLGETSTRINGPROC		pglGetString;
+extern PFNGLGETTEXPARAMETERFVPROC	pglGetTexParameterfv;
 extern PFNGLHINTPROC			pglHint;
 extern PFNGLLOADIDENTITYPROC		pglLoadIdentity;
 extern PFNGLLOADMATRIXFPROC		pglLoadMatrixf;
@@ -214,11 +219,15 @@ extern PFNGLSECONDARYCOLOR3UBEXTPROC		pglSecondaryColor3ubEXT;
 extern PFNGLSECONDARYCOLOR3UBVEXTPROC		pglSecondaryColor3ubvEXT;
 extern PFNGLSECONDARYCOLORPOINTEREXTPROC	pglSecondaryColorPointerEXT;
 
+extern int ogl_have_multisample_filter_hint;
 extern int ogl_have_paletted_texture;
 extern int ogl_have_secondary_color;
+extern int ogl_have_texture_filter_anisotropic;
 
+extern int ogl_use_multisample_filter_hint;
 extern int ogl_use_paletted_texture;
 extern int ogl_use_secondary_color;
+extern int ogl_use_texture_filter_anisotropic;
 
 extern void load_ogl_functions(int mode);
 extern int check_for_errors(const char *file, int line);

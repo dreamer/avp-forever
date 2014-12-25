@@ -20,14 +20,31 @@ void* PoolAllocateMem(unsigned int amount)
 	char* retval;
 
 	GLOBALASSERT(amount<=MEMORY_BLOCK_SIZE)
+	if (amount > MEMORY_BLOCK_SIZE)
+	{
+		// fatal error
+		return NULL;
+	}
 	
+	// align up
+	amount = (amount + 7) & ~7;
+
 	if(amount>MemoryLeft)
 	{
 		CurrentMemoryBlock++;
 		GLOBALASSERT(CurrentMemoryBlock<MAX_NUM_MEMORY_BLOCK);
+		if (CurrentMemoryBlock >= MAX_NUM_MEMORY_BLOCK)
+		{
+			// fatal error
+			return NULL;
+		}
 		MemoryBlocks[CurrentMemoryBlock]=AllocateMem(MEMORY_BLOCK_SIZE);
-		GLOBALASSERT(MemoryBlocks[CurrentMemoryBlock]);
-
+		GLOBALASSERT(MemoryBlocks[CurrentMemoryBlock]!=NULL);
+		if (MemoryBlocks[CurrentMemoryBlock] == NULL)
+		{
+			// fatal error
+			return NULL;
+		}
 		
 		MemoryLeft=MEMORY_BLOCK_SIZE;
 		MemoryPoolPtr=MemoryBlocks[CurrentMemoryBlock];

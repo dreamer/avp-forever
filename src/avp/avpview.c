@@ -16,6 +16,7 @@
 #include "lighting.h"
 #include "weapons.h"
 #include "sfx.h"
+#include "fmv.h"
 /* character extents data so you know where the player's eyes are */
 #include "extents.h"
 #include "avp_userprofile.h"
@@ -100,7 +101,7 @@ extern int GetSingleColourForPrimary(int Colour);
 extern void ColourFillBackBuffer(int FillColour);
 
 static void ModifyHeadOrientation(void);
-int AVPViewVolumePlaneTest(CLIPPLANEBLOCK *cpb, DISPLAYBLOCK *dblockptr, int or);
+int AVPViewVolumePlaneTest(CLIPPLANEBLOCK *cpb, DISPLAYBLOCK *dblockptr, int obr);
 
 
 
@@ -875,16 +876,16 @@ void InitialiseRenderer(void)
 
 int AVPViewVolumeTest(VIEWDESCRIPTORBLOCK *VDB_Ptr, DISPLAYBLOCK *dblockptr)
 {
-	int or = dblockptr->ObRadius;
+	int obr = dblockptr->ObRadius;
 
 	/* Perform the view volume plane tests */
 
 	if(
-	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipZPlane, dblockptr, or) &&
-	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipLeftPlane, dblockptr, or) &&
-	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipRightPlane, dblockptr, or) &&
-	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipUpPlane, dblockptr, or) &&
-	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipDownPlane, dblockptr, or))
+	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipZPlane, dblockptr, obr) &&
+	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipLeftPlane, dblockptr, obr) &&
+	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipRightPlane, dblockptr, obr) &&
+	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipUpPlane, dblockptr, obr) &&
+	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipDownPlane, dblockptr, obr))
 		return Yes;
 
 	else
@@ -900,13 +901,13 @@ int AVPViewVolumeTest(VIEWDESCRIPTORBLOCK *VDB_Ptr, DISPLAYBLOCK *dblockptr)
 
 */
 
-int AVPViewVolumePlaneTest(CLIPPLANEBLOCK *cpb, DISPLAYBLOCK *dblockptr, int or)
+int AVPViewVolumePlaneTest(CLIPPLANEBLOCK *cpb, DISPLAYBLOCK *dblockptr, int obr)
 {
 	VECTORCH POPRelObView;
 
 	MakeVector(&dblockptr->ObView, &cpb->CPB_POP, &POPRelObView);
 
-	if(DotProduct(&POPRelObView, &cpb->CPB_Normal) < or) return Yes;
+	if(DotProduct(&POPRelObView, &cpb->CPB_Normal) < obr) return Yes;
 	else return No;
 }
 

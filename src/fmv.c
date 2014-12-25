@@ -11,7 +11,7 @@
 #include "fmv.h"
 #include "avp_menus.h"
 #include "avp_userprofile.h"
-#include "oglfunc.h"
+#include "oglfunc.h" // move this into opengl.c
 
 #define UseLocalAssert 1
 #include "ourasert.h"
@@ -332,6 +332,7 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 		dstPtr += 3;
 	} while(--pixels);
 	
+//#warning move this into opengl.c
 	// update the opengl texture
 	pglBindTexture(GL_TEXTURE_2D, ftPtr->ImagePtr->D3DTexture->id);
 	

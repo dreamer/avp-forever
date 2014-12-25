@@ -242,7 +242,7 @@ AVP_Generator_Extra_Name_Chunk::AVP_Generator_Extra_Name_Chunk(Chunk_With_Childr
 
 AVP_Generator_Extra_Name_Chunk::~AVP_Generator_Extra_Name_Chunk()
 {
-	delete name;
+	delete [] name;
 }
 
 void AVP_Generator_Extra_Name_Chunk::fill_data_block(char* data_start)
@@ -292,7 +292,7 @@ AVP_Generator_Extended_Settings_Chunk::AVP_Generator_Extended_Settings_Chunk(Chu
 AVP_Generator_Extended_Settings_Chunk::AVP_Generator_Extended_Settings_Chunk(Chunk_With_Children* parent)
 :Chunk(parent,"GENEXSET")
 {
-	weights=new AVP_Generator_Weighting;
+	weights=(AVP_Generator_Weighting *)new unsigned char[sizeof(AVP_Generator_Weighting)];
 	memset(weights,0,sizeof(AVP_Generator_Weighting));
 	weights->data_size=sizeof(AVP_Generator_Weighting);
 	GenLimit=pad1=pad2=pad3=0;
@@ -303,7 +303,7 @@ AVP_Generator_Extended_Settings_Chunk::AVP_Generator_Extended_Settings_Chunk(Chu
 
 AVP_Generator_Extended_Settings_Chunk::~AVP_Generator_Extended_Settings_Chunk()
 {
-	delete  weights;
+	delete [] weights;
 }
 
 void AVP_Generator_Extended_Settings_Chunk::fill_data_block (char * data)
@@ -580,7 +580,7 @@ AVP_Environment_Settings_Chunk::AVP_Environment_Settings_Chunk(Chunk_With_Childr
 AVP_Environment_Settings_Chunk::AVP_Environment_Settings_Chunk(Chunk_With_Children* parent)
 :Chunk(parent,"AVPENVIR")
 {
-	settings=new AVP_Environment_Settings;
+	settings=(AVP_Environment_Settings*)new unsigned char[sizeof(AVP_Environment_Settings)];
 	settings->data_size=sizeof(AVP_Environment_Settings);
 	settings->sky_colour_red=200;
 	settings->sky_colour_green=200;
@@ -601,7 +601,7 @@ AVP_Environment_Settings_Chunk::AVP_Environment_Settings_Chunk(Chunk_With_Childr
 
 AVP_Environment_Settings_Chunk::~AVP_Environment_Settings_Chunk()
 {
-	delete  settings;
+	delete [] settings;
 }
 
 void AVP_Environment_Settings_Chunk::fill_data_block (char * data_start)

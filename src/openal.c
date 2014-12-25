@@ -3,8 +3,8 @@
 #include <string.h>
 #include <math.h>
 
-#include <AL/al.h>
-#include <AL/alc.h>
+#include "al.h"
+#include "alc.h"
 
 #include "fixer.h"
 
@@ -21,6 +21,10 @@
 
 #if defined( _MSC_VER )
 #include <AL/eax.h>
+#endif
+
+#if 0
+#define OPENAL_DEBUG
 #endif
 
 ACTIVESOUNDSAMPLE ActiveSounds[SOUND_MAXACTIVE];
@@ -563,6 +567,7 @@ int PlatPlaySound(int activeIndex)
 	
 	if (ActiveSounds[activeIndex].threedee) {			
 		alSourcei(ActiveSounds[activeIndex].ds3DBufferP, AL_SOURCE_RELATIVE, AL_FALSE);
+		alSourcef(ActiveSounds[activeIndex].ds3DBufferP, AL_REFERENCE_DISTANCE, ActiveSounds[activeIndex].threedeedata.inner_range);
 
 		// TODO: min distance ActiveSounds[activeIndex].threedeedata.inner_range?
 		// TODO: max distance DS3D_DEFAULTMAXDISTANCE?
@@ -865,7 +870,9 @@ void PlatUpdatePlayer()
 			or[5] = -(float) ((Global_VDB_Ptr->VDB_Mat.mat32) / 65536.0F);
 		}
 
-		if ((AvP.PlayerType == I_Alien && DopplerShiftIsOn && NormalFrameTime)) {
+#warning VELOCITY AND/OR OPENAL SETUP IS IN WRONG UNITS
+		static int useVel = 0;
+		if (useVel!=0&&(AvP.PlayerType == I_Alien && DopplerShiftIsOn && NormalFrameTime)) {
 			DYNAMICSBLOCK *dynPtr = Player->ObStrategyBlock->DynPtr;
 			float invFrameTime = 100000.0f/(float)NormalFrameTime;
 			
@@ -883,7 +890,7 @@ void PlatUpdatePlayer()
 		pos[2] = Global_VDB_Ptr->VDB_World.vz; // 10000.0;
 		
 #ifdef OPENAL_DEBUG			
-		fprintf(stderr, "OPENAL: Player: (%f, %f, %f) (%f, %f, %f %f, %f, %f)\n", pos[0], pos[1], pos[2], or[0], or[1], or[2], or[3], or[4], or[5]);
+		fprintf(stderr, "OPENAL: Player: (%f, %f, %f) (%f, %f, %f %f, %f, %f) (%f, %f, %f)\n", pos[0], pos[1], pos[2], or[0], or[1], or[2], or[3], or[4], or[5], vel[0], vel[1], vel[2]);
 #endif
 
 		pos[0] = 0.0f;

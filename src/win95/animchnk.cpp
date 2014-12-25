@@ -218,7 +218,7 @@ FrameList::FrameList(TEXANIM* p,FrameList* fl,int* conv)
 FrameList::~FrameList()
 {
 	delete [] Textures;
-	delete UVCoords;
+	delete [] UVCoords;
 }
 
 TEXANIM::TEXANIM()

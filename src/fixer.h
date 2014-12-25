@@ -9,6 +9,7 @@
 #include <windows.h>
 #include <tchar.h>
 #include <mbstring.h>
+#include <inttypes.h>
 #define Yes 1 // sigh
 #define No 0 // sigh
 

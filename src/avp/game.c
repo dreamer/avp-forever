@@ -24,6 +24,7 @@
 #include "psndplat.h"
 #include "particle.h"
 #include "sfx.h"
+#include "fmv.h"
 #include "version.h"
 #include "bh_rubberduck.h"
 #include "bh_marin.h"

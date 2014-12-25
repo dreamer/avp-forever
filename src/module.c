@@ -643,7 +643,7 @@ int GetModuleVisArrays(void)
 	ModuleArraySize = index + 1;
 
 
-	ModuleCurrVisArray  = AllocateMem(ModuleArraySize);
+	ModuleCurrVisArray  = (char*) AllocateMem(ModuleArraySize);
 
 	if(ModuleCurrVisArray)
 	{
