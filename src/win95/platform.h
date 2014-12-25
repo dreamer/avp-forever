@@ -1,4 +1,9 @@
 #ifndef PLATFORM_INCLUDED
+#define PLATFORM_INCLUDED
+
+#include "fixer.h"
+
+#include "shape.h" // struct imageheader
 
 /*
 
@@ -10,55 +15,7 @@
 extern "C"  {
 #endif
 
-/*
-	Minimise header files to
-	speed compiles...
-*/
-
-#define WIN32_LEAN_AND_MEAN
-
-/*
-	Standard windows functionality
-*/
-
-#include <windows.h>
-#include <windowsx.h>
-#include <winuser.h>
-#include <mmsystem.h>
-#include <stdlib.h>
-#include <stdarg.h>
-#include <stdio.h>
-
-/*
-	DirectX functionality
-*/
-
-#include "ddraw.h"
-#include "d3d.h"
-#include "dsound.h"
-#include "dplay.h"
-#include "dinput.h"
-#include "dplobby.h"
-//#include "fastfile.h"
-
-
-#define platform_pc Yes
-
-#define Saturn			No
-
-#define Hardware2dTextureClipping No
-
-
-/*
-
- Types
-
-*/
-
-typedef RECT RECT_AVP;
-
-
-/* Watcom C 64-bit values */
+/* Types */
 
 typedef struct LONGLONGCH {
 
@@ -66,7 +23,6 @@ typedef struct LONGLONGCH {
 	int hi32;
 
 } LONGLONGCH;
-
 
 /*
 
@@ -92,24 +48,6 @@ typedef enum {
 	PType_OffTopOfScale
 
 } PROCESSORTYPES;
-
-
-/*
-
- VGA Palette Entry
-
-*/
-
-typedef struct vgapaletteentry {
-
-	unsigned char vga_r;
-	unsigned char vga_g;
-	unsigned char vga_b;
-
-} VGAPALETTEENTRY;
-
-
-extern void LoadAndChangeToPalette(char*);
 
 /*
 	Video mode decsription (to be filled
@@ -412,15 +350,6 @@ typedef enum {
 
 
 /*
-	Max no of palettes -- at present there is NO
-	code for palette switching and ALL palette
-	calls within the DirectDraw interface system
-	run on palette 0
-*/
-
-#define MaxPalettes 4 
-
-/*
 
  Video Mode Types
 
@@ -480,21 +409,6 @@ typedef enum {
 	RestartOutOfVidMemForPrimary
 
 } VIDEORESTARTMODES;
-
-/*
-	Load modes for putting an image
-	in a DirectDraw surface --- either
-	do or do not deallocate the
-	system memory image, but always
-	keep the DirectDraw one
-*/
-
-typedef enum {
-
-	LoadModeDirectDrawOnly,
-	LoadModeFull
-
-} IMAGELOADMODES;
 
 
 /*
@@ -597,50 +511,6 @@ typedef enum {
 } DXMEMORYMODES;
 
 /*
-
- .BMP File header
-
-*/
-
-/* 
-  Pack the header to 1 byte alignment so that the 
-  loader works (John's code, still under test).
-*/
-
-#ifdef __WATCOMC__
-#pragma pack (1)
-#endif
-
-typedef struct bmpheader {
-
-	unsigned short BMP_ID;	/* Contains 'BM' */
-	int BMP_Size;
-
-	short BMP_Null1;
-	short BMP_Null2;
-
-	int BMP_Image;		/* Byte offset of image start relative to offset 14 */
-	int BMP_HeadSize;	/* Size of header (40 for Windows, 12 for OS/2) */
-	int BMP_Width;		/* Width of image in pixels */
-	int BMP_Height;		/* Height of image in pixels */
-
-	short BMP_Planes;	/* Number of image planes (must be 1) */
-	short BMP_Bits;		/* Number of bits per pixel (1,4,8 or 24) */
-
-	int BMP_Comp;			/* Compression type */
-	int BMP_CSize;		/* Size in bytes of compressed image */
-	int BMP_Hres;			/* Horizontal resolution in pixels/meter */
-	int BMP_Vres;			/* Vertical resolution in pixels/meter */
-	int BMP_Colours;		/* Number of colours used, below (N) */
-	int BMP_ImpCols;		/* Number of important colours */
-
-} BMPHEADER;
-
-#ifdef __WATCOMC__
-#pragma pack (4)
-#endif
-
-/*
 	Types of texture files that can be
 	requested from the main D3D texture
 	loader.
@@ -667,69 +537,6 @@ typedef enum {
 
 } WININITMODES;
 
-/*
-
- Triangle Array Limits etc.
-
-*/
-
-#define maxarrtriangles 7 /* Could be 6 if all shape data in triangles */
-#define trianglesize (1 + 1 + 1 + 1 + (6 * 3) + 1)  /* largest, could be 5*3 if no 3d texturing */
-#define pta_max 9 /* Could be 8 if all shape data in triangles */
-
-/* header + xy + terminator */
-#define item_polygon_trianglesize (1 + 1 + 1 + 1 + (2 * 3) + 1)
-/* header + xyi + terminator */
-#define item_gouraudpolygon_trianglesize (1 + 1 + 1 + 1 + (3 * 3) + 1)
-/* header + xyuv + terminator */
-#define item_2dtexturedpolygon_trianglesize (1 + 1 + 1 + 1 + (4 * 3) + 1)
-/* header + xyuvi + terminator */
-#define item_gouraud2dtexturedpolygon_trianglesize (1 + 1 + 1 + 1 + (5 * 3) + 1)
-/* header + xyuvw + terminator */
-#define item_3dtexturedpolygon_trianglesize (1 + 1 + 1 + 1 + (5 * 3) + 1)
-/* header + xyuvwi + terminator */
-#define item_gouraud3dtexturedpolygon_trianglesize (1 + 1 + 1 + 1 + (6 * 3) + 1)
-
-/*
-
- Vertex sizes
-
- For copying vertices from item list polygons to triangles
-
- e.g.
-
- Vertex 2 (x component) of the quad would be (for Item_Polygon)
-
- q[2 * i_poly_vsize + i_vstart + ix]
-
- WARNING: If the item format changes these MUST be updated
-
-*/
-
-#define vstart          4
-
-#define poly_vsize      2
-#define gpoly_vsize     3
-#define t2poly_vsize    4
-#define gt2poly_vsize   5
-#define t3poly_vsize    5
-#define gt3poly_vsize   6
-
-
-
-/*
-
- Triangle Array Structure
-
-*/
-
-typedef struct trianglearray {
-
-	int TA_NumTriangles;
-	int *TA_ItemPtr;
-	int *TA_TriangleArray[maxarrtriangles];
-
-} TRIANGLEARRAY;
 
 /*
 	Function prototypes
@@ -746,10 +553,10 @@ long GetWindowsTickCount(void);
 void CheckForWindowsMessages(void);
 BOOL ExitWindowsSystem(void);
 BOOL InitialiseWindowsSystem(HANDLE hInstance, int nCmdShow, int WinInitMode);
-void KeyboardHandlerKeyDown(WPARAM wParam);
-void KeyboardHandlerKeyUp(WPARAM wParam);
-void MouseVelocityHandler(UINT message, LPARAM lParam);
-void MousePositionHandler(UINT message, LPARAM lParam);
+//void KeyboardHandlerKeyDown(WPARAM wParam);
+//void KeyboardHandlerKeyUp(WPARAM wParam);
+//void MouseVelocityHandler(UINT message, LPARAM lParam);
+//void MousePositionHandler(UINT message, LPARAM lParam);
 int  ReadJoystick(void); 
 int  CheckForJoystick(void);
 BOOL SpawnRasterThread();
@@ -777,34 +584,13 @@ void finiObjectsExceptDD(void);
 BOOL TestMemoryAccess(void);
 int ChangePalette (unsigned char* NewPalette);
 int GetAvailableVideoMemory(void);
-void HandleVideoModeRestarts(HINSTANCE hInstance, int nCmdShow);
+//void HandleVideoModeRestarts(HINSTANCE hInstance, int nCmdShow);
 void* MakeBackdropSurface(void);
 void ReleaseBackdropSurface(void);
 void LockBackdropSurface(void);
 void UnlockBackdropSurface(void);
 void ComposeBackdropBackBuffer(void);
 int GetSingleColourForPrimary(int Colour);
-
-/* 
-	DirectX functionality only available in 
-	C++ under Watcom at present
-*/
-#ifdef __cplusplus
-HRESULT CALLBACK EnumDisplayModesCallback(LPDDSURFACEDESC pddsd, LPVOID Context);
-BOOL FAR PASCAL EnumDDObjectsCallback(GUID FAR* lpGUID, LPSTR lpDriverDesc,
-                                      LPSTR lpDriverName, LPVOID lpContext);
-#if triplebuffer
-/* 
-	must be WINAPI to support Windows FAR PASCAL
-	calling convention.  Must be HRESULT to support
-	enumeration return value.  NOTE THIS FUNCTION
-	DOESN'T WORK (DOCS WRONG) AND TRIPLE BUFFERING
-	HAS BEEN REMOVED ANYWAY 'COS IT'S USELESS...
-*/
-HRESULT WINAPI InitTripleBuffers(LPDIRECTDRAWSURFACE lpdd, 
-	 LPDDSURFACEDESC lpsd, LPVOID lpc);
-#endif
-#endif
 
 /* Direct 3D Immediate Mode Rasterisation Module */
 BOOL InitialiseDirect3DImmediateMode(void);
@@ -845,14 +631,6 @@ void WriteZB3dTexturedPolygonToExecuteBuffer(int* itemptr);
 void WriteZBGouraud3dTexturedPolygonToExecuteBuffer(int* itemptr);
 #endif
 
-#ifdef __cplusplus
-HRESULT WINAPI DeviceEnumerator(LPGUID lpGuid,
-   LPSTR lpDeviceDescription, LPSTR lpDeviceName,
-   LPD3DDEVICEDESC lpHWDesc, LPD3DDEVICEDESC lpHELDesc, LPVOID lpContext);
-HRESULT CALLBACK TextureFormatsEnumerator
-   (LPDDSURFACEDESC lpDDSD, LPVOID lpContext);
-#endif
-
 /* KJL 11:28:31 9/9/97 - Direct Input prototypes */
 BOOL InitialiseDirectInput(void);
 void ReleaseDirectInput(void);
@@ -866,14 +644,13 @@ void ReleaseDirectMouse(void);
 /*
 	Internal
 */
-#ifdef AVP_DEBUG_VERSION
+//#ifdef AVP_DEBUG_VERSION
 int textprint(const char* t, ...);
-#else
-#define textprint(ignore)
-#endif
+//#else
+//#define textprint(ignore)
+//#endif
 
 
-void MakePaletteShades(VGAPALETTEENTRY *vga_palptr, int hue, int pal_shades_per_hue);
 void ConvertToDDPalette(unsigned char* src, unsigned char* dst, int length, int flags);
 int textprintXY(int x, int y, const char* t, ...);
 void LoadSystemFonts(char* fname);
@@ -883,18 +660,17 @@ void FlushTextprintBuffer(void);
 void InitPrintQueue(void);
 void InitJoysticks(void);
 void ReadJoysticks(void);
-int ChangeDisplayModes(HINSTANCE hInst, int nCmd, 
-     int NewVideoMode, int NewWindowMode,
-     int NewZBufferMode, int NewRasterisationMode, 
-     int NewSoftwareScanDrawMode, int NewDXMemoryMode);
+//int ChangeDisplayModes(HINSTANCE hInst, int nCmd, 
+//     int NewVideoMode, int NewWindowMode,
+//     int NewZBufferMode, int NewRasterisationMode, 
+//     int NewSoftwareScanDrawMode, int NewDXMemoryMode);
 int DeallocateAllImages(void);
 int MinimizeAllImages(void);
 int RestoreAllImages(void);
 void ConvertDDToInternalPalette(unsigned char* src, unsigned char* dst, int length);
 PROCESSORTYPES ReadProcessorType(void);
 
-/* EXTERNS FOR GLOBALS GO HERE !!!!!! */
-extern DDCAPS direct_draw_caps;
+//extern DDCAPS direct_draw_caps;
 
 /*
 
@@ -934,6 +710,5 @@ void ProcessProjectWhileWaitingToBeFlippable();
 };
 #endif
 
-#define PLATFORM_INCLUDED
 
 #endif

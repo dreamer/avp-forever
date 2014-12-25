@@ -10,19 +10,9 @@
 #include "huffman.hpp"
 
 
-#include <mbstring.h>
-
-#ifdef cencon
-#define new my_new
-#endif
-
-
 // Class Lockable_Chunk_With_Children functions
 
-#if cencon
-#else
 extern char * users_name;
-#endif
 
 //macro for helping to force inclusion of chunks when using libraries
 FORCE_CHUNK_INCLUDE_IMPLEMENT(mishchnk)
@@ -118,8 +108,7 @@ BOOL Lockable_Chunk_With_Children::lock_chunk(File_Chunk & fchunk)
 
 	CloseHandle (rif_file);
 	return TRUE;
-	#endif
-	
+	#endif	
 }	
 
 BOOL Lockable_Chunk_With_Children::unlock_chunk (File_Chunk & fchunk, BOOL updateyn)
@@ -364,10 +353,9 @@ File_Chunk::File_Chunk(const char * file_name)
 // Load in whole chunk and traverse
 	char rifIsCompressed = FALSE;
 	char *uncompressedData = NULL;
-	HANDLE rif_file;
+	FILE *rif_file;
 	DWORD file_size;
 	DWORD file_size_from_file;
-	unsigned long bytes_read;
 	char * buffer;
 	char * buffer_ptr;
 	char id_buffer[9];
@@ -382,30 +370,24 @@ File_Chunk::File_Chunk(const char * file_name)
 
 	strcpy (filename, file_name);
 
-	rif_file = CreateFileA (file_name, GENERIC_READ, 0, 0, OPEN_EXISTING, 
-					FILE_FLAG_RANDOM_ACCESS, 0);
+	rif_file = OpenGameFile(file_name, FILEMODE_READONLY, FILETYPE_PERM);
 
-	if (rif_file == INVALID_HANDLE_VALUE) {
+	if (rif_file == NULL) {
 		error_code = CHUNK_FAILED_ON_LOAD;
 		return;
 	}
 
-	file_size = GetFileSize (rif_file, NULL);	
+	fseek(rif_file, 0, SEEK_END);
+	file_size = ftell(rif_file);
+	rewind(rif_file);
 
-	
-	if (!ReadFile(rif_file, id_buffer, 8, &bytes_read, 0)) {
+
+	if (fread(id_buffer, 1, 8, rif_file) != 8) {	
 		error_code = CHUNK_FAILED_ON_LOAD;
-		CloseHandle (rif_file);
+		fclose(rif_file);
 		return;
 	}	
 
-	#if UseOldChunkLoader
-	if (strncmp (id_buffer, "REBINFLF", 8)) {
-		error_code = CHUNK_FAILED_ON_LOAD_NOT_RECOGNISED;
-		CloseHandle (rif_file);
-		return;
-	}	
-	#else
 	/* KJL 16:46:14 19/09/98 - check for a compressed rif */
 	if (!strncmp (id_buffer, COMPRESSED_RIF_IDENTIFIER, 8))
 	{
@@ -414,10 +396,10 @@ File_Chunk::File_Chunk(const char * file_name)
 	else if (strncmp (id_buffer, "REBINFF2", 8))
 	{
 		error_code = CHUNK_FAILED_ON_LOAD_NOT_RECOGNISED;
-		CloseHandle (rif_file);
+		fclose(rif_file);
 		return;
 	}	
-	#endif
+
 	buffer = new char [file_size];
 
 	/* KJL 17:57:44 19/09/98 - if the rif is compressed, we must load the whole
@@ -425,10 +407,9 @@ File_Chunk::File_Chunk(const char * file_name)
 	pointer to the original data. */
 	if (rifIsCompressed)
 	{
-		if (!ReadFile(rif_file, buffer+8, (file_size-8), &bytes_read, 0))
-		{
+		if (fread(buffer+8, 1, (file_size-8), rif_file) != (file_size-8)) {
 			error_code = CHUNK_FAILED_ON_LOAD;
-			CloseHandle (rif_file);
+			fclose(rif_file);
 			return;
 		}	
 		uncompressedData = HuffmanDecompress((HuffmanPackage*)buffer); 		
@@ -440,27 +421,28 @@ File_Chunk::File_Chunk(const char * file_name)
 	}
 	else // the normal uncompressed approach:
 	{
-		if (!ReadFile(rif_file, &file_size_from_file, 4, &bytes_read, 0)) {
+		if (fread(&file_size_from_file, 1, 4, rif_file) != 4) {
 			error_code = CHUNK_FAILED_ON_LOAD;
-			CloseHandle (rif_file);
+			fclose(rif_file);
 			return;
 		}	
 
 		if (file_size != file_size_from_file) {
 			error_code = CHUNK_FAILED_ON_LOAD_NOT_RECOGNISED;
-			CloseHandle (rif_file);
+			fclose(rif_file);
 			return;
 		}	
 
-		if (!ReadFile(rif_file, buffer, (file_size-12), &bytes_read, 0))
-		{
+		if (fread(buffer, 1, (file_size-12), rif_file) != (file_size-12)) {
 			error_code = CHUNK_FAILED_ON_LOAD;
-			CloseHandle (rif_file);
+			fclose(rif_file);
 			return;
 		}
 		buffer_ptr = buffer;
 	}
 
+	fclose(rif_file);
+	
 	// Process the RIF
 	// The start of the first chunk
 
@@ -473,7 +455,6 @@ File_Chunk::File_Chunk(const char * file_name)
 
 		DynCreate(buffer_ptr);
 		buffer_ptr += *(int *)(buffer_ptr + 8);
-
 	}
 
 	/* KJL 17:59:42 19/09/98 - release the memory holding the rif */
@@ -486,10 +467,7 @@ File_Chunk::File_Chunk(const char * file_name)
 		delete [] buffer;
 	}
 
-	CloseHandle (rif_file);
-
 	post_input_processing();
-
 }
 
 File_Chunk::File_Chunk()
@@ -644,7 +622,8 @@ void File_Chunk::post_input_processing()
 		child_lists.delete_first_entry();
 	}
 
-	for (LIF<Shape_Chunk *> sli(&shplist); !sli.done(); sli.next())
+	LIF<Shape_Chunk *> sli(&shplist);
+	for (; !sli.done(); sli.next())
 	{
 		Shape_Chunk::max_id = max (Shape_Chunk::max_id,sli()->get_header()->file_id_num);	
 	}
@@ -660,7 +639,7 @@ void File_Chunk::post_input_processing()
 		ol()->assoc_with_shape(shape_array[ol()->get_header()->shape_id_no]);
 	}
 
-	delete shape_array;
+	delete [] shape_array;
 	
 
 	Chunk_With_Children::post_input_processing();	
@@ -1046,12 +1025,6 @@ BOOL File_Chunk::check_file()
 }
 
 
-#if InterfaceEngine
-
-	extern File_Chunk * Env_Chunk;
-	
-#endif
-	
 BOOL File_Chunk::update_file()
 {
 
@@ -1086,22 +1059,6 @@ BOOL File_Chunk::update_file()
 	return(write_file(tempname));
 	
 	#else
-
-#if InterfaceEngine
-
-	// log, to track error
-	char fname [256];
-	char * dotpos;
-
-	strcpy (fname, filename);
-
-	dotpos = strrchr (fname, '.');
-	
-	sprintf (dotpos, ".log");
-	
-	FILE * log = fopen (fname, "a");
-
-#endif
 
 	if (!filename) return FALSE;
 
@@ -1250,13 +1207,6 @@ BOOL File_Chunk::update_file()
 	ed = (Environment_Data_Chunk *)lookup_single_child ("REBENVDT");
 	if (ed)
 	{
-
-#if InterfaceEngine
-
-	fprintf (log, "Env_Data %d %d %d %d", ed->updated, ed->local_lock, ed->updated_outside, ed->external_lock);
-
-#endif
-
 		if (ed->updated && 
 			!(ed->updated_outside || ed->external_lock)) 
 			ed->update_chunk_in_file(rif_file);
@@ -1285,11 +1235,6 @@ BOOL File_Chunk::update_file()
 
 	CloseHandle (rif_file);
 
-#if InterfaceEngine
-
-	fclose (log);
-
-#endif
 	return TRUE;
 
 	#endif //DisableLock
@@ -1483,7 +1428,7 @@ void File_Chunk::list_objects(List<Object_Chunk *> * pList)
 
 	if (children)	
 		while	(child_ptr != NULL) {
-			if (strncmp ("RBOBJECT", child_ptr->identifier, 8) == NULL)
+			if (strncmp ("RBOBJECT", child_ptr->identifier, 8) == 0)
 			{
 				assert (!child_ptr->r_u_miscellaneous());
 				pList->add_entry((Object_Chunk *)child_ptr);
@@ -1502,7 +1447,7 @@ void File_Chunk::list_shapes(List<Shape_Chunk *> * pList)
 
 	if (children)	
 		while	(child_ptr != NULL) {
-			if (strncmp ("REBSHAPE", child_ptr->identifier, 8) == NULL)
+			if (strncmp ("REBSHAPE", child_ptr->identifier, 8) == 0)
 			{
 				assert (!child_ptr->r_u_miscellaneous());
 				pList->add_entry((Shape_Chunk *)child_ptr);
@@ -1520,7 +1465,7 @@ void File_Chunk::list_dummy_objects(List<Dummy_Object_Chunk *> * pList){
 
 	if (children)	
 		while	(child_ptr != NULL) {
-			if (strncmp ("DUMMYOBJ", child_ptr->identifier, 8) == NULL)
+			if (strncmp ("DUMMYOBJ", child_ptr->identifier, 8) == 0)
 			{
 				assert (!child_ptr->r_u_miscellaneous());
 				pList->add_entry((Dummy_Object_Chunk *)child_ptr);
@@ -1537,7 +1482,7 @@ Environment_Data_Chunk * File_Chunk::get_env_data()
 
 	if (children)	
 		while	(child_ptr != NULL) {
-			if (strncmp ("REBENVDT", child_ptr->identifier, 8) == NULL)
+			if (strncmp ("REBENVDT", child_ptr->identifier, 8) == 0)
 			{
 				assert (!child_ptr->r_u_miscellaneous());
 				e_list.add_entry((Environment_Data_Chunk *)child_ptr);
@@ -1550,10 +1495,7 @@ Environment_Data_Chunk * File_Chunk::get_env_data()
 	
 	if (e_list.size())
 		return e_list.first_entry();
-	else
-	{
-		return(0);
-	}	
+	return 0;
 }
 
 void File_Chunk::build_object_array()
@@ -1752,10 +1694,9 @@ RIF_File_Chunk::RIF_File_Chunk (Chunk_With_Children * parent, const char * file_
 {
 	char rifIsCompressed = FALSE;
 	char *uncompressedData = NULL;
-	HANDLE rif_file;
+	FILE *rif_file;
 	DWORD file_size;
 	DWORD file_size_from_file;
-	unsigned long bytes_read;
 	char * buffer;
 	char * buffer_ptr;
 	char id_buffer[9];
@@ -1767,21 +1708,21 @@ RIF_File_Chunk::RIF_File_Chunk (Chunk_With_Children * parent, const char * file_
 	
 	error_code = 0;
 	
-	rif_file = CreateFileA (file_name, GENERIC_READ, 0, 0, OPEN_EXISTING, 
-					FILE_FLAG_RANDOM_ACCESS, 0);
+	rif_file = OpenGameFile(file_name, FILEMODE_READONLY, FILETYPE_PERM);
 
-
-	if (rif_file == INVALID_HANDLE_VALUE) {
+	if (rif_file == NULL) {
 		error_code = CHUNK_FAILED_ON_LOAD;
 		Parent_File = ParentFileStore;
 		return;
 	}
 
-	file_size = GetFileSize (rif_file, NULL);	
+	fseek(rif_file, 0, SEEK_END);
+	file_size = ftell(rif_file);
+	rewind(rif_file);
 
-	if (!ReadFile(rif_file, id_buffer, 8, &bytes_read, 0)) {
+	if (fread(id_buffer, 1, 8, rif_file) != 8) {
 		error_code = CHUNK_FAILED_ON_LOAD;
-		CloseHandle (rif_file);
+		fclose(rif_file);
 		Parent_File = ParentFileStore;
 		return;
 	}	
@@ -1793,7 +1734,7 @@ RIF_File_Chunk::RIF_File_Chunk (Chunk_With_Children * parent, const char * file_
 	}	
 	else if (strncmp (id_buffer, "REBINFF2", 8)) {
 		error_code = CHUNK_FAILED_ON_LOAD_NOT_RECOGNISED;
-		CloseHandle (rif_file);
+		fclose(rif_file);
 		Parent_File = ParentFileStore;
 		return;
 	}	
@@ -1805,10 +1746,9 @@ RIF_File_Chunk::RIF_File_Chunk (Chunk_With_Children * parent, const char * file_
 	pointer to the original data. */
 	if (rifIsCompressed)
 	{
-		if (!ReadFile(rif_file, buffer+8, (file_size-8), &bytes_read, 0))
-		{
+		if (fread(buffer+8, 1, (file_size-8), rif_file) != (file_size-8)) {
 			error_code = CHUNK_FAILED_ON_LOAD;
-			CloseHandle (rif_file);
+			fclose(rif_file);
 			Parent_File = ParentFileStore;
 			delete [] buffer;
 			return;
@@ -1823,9 +1763,9 @@ RIF_File_Chunk::RIF_File_Chunk (Chunk_With_Children * parent, const char * file_
 	else // the normal uncompressed approach:
 	{
 		//get the file size stored in the rif file
-		if (!ReadFile(rif_file, &file_size_from_file, 4, &bytes_read, 0)) {
+		if (fread(&file_size_from_file, 1, 4, rif_file) != 4) {
 			error_code = CHUNK_FAILED_ON_LOAD;
-			CloseHandle (rif_file);
+			fclose(rif_file);
 			Parent_File = ParentFileStore;
 			delete [] buffer;
 			return;
@@ -1834,25 +1774,24 @@ RIF_File_Chunk::RIF_File_Chunk (Chunk_With_Children * parent, const char * file_
 		//and compare with the actual file size
 		if (file_size != file_size_from_file) {
 			error_code = CHUNK_FAILED_ON_LOAD_NOT_RECOGNISED;
-			CloseHandle (rif_file);
+			fclose(rif_file);
 			Parent_File = ParentFileStore;
 			delete [] buffer;
 			return;
 		}	
 
 		//read the rest of the file into the buffer
-		if (!ReadFile(rif_file, buffer, (file_size-12), &bytes_read, 0))
-		{
+		if (fread(buffer, 1, (file_size-12), rif_file) != (file_size-12)) {
 			error_code = CHUNK_FAILED_ON_LOAD;
-			CloseHandle (rif_file);
+			fclose(rif_file);
 			Parent_File = ParentFileStore;
 			delete [] buffer;
 			return;
 		}
 		buffer_ptr = buffer;
 	}
-
 	
+	fclose(rif_file);
 	
 
 	// Process the RIF
@@ -1880,12 +1819,9 @@ RIF_File_Chunk::RIF_File_Chunk (Chunk_With_Children * parent, const char * file_
 		delete [] buffer;
 	}
 
-	CloseHandle (rif_file);
-
 	post_input_processing();
 
 	Parent_File = ParentFileStore;
-	
 }
 
 void RIF_File_Chunk::post_input_processing()
@@ -1944,7 +1880,7 @@ void RIF_File_Chunk::list_objects(List<Object_Chunk *> * pList)
 
 	if (children)	
 		while	(child_ptr != NULL) {
-			if (strncmp ("RBOBJECT", child_ptr->identifier, 8) == NULL)
+			if (strncmp ("RBOBJECT", child_ptr->identifier, 8) == 0)
 			{
 				assert (!child_ptr->r_u_miscellaneous());
 				pList->add_entry((Object_Chunk *)child_ptr);
@@ -1962,7 +1898,7 @@ void RIF_File_Chunk::list_shapes(List<Shape_Chunk *> * pList)
 
 	if (children)	
 		while	(child_ptr != NULL) {
-			if (strncmp ("REBSHAPE", child_ptr->identifier, 8) == NULL)
+			if (strncmp ("REBSHAPE", child_ptr->identifier, 8) == 0)
 			{
 				assert (!child_ptr->r_u_miscellaneous());
 				pList->add_entry((Shape_Chunk *)child_ptr);
@@ -1979,7 +1915,7 @@ Environment_Data_Chunk * RIF_File_Chunk::get_env_data()
 
 	if (children)	
 		while	(child_ptr != NULL) {
-			if (strncmp ("REBENVDT", child_ptr->identifier, 8) == NULL)
+			if (strncmp ("REBENVDT", child_ptr->identifier, 8) == 0)
 			{
 				assert (!child_ptr->r_u_miscellaneous());
 				e_list.add_entry((Environment_Data_Chunk *)child_ptr);
@@ -1992,8 +1928,5 @@ Environment_Data_Chunk * RIF_File_Chunk::get_env_data()
 	
 	if (e_list.size())
 		return e_list.first_entry();
-	else
-	{
-		return(0);
-	}	
+	return 0;
 }

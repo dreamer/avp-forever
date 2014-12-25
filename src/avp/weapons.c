@@ -35,6 +35,8 @@
 #include "bh_light.h"
 #include "bh_corpse.h"
 #include "bh_ais.h"
+#include "bh_videoscreen.h"
+#include "bh_track.h"
 #include "weapons.h"
 #include "avpview.h"
 
@@ -46,19 +48,18 @@
 #include "psndproj.h"
 #include "psndplat.h"
 #include "showcmds.h"
+#include "projload.hpp"
 
 /* for win 95 net support */
-#if SupportWindows95
 #include "pldghost.h"
 #include "pldnet.h"
-#endif
 
 #include "los.h"
 #include "kshape.h"
 #include "targeting.h"
 #include "extents.h"
 #include "scream.h"
-#include "AvP_UserProfile.h"
+#include "avp_userprofile.h"
 
 #define BITE_HEALTH_RECOVERY	(50)
 #define BITE_ARMOUR_RECOVERY	(30)
@@ -83,7 +84,9 @@
 *  										G L O B A L S 	            					    *
 ****************************************************************************************KJL*/
 
+#if 0
 static char tempstring[256];
+#endif
 
 static int WBStrikeTime=(ONE_FIXED>>1);
 static int ACStrikeTime=(ONE_FIXED/6);
@@ -191,6 +194,8 @@ struct Target PlayersTarget;
 int GrenadeLauncherSelectedAmmo;
 int LastHand;  // For alien claws and two pistols
 
+int AllowGoldWeapons = 0; // flag to indicate the Gold version weapons should be allowed
+
 char *GrenadeLauncherBulletNames[6] = {
 	"bulletF",	//05_
 	"bulletA",	//_
@@ -287,7 +292,6 @@ int FireEmptyMinigun(PLAYER_WEAPON_DATA *weaponPtr);
 int Staff_Manager(DAMAGE_PROFILE *damage,SECTION_DATA *section1,SECTION_DATA *section2,SECTION_DATA *section3,
 	STRATEGYBLOCK *wielder);
 
-static void FireLineOfSightAmmo(enum AMMO_ID AmmoID, VECTORCH* sourcePtr, VECTORCH* directionPtr, int multiple);
 static void PlayerFireLineOfSightAmmo(enum AMMO_ID AmmoID, int multiple);
 extern void FireProjectileAmmo(enum AMMO_ID AmmoID);
 
@@ -295,7 +299,6 @@ void HandleWeaponImpact(VECTORCH *positionPtr, STRATEGYBLOCK *sbPtr, enum AMMO_I
 
 
 void FireAutoGun(STRATEGYBLOCK *sbPtr);
-void MakeMatrixFromDirection(VECTORCH *directionPtr, MATRIXCH *matrixPtr);
 void FindEndOfShape(VECTORCH* endPositionPtr, int shapeIndex);
 static void CalculateTorque(EULER *rotationPtr, VECTORCH *directionPtr, STRATEGYBLOCK *sbPtr);
 static void CalculateTorqueAtPoint(EULER *rotationPtr, VECTORCH *pointPtr, STRATEGYBLOCK *sbPtr);
@@ -326,8 +329,6 @@ void WeaponCreateStartFrame(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr);
 #endif
 int PC_Alien_Eat_Attack(int hits);
 int FirePredatorDisc(PLAYER_WEAPON_DATA *weaponPtr,SECTION_DATA *disc_section);
-
-void SmartTarget_GetCofM(DISPLAYBLOCK *target,VECTORCH *viewSpaceOutput);
 
 void BiteAttack_AwardHealth(STRATEGYBLOCK *sbPtr,AVP_BEHAVIOUR_TYPE pre_bite_type);
 void LimbRip_AwardHealth(void);
@@ -1359,8 +1360,8 @@ static void WeaponStateIdle(PLAYER_STATUS *playerStatusPtr,PLAYER_WEAPON_DATA *w
 			}
 		}
     } else if ((RequestChangeOfWeapon(playerStatusPtr,weaponPtr))
-    	||((playerStatusPtr->SelectedWeaponSlot!=playerStatusPtr->SwapToWeaponSlot))
-    		&&(playerStatusPtr->SwapToWeaponSlot!=WEAPON_FINISHED_SWAPPING)) {
+    	||((playerStatusPtr->SelectedWeaponSlot!=playerStatusPtr->SwapToWeaponSlot)
+    		&&(playerStatusPtr->SwapToWeaponSlot!=WEAPON_FINISHED_SWAPPING))) {
 		weaponPtr->CurrentState = WEAPONSTATE_UNREADYING;
 	    weaponPtr->StateTimeOutCounter = WEAPONSTATE_INITIALTIMEOUTCOUNT;
 		NewOnScreenMessage
@@ -1636,6 +1637,12 @@ static int RequestChangeOfWeapon(PLAYER_STATUS *playerStatusPtr,PLAYER_WEAPON_DA
 					}
 				}
 			}
+            // Disallow Gold version weapons with regular version
+			if (!AllowGoldWeapons && ((playerStatusPtr->WeaponSlot[newSlot].WeaponIDNumber==WEAPON_FRISBEE_LAUNCHER) || 
+			   (playerStatusPtr->WeaponSlot[newSlot].WeaponIDNumber==WEAPON_MARINE_PISTOL) || 
+			   (playerStatusPtr->WeaponSlot[newSlot].WeaponIDNumber==WEAPON_TWO_PISTOLS))) {
+                slotValidity=0;
+            }
 		} while(slotValidity==0);
 
 		if(newSlot != playerStatusPtr->SelectedWeaponSlot)
@@ -1703,6 +1710,12 @@ static int RequestChangeOfWeapon(PLAYER_STATUS *playerStatusPtr,PLAYER_WEAPON_DA
 					}
 				}
 			}
+            // Disallow Gold version weapons with regular version
+			if (!AllowGoldWeapons && ((playerStatusPtr->WeaponSlot[newSlot].WeaponIDNumber==WEAPON_FRISBEE_LAUNCHER) || 
+			   (playerStatusPtr->WeaponSlot[newSlot].WeaponIDNumber==WEAPON_MARINE_PISTOL) || 
+			   (playerStatusPtr->WeaponSlot[newSlot].WeaponIDNumber==WEAPON_TWO_PISTOLS))) {
+                slotValidity=0;
+            }
 		} while(slotValidity==0);
         
 		if(newSlot != playerStatusPtr->SelectedWeaponSlot)
@@ -1722,6 +1735,12 @@ static int RequestChangeOfWeapon(PLAYER_STATUS *playerStatusPtr,PLAYER_WEAPON_DA
         if( (requestedSlot != playerStatusPtr->SelectedWeaponSlot)
           &&(playerStatusPtr->WeaponSlot[requestedSlot].Possessed == 1) )
         { 
+            // Disallow Gold version weapons with regular version
+			if (!AllowGoldWeapons && ((playerStatusPtr->WeaponSlot[requestedSlot].WeaponIDNumber==WEAPON_FRISBEE_LAUNCHER) || 
+			   (playerStatusPtr->WeaponSlot[requestedSlot].WeaponIDNumber==WEAPON_MARINE_PISTOL) || 
+			   (playerStatusPtr->WeaponSlot[requestedSlot].WeaponIDNumber==WEAPON_TWO_PISTOLS))) {
+                return 0;
+            }
 			if (playerStatusPtr->WeaponSlot[requestedSlot].WeaponIDNumber==WEAPON_PRED_DISC) {
 				if (playerStatusPtr->WeaponSlot[requestedSlot].PrimaryRoundsRemaining==0 
 					&& playerStatusPtr->WeaponSlot[requestedSlot].PrimaryMagazinesRemaining==0) {
@@ -1858,6 +1877,12 @@ static int RequestChangeOfWeaponWhilstSwapping(PLAYER_STATUS *playerStatusPtr,PL
 					}
 				}
 			}
+            // Disallow Gold version weapons with regular version
+			if (!AllowGoldWeapons && ((playerStatusPtr->WeaponSlot[newSlot].WeaponIDNumber==WEAPON_FRISBEE_LAUNCHER) || 
+			   (playerStatusPtr->WeaponSlot[newSlot].WeaponIDNumber==WEAPON_MARINE_PISTOL) || 
+			   (playerStatusPtr->WeaponSlot[newSlot].WeaponIDNumber==WEAPON_TWO_PISTOLS))) {
+                slotValidity=0;
+            }
 		}
 		while(slotValidity==0);
 
@@ -1922,6 +1947,12 @@ static int RequestChangeOfWeaponWhilstSwapping(PLAYER_STATUS *playerStatusPtr,PL
 					}
 				}
 			}
+            // Disallow Gold version weapons with regular version
+			if (!AllowGoldWeapons && ((playerStatusPtr->WeaponSlot[newSlot].WeaponIDNumber==WEAPON_FRISBEE_LAUNCHER) || 
+			   (playerStatusPtr->WeaponSlot[newSlot].WeaponIDNumber==WEAPON_MARINE_PISTOL) || 
+			   (playerStatusPtr->WeaponSlot[newSlot].WeaponIDNumber==WEAPON_TWO_PISTOLS))) {
+                slotValidity=0;
+            }
 		}
 		while(slotValidity==0);
         
@@ -1939,6 +1970,12 @@ static int RequestChangeOfWeaponWhilstSwapping(PLAYER_STATUS *playerStatusPtr,PL
         if( (requestedSlot != currentSlot)
           &&(playerStatusPtr->WeaponSlot[requestedSlot].Possessed == 1) )
         { 
+            // Disallow Gold version weapons with regular version
+			if (!AllowGoldWeapons && ((playerStatusPtr->WeaponSlot[requestedSlot].WeaponIDNumber==WEAPON_FRISBEE_LAUNCHER) || 
+			   (playerStatusPtr->WeaponSlot[requestedSlot].WeaponIDNumber==WEAPON_MARINE_PISTOL) || 
+			   (playerStatusPtr->WeaponSlot[requestedSlot].WeaponIDNumber==WEAPON_TWO_PISTOLS))) {
+                return 0;
+            }
 			if (playerStatusPtr->WeaponSlot[requestedSlot].WeaponIDNumber==WEAPON_PRED_DISC) {
 				if (playerStatusPtr->WeaponSlot[requestedSlot].PrimaryRoundsRemaining==0 
 					&& playerStatusPtr->WeaponSlot[requestedSlot].PrimaryMagazinesRemaining==0) {
@@ -2284,10 +2321,9 @@ void HandleWeaponImpact(VECTORCH *positionPtr, STRATEGYBLOCK *sbPtr, enum AMMO_I
 			DISPLAYBLOCK *dispPtr = MakeDebris(I_BehaviourPlasmaImpact,positionPtr);
 			if (dispPtr) 
 			{
-				#if SupportWindows95
  				if(AvP.Network!=I_No_Network) 
   					AddNetMsg_LocalRicochet(I_BehaviourPlasmaImpact,positionPtr,&LOS_ObjectNormal);
- 				#endif			
+
 				MakeMatrixFromDirection(&LOS_ObjectNormal,&dispPtr->ObMat);
 			}
 			break;
@@ -2305,10 +2341,9 @@ void HandleWeaponImpact(VECTORCH *positionPtr, STRATEGYBLOCK *sbPtr, enum AMMO_I
 			DISPLAYBLOCK *dispPtr = MakeDebris(I_BehaviourBulletRicochet,positionPtr);
 			if (dispPtr) 
 			{
-				#if SupportWindows95
  				if(AvP.Network!=I_No_Network) 
  					AddNetMsg_LocalRicochet(I_BehaviourBulletRicochet,positionPtr,&LOS_ObjectNormal);
- 				#endif			            				
+
 				MakeMatrixFromDirection(&LOS_ObjectNormal,&dispPtr->ObMat);
 			}
 			break;
@@ -2517,9 +2552,7 @@ void CauseDamageToObject(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int multi
 		}
 		case I_BehaviourNetGhost:
 		{
-			#if SupportWindows95
 			DamageNetworkGhost(sbPtr, damage, use_multiple,NULL,incoming);
-			#endif
 			break;
 		}
 		case I_BehaviourAutoGun:
@@ -2615,7 +2648,6 @@ void HandleEffectsOfExplosion(STRATEGYBLOCK *objectToIgnorePtr, VECTORCH *centre
 					}
 				 	/* effect of explosion on object's dynamics */
 					{
-						VECTORCH directionOfForce;
 						EULER rotation;
 	 					int magnitudeOfForce = 5000*damage/dynPtr->Mass;
 						
@@ -2973,7 +3005,6 @@ void PositionPlayersWeaponMuzzleFlash(void)
 	/* rotate flash around in random multiples of 60 degrees */
 	{
 		MATRIXCH mat;
-		extern int cosine[], sine[];
    		int angle = (FastRandom()%6)*683;
  	  	int cos = GetCos(angle);
  	  	int sin = GetSin(angle);
@@ -3358,7 +3389,7 @@ void FindEndOfShape(VECTORCH* endPositionPtr, int shapeIndex)
 }
 
 
-
+#if 0
 static void FireLineOfSightAmmo(enum AMMO_ID AmmoID, VECTORCH* sourcePtr, VECTORCH* directionPtr, int multiple)
 {
 	#if 0
@@ -3396,7 +3427,7 @@ static void FireLineOfSightAmmo(enum AMMO_ID AmmoID, VECTORCH* sourcePtr, VECTOR
 		HandleWeaponImpact(&LOS_Point,LOS_ObjectHitPtr->ObStrategyBlock,AmmoID,directionPtr, multiple*ONE_FIXED, LOS_HModel_Section);
 	}
 }
-
+#endif
 
 
 static void CalculateTorque(EULER *rotationPtr, VECTORCH *directionPtr, STRATEGYBLOCK *sbPtr)
@@ -6325,7 +6356,6 @@ void PredPistol_Firing(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr) {
 
 int PlayerFireFlameThrower(PLAYER_WEAPON_DATA *weaponPtr) {
 
-	extern VECTORCH CentreOfMuzzleOffset;
 	VECTORCH *firingpos;
 
 	TEMPLATE_WEAPON_DATA *twPtr=&TemplateWeapon[weaponPtr->WeaponIDNumber];
@@ -6578,7 +6608,7 @@ DISPLAYBLOCK *CauseDamageToHModel(HMODELCONTROLLER *HMC_Ptr, STRATEGYBLOCK *sbPt
 		} else if ( ((this_section_data->sempai->flags&section_is_master_root)==0) 
 			&&((this_section_data->sempai->flags&section_flag_never_frag)==0)
 			&&(((this_section_data->sempai->flags&section_sprays_acid)&&((this_section_data->sempai->flags&section_flag_fragonlyfordisks)==0))
-				||((this_section_data->sempai->StartingStats.Health<TotalKineticDamage(damage))&&(this_section_data->sempai->flags&section_flag_fragonlyfordisks==0))
+				||((this_section_data->sempai->StartingStats.Health<TotalKineticDamage(damage))&&((this_section_data->sempai->flags&section_flag_fragonlyfordisks)==0))
 				||((damage->Slicing>2)&&(this_section_data->sempai->flags&section_flag_fragonlyfordisks))
 				||((damage->Slicing>0)&&((this_section_data->sempai->flags&section_flag_fragonlyfordisks)==0))
 			)
@@ -6725,9 +6755,7 @@ DISPLAYBLOCK *CauseDamageToHModel(HMODELCONTROLLER *HMC_Ptr, STRATEGYBLOCK *sbPt
 		/* Whoa, positive feedback! */
 		case I_BehaviourNetGhost:
 		{
-			#if SupportWindows95
 			DamageNetworkGhost(sbPtr, damage, multiple,this_section_data,incoming);
-			#endif
 			break;
 		}
 		#endif
@@ -8080,7 +8108,6 @@ int Target_IsEdible(STRATEGYBLOCK *candidate) {
 				}
 				break;
 			}
-	#if SupportWindows95
 		case I_BehaviourNetGhost:
 			{
 				NETGHOSTDATABLOCK *dataptr;
@@ -8098,7 +8125,6 @@ int Target_IsEdible(STRATEGYBLOCK *candidate) {
 				}
 			}
 			break;
-	#endif
 		default:
 			return(0);
 			break;
@@ -8501,8 +8527,6 @@ void PlasmaCaster_Recoil(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr) {
 	#endif
 
 	if (weaponPtr->StateTimeOutCounter == WEAPONSTATE_INITIALTIMEOUTCOUNT) {
-		
-		int multiplyer,a;
 
 		if (playerStatusPtr->PlasmaCasterCharge<Caster_MinCharge) {
 			/* Don't fire at all! */
@@ -8512,6 +8536,7 @@ void PlasmaCaster_Recoil(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr) {
 
 		/* Fix plasmacaster damage. */
 		#if 0
+		int multiplyer,a;
 		a=playerStatusPtr->PlasmaCasterCharge;
 		
 		/* These values computed by hand! */
@@ -10541,7 +10566,6 @@ extern void AutoSwapToDisc_OutOfSequence(void) {
 
 #define SPEAR_NPC_IMPULSE	(20000)
 
-void CreateSpearPossiblyWithFragment(DISPLAYBLOCK *dispPtr, VECTORCH *spearPositionPtr, VECTORCH *spearDirectionPtr);
 void HandleSpearImpact(VECTORCH *positionPtr, STRATEGYBLOCK *sbPtr, enum AMMO_ID AmmoID, VECTORCH *directionPtr, int multiple, SECTION_DATA *this_section_data) 
 {
 	VECTORCH incoming,*invec;
@@ -10806,9 +10830,7 @@ void CreateSpearPossiblyWithFragment(DISPLAYBLOCK *dispPtr, VECTORCH *spearPosit
 		}
 		
 		#if 0 // no network yet!
-		#if SupportWindows95
 		if(AvP.Network != I_No_Network)	AddNetGameObjectID(dispPtr->ObStrategyBlock);
-		#endif
 		#endif
 	    Sound_Play(SID_SPEARGUN_HITTING_WALL,"d",&dynPtr->Position);  
 		return;
@@ -11017,7 +11039,6 @@ int PlayerFirePredPistolFlechettes(PLAYER_WEAPON_DATA *weaponPtr) {
 int PredPistolSecondaryFire(PLAYER_WEAPON_DATA *weaponPtr) {
 
 	TEMPLATE_WEAPON_DATA *twPtr=&TemplateWeapon[weaponPtr->WeaponIDNumber];
-  	TEMPLATE_AMMO_DATA *templateAmmoPtr = &TemplateAmmo[twPtr->SecondaryAmmoID];
 	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 
 	LOCALASSERT(playerStatusPtr);
@@ -11216,6 +11237,8 @@ int FriendlyFireDamageFilter(DAMAGE_PROFILE *damage) {
 		case AMMO_PRED_TROPHY_KILLSECTION:
 			return(VulnerableToPredatorDamage);
 			break;
+			
+		default: ;
 	}
 
 	return TRUE;
@@ -11667,18 +11690,6 @@ int AreTwoPistolsInTertiaryFire(void) {
 
 }
 
-int FireMarineTwoPistolsPrimary(PLAYER_WEAPON_DATA *weaponPtr) {
-	
-	return(FireMarineTwoPistols(weaponPtr,0));
-
-}
-
-int FireMarineTwoPistolsSecondary(PLAYER_WEAPON_DATA *weaponPtr) {
-	
-	return(FireMarineTwoPistols(weaponPtr,1));
-
-}
-
 int FireMarineTwoPistols(PLAYER_WEAPON_DATA *weaponPtr, int secondary)
 {
 	TEMPLATE_WEAPON_DATA *twPtr=&TemplateWeapon[weaponPtr->WeaponIDNumber];
@@ -11686,9 +11697,6 @@ int FireMarineTwoPistols(PLAYER_WEAPON_DATA *weaponPtr, int secondary)
 
 	DELTA_CONTROLLER *FireRight;
 	DELTA_CONTROLLER *FireLeft;
-
-	EULER judder;
-	MATRIXCH juddermat;
 
 	/* Deduce which pistol can fire, if either? */
 
@@ -11780,6 +11788,18 @@ int FireMarineTwoPistols(PLAYER_WEAPON_DATA *weaponPtr, int secondary)
 	}	
 	return(1);	
 }	
+
+int FireMarineTwoPistolsPrimary(PLAYER_WEAPON_DATA *weaponPtr) {
+	
+	return(FireMarineTwoPistols(weaponPtr,0));
+
+}
+
+int FireMarineTwoPistolsSecondary(PLAYER_WEAPON_DATA *weaponPtr) {
+	
+	return(FireMarineTwoPistols(weaponPtr,1));
+
+}
 
 void MarineTwoPistols_Fidget(void *playerStatus, PLAYER_WEAPON_DATA *weaponPtr) {
 

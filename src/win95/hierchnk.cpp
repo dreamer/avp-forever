@@ -52,7 +52,7 @@ Object_Hierarchy_Name_Chunk * Object_Hierarchy_Chunk::get_name ()
 RIF_IMPLEMENT_DYNCREATE("OBJHIERD",Object_Hierarchy_Data_Chunk)
 
 Object_Hierarchy_Data_Chunk::Object_Hierarchy_Data_Chunk (Object_Hierarchy_Chunk * parent, const char * obname)
-: Chunk (parent, "OBJHIERD"), ob_name (0), object(0)
+: Chunk (parent, "OBJHIERD"), object(0), ob_name (0)
 {
 	num_extra_data=0;
 	extra_data=0;
@@ -135,23 +135,6 @@ void Object_Hierarchy_Data_Chunk::fill_data_block (char *data_start)
 	
 }
 
-#if UseOldChunkLoader
-Object_Hierarchy_Data_Chunk::Object_Hierarchy_Data_Chunk (Object_Hierarchy_Chunk * parent, const char * data_start, size_t /*ssize*/)
-: Chunk (parent, "OBJHIERD"), object(0), ob_name (0)
-{
-	
-	num_extra_data=0;
-	extra_data=0;
-
-	data_start+=40;
-		
-	if (strlen(data_start))
-	{
-		ob_name = new char [strlen(data_start) + 1];
-		strcpy (ob_name, data_start);
-	}
-}
-#else
 Object_Hierarchy_Data_Chunk::Object_Hierarchy_Data_Chunk (Chunk_With_Children * parent, const char * data_start, size_t /*ssize*/)
 : Chunk (parent, "OBJHIERD"), object(0), ob_name (0)
 {
@@ -176,7 +159,6 @@ Object_Hierarchy_Data_Chunk::Object_Hierarchy_Data_Chunk (Chunk_With_Children * 
 		strcpy (ob_name, data_start);
 	}
 }
-#endif
 
 void Object_Hierarchy_Data_Chunk::post_input_processing ()
 {
@@ -298,6 +280,7 @@ Object_Hierarchy_Alternate_Shape_Set_Chunk::Object_Hierarchy_Alternate_Shape_Set
 Object_Hierarchy_Alternate_Shape_Set_Chunk::Object_Hierarchy_Alternate_Shape_Set_Chunk(Chunk_With_Children* parent,const char* data,size_t)
 :Chunk(parent,"OBHALTSH")
 {
+	int i;
 		
 	Shape_Set_Num=*(int*)data;
 	data+=4;
@@ -310,7 +293,7 @@ Object_Hierarchy_Alternate_Shape_Set_Chunk::Object_Hierarchy_Alternate_Shape_Set
 	int num_shapes=*(int*)data;
 	data+=4;
 
-	for(int i=0;i<num_shapes;i++)
+	for(i=0;i<num_shapes;i++)
 	{
 		Replaced_Shape_Details* rsd=new Replaced_Shape_Details;
 		
@@ -340,7 +323,7 @@ Object_Hierarchy_Alternate_Shape_Set_Chunk::Object_Hierarchy_Alternate_Shape_Set
 
 Object_Hierarchy_Alternate_Shape_Set_Chunk::~Object_Hierarchy_Alternate_Shape_Set_Chunk()
 {
-	if(Shape_Set_Name) delete Shape_Set_Name;
+	if(Shape_Set_Name) delete[] Shape_Set_Name;
 
 	while(Replaced_Shape_List.size())
 	{
@@ -445,7 +428,7 @@ Hierarchy_Shape_Set_Collection_Chunk::Hierarchy_Shape_Set_Collection_Chunk(Chunk
 
 Hierarchy_Shape_Set_Collection_Chunk::~Hierarchy_Shape_Set_Collection_Chunk()
 {
-	if(Set_Collection_Name) delete Set_Collection_Name;
+	if(Set_Collection_Name) delete[] Set_Collection_Name;
 }
 
 void Hierarchy_Shape_Set_Collection_Chunk::fill_data_block(char* data_start)
@@ -538,7 +521,7 @@ Hierarchy_Degradation_Distance_Chunk::Hierarchy_Degradation_Distance_Chunk(Chunk
 
 Hierarchy_Degradation_Distance_Chunk::~Hierarchy_Degradation_Distance_Chunk()
 {
-	if(distance_array)delete distance_array;
+	if(distance_array)delete[] distance_array;
 }
 
 void Hierarchy_Degradation_Distance_Chunk::fill_data_block(char* data_start)
@@ -573,18 +556,6 @@ size_t Hierarchy_Degradation_Distance_Chunk::size_chunk()
 
 RIF_IMPLEMENT_DYNCREATE("HIERBBOX",Hierarchy_Bounding_Box_Chunk)
 
-#if UseOldChunkLoader
-Hierarchy_Bounding_Box_Chunk::Hierarchy_Bounding_Box_Chunk(Chunk_With_Children* parent,const char* data,size_t datasize)
-:Chunk(parent,"HIERBBOX")
-{
-	assert(datasize==2*sizeof(ChunkVector));
-	
-		
-	min=*(ChunkVector*)data;
-	data+=sizeof(ChunkVector);
-	max=*(ChunkVector*)data;
-}
-#else
 Hierarchy_Bounding_Box_Chunk::Hierarchy_Bounding_Box_Chunk(Chunk_With_Children* parent,const char* data,size_t datasize)
 :Chunk(parent,"HIERBBOX")
 {
@@ -594,7 +565,7 @@ Hierarchy_Bounding_Box_Chunk::Hierarchy_Bounding_Box_Chunk(Chunk_With_Children* 
 	data+=sizeof(ChunkVectorInt);
 	max=*(ChunkVectorInt*)data;
 }
-#endif
+
 void Hierarchy_Bounding_Box_Chunk::fill_data_block(char* data_start)
 {
 	strncpy (data_start, identifier, 8);

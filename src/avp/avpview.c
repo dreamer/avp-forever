@@ -7,16 +7,16 @@
 #include "dynblock.h"
 #include "bh_types.h"
 #include "avpview.h"
+#include "opengl.h"
 
 #include "kshape.h"
 #include "kzsort.h"
-#include "frustrum.h"
-#include "krender.h"
+#include "frustum.h"
 #include "vision.h"
 #include "lighting.h"
 #include "weapons.h"
 #include "sfx.h"
-#include "smacker.h"
+#include "fmv.h"
 /* character extents data so you know where the player's eyes are */
 #include "extents.h"
 #include "avp_userprofile.h"
@@ -43,7 +43,8 @@ extern int ScanDrawMode;
 extern int DrawMode;
 extern int ZBufferMode;
 
-extern DPID MultiplayerObservedPlayer;
+//extern DPID MultiplayerObservedPlayer;
+extern int MultiplayerObservedPlayer;
 
 #if SupportMorphing
 MORPHDISPLAY MorphDisplay;
@@ -87,13 +88,11 @@ int *Global_EID_IPtr;
 
 extern float CameraZoomScale;
 extern int CameraZoomLevel;
-extern int AlienBiteAttackInProgress=0;
+int AlienBiteAttackInProgress;
 
 /* phase for cloaked objects */
 int CloakingPhase;
 extern int NormalFrameTime;
-extern int cosine[];
-extern int sine[];
 
 int LeanScale;
 EULER deathTargetOrientation={0,0,0};
@@ -102,6 +101,7 @@ extern int GetSingleColourForPrimary(int Colour);
 extern void ColourFillBackBuffer(int FillColour);
 
 static void ModifyHeadOrientation(void);
+int AVPViewVolumePlaneTest(CLIPPLANEBLOCK *cpb, DISPLAYBLOCK *dblockptr, int obr);
 
 
 
@@ -254,8 +254,42 @@ void LightSourcesInRangeOfObject(DISPLAYBLOCK *dptr)
 			lightElementPtr++;
 		}
 	}
+}
 
+int LightIntensityAtPoint(VECTORCH *pointPtr)
+{
+	int intensity = 0;
+	int i, j;
+	
+	DISPLAYBLOCK **activeBlockListPtr = ActiveBlockList;
+	for(i = NumActiveBlocks; i != 0; i--) {
+		DISPLAYBLOCK *dispPtr = *activeBlockListPtr++;
+		
+		if (dispPtr->ObNumLights) {
+			for(j = 0; j < dispPtr->ObNumLights; j++) {
+				LIGHTBLOCK *lptr = dispPtr->ObLights[j];
+				VECTORCH disp = lptr->LightWorld;
+				int dist;
+				
+				disp.vx -= pointPtr->vx;
+				disp.vy -= pointPtr->vy;
+				disp.vz -= pointPtr->vz;
+				
+				dist = Approximate3dMagnitude(&disp);
+				
+				if (dist<lptr->LightRange) {
+					intensity += WideMulNarrowDiv(lptr->LightBright,lptr->LightRange-dist,lptr->LightRange);
+				}
+			}
+		}
+	}
+	if (intensity>ONE_FIXED) intensity=ONE_FIXED;
+	else if (intensity<GlobalAmbience) intensity=GlobalAmbience;
+	
+	/* KJL 20:31:39 12/1/97 - limit how dark things can be so blood doesn't go green */
+	if (intensity<10*256) intensity = 10*256;
 
+	return intensity;
 }
 
 EULER HeadOrientation = {0,0,0};
@@ -620,11 +654,7 @@ void ReflectObject(DISPLAYBLOCK *dPtr)
 void CheckIfMirroringIsRequired(void);
 void AvpShowViews(void)
 {
-	#if SOFTWARE_RENDERER
-	FlushSoftwareZBuffer();
-	#else
 	FlushD3DZBuffer();
-	#endif
 
 	UpdateAllFMVTextures();	
 
@@ -636,11 +666,6 @@ void AvpShowViews(void)
 //	GlobalAmbience=655;
 //	textprint("Global Ambience: %d\n",GlobalAmbience);
 
-	#if PSX
-	// For PSX, GlobalAmbience is used in the render files
-	GlobalAmbience = Global_VDB_Ptr->VDB_Ambience >> 8;
-	#endif
-	
 	/* Prepare the View Descriptor Block for use in ShowView() */
 
 	PrepareVDBForShowView(Global_VDB_Ptr);
@@ -697,13 +722,10 @@ void AvpShowViews(void)
 	 	/* KJL 12:13:26 02/05/97 - divert rendering for AvP */
 		KRenderItems(Global_VDB_Ptr);
 	}
-	#if 0 
-	RenderDungeon();
-	#endif
 
 	PlatformSpecificShowViewExit(Global_VDB_Ptr, &ScreenDescriptorBlock);
 
-	#if (SupportWindows95 && SupportZBuffering)
+	#if SupportZBuffering
 	if ((ScanDrawMode != ScanDrawDirectDraw) &&	(ZBufferMode != ZBufferOff))
 	{
 		/* KJL 10:25:44 7/23/97 - this offset is used to push back the normal game gfx,
@@ -854,16 +876,16 @@ void InitialiseRenderer(void)
 
 int AVPViewVolumeTest(VIEWDESCRIPTORBLOCK *VDB_Ptr, DISPLAYBLOCK *dblockptr)
 {
-	int or = dblockptr->ObRadius;
+	int obr = dblockptr->ObRadius;
 
 	/* Perform the view volume plane tests */
 
 	if(
-	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipZPlane, dblockptr, or) &&
-	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipLeftPlane, dblockptr, or) &&
-	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipRightPlane, dblockptr, or) &&
-	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipUpPlane, dblockptr, or) &&
-	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipDownPlane, dblockptr, or))
+	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipZPlane, dblockptr, obr) &&
+	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipLeftPlane, dblockptr, obr) &&
+	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipRightPlane, dblockptr, obr) &&
+	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipUpPlane, dblockptr, obr) &&
+	AVPViewVolumePlaneTest(&VDB_Ptr->VDB_ClipDownPlane, dblockptr, obr))
 		return Yes;
 
 	else
@@ -879,13 +901,13 @@ int AVPViewVolumeTest(VIEWDESCRIPTORBLOCK *VDB_Ptr, DISPLAYBLOCK *dblockptr)
 
 */
 
-int AVPViewVolumePlaneTest(CLIPPLANEBLOCK *cpb, DISPLAYBLOCK *dblockptr, int or)
+int AVPViewVolumePlaneTest(CLIPPLANEBLOCK *cpb, DISPLAYBLOCK *dblockptr, int obr)
 {
 	VECTORCH POPRelObView;
 
 	MakeVector(&dblockptr->ObView, &cpb->CPB_POP, &POPRelObView);
 
-	if(DotProduct(&POPRelObView, &cpb->CPB_Normal) < or) return Yes;
+	if(DotProduct(&POPRelObView, &cpb->CPB_Normal) < obr) return Yes;
 	else return No;
 }
 

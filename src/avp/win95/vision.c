@@ -9,6 +9,7 @@
 #include "gamedef.h"
 #include "bh_types.h"
 #include "huddefs.h"
+#include "opengl.h"
 
 /* patrick's sound include */
 #include "psnd.h"
@@ -21,8 +22,7 @@
 *                                    P R O T O T Y P E S	                                *
 ****************************************************************************************KJL*/
 #include "vision.h"
-#include "krender.h"
-#include "frustrum.h"
+#include "frustum.h"
 #include "avpview.h"
 #include "game_statistics.h"
 
@@ -31,7 +31,7 @@
 ****************************************************************************************KJL*/
 enum VISION_MODE_ID CurrentVisionMode;
 
-static visionModeDebounced=0;
+static int visionModeDebounced=0;
 
 extern ACTIVESOUNDSAMPLE ActiveSounds[];
 int predOVision_SoundHandle;
@@ -47,7 +47,6 @@ extern int NormalFrameTime;
 extern int GlobalAmbience;
 /* JH 29/5/97 - to control how D3D does the lighting */
 struct D3DLightColourControl d3d_light_ctrl;
-struct D3DOverlayColourControl d3d_overlay_ctrl;
 /*KJL****************************************************************************************
 *                                     F U N C T I O N S	                                    *
 ****************************************************************************************KJL*/
@@ -220,6 +219,8 @@ extern void ChangePredatorVisionMode(void)
 			CurrentVisionMode=VISION_MODE_NORMAL;
 			break;
 		}
+		default:
+			break;
 	}
 	Sound_Play(SID_VISION_ON,"h");
 	PredatorVisionChangeCounter=ONE_FIXED;

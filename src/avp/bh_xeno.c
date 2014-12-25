@@ -24,10 +24,10 @@
 #include "bh_debri.h"
 #include "plat_shp.h"
 #include "particle.h"
-#include "AI_Sight.h"
+#include "ai_sight.h"
 #include "sequnces.h"
 #include "huddefs.h"
-#include "ShowCmds.h"
+#include "showcmds.h"
 #include "sfx.h"
 #include "bh_marin.h"
 #include "bh_far.h"
@@ -39,6 +39,7 @@
 #include "bh_alien.h"
 #include "bh_corpse.h"
 #include "bh_dummy.h"
+#include "game_statistics.h"
 
 #define UseLocalAssert Yes
 #include "ourasert.h"
@@ -1886,7 +1887,6 @@ void Xeno_TurnAndTarget(STRATEGYBLOCK *sbPtr, int *ref_anglex,int *ref_angley) {
 void Xeno_Limbs_ShootTheRoof(STRATEGYBLOCK *sbPtr) {
 
 	XENO_STATUS_BLOCK *xenoStatusPointer;
-	int anglex,angley;
 
 	LOCALASSERT(sbPtr);
 	xenoStatusPointer = (XENO_STATUS_BLOCK *)(sbPtr->SBdataptr);    	
@@ -2596,7 +2596,6 @@ int Xenoborg_TargetFilter(STRATEGYBLOCK *candidate) {
 		case I_BehaviourXenoborg:
 			return(0);
 			break;
-		#if SupportWindows95
 		case I_BehaviourNetGhost:
 			{
 				NETGHOSTDATABLOCK *dataptr;
@@ -2613,7 +2612,6 @@ int Xenoborg_TargetFilter(STRATEGYBLOCK *candidate) {
 				}
 			}
 			break;
-		#endif
 		default:
 			return(0);
 			break;
@@ -4125,7 +4123,9 @@ void Execute_Xeno_TurnToFace_Far(STRATEGYBLOCK *sbPtr)
 void Execute_Xeno_Follow_Far(STRATEGYBLOCK *sbPtr)
 {
 	XENO_STATUS_BLOCK *xenoStatusPointer;
+#if FAR_XENO_ACTIVITY
 	int anglex,angley;
+#endif
 
 	LOCALASSERT(sbPtr);
 	xenoStatusPointer = (XENO_STATUS_BLOCK *)(sbPtr->SBdataptr);    	
@@ -4320,7 +4320,9 @@ void Execute_Xeno_Return_Far(STRATEGYBLOCK *sbPtr)
 void Execute_Xeno_Avoidance_Far(STRATEGYBLOCK *sbPtr)
 {
 	XENO_STATUS_BLOCK *xenoStatusPointer;    
+#if FAR_XENO_ACTIVITY
 	int anglex,angley;
+#endif
 	
 	LOCALASSERT(sbPtr);
 	xenoStatusPointer = (XENO_STATUS_BLOCK *)(sbPtr->SBdataptr);    

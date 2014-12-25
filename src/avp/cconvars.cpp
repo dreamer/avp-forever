@@ -18,24 +18,21 @@
 #include "consvar.hpp"
 #include "conscmnd.hpp"
 #include "equipmnt.h"
-#include "inline.h"
-#include "module.h"
-#include "stratdef.h"
 #include "weapons.h"
 #include "bh_queen.h"
 #include "bh_gener.h"
 #include "dxlog.h"
 #include "avp_menus.h"
 #include "pheromon.h"
-#include "ShowCmds.h"
+#include "showcmds.h"
 #include "pfarlocs.h"
 
 #define UseLocalAssert Yes
 #include "ourasert.h"
 
 #include "game_statistics.h"
-#include "AvP_EnvInfo.h"
-#include "AvP_UserProfile.h"
+#include "avp_envinfo.h"
+#include "avp_userprofile.h"
 
 extern "C"
 {
@@ -450,7 +447,7 @@ void PredPistol_SemiAuto(void) {
 
 void SetPlayerStartingHealth(int value) {
 
-	NPC_DATA *NpcData;
+	NPC_DATA *NpcData = NULL;
 	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 	
 	switch (AvP.PlayerType)
@@ -512,7 +509,7 @@ void SetPlayerStartingHealth(int value) {
 
 void SetPlayerStartingArmour(int value) {
 
-	NPC_DATA *NpcData;
+	NPC_DATA *NpcData = NULL;
 	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 	
 	switch (AvP.PlayerType)

@@ -74,7 +74,6 @@ extern int PrintDebuggingText(const char* t, ...);
 
 */
 extern int VideoMode;
-extern void (*UpdateScreen[]) (void);
 extern DISPLAYBLOCK* ActiveBlockList[];
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 extern void (*SetVideoMode[]) (void);
@@ -762,7 +761,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 		TimeStampedMessage("After CDDA_Stop");
 
 		/* netgame support */
-		#if SupportWindows95 /* call me paranoid */
 		if(AvP.Network != I_No_Network) 
 		{
 			/* we cleanup and reset our game mode here, at the end of the game loop, as other 
@@ -770,7 +768,6 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,
 			EndAVPNetGame();
 			//EndOfNetworkGameScreen();
 		}
-		#endif
 
 		//need to get rid of the player rifs before we can clear the memory pool
 				

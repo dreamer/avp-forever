@@ -4,6 +4,8 @@
 
 #define DB_LEVEL 1
 
+#include <stdio.h>
+
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"
@@ -16,6 +18,8 @@
 #include "db.h"
 #include "showcmds.h"
 #include "avp_userprofile.h"
+#include "cdplayer.h"
+
 /* Patrick 5/6/97 -------------------------------------------------------------
   Internal globals
   ----------------------------------------------------------------------------*/
@@ -111,7 +115,7 @@ void SoundSys_Management(void)
 		if(ActiveSounds[i].soundIndex==SID_NOSOUND) continue; /* empty slot */
 		numActive++;
 
-		if(PlatSoundHasStopped(i)!=0 && !ActiveSounds[i].paused)
+		if(PlatSoundHasStopped(i) && !ActiveSounds[i].paused)
 		{
 			Sound_Stop(i);
 			continue;			
@@ -348,6 +352,7 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 
 	if(!SoundSwitchedOn) return;
 
+
 	/* check soundIndex for bounds, whether it has been loaded, and number of instances */
 	if((soundNumber<0)||(soundNumber>=SID_MAXIMUM)) return;
 	if(!(GameSounds[soundNumber].loaded)) return;
@@ -485,6 +490,7 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 				db_log3("Failed to find a lower priority sound.");
 				return; /* give up */
 			}
+
 			/* remove it, and use it's slot */
 			db_log3("Stopping a lower priority sound.");
 			Sound_Stop(newIndex);
@@ -506,6 +512,12 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 	ActiveSounds[newIndex].reverb_off=reverb_off;
 	if(loop) ActiveSounds[newIndex].loop = 1;
 	else ActiveSounds[newIndex].loop = 0;
+
+#if 0
+fprintf(stderr, "PSND: Play: new = %d. num = %d, p = %d, v = %d, pi = %d, l = %d, mi = %d, rev = %d\n", newIndex, soundNumber, priority, volume, pitch, loop, marine_ignore, reverb_off);
+fprintf(stderr, "PSND: Play: %d %d %s l:%d\n", newIndex, soundNumber, GameSounds[soundNumber].wavName, loop);
+#endif
+
 	if(worldPosn) 
 	{
 		VECTORCH zeroPosn = {0,0,0};
@@ -546,17 +558,23 @@ void Sound_Play(SOUNDINDEX soundNumber, char *format, ...)
 	GameSounds[soundNumber].activeInstances++;
 	if(externalRef) *externalRef = newIndex;
 
-	if(soundStartPosition && ActiveSounds[newIndex].dsBufferP)
-	{
-		//sound starts part of the way in
-		IDirectSoundBuffer_SetCurrentPosition(ActiveSounds[newIndex].dsBufferP,soundStartPosition);
-	}
+/* only will happen because of savegames */
+//	if(soundStartPosition && ActiveSounds[newIndex].dsBufferP)
+//	{
+//		//sound starts part of the way in
+//		IDirectSoundBuffer_SetCurrentPosition(ActiveSounds[newIndex].dsBufferP,soundStartPosition);
+//	}
+#if 0 /* TODO */
+	if (soundStartPosition)
+		fprintf(stderr, "Sound_Play: sound starts part of the way in (%d)\n", soundStartPosition);
+#endif		
 }
 
 void Sound_Stop(int activeSoundNumber)
 {
 	SOUNDINDEX soundNo;
-
+	int buf;
+	
 	if(!SoundSwitchedOn) return;
 	/* validate argument */
 	if(activeSoundNumber<0) return;
@@ -574,10 +592,17 @@ void Sound_Stop(int activeSoundNumber)
 		*(ActiveSounds[activeSoundNumber].externalRef) = SOUND_NOACTIVEINDEX;      
 			
 	/* stop the sound: it may have already stopped, of course, but never mind */
+	
 	PlatStopSound(activeSoundNumber);
 
+#if 0	
+fprintf(stderr, "PSND: Stop: %d %d %s\n", activeSoundNumber, soundNo, GameSounds[soundNo].wavName);
+#endif
+	
 	/* release the active sound slot */
+	buf = ActiveSounds[activeSoundNumber].ds3DBufferP;
 	ActiveSounds[activeSoundNumber] = BlankActiveSound;
+	ActiveSounds[activeSoundNumber].ds3DBufferP = buf;
 }
 
 void Sound_ChangeVolume(int activeSoundNumber, int volume)
@@ -828,12 +853,15 @@ void Save_SoundState(int* soundHandle)
 		//by Sound_Play
 		block->volume<<=7;
 		block->volume/=VOLUME_PLAT2DSCALE;
-		
-		if(sound->dsBufferP)
-			IDirectSoundBuffer_GetCurrentPosition(sound->dsBufferP,(LPDWORD)&block->position,NULL);
-		else
-			block->position = 0;
 
+/* only for savegames */		
+//		if(sound->dsBufferP)
+//			IDirectSoundBuffer_GetCurrentPosition(sound->dsBufferP,(LPDWORD)&block->position,NULL);
+//		else
+			block->position = 0;
+#if 0 /* TODO */
+fprintf(stderr, "Save_SoundState: GetCurrentPosition!\n");
+#endif		
 		strcpy((char*)(block+1),name);
 		
 	}	
@@ -918,11 +946,15 @@ void Save_SoundsWithNoReference()
 				block->volume<<=7;
 				block->volume/=VOLUME_PLAT2DSCALE;
 
-				if(sound->dsBufferP)
-					IDirectSoundBuffer_GetCurrentPosition(sound->dsBufferP,(LPDWORD)&block->position,NULL);
-				else
+/* savegames */
+//				if(sound->dsBufferP)
+//					IDirectSoundBuffer_GetCurrentPosition(sound->dsBufferP,(LPDWORD)&block->position,NULL);
+//				else
 					block->position = 0;
-
+#if 0 /* TODO */
+				fprintf(stderr, "Save_SoundsWithNoReference: GetCurrentPosition!\n");
+#endif
+				
 				strcpy((char*)(block+1),name);
 			}
 		}

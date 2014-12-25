@@ -2,22 +2,19 @@
 extern "C"
 {
 	#include "3dc.h"
-	//#include "intro.hpp"
 	#include "inline.h"
-	#include "smacker.h"
-	#include "AvP_Menus.h"
+	//#include "smacker.h"
+	#include "avp_menus.h"
+    #include "avp_intro.h"
 	extern int NormalFrameTime;
-	extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-	extern DDPIXELFORMAT DisplayPixelFormat;
-	extern LPDIRECTDRAWSURFACE lpDDSBack;
-	extern int GotAnyKey;
+	extern unsigned char GotAnyKey;
 	extern int DebouncedGotAnyKey;
-
+	extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 	extern AVPMENUGFX AvPMenuGfxStorage[];
 extern void DirectReadKeyboard(void);
 
 
-static IntroHasAlreadyBeenPlayed = 1;
+static int IntroHasAlreadyBeenPlayed = 1;
 
 
 void Show_CopyrightInfo(void);
@@ -29,6 +26,18 @@ extern void Show_WinnerScreen(void);
 extern void PlayBinkedFMV(char *filenamePtr);
 extern void DrawMainMenusBackdrop(void);
 extern void FadedScreen(int alpha);
+
+void StartMenuMusic(void)
+{
+}
+
+void PlayMenuMusic(void)
+{
+}
+
+void EndMenuMusic(void)
+{
+}
 
 void WeWantAnIntro(void)
 {
@@ -53,7 +62,7 @@ extern void PlayIntroSequence(void)
 	FlipBuffers();
 	ClearScreenToBlack();
 
-	PlayBinkedFMV("FMVs/logos.bik");
+	//PlayBinkedFMV("FMVs/logos.bik");
 	//PlayFMV("FMVs/rebellion.smk");
 
 	StartMenuMusic();

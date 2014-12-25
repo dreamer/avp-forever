@@ -10,14 +10,7 @@
 
 */
 
-	#if platform_pc
-	extern int sine[];
-	extern int cosine[];
-	#endif
-
-    #if SupportWindows95
-	extern int ScanDrawMode;
-	#endif
+extern int ScanDrawMode;
 
 
 /*
@@ -26,7 +19,7 @@
 
 */
 
-SCENE Global_Scene = 0;
+SCENE Global_Scene/* = 0*/;
 
 
 
@@ -393,37 +386,11 @@ static void CreateProjectorArray(VIEWDESCRIPTORBLOCK *vdb)
 
  SetVDB requires a VIEWDESCRIPTORBLOCK
 
- See the actual function code for what each parameter is
-
 */
 
-void SetVDB(vdb, fl, ty, d, cx,cy, prx,pry, mxp, cl,cr,cu,cd, h1,h2,hc, amb)
-
-	VIEWDESCRIPTORBLOCK *vdb;
-
-	int fl;
-	int ty;
-
-	int d;
-
-	int cx;
-	int cy;
-
-	int prx;
-	int pry;
-	int mxp;
-
-	int cl;
-	int cr;
-	int cu;
-	int cd;
-
-	int h1;
-	int h2;
-	int hc;
-
-	int amb;
-
+void SetVDB(VIEWDESCRIPTORBLOCK *vdb, int fl, int ty, int d, int cx, int cy, 
+    int prx, int pry, int mxp, int cl, int cr, int cu, int cd, 
+    int h1, int h2, int hc, int amb)
 {
 
 
@@ -446,9 +413,7 @@ void SetVDB(vdb, fl, ty, d, cx,cy, prx,pry, mxp, cl,cr,cu,cd, h1,h2,hc, amb)
 
 		vdb->VDB_Depth			= ScreenDescriptorBlock.SDB_Depth;
 
-        #if SupportWindows95
-        vdb->VDB_ScreenDepth    = ScreenDescriptorBlock.SDB_ScreenDepth;
-		#endif
+		vdb->VDB_ScreenDepth    = ScreenDescriptorBlock.SDB_ScreenDepth;
 
 		vdb->VDB_CentreX		= ScreenDescriptorBlock.SDB_CentreX;
 		vdb->VDB_CentreY		= ScreenDescriptorBlock.SDB_CentreY;
@@ -466,16 +431,12 @@ void SetVDB(vdb, fl, ty, d, cx,cy, prx,pry, mxp, cl,cr,cu,cd, h1,h2,hc, amb)
 
 	else {
 
-        #if SupportWindows95
 		 if (ScanDrawMode == ScanDrawDirectDraw)
 		   vdb->VDB_Depth			= d;
 		 else
 		   vdb->VDB_Depth = VideoModeType_24;
 
-        vdb->VDB_ScreenDepth    = ScreenDescriptorBlock.SDB_ScreenDepth;
-		#else
-		vdb->VDB_Depth			= d;
-		#endif
+		vdb->VDB_ScreenDepth    = ScreenDescriptorBlock.SDB_ScreenDepth;
 
 		vdb->VDB_CentreX		= cx;
 		vdb->VDB_CentreY		= cy;
@@ -742,10 +703,7 @@ VIEWDESCRIPTORBLOCK* CreateActiveVDB(void)
 
 */
 
-int DestroyActiveVDB(dblockptr)
-
-	VIEWDESCRIPTORBLOCK *dblockptr;
-
+int DestroyActiveVDB(VIEWDESCRIPTORBLOCK *dblockptr)
 {
 
 	int j = -1;

@@ -1,5 +1,4 @@
-#include "advwin32.h"
-#include "iff_ILBM.hpp"
+#include "iff_ilbm.hpp"
 
 IFF_IMPLEMENT_DYNCREATE("ILBM","BMHD",IlbmBmhdChunk)
 IFF_IMPLEMENT_DYNCREATE("ILBM","CMAP",IlbmCmapChunk)
@@ -85,10 +84,6 @@ namespace IFF
 			return true;
 		}
 
-// The uninitialised part of byte is shifted out.
-#ifdef _MSC_VER
-#pragma warning(disable: 4701)
-#endif
 		bool IlbmBodyChunk::EncodeNextRow(unsigned const * pRow)
 		{
 			if (!pEncodeDst) return false;
@@ -97,7 +92,7 @@ namespace IFF
 			{
 				UBYTE * pBuf = pEncodeSrc;
 				
-				unsigned byte;
+				unsigned byte=0;
 				for (unsigned x=0; x<nWidth; ++x)
 				{
 					byte <<= 1;
@@ -165,9 +160,6 @@ namespace IFF
 			
 			return true;
 		}
-#ifdef _MSC_VER
-#pragma warning(default: 4701)
-#endif
 		
 		bool IlbmBodyChunk::EndEncode()
 		{
@@ -207,10 +199,6 @@ namespace IFF
 		return pData != NULL;
 	}
 
-// The uninitialised part of pDecodeDst is shifted out.
-#ifdef _MSC_VER
-#pragma warning(disable: 4701)
-#endif
 	unsigned const * IlbmBodyChunk::DecodeNextRow() const
 	{
 		if (!pDecodeSrc || !pDecodeDst) return NULL;
@@ -225,7 +213,7 @@ namespace IFF
 			
 			for (unsigned b=0; b<nBitPlanes; ++b)
 			{
-				unsigned byte;
+				unsigned byte=0;
 				for (unsigned x=0; x<nWidth; ++x)
 				{
 					if (!(x&7))
@@ -283,7 +271,7 @@ namespace IFF
 		{
 			for (unsigned b=0; b<nBitPlanes; ++b)
 			{
-				unsigned byte;
+				unsigned byte=0;
 				for (unsigned x=0; x<nWidth; ++x)
 				{
 					if (!(x&7))
@@ -305,9 +293,6 @@ namespace IFF
 		
 		return pDecodeDst;
 	}
-#ifdef _MSC_VER
-#pragma warning(default: 4701)
-#endif
 	
 	IlbmBodyChunk::~IlbmBodyChunk()
 	{

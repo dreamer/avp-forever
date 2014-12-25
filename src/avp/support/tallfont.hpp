@@ -7,7 +7,7 @@
 #ifndef _tallfont
 #define _tallfont 1
 
-	#if ( defined( __WATCOMC__ ) || defined( _MSC_VER ) )
+	#if defined( _MSC_VER )
 		#pragma once
 	#endif
 
@@ -95,6 +95,7 @@
 		int SpaceWidth_Val;
 
 		LPDIRECTDRAWSURFACE image_ptr;
+
 		AW_BACKUPTEXTUREHANDLE hBackup;
 
 		r2size R2Size_OverallImage;

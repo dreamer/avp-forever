@@ -7,6 +7,7 @@
 
 #include "dynblock.h"
 #include "dynamics.h"
+#include "plat_shp.h"
 
 #define UseLocalAssert Yes
 
@@ -16,19 +17,6 @@
 
 extern int NormalFrameTime;
 
-
-#if PSX
-
-void * LightFXBehaveInit (void * bhdata, STRATEGYBLOCK* sbptr)
-{
-	
-}	
-void LightFXBehaveFun (STRATEGYBLOCK* sbptr)
-{
-	
-}	
-
-#else
 
 void * LightFXBehaveInit (void * bhdata, STRATEGYBLOCK* sbptr)
 {
@@ -640,4 +628,3 @@ void SaveStrategy_LightFx(STRATEGYBLOCK* sbPtr)
 	COPYELEMENT_SAVE(timer2)
 	COPYELEMENT_SAVE(time_to_next_flicker_state)
 }
-#endif

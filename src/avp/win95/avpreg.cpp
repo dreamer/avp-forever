@@ -72,7 +72,7 @@ void GetPathFromRegistry()
 		else
 		{
 			directory=new char[40];
-			strcpy(directory,"\\\\nursey\\shadows\\avp\\textures");
+			strcpy(directory,"\\\\bob\\textures\\avp_graphics");
 		}
 		*(char**)&SecondTex_Directory=directory;
 	}
@@ -89,7 +89,7 @@ void GetPathFromRegistry()
 		else
 		{
 			directory=new char[40];
-			strcpy(directory,"\\\\nursey\\shadows\\avp\\sound\\");
+			strcpy(directory,"\\\\bob\\vss\\avp\\sound\\");
 		}
 		SecondSoundDir=directory;
 	}

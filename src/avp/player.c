@@ -19,24 +19,26 @@ so player.c is looking a bit bare at the moment. */
 #include "particle.h"
 #include "scream.h"
 #include "savegame.h"
-#if SupportWindows95
-	#include "rebmenus.hpp"
-#endif
+#include "game_statistics.h"
+#include "pfarlocs.h"
+#include "bh_ais.h"
 
 #define UseLocalAssert Yes
 #include "ourasert.h"
 
 #include "psnd.h"
 #include "psndplat.h"
+#include "player.h"
 
 /* for win 95 net support */
-#if SupportWindows95
 #include "pldnet.h"
 #include "pldghost.h"
-#include "dp_func.h"
-#endif
-#include "ShowCmds.h"
-#include "BonusAbilities.h"
+//#include "dp_func.h"
+
+#include "showcmds.h"
+#include "bonusabilities.h"
+
+extern DPID AVPDPNetID;
 
 #define PLAYER_HMODEL 0
 
@@ -109,7 +111,9 @@ void InitPlayer(STRATEGYBLOCK* sbPtr, int sb_type)
 	* and fills in some initial values.                                                       *
 	**************************************************************************************KJL*/
 
+#if 0
 	SECTION *root_section;
+#endif
 	PLAYER_STATUS *psPtr = &PlayerStatusBlock;
 	GLOBALASSERT(psPtr);
  	GLOBALASSERT(sbPtr);
@@ -357,11 +361,8 @@ void InitPlayer(STRATEGYBLOCK* sbPtr, int sb_type)
 	//restore the number of saves allowed
 	ResetNumberOfSaves();
 
-#if SupportWindows95
 	//choosing a start position now occurs later on
 //	if(AvP.Network!=I_No_Network) TeleportNetPlayerToAStartingPosition(sbPtr, 1);
-#endif
-
 }
 
 void ChangeToMarine()
@@ -479,13 +480,6 @@ void MaintainPlayer(void)
 	textprint("PlayerLight %d\n",CurrentLightAtPlayer);
 	#endif
 
-	#if SupportWindows95
-	#if 0//UseRebMenus
-	if(playerStatusPtr->Mvt_InputRequests.Flags.Rqst_PauseGame)
-	{
-		REBMENUS_ProcessPauseRequest();
-	}
-	#else
 	if(AvP.Network==I_No_Network)
 	{
 		#if 1
@@ -512,8 +506,7 @@ void MaintainPlayer(void)
 		// go to start menu
 		AvP.MainLoopRunning = 0;
 	}
-	#endif
-	#endif
+
 	//Update the player's invulnerabilty timer
 	if(playerStatusPtr->invulnerabilityTimer>0)
 	{
@@ -1147,7 +1140,6 @@ static void PlayerIsDead(DAMAGE_PROFILE* damage,int multiplier,VECTORCH* incomin
 	}
 
 	/* network support... */
-	#if SupportWindows95
 	if(AvP.Network!=I_No_Network) 
 	{
 		playerStatusPtr->MyCorpse=MakeNewCorpse();
@@ -1317,7 +1309,7 @@ static void PlayerIsDead(DAMAGE_PROFILE* damage,int multiplier,VECTORCH* incomin
 		    SpeciesTag_DetermineMyNextCharacterType();
 		}
 	}
-	#endif
+
 	if (playerStatusPtr->soundHandle!=SOUND_NOACTIVEINDEX) {
  		Sound_Stop(playerStatusPtr->soundHandle);
 	}
@@ -1343,7 +1335,9 @@ void DeInitialisePlayer(void) {
 	/* I thought it would be logical to put it here... */
 	
   	int slot = MAX_NO_OF_WEAPON_SLOTS;
+#if 0
 	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
+#endif
 
     do {
 		TXACTRLBLK *txactrl,*txactrl_next;

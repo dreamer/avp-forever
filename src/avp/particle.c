@@ -24,15 +24,20 @@
 #include "sphere.h"
 #include "bh_rubberduck.h"
 #include "bh_weap.h"
+#include "weapons.h"
+#include "decal.h"
 #include "avpview.h"
 #include "pldghost.h"
 #include "detaillevels.h"
 #include "psnd.h"
+#include "kzsort.h"
 #include "avp_userprofile.h"
 #define UseLocalAssert Yes
 #include "ourasert.h"
 #include "savegame.h"
 #include "los.h"
+#include "chnkload.h"
+#include "maths.h"
 
 #include <math.h>
 
@@ -1748,8 +1753,6 @@ void HandleParticleSystem(void)
 			}
 			case PARTICLE_FLARESMOKE:
 			{
-				extern sine[],cosine[];
-
 //				particlePtr->Position.vy -= MUL_FIXED(1000+(FastRandom()&511),NormalFrameTime);
 				particlePtr->Position.vy += MUL_FIXED(particlePtr->Velocity.vy,NormalFrameTime);
 				
@@ -1816,8 +1819,6 @@ void HandleParticleSystem(void)
 			}
 			case PARTICLE_STEAM:
 			{
-				extern sine[],cosine[];
-
 //				particlePtr->Position.vy -= MUL_FIXED(1000+(FastRandom()&511),NormalFrameTime);
 				particlePtr->Position.vy += MUL_FIXED(particlePtr->Velocity.vy,NormalFrameTime);
 				
@@ -1883,8 +1884,6 @@ void HandleParticleSystem(void)
 			case PARTICLE_BLACKSMOKE:
 			case PARTICLE_IMPACTSMOKE:
 			{
-				extern sine[],cosine[];
-
 //				particlePtr->Position.vy -= MUL_FIXED(1000+(FastRandom()&511),NormalFrameTime);
 				particlePtr->Position.vy += MUL_FIXED(particlePtr->Velocity.vy,NormalFrameTime);
 				
@@ -1947,8 +1946,6 @@ void HandleParticleSystem(void)
 			}
 			case PARTICLE_GUNMUZZLE_SMOKE:
 			{
-				extern sine[],cosine[];
-
 //				particlePtr->Position.vy -= MUL_FIXED(1000+(FastRandom()&511),NormalFrameTime);
 				particlePtr->Position.vy += MUL_FIXED(particlePtr->Velocity.vy,NormalFrameTime);
 				#if 1
@@ -3780,10 +3777,8 @@ void HandleRainShaft(MODULE *modulePtr, int bottomY, int topY, int numberOfRaind
 	
 }
 
-#include <math.h>
 void HandleRipples(void)
 {
-	extern int sine[];
 	int i;
 
 	for(i=0; i<MAX_NO_OF_RIPPLES; i++)
@@ -3804,7 +3799,6 @@ void HandleRipples(void)
 
 int EffectOfRipples(VECTORCH *point)
 {
-	extern int sine[];
 	int offset;
 	int i;
  	offset = GetSin((point->vx+point->vz+CloakingPhase)&4095)>>11;
@@ -4023,7 +4017,6 @@ void DrawMuzzleFlash(VECTORCH *positionPtr,VECTORCH *directionPtr, enum MUZZLE_F
 			MATRIXCH rotmat;
 			MakeMatrixFromDirection(directionPtr,&muzzleMatrix);
 			{
-				extern int cosine[], sine[];
 		   		int angle = 4096/12;
 		 	  	int cos = GetCos(angle);
 		 	  	int sin = GetSin(angle);
@@ -5164,7 +5157,7 @@ void HandlePheromoneTrails(void)
 
 	}					 
 }
-#include "frustrum.h"
+#include "frustum.h"
 void RenderTrailSegment(PHEROMONE_TRAIL *trailPtr)
 {
  	POLYHEADER fakeHeader;
@@ -5301,7 +5294,6 @@ extern void RenderParticlesInMirror(void)
 		while(numOfObjects)
 		{
 			DISPLAYBLOCK *objectPtr = OnScreenBlockList[--numOfObjects];
-			STRATEGYBLOCK *sbPtr = objectPtr->ObStrategyBlock;
 
 			if (!objectPtr->ObShape && objectPtr->SfxPtr)
 			{
@@ -5421,6 +5413,8 @@ void TimeScaleThingy()
 				case I_BehaviourMolotov :
 					DesiredTimeScale=MUL_FIXED(DesiredTimeScale,ONE_FIXED*.7);
 					break;
+					
+				default: ;
 			}
 		}
 	}

@@ -18,7 +18,7 @@ extern MAPBLOCK6 Term_Type6;
 extern MODULEMAPBLOCK AvpCompiledMaps[];
 
 MAPHEADER Map[]={
-
+    {
 	0,
 	0,
 	0,
@@ -26,7 +26,8 @@ MAPHEADER Map[]={
 	0,
 	0,
 	0,
-	&Player_and_Camera_Type8[0],
+	&Player_and_Camera_Type8[0]
+    }
 };
 
 
@@ -91,8 +92,8 @@ MAPBLOCK6 Empty_Landscape_Type6 = {
 
 	-1, /* No shape */
 
-	0,0,0,		/* Loc */
-	0,0,0,				/* Orient */
+    {0,0,0},		/* Loc */
+    {0,0,0},				/* Orient */
 
 	ObFlag_MultLSrc
 	/*| ObFlag_BFCRO*/
@@ -125,8 +126,8 @@ MAPBLOCK6 Empty_Object_Type6 = {
 
 	-1,	/* No shape */
 
-	0,0,0,		/* Loc */
-	0,0,0,				/* Orient */
+    {0,0,0},		/* Loc */
+    {0,0,0},				/* Orient */
 
 	ObFlag_MultLSrc |
 	/*| ObFlag_BFCRO*/
@@ -157,8 +158,8 @@ MAPBLOCK6 Term_Type6 = {
 
 	MapType_Term,
 	0,
-	0,0,0,
-	0,0,0,
+    {0,0,0},
+    {0,0,0},
 	0,						/* Flags */
 	
 	#if StandardStrategyAndCollisions
@@ -179,7 +180,7 @@ MAPBLOCK6 Term_Type6 = {
 MAPBLOCK8 Player_and_Camera_Type8[] = {
 #if SupportModules
 	/*  Ship */
-					 
+  {					 
 	MapType_Player,
 
 	I_ShapeMarinePlayer, 	/*mainshapelist position 0*/
@@ -187,8 +188,8 @@ MAPBLOCK8 Player_and_Camera_Type8[] = {
 
 	/* MapType_Camera, */
 
-	0, 0, 0,							/* Loc */
-	0, 3062, 0,							/* Orient */
+    {0, 0, 0},							/* Loc */
+    {0, 3062, 0},						/* Orient */
 
 	ObFlag_MultLSrc
 	|0
@@ -226,7 +227,7 @@ MAPBLOCK8 Player_and_Camera_Type8[] = {
 	0,											/* MapMass */
 	0,0,0,									/* MapNewtonV */
 	#endif
-	0,0,0,									/* MapOrigin */
+    {0,0,0},									/* MapOrigin */
 					   
 	0,											/* MapSimShapes */
 	0,											/* MapViewType */
@@ -234,8 +235,8 @@ MAPBLOCK8 Player_and_Camera_Type8[] = {
 	0,					/* MapMPtr */
 
 	0,											/* MapDPtr */
-	0,0,0,									/* MapMOffset */
-
+    {0,0,0}									/* MapMOffset */
+  },
 
 /****************************************************************************/
 
@@ -294,10 +295,11 @@ MAPBLOCK8 Player_and_Camera_Type8[] = {
 /****************************************************************************/
 	/* Map End */
 #endif /*SupportModules*/
+  {
 	MapType_Term,		/* Map Type Function */
 	0,						/* Shape */
-	0,0,0,				/* Loc */
-	0,0,0,				/* Orient */
+    {0,0,0},				/* Loc */
+    {0,0,0},				/* Orient */
 	0,						/* Flags 1 */
 	0,						/* Flags 2 */
 	0,						/* Flags 3 */
@@ -315,13 +317,13 @@ MAPBLOCK8 Player_and_Camera_Type8[] = {
 	0,						/* MapMass */
 	0,0,0,				/* MapNewtonV */
 	#endif
-	0,0,0,				/* MapOrigin */
+    {0,0,0},				/* MapOrigin */
 	0,						/* MapSimShapes */
 	0,						/* MapViewType */
 	0,						/* MapMPtr */
 	0,						/* MapDPtr */
-	0,0,0,				/* MapMOffset */
-
+    {0,0,0}				/* MapMOffset */
+  }
 };
 
 
@@ -352,8 +354,8 @@ MODULEMAPBLOCK AvpCompiledMaps[] = {
 	{
 	MapType_Term,		/* Map Type Function */
 	0,						/* Shape */
-	0,0,0,				/* Loc */
-	0,0,0,				/* Orient */
+    {0,0,0},				/* Loc */
+    {0,0,0},				/* Orient */
 	0,						/* Flags 1 */
 	0,						/* Flags 2 */
 	0,						/* Flags 3 */
@@ -371,12 +373,12 @@ MODULEMAPBLOCK AvpCompiledMaps[] = {
 	0,						/* MapMass */
 	0,0,0,				/* MapNewtonV */
 	#endif
-	0,0,0,				/* MapOrigin */
+    {0,0,0},				/* MapOrigin */
 	0,						/* MapSimShapes */
 	0,						/* MapViewType */
 	0,						/* MapMPtr */
 	0,						/* MapDPtr */
-	0,0,0,				/* MapMOffset */
+    {0,0,0},				/* MapMOffset */
 	}
 };
 
@@ -388,8 +390,8 @@ MODULE Empty_Module = {
 	"null",									/* char m_name[] */
 	0,											/* int m_index */
 	0,											/* int m_flags */
-	0,0,0,									/* VECTOR m_world */
-	"null",									/* MREF m_ext */
+    {0,0,0},									/* VECTOR m_world */
+    {"null"},									/* MREF m_ext */
 	0,											/* int m_ext_scale */
 	0,											/* int m_maxx */
 	0,											/* int m_minx */
@@ -399,27 +401,24 @@ MODULE Empty_Module = {
 	0,											/* int m_minz */
 	0,											/* MODULEMAPBLOCK *m_mapptr */
 	0,											/* struct displayblock *m_dptr */
-	"null",									/* MREF m_vptr */
+    {"null"},									/* MREF m_vptr */
 	0,											/* VMODULE *m_v_ptrs */
 	0,											/* struct module **m_link_ptrs */
 //	0,											/* VIEWPORT *m_viewports */
 	0,											/* MODULETABLEHEADER *m_table */
 	mfun_null,								/* MFUNCTION m_ifvisible */
 	mfun_null,								/* MFUNCTION m_ifvinside */
-	"null",									/* MREF m_funref */
+    {"null"},									/* MREF m_funref */
 	0,											/* Strategy block * */
 	0,											/* num lights*/
 	NULL,										/* pointer to light blocks*/
 	NULL,										/* pointer to extraitemdata */
 	
+    {0,0,0,
 	0,0,0,
-	0,0,0,
-	0,0,0,
+	0,0,0},
 	
-	#if SupportWindows95
 	0,
-	#endif
-
 };
 
 
@@ -437,8 +436,8 @@ MODULEMAPBLOCK Empty_Module_Map =
 
 	MapType_Default,                   /* MapType */
 	-1,                                /* MapShape */
-	0, 0, 0,                           /* MapWorld */
-	0, 0, 0,                           /* MapEuler */                                             /* Orient */
+    {0, 0, 0},                           /* MapWorld */
+    {0, 0, 0},                           /* MapEuler */                                             /* Orient */
 
 	0
 	| ObFlag_MultLSrc                       /* MapFlags */
@@ -461,13 +460,13 @@ MODULEMAPBLOCK Empty_Module_Map =
 	0,                                 /* Interior Type */
 
 	LightType_PerVertex,               /* MapLightType */
-	0,0,0,                             /* MapOrigin */
+    {0,0,0},                           /* MapOrigin */
 	0,                                 /* MapSimShapes */
 	0,                                 /* MapViewType */
 
 	0,                                 /* MapMPtr */
 	0,                                 /* MapDPtr */
-	0,0,0,                             /* MapMOffset */
+    {0,0,0},                           /* MapMOffset */
 
 };
 
@@ -488,8 +487,8 @@ MODULEMAPBLOCK TempModuleMap = \
 	MapType_Default,                   /* MapType */
 	-1,                                /* MapShape */
 
-	0, 0, 0,                           /* MapWorld */
-	0, 0, 0,                           /* MapEuler */                                             /* Orient */
+    {0, 0, 0},                         /* MapWorld */
+    {0, 0, 0},                         /* MapEuler */                                             /* Orient */
 
 	0																	/* flags 1*/
 	| ObFlag_NoInfLSrc
@@ -505,17 +504,14 @@ MODULEMAPBLOCK TempModuleMap = \
 	0,                                /* VDB Definition */
 	0,                                /* Interior Type */
 
-#if Saturn
-	LightType_PerObject,               /* MapLightType */
-#else
 	LightType_PerVertex,               /* MapLightType */
-#endif
-	0,0,0,                             /* MapOrigin */
+
+    {0,0,0},                           /* MapOrigin */
 	0,                                 /* MapSimShapes */
 	0,                                 /* MapViewType */
 	0,                                 /* MapMPtr */
 	0,                                 /* MapDPtr */
-	0,0,0                              /* MapMOffset */
+    {0,0,0}                            /* MapMOffset */
 
 };
 

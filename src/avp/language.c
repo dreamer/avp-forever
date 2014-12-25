@@ -11,10 +11,8 @@
 #include "language.h"
 #include "huffman.hpp"
 
-#if SupportWindows95
-	// DHM 12 Nov 97: hooks for C++ string handling code:
-	#include "strtab.hpp"
-#endif
+// DHM 12 Nov 97: hooks for C++ string handling code:
+#include "strtab.hpp"
 
 #define UseLocalAssert Yes
 #include "ourasert.h"
@@ -29,11 +27,12 @@
 
 static char EmptyString[]="";
 
-static char *TextStringPtr[MAX_NO_OF_TEXTSTRINGS]={&EmptyString,};
+static char *TextStringPtr[MAX_NO_OF_TEXTSTRINGS] = { EmptyString };
 static char *TextBufferPtr;
 
 void InitTextStrings(void)
 {
+	char *filename;
 	char *textPtr;
 	int i;
 
@@ -41,18 +40,28 @@ void InitTextStrings(void)
 	GLOBALASSERT(AvP.Language>=0);
 	GLOBALASSERT(AvP.Language<I_MAX_NO_OF_LANGUAGES);
 	
-	#if MARINE_DEMO
-	TextBufferPtr = LoadTextFile("menglish.txt");
-	#elif ALIEN_DEMO
-	TextBufferPtr = LoadTextFile("aenglish.txt");
-	#elif USE_LANGUAGE_TXT
-	TextBufferPtr = LoadTextFile("language.txt");
-	#else
-	TextBufferPtr = LoadTextFile(LanguageFilename[AvP.Language]);
-	#endif
+#if MARINE_DEMO
+	filename = "menglish.txt";
+#elif ALIEN_DEMO
+	filename = "aenglish.txt";
+#elif USE_LANGUAGE_TXT
+	filename = "language.txt";
+#else
+	filename = LanguageFilename[AvP.Language];
+#endif
+	TextBufferPtr = LoadTextFile(filename);
+		
+	if (TextBufferPtr == NULL) {
+		/* NOTE:
+		   if this load fails, then most likely the game is not 
+		   installed correctly. 
+		   SBF
+		  */ 
+		fprintf(stderr, "ERROR: unable to load %s language text file\n",
+			 filename);
+		exit(1);
+	}
 	
-	LOCALASSERT(TextBufferPtr);
-
 	if (!strncmp (TextBufferPtr, "REBCRIF1", 8))
 	{
 		textPtr = (char*)HuffmanDecompress((HuffmanPackage*)(TextBufferPtr)); 		
@@ -64,14 +73,13 @@ void InitTextStrings(void)
 		textPtr = TextBufferPtr;
 	}
 
-	#if SupportWindows95
-	AddToTable( &EmptyString );
-	#endif
+	AddToTable( EmptyString );
 
 	for (i=1; i<MAX_NO_OF_TEXTSTRINGS; i++)
 	{	
 		/* scan for a quote mark */
-		while (*textPtr++ != '"');
+		while (*textPtr++ != '"') 
+			if (*textPtr == '@') return; /* '@' should be EOF */
 
 		/* now pointing to a text string after quote mark*/
 		TextStringPtr[i] = textPtr;
@@ -84,19 +92,17 @@ void InitTextStrings(void)
 
 		/* change quote mark to zero terminator */
 		*textPtr = 0;
+		textPtr++;
 
-		#if SupportWindows95
 		AddToTable( TextStringPtr[i] );
-		#endif
 	}
 }
+
 void KillTextStrings(void)
 {
 	UnloadTextFile(LanguageFilename[AvP.Language],TextBufferPtr);
 
-	#if SupportWindows95
 	UnloadTable();
-	#endif
 }
 
 char *GetTextString(enum TEXTSTRING_ID stringID)

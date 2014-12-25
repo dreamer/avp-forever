@@ -1,3 +1,6 @@
+#ifndef __AVP_WIN95_FRONTEND_AVP_MENUGFX_HPP__
+#define __AVP_WIN95_FRONTEND_AVP_MENUGFX_HPP__
+
 /* KJL 12:27:18 26/06/98 - AvP_MenuGfx.hpp */
 
 enum AVPMENUGFX_ID
@@ -74,7 +77,8 @@ enum AVPMENUGFX_ID
 typedef struct
 {
 	char *FilenamePtr;
-	LPDIRECTDRAWSURFACE ImagePtr;
+	void *ImagePtr;
+
 	AW_BACKUPTEXTUREHANDLE hBackup;
 	int Width;
 	int Height;
@@ -93,7 +97,7 @@ extern void LoadAllAvPMenuGfx(void);
 extern void LoadAllSplashScreenGfx(void);
 extern void ReleaseAllAvPMenuGfx(void);
 
-extern int RenderMenuText(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format);
+extern int RenderMenuText(const char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format);
 
 extern int RenderSmallMenuText(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format);
 extern int RenderSmallMenuText_Coloured(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format, int red, int green, int blue); 
@@ -102,7 +106,11 @@ extern int Hardware_RenderSmallMenuText(char *textPtr, int x, int y, int alpha, 
 extern int Hardware_RenderSmallMenuText_Coloured(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format, int red, int green, int blue);
 
 extern int RenderMenuText_Clipped(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format, int topY, int bottomY);
-extern void RenderSmallFontString_Wrapped(char *textPtr,RECT* area,int alpha,int* output_x,int* output_y);
+extern void RenderSmallFontString_Wrapped(const char *textPtr,RECT* area,int alpha,int* output_x,int* output_y);
+extern void Hardware_RenderKeyConfigRectangle(int alpha);
+extern void RenderKeyConfigRectangle(int alpha);
+extern void Hardware_RenderHighlightRectangle(int x1,int y1,int x2,int y2,int r, int g, int b);
+extern void RenderHighlightRectangle(int x1,int y1,int x2,int y2, int r, int g, int b);
 
 
 extern void DrawAvPMenuGfx(enum AVPMENUGFX_ID menuGfxID, int topleftX, int topleftY, int alpha,enum AVPMENUFORMAT_ID format);
@@ -113,3 +121,6 @@ extern int HeightOfMenuGfx(enum AVPMENUGFX_ID menuGfxID);
 
 
 extern void ClearScreenToBlack(void);
+extern void InitialiseMenuGfx(void);
+
+#endif

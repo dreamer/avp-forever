@@ -27,6 +27,7 @@ void FirePredPistolFlechettes(VECTORCH *base_position,VECTORCH *base_offset,MATR
 extern void FrisbeeEnergyBoltBehaviour(STRATEGYBLOCK *sbPtr);
 
 extern int SBIsEnvironment(STRATEGYBLOCK *sbPtr);
+int ValidTargetForProxMine(STRATEGYBLOCK *obstaclePtr);
 
 typedef struct OneShotBehaviourType
 {
@@ -132,18 +133,14 @@ typedef struct SpearBehaviourType
 
 #define FRAG_LIFETIME 65536
 
-#if SupportWindows95
-  #define NO_OF_FRAGS_IN_CLUSTER_BOMB 6
-#else
-  #define NO_OF_FRAGS_IN_CLUSTER_BOMB 4
-#endif
-   
+#define NO_OF_FRAGS_IN_CLUSTER_BOMB 6   
 
 #define PROX_GRENADE_TRIGGER_TIME (ONE_FIXED/4)
 #define PROX_GRENADE_RANGE (4000)
 #define PROX_GRENADE_SOUND_GENERATION_TIME 65536
 #define PROX_GRENADE_LIFETIME (20)
 
+STRATEGYBLOCK* CreateGrenadeKernel(AVP_BEHAVIOUR_TYPE behaviourID, VECTORCH *position, MATRIXCH *orient,int fromplayer);
 
 
 /* KJL 17:46:30 02/24/97 - below is some old stuff I'll leave for reference */

@@ -17,8 +17,6 @@ extern "C" {
 #include "stratdef.h"
 #include "gamedef.h"
 #include "bh_types.h"
-#include "d3dmacs.h"
-//#include "string.h"
 
 #include "hudgfx.h"
 #include "huddefs.h"
@@ -27,10 +25,12 @@ extern "C" {
 #include "chnktexi.h"
 
 
-#include "HUD_layout.h"
+#include "hud_layout.h"
 #include "language.h"
 
 
+extern void D3D_RenderHUDString_Centred(char *stringPtr, int centreX, int y, int colour);
+extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colour);
 
 extern "C++" 									  
 {
@@ -38,9 +38,6 @@ extern "C++"
 #include "pcmenus.h"
 //#include "projload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
 #include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
-extern void D3D_RenderHUDString_Centred(char *stringPtr, int centreX, int y, int colour);
-extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colour);
-
 };
 
 #include "d3d_hud.h"
@@ -64,8 +61,6 @@ extern void D3D_RenderHUDNumber_Centred(unsigned int number,int x,int y,int colo
 ( \
 		RGBA_MAKE(rr,gg,bb,aa) \
 )
-#include "kshape.h"
-
 
 
 void D3D_DrawHUDFontCharacter(HUDCharDesc *charDescPtr);
@@ -75,7 +70,6 @@ extern void YClipMotionTrackerVertices(struct VertexTag *v1, struct VertexTag *v
 extern void XClipMotionTrackerVertices(struct VertexTag *v1, struct VertexTag *v2);
 /* HUD globals */
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-extern int sine[],cosine[];
 
 extern enum HUD_RES_ID HUDResolution;
 
@@ -197,8 +191,6 @@ void D3D_InitialiseMarineHUD(void)
 {
 	//SelectGenTexDirectory(ITI_TEXTURE);
 
-	extern unsigned char *ScreenBuffer;
-
 	/* set game mode: different though for multiplayer game */
 	if(AvP.Network==I_No_Network)
 		cl_pszGameMode = "marine";
@@ -297,8 +289,13 @@ void LoadCommonTextures(void)
 		extern char LevelName[];
 		if (!strcmp(LevelName,"invasion_a"))
 		{
+#if !ALIEN_DEMO
 		   	ChromeImageNumber = CL_LoadImageOnce("Envrnmts\\Invasion\\water2.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
 			WaterShaftImageNumber = CL_LoadImageOnce("Envrnmts\\Invasion\\water-shaft.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
+#else /* alien demo has these in common */
+		   	ChromeImageNumber = CL_LoadImageOnce("Common\\water2.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
+			WaterShaftImageNumber = CL_LoadImageOnce("Common\\water-shaft.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE|LIO_TRANSPARENT);
+#endif			
 		}
 		else if (!strcmp(LevelName,"genshd1"))
 		{
@@ -328,7 +325,6 @@ void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 
 	struct VertexTag quadVertices[4];
 	int widthCos,widthSin;
-	extern int CloakingPhase;
 
 	BlueBar.TopLeftY = ScreenDescriptorBlock.SDB_Height-MUL_FIXED(MotionTrackerScale,40);
 	MotionTrackerCentreY = BlueBar.TopLeftY;
@@ -444,7 +440,6 @@ void D3D_BLTMotionTrackerToHUD(int scanLineSize)
 void D3D_BLTMotionTrackerBlipToHUD(int x, int y, int brightness)
 {
 	HUDImageDesc imageDesc;
-	int screenX,screenY; /* in 16.16 */
 	int frame;
 	int motionTrackerScaledHalfWidth = MUL_FIXED(MotionTrackerScale*3,MotionTrackerHalfWidth/2);
     
@@ -698,21 +693,8 @@ void D3D_BLTGunSightToHUD(int screenX, int screenY, enum GUNSIGHT_SHAPE gunsight
 	Draw_HUDImage(&imageDesc);
 }
 
-void LoadBackdropImage(void)
-{
-#if 1
-	extern int BackdropImage;
-	extern char LevelName[];
-	if (!strcmp(LevelName,"pred03"))
-	  	BackdropImage = CL_LoadImageOnce("Envrnmts\\Pred03\\backdrop.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
-#endif
-}
-
-
 void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 {
-	HUDCharDesc charDesc;
-	int i=MAX_NO_OF_COMMON_HUD_DIGITS;
 	unsigned int healthColour;
 	unsigned int armourColour;
 
@@ -858,8 +840,6 @@ void Render_HealthAndArmour(unsigned int health, unsigned int armour)
 } 
 void Render_MarineAmmo(enum TEXTSTRING_ID ammoText, enum TEXTSTRING_ID magazinesText, unsigned int magazines, enum TEXTSTRING_ID roundsText, unsigned int rounds, int primaryAmmo)
 {
-	HUDCharDesc charDesc;
-	int i=MAX_NO_OF_COMMON_HUD_DIGITS;
 	int xCentre = MUL_FIXED(HUDLayout_RightmostTextCentre,HUDScaleFactor)+ScreenDescriptorBlock.SDB_Width;
 	if(!primaryAmmo) xCentre+=MUL_FIXED(HUDScaleFactor,HUDLayout_RightmostTextCentre*2);
 

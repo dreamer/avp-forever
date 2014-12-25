@@ -67,6 +67,7 @@ enum HUD_RES_ID
 struct DDGraphicTag 
 {
 	LPDIRECTDRAWSURFACE    LPDDS;
+
 	AW_BACKUPTEXTUREHANDLE hBackup; // JH 12/2/98 changed for new gfx loading system
     RECT				   SrcRect;
 };
@@ -117,7 +118,7 @@ extern void RestoreAllDDGraphics(void);
 /*KJL****************************************************************************************
 * 										 E X T E R N S 	  									*
 ****************************************************************************************KJL*/
-extern LPDIRECTDRAW lpDD;
-extern LPDIRECTDRAWSURFACE lpDDSBack;
+//extern LPDIRECTDRAW lpDD;
+//extern LPDIRECTDRAWSURFACE lpDDSBack;
 
 #endif

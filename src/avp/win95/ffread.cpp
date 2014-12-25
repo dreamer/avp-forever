@@ -1,6 +1,12 @@
-#include <string.h>
-#include <malloc.h>
+#ifdef WIN32
 #include <windows.h>
+#else
+#include <errno.h>
+#endif
+
+#include <string.h>
+#include <stdlib.h>
+#include <ctype.h>
 #include <stdio.h>
 
 #include "ffread.hpp"
@@ -27,6 +33,7 @@ void ReportError(char const * mesg1, char const * mesg2)
 	}
 	else
 	{
+#ifdef WIN32
 		char * lpMsgBuf;
 
 		err = GetLastError();
@@ -49,6 +56,15 @@ void ReportError(char const * mesg1, char const * mesg2)
 		
 		// Free the buffer.
 		LocalFree( lpMsgBuf );
+#else
+		mesg2 = strerror(errno);
+		
+		mesg = new char [strlen(mesg1)+32+strlen(mesg2)+1];
+		strcpy(mesg, mesg1);
+		strcat(mesg, "\n\nReportError: ");
+		strcat(mesg, mesg2);
+		strcat(mesg, "\n");
+#endif
 	}
 	
 	// Display the string.
@@ -63,7 +79,7 @@ void ReportError(char const * mesg1, char const * mesg2)
 /***************/
 
 #define READ_FILE(fname,post_proc,on_return,h,data,n_bytes,n_bytes_read,p5) \
-	if (!ReadFile(h,data,n_bytes,&n_bytes_read,p5)) \
+	if ((n_bytes_read = fread(data, 1, n_bytes, h)) == 0) \
 	{ \
 		ReportError(fname); \
 		post_proc; \
@@ -98,7 +114,7 @@ FFDataI::FFDataI(char const *_filename, void *_data, size_t _length)
 
 FFDataI::FFDataI(FFDataI const & ffd, ptrdiff_t offset)
 : filename(0)
-, data((void *)((size_t)ffd.data + offset))
+, data((void *)((intptr_t)ffd.data + offset))
 , length(ffd.length)
 {
 	if (ffd.filename)
@@ -173,9 +189,9 @@ FFHeaderI::FFHeaderI(char const *_filename,BOOL _should_be_kept)
 {
 	if (_filename)
 	{
-		filename = new char [strlen(_filename)+1];
+		filename = new char [strlen(_filename) + 1];
 		strcpy(filename,_filename);
-		
+				
 		Read();
 	}
 }
@@ -196,7 +212,7 @@ FFHeaderI::FFHeaderI(FFHeaderI const & ffh)
 		data = malloc(length);
 		memcpy(data,ffh.data,length);
 	}
-	ptrdiff_t offset = (size_t)data - (size_t)ffh.data;
+	ptrdiff_t offset = (intptr_t)data - (intptr_t)ffh.data;
 	for (int i=0; i<FFHI_HASHTABLESIZE; ++i)
 	{
 		for (CLIF<FFDataI> i_file(&ffh.files[i]); !i_file.done(); i_file.next())
@@ -227,7 +243,7 @@ FFHeaderI & FFHeaderI::operator = (FFHeaderI const & ffh)
 			data = malloc(length);
 			memcpy(data,ffh.data,length);
 		}
-		ptrdiff_t offset = (size_t)data - (size_t)ffh.data;
+		ptrdiff_t offset = (intptr_t)data - (intptr_t)ffh.data;
 		for (int i=0; i<FFHI_HASHTABLESIZE; ++i)
 		{
 			for (CLIF<FFDataI> i_file(&ffh.files[i]); !i_file.done(); i_file.next())
@@ -272,11 +288,11 @@ FFError FFHeaderI::Read(char const *_filename)
 		strcpy(filename,_filename);
 	}
 	
-	HANDLE h = CreateFile (filename, GENERIC_READ, FILE_SHARE_READ, 0, OPEN_EXISTING, 0, 0);
+	FILE *h = OpenGameFile(filename, FILEMODE_READONLY, FILETYPE_PERM);
 	
-	if (INVALID_HANDLE_VALUE==h)
+	if (h == NULL)
 	{
-		ReportError(_filename);
+		ReportError(filename);
 		return FF_COULDNOTOPENFILE;
 	}
 	
@@ -284,55 +300,58 @@ FFError FFHeaderI::Read(char const *_filename)
 	Clear();
 	
 	char magic[4];
-	unsigned long rffl_version;
-	size_t num_files;
-	size_t total_headsize;
+	uint32_t rffl_version;
+	uint32_t num_files;
+	uint32_t total_headsize;
+	uint32_t data_length;
 	
 	DWORD bytes_read;
 	
-	READ_FILE(filename,(void)0,CloseHandle(h),h,magic,4,bytes_read,0)
-	READ_FILE(filename,(void)0,CloseHandle(h),h,&rffl_version,4,bytes_read,0)
-	READ_FILE(filename,(void)0,CloseHandle(h),h,&num_files,4,bytes_read,0)
-	READ_FILE(filename,(void)0,CloseHandle(h),h,&total_headsize,4,bytes_read,0)
-	READ_FILE(filename,(void)0,CloseHandle(h),h,&length,4,bytes_read,0)
-	
+	READ_FILE(filename,(void)0,fclose(h),h,magic,4,bytes_read,0)
+	READ_FILE(filename,(void)0,fclose(h),h,&rffl_version,4,bytes_read,0)
+	READ_FILE(filename,(void)0,fclose(h),h,&num_files,4,bytes_read,0)
+	READ_FILE(filename,(void)0,fclose(h),h,&total_headsize,4,bytes_read,0)
+	READ_FILE(filename,(void)0,fclose(h),h,&data_length,4,bytes_read,0)
+
+	length = data_length;
+		
 	if (strncmp(magic,"RFFL",4))
 	{
 		ReportError(filename,"Incorrect file type");
-		CloseHandle(h);
+		fclose(h);
 		return FF_COULDNOTREADFILE;
 	}
 	if (rffl_version>0)
 	{
 		ReportError(filename,"Version not supported");
-		CloseHandle(h);
+		fclose(h);
 		return FF_COULDNOTREADFILE;
 	}
 	
 	void * header = malloc(total_headsize);
 	
-	READ_FILE(filename,(void)0,CloseHandle(h),h,header,total_headsize,bytes_read,0)
+	READ_FILE(filename,(void)0,fclose(h),h,header,total_headsize,bytes_read,0)
 	
 	data = malloc(length);
 	
-	READ_FILE(filename,(void)0,CloseHandle(h),h,data,length,bytes_read,0)
+	READ_FILE(filename,(void)0,fclose(h),h,data,length,bytes_read,0)
 	
-	CloseHandle(h);
+	fclose(h);
 	
 	// now parse the header
 	
 	void * headerP = header;
 	
-	for (int i=0; i<num_files; ++i)
+	for (unsigned int i=0; i<num_files; ++i)
 	{
-		char const * fnameP = (char *)((size_t)headerP + 8);
-		size_t leng = *(size_t *)((size_t)headerP + 4);
-		void * dataP = (void *)((size_t)data + *(size_t *)headerP);
+		char const * fnameP = (char *)((intptr_t)headerP + 8);
+		uint32_t leng = *(uint32_t *)((intptr_t)headerP + 4);
+		void * dataP = (void *)((intptr_t)data + *(uint32_t *)headerP);
 		
 		files[HashFunction(fnameP)].add_entry(FFDataI(fnameP,dataP,leng));
 		
 		// increment pointer
-		headerP = (void *)((size_t)headerP + 8 + strlen(fnameP) +4&~3);
+		headerP = (void *)(((intptr_t)headerP + 8 + strlen(fnameP) +4)&~3);
 	}
 	
 	free(header);

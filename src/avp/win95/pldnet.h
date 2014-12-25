@@ -167,6 +167,7 @@ typedef enum netgame_connectiontype
 typedef struct netgame_playerdata
 {
 	DPID playerId;
+	
 	char name[NET_PLAYERNAMELENGTH];
 	NETGAME_CHARACTERTYPE characterType;
 	NETGAME_SPECIALISTCHARACTERTYPE characterSubType;
@@ -301,22 +302,27 @@ typedef struct netgame_gamedata
 
 /* ---------------------------------------------------------------------
   Individual message structures
-  ----------------------------------------------------------------------*/
-#pragma pack(push,1)
+   ----------------------------------------------------------------------*/
 
+PACKED_PUSH
 typedef struct netmessageheader
 {
 	unsigned char type;
-}NETMESSAGEHEADER;
+} PACKED NETMESSAGEHEADER;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct gamedescription_playerdata
 {
 	DPID playerId;
+	
 	unsigned char characterType:2;
 	unsigned char characterSubType:6;
 	unsigned char startFlag;
-}GAMEDESCRIPTION_PLAYERDATA;
+} PACKED GAMEDESCRIPTION_PLAYERDATA;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_gamedescription
 {
 	GAMEDESCRIPTION_PLAYERDATA players[NET_MAXPLAYERS];	
@@ -383,15 +389,19 @@ typedef struct netmessage_gamedescription
 	unsigned int pistolInfiniteAmmo:1;
 	unsigned int specialistPistols:1;
 
-}NETMESSAGE_GAMEDESCRIPTION;
+} PACKED NETMESSAGE_GAMEDESCRIPTION;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_playerdescription
 {
 	unsigned char characterType: 3;
 	unsigned char characterSubType: 4;
 	unsigned char startFlag: 1;	
-}NETMESSAGE_PLAYERDESCRIPTION;
+} PACKED NETMESSAGE_PLAYERDESCRIPTION;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_playerstate
 {
 	unsigned char characterType :2; //send character type each frame (in case it changes)
@@ -432,8 +442,10 @@ typedef struct netmessage_playerstate
 #endif
 	unsigned int landingNoise:1;
 
-}NETMESSAGE_PLAYERSTATE;
+} PACKED NETMESSAGE_PLAYERSTATE;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_playerstate_minimal
 {
 	unsigned short Elevation : 12;
@@ -447,8 +459,10 @@ typedef struct netmessage_playerstate_minimal
 	unsigned char Special:1;
 
 	unsigned char CloakingEffectiveness;
-}NETMESSAGE_PLAYERSTATE_MINIMAL;
+} PACKED NETMESSAGE_PLAYERSTATE_MINIMAL;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_playerstate_medium
 {
 	NETMESSAGE_PLAYERSTATE_MINIMAL minimalMessage;
@@ -457,28 +471,37 @@ typedef struct netmessage_playerstate_medium
 	signed int yOrient: 9;
 	signed int zOrient: 9;
 
-}NETMESSAGE_PLAYERSTATE_MEDIUM;
+} PACKED NETMESSAGE_PLAYERSTATE_MEDIUM;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_frametimer
 {
 	unsigned short frame_time;
-}NETMESSAGE_FRAMETIMER;
+} PACKED NETMESSAGE_FRAMETIMER;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_playerkilled
 {
 	int objectId;
 	DPID killerId;
+	
 	NETGAME_CHARACTERTYPE myType;  //take character types at time of death , in case they change
 	NETGAME_CHARACTERTYPE killerType;
 	char weaponIcon;
-}NETMESSAGE_PLAYERKILLED;
+} PACKED NETMESSAGE_PLAYERKILLED;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_corpsedeathanim
 {
 	int objectId;
 	int deathId;
-}NETMESSAGE_CORPSEDEATHANIM;
+} PACKED NETMESSAGE_CORPSEDEATHANIM;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_allgamescores
 {
 	int playerFrags[NET_MAXPLAYERS][NET_MAXPLAYERS];
@@ -487,13 +510,17 @@ typedef struct netmessage_allgamescores
 	int aliensKilled[NET_MAXPLAYERS][3];
 	int deathsFromAI[NET_MAXPLAYERS];
 	
-}NETMESSAGE_ALLGAMESCORES;
+} PACKED NETMESSAGE_ALLGAMESCORES;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_speciesscores
 {
 	int teamScores[3];
-}NETMESSAGE_SPECIESSCORES;
+} PACKED NETMESSAGE_SPECIESSCORES;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_playerscores
 {
 	unsigned char playerId;
@@ -502,8 +529,10 @@ typedef struct netmessage_playerscores
 	int playerScoreAgainst;
 	int aliensKilled[3];
 	int deathsFromAI;
-}NETMESSAGE_PLAYERSCORES;
+} PACKED NETMESSAGE_PLAYERSCORES;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_scorechange
 {
 	unsigned char killerIndex;
@@ -511,8 +540,10 @@ typedef struct netmessage_scorechange
 	int fragCount;
 	int killerScoreFor;
 	int victimScoreAgainst;
-}NETMESSAGE_SCORECHANGE;
+} PACKED NETMESSAGE_SCORECHANGE;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_localRicochet
 {
 	signed int xPos;
@@ -522,8 +553,10 @@ typedef struct netmessage_localRicochet
 	signed int yDirn;
 	signed int zDirn;
 	unsigned char type;			
-}NETMESSAGE_LOCALRICOCHET;
+} PACKED NETMESSAGE_LOCALRICOCHET;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_lobstate
 {
 	signed int xPos: 23;
@@ -537,14 +570,17 @@ typedef struct netmessage_lobstate
 	unsigned char IOType;
 	unsigned char subtype;
 	unsigned char event_flag;
-}NETMESSAGE_LOBSTATE;
+} PACKED NETMESSAGE_LOBSTATE;
+PACKED_POP
 
 
 //damage message is now split into multiple parts , to avoid sending
 //stuff that isn't required
+PACKED_PUSH
 typedef struct netmessage_lobdamaged_header
 {
 	DPID playerId;
+	
 	signed int objectId;
 	short ammo_id:11;
 	
@@ -553,8 +589,10 @@ typedef struct netmessage_lobdamaged_header
 	short sectionID:1; 
 	short delta_seq:1; 
 	short direction:1; 
-}NETMESSAGE_LOBDAMAGED_HEADER;
+} PACKED NETMESSAGE_LOBDAMAGED_HEADER;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_ghosthierarchydamaged_header
 {
 	signed int Guid;
@@ -564,8 +602,10 @@ typedef struct netmessage_ghosthierarchydamaged_header
 	short multiple:1; 
 	short sectionID:1; 
 	short direction:1; 
-}NETMESSAGE_GHOSTHIERARCHYDAMAGED_HEADER;
+} PACKED NETMESSAGE_GHOSTHIERARCHYDAMAGED_HEADER;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_inanimatedamaged_header
 {
 	char name[8];
@@ -573,8 +613,10 @@ typedef struct netmessage_inanimatedamaged_header
 	
 	short damageProfile:1; 
 	short multiple:1; 
-}NETMESSAGE_INANIMATEDAMAGED_HEADER;
+} PACKED NETMESSAGE_INANIMATEDAMAGED_HEADER;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_damage_profile
 {
 	short Impact;		 /* nb I have copied these, as I don't think*/
@@ -591,49 +633,65 @@ typedef struct netmessage_damage_profile
 	unsigned int BlowUpSections	:1;
 	unsigned int Special		:1;
 	unsigned int MakeExitWounds	:1;
-}NETMESSAGE_DAMAGE_PROFILE;
+} PACKED NETMESSAGE_DAMAGE_PROFILE;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_damage_multiple
 {
 	int multiple;
-}NETMESSAGE_DAMAGE_MULTIPLE;
+} PACKED NETMESSAGE_DAMAGE_MULTIPLE;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_damage_section
 {
 	short SectionID;
-}NETMESSAGE_DAMAGE_SECTION;
+} PACKED NETMESSAGE_DAMAGE_SECTION;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_damage_delta
 {
 	char Delta_Sequence;
 	char Delta_Sub_Sequence;
-}NETMESSAGE_DAMAGE_DELTA;
+} PACKED NETMESSAGE_DAMAGE_DELTA;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_damage_direction
 {
 	int direction_x:10;
 	int direction_y:10;
 	int direction_z:10;
-}NETMESSAGE_DAMAGE_DIRECTION;
+} PACKED NETMESSAGE_DAMAGE_DIRECTION;
+PACKED_POP
 //that was the last part of the local object damage stuff
 
-
+PACKED_PUSH
 typedef struct netmessage_lobdestroyed_request
 {
 	DPID playerId;
+	
 	signed int objectId;
-}NETMESSAGE_LOBDESTROYED_REQUEST;
+} PACKED NETMESSAGE_LOBDESTROYED_REQUEST;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_lobdestroyed
 {
 	signed int objectId;
-}NETMESSAGE_LOBDESTROYED;
+} PACKED NETMESSAGE_LOBDESTROYED;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_objectpickedup
 {
 	char name[8];
-}NETMESSAGE_OBJECTPICKEDUP;
+} PACKED NETMESSAGE_OBJECTPICKEDUP;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_inanimatedamaged
 {
 	char name[8];
@@ -656,29 +714,39 @@ typedef struct netmessage_inanimatedamaged
 
 	int multiple;				
 
-}NETMESSAGE_INANIMATEDAMAGED;
+} PACKED NETMESSAGE_INANIMATEDAMAGED;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_inanimatedestroyed
 {
 	char name[8];
-}NETMESSAGE_INANIMATEDESTROYED;
+} PACKED NETMESSAGE_INANIMATEDESTROYED;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_losrequestbinaryswitch
 {
 	char name[8];
-}NETMESSAGE_LOSREQUESTBINARYSWITCH;
+} PACKED NETMESSAGE_LOSREQUESTBINARYSWITCH;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_platformliftstate
 {
 	char name[8];
 	char state;
-}NETMESSAGE_PLATFORMLIFTSTATE;
+} PACKED NETMESSAGE_PLATFORMLIFTSTATE;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_requestplatformliftactivate
 {
 	char name[8];
-}NETMESSAGE_REQUESTPLATFORMLIFTACTIVATE;
+} PACKED NETMESSAGE_REQUESTPLATFORMLIFTACTIVATE;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_agunstate
 {
 	signed int xPos: 23;
@@ -690,40 +758,50 @@ typedef struct netmessage_agunstate
 	signed int objectId;
 	unsigned char IAmFiring: 1;
 	unsigned char IAmEnabled: 1;
-}NETMESSAGE_AGUNSTATE;
+} PACKED NETMESSAGE_AGUNSTATE;
+PACKED_POP
 
 /* KJL 17:45:21 20/01/98 - make decal message */
 /* currently not optimised for space! */
 #include "decal.h"
+PACKED_PUSH
 typedef struct netmessage_makedecal
 {
 	enum DECAL_ID DecalID;
 	VECTORCH Position;
 	VECTORCH Direction;
 	int ModuleIndex;
-}NETMESSAGE_MAKEDECAL;
+} PACKED NETMESSAGE_MAKEDECAL;
+PACKED_POP
 
 /* KJL 11:32:52 27/04/98 - explosions */
+PACKED_PUSH
 typedef struct netmessage_makeexplosion
 {
 	enum EXPLOSION_ID ExplosionID;
 	VECTORCH Position;
-}NETMESSAGE_MAKEEXPLOSION;
+} PACKED NETMESSAGE_MAKEEXPLOSION;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_makeflechetteexplosion
 {
 	VECTORCH Position;
 	int Seed;
-}NETMESSAGE_MAKEFLECHETTEEXPLOSION;
+} PACKED NETMESSAGE_MAKEFLECHETTEEXPLOSION;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_makeplasmaexplosion
 {
 	enum EXPLOSION_ID ExplosionID;
 	VECTORCH Position;
 	VECTORCH FromPosition;
-}NETMESSAGE_MAKEPLASMAEXPLOSION;
+} PACKED NETMESSAGE_MAKEPLASMAEXPLOSION;
+PACKED_POP
 
 /* KJL 11:13:59 20/05/98 - pred laser sights */
+PACKED_PUSH
 typedef struct netmessage_predatorsights
 {
 //	THREE_LASER_DOT_DESC Dots;
@@ -739,16 +817,19 @@ typedef struct netmessage_predatorsights
 	DPID TargetID;
 
 	// 16 bytes (DPID 4 bytes?)
+} PACKED NETMESSAGE_PREDATORSIGHTS;
+PACKED_POP
 
-} NETMESSAGE_PREDATORSIGHTS;
-
+PACKED_PUSH
 typedef struct netmessage_lobonfire
 {
 	DPID playerId;
+	
 	signed int objectId;
+} PACKED NETMESSAGE_LOBONFIRE;
+PACKED_POP
 
-}NETMESSAGE_LOBONFIRE;
-
+PACKED_PUSH
 typedef struct netmessage_alienaistate
 {
 	signed int Guid;
@@ -777,8 +858,10 @@ typedef struct netmessage_alienaistate
 	unsigned short standard_gravity:1;
 	#endif
 
-}NETMESSAGE_ALIENAISTATE;
+} PACKED NETMESSAGE_ALIENAISTATE;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_aliensequencechange
 {
 	signed int Guid;
@@ -788,8 +871,10 @@ typedef struct netmessage_aliensequencechange
 	short sequence_length; //in 256ths of a second
 	short tweening_time;
 
-}NETMESSAGE_ALIENSEQUENCECHANGE;
+} PACKED NETMESSAGE_ALIENSEQUENCECHANGE;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_alienaikilled
 {
 	signed int Guid;
@@ -799,12 +884,15 @@ typedef struct netmessage_alienaikilled
 	int GibbFactor;
 
 	DPID killerId;
+	
 	int killCount;
 	unsigned char AlienType: 2;//alien/predalien/praetorian
 
 	char weaponIcon;
-}NETMESSAGE_ALIENAIKILLED;
+} PACKED NETMESSAGE_ALIENAIKILLED;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_faralienposition
 {
 	signed int Guid;
@@ -814,17 +902,19 @@ typedef struct netmessage_faralienposition
 	unsigned int indexIsModuleIndex:1;
 	unsigned int alienType:2;
 
-	
+} PACKED NETMESSAGE_FARALIENPOSITION;
+PACKED_POP
 
-}NETMESSAGE_FARALIENPOSITION;
-
+PACKED_PUSH
 typedef struct netmessage_gibbing
 {
 	signed int Guid;
 	int gibbFactor;
 	int seed;
-}NETMESSAGE_GIBBING;
+} PACKED NETMESSAGE_GIBBING;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_spotaliensound
 {
 	unsigned char soundCategory:6;
@@ -834,58 +924,74 @@ typedef struct netmessage_spotaliensound
 	int vy;
 	int vz;
 
-} NETMESSAGE_SPOTALIENSOUND;
+} PACKED NETMESSAGE_SPOTALIENSOUND;
+PACKED_POP
 
-
+PACKED_PUSH
 typedef struct netmessage_createweapon
 {
 	char name[8];
 	VECTORCH location;
 	int type;
 
-}NETMESSAGE_CREATEWEAPON;
+} PACKED NETMESSAGE_CREATEWEAPON;
+PACKED_POP
 
 #define NUMBER_OF_FRAGMENTAL_OBJECTS (64>>3)
+PACKED_PUSH
 typedef struct netmessage_fragmentalobjectsstatus
 {
 	unsigned char BatchNumber; //send object states over several frames
 	unsigned char StatusBitfield[NUMBER_OF_FRAGMENTAL_OBJECTS];
 
-}NETMESSAGE_FRAGMENTALOBJECTSSTATUS;
+} PACKED NETMESSAGE_FRAGMENTALOBJECTSSTATUS;
+PACKED_POP
 
 #define NUMBER_OF_STRATEGIES_TO_SYNCH 16
+PACKED_PUSH
 typedef struct netmessage_strategysynch
 {
 	unsigned char BatchNumber; //send object states over several frames
 	int strategyCheckSum;
 	unsigned char StatusBitfield[NUMBER_OF_STRATEGIES_TO_SYNCH>>2]; //2bits per strategy
 
-}NETMESSAGE_STRATEGYSYNCH;
+} PACKED NETMESSAGE_STRATEGYSYNCH;
+PACKED_POP
 
 
 //for messages that just require a player id
+PACKED_PUSH
 typedef struct netmessage_playerid
 {
-	DPID playerID; 
-}NETMESSAGE_PLAYERID;
+	DPID playerID; 	
+} PACKED NETMESSAGE_PLAYERID;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_lms_restart
 {
 	DPID playerID; 
+	
 	int seed;
-}NETMESSAGE_LMS_RESTART;
+} PACKED NETMESSAGE_LMS_RESTART;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_restartgame
 {
 	int seed;
-}NETMESSAGE_RESTARTGAME;
+} PACKED NETMESSAGE_RESTARTGAME;
+PACKED_POP
 
 //countdown to restart
+PACKED_PUSH
 typedef struct netmessage_lms_restarttimer
 {
 	unsigned char timer;
-}NETMESSAGE_LMS_RESTARTTIMER;
+} PACKED NETMESSAGE_LMS_RESTARTTIMER;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct netmessage_spotothersound
 {
 	enum soundindex SoundIndex;
@@ -894,15 +1000,16 @@ typedef struct netmessage_spotothersound
 	int vz;
 	int explosion:1;
 
-} NETMESSAGE_SPOTOTHERSOUND;
+} PACKED NETMESSAGE_SPOTOTHERSOUND;
+PACKED_POP
 
+PACKED_PUSH
 typedef struct multiplayer_start
 {
 	VECTORCH location;
 	EULER orientation;
-}MULTIPLAYER_START;
-
-#pragma pack(pop)
+} PACKED MULTIPLAYER_START;
+PACKED_POP
 
 
 /* ---------------------------------------------------------------------
@@ -968,7 +1075,7 @@ extern void AddNetMsg_LocalObjectDestroyed_Request(STRATEGYBLOCK *sbPtr);
 extern void AddNetMsg_ScoreChange(int killerIndex,int victimIndex);
 
 extern void AddNetMsg_PlayerID(DPID playerID,unsigned char message);
-extern void AddNetMsg_LastManStanding_RestartTimer(unsigned char time);
+extern void AddNetMsg_LastManStanding_RestartTimer(char time);
 extern void AddNetMsg_LastManStanding_Restart(DPID alienID,int seed);
 
 extern void AddNetMsg_CreateWeapon(char* objectName,int type,VECTORCH* location);
@@ -996,6 +1103,11 @@ extern void DoMultiplayerSpecificHud();
 extern void GetNextMultiplayerObservedPlayer();
 extern void TurnOffMultiplayerObserveMode();
 extern void CheckStateOfObservedPlayer();
+void MinimalNetCollectMessages(void);
+void InitAVPNetGameForHost(int species, int gamestyle, int level);
+void InitAVPNetGameForJoin(void);
+void CreatePlayersImageInMirror(void);
+void RenderPlayersImageInMirror(void);
 
 
 /* ---------------------------------------------------------------------
@@ -1019,5 +1131,6 @@ extern int LobbiedGame;
 
 #ifdef __cplusplus
 }
+
 #endif
 #endif

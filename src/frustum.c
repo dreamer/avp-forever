@@ -14,7 +14,7 @@
 
 #include "kshape.h"
 #include "kzsort.h"
-#include "frustrum.h"
+#include "frustum.h"
 
 #include "particle.h"
 
@@ -1271,5 +1271,3 @@ int TriangleWithinFrustrum(void)
 	/* yes, we need to draw poly */
 	return 1;
 }
-
-  

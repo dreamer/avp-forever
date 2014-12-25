@@ -292,6 +292,10 @@ TeletypeDaemon :: TeletypeDaemon
 {
 	GLOBALASSERT( pTeletypeGadg );
 
+	#if SupportTeletypeSound
+	SoundHandle = SOUND_NOACTIVEINDEX;
+	#endif
+	
 	pTeletypeGadg_Val = pTeletypeGadg;
 
 	fFinished_Val = No;

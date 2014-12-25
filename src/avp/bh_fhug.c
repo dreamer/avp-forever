@@ -7,6 +7,7 @@
 #include "module.h"
 #include "stratdef.h"
 #include "gamedef.h"
+#include "game_statistics.h"
 #include "dynblock.h"
 #include "dynamics.h"
 #include "comp_shp.h"
@@ -23,7 +24,7 @@
 
 #define UseLocalAssert Yes
 #include "ourasert.h"
-#include "ShowCmds.h"
+#include "showcmds.h"
 #include "sfx.h"
 
 #define HUGGER_STATE_PRINT	0
@@ -32,7 +33,6 @@
 extern int ModuleArraySize;
 extern char *ModuleCurrVisArray;
 extern int NormalFrameTime;
-extern int cosine[], sine[];
 
 extern ACTIVESOUNDSAMPLE ActiveSounds[];
 
@@ -52,7 +52,9 @@ static int HuggerShouldAttackPlayer(void);
 static void SetHuggerAnimationSequence(STRATEGYBLOCK *sbPtr, HUGGER_SUBSEQUENCES seq, int length);
 static void KillFaceHugger(STRATEGYBLOCK *sbPtr,DAMAGE_PROFILE *damage);
 
+#if 0
 static int InContactWithPlayer(DYNAMICSBLOCK *dynPtr);
+#endif
 static void JumpAtPlayer(STRATEGYBLOCK *sbPtr);
 
 extern SECTION *GetHierarchyFromLibrary(const char *rif_name);
@@ -776,8 +778,6 @@ void PlotFaceHugger(STRATEGYBLOCK *sbPtr) {
 
 static void Execute_FHNS_Attack(STRATEGYBLOCK *sbPtr)
 {
-	extern VIEWDESCRIPTORBLOCK *ActiveVDBList[];
-
 	DYNAMICSBLOCK *dynPtr;
 	FACEHUGGER_STATUS_BLOCK *facehuggerStatusPointer;    
 	
@@ -933,6 +933,7 @@ static int HuggerShouldAttackPlayer(void)
 	return 1;
 }
 
+#if 0
 static int InContactWithPlayer(DYNAMICSBLOCK *dynPtr)
 {
 	struct collisionreport *nextReport;
@@ -949,6 +950,7 @@ static int InContactWithPlayer(DYNAMICSBLOCK *dynPtr)
 	
 	return 0;	
 }
+#endif
 
 static void JumpAtPlayer(STRATEGYBLOCK *sbPtr)
 {

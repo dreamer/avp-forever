@@ -5,6 +5,8 @@
 
 #include "stratdef.h"
 #include "gamedef.h"
+#include "game_statistics.h"
+#include "messagehistory.h"
 #include "dynblock.h"
 #include "dynamics.h"
 
@@ -22,37 +24,28 @@
 #include "psndplat.h"
 #include "particle.h"
 #include "sfx.h"
+#include "fmv.h"
 #include "version.h"
-#include "bh_RubberDuck.h"
+#include "bh_rubberduck.h"
 #include "bh_marin.h"
 #include "dxlog.h"
 #include "avp_menus.h"
 #include "avp_userprofile.h"
 #include "davehook.h"
-#include "CDTrackSelection.h"
+#include "cdtrackselection.h"
 #include "savegame.h"
 	// Added 18/11/97 by DHM: all hooks for my code
 
 #define UseLocalAssert Yes
 #include "ourasert.h"
 
-/* KJL 09:47:33 03/19/97 - vision stuff for marine and predator.
-Currently PC only because it will probably be implemented in a completely
-different way on the consoles, so I won't worry the PSX guys for now.
-*/
-#if SupportWindows95
-
 #include "vision.h"
 
 #include "cheat.h"	
 #include "pldnet.h"								 
 
-#endif
-
-#if SupportWindows95 || Saturn
 #include "kshape.h"
-#include "krender.h"
-#endif
+#include "game.h"
 
 /* KJL 16:00:13 11/22/96 - One of my evil experiments....   */
 #define PENTIUM_PROFILING_ON 0
@@ -62,27 +55,18 @@ different way on the consoles, so I won't worry the PSX guys for now.
 #if PENTIUM_PROFILING_ON
 #include "pentime.h"
 #else
-#if SupportWindows95
 #define gProfileStart();
 #define ProfileStop(x);
-#endif
 #endif
 
 #define	VERSION_DisableStartupMenus 	Yes
 #define VERSION_DisableStartupCredits	Yes
-#include "avp_menus.h"
 
 /******************
 Extern Engine Varibles
 ******************/
 
-extern void (*UpdateScreen[]) (void);
 extern int VideoMode;
-
-#if PSX
-#else
-extern void (*SetVideoMode[]) (void);
-#endif
 
 extern int FrameRate;
 extern int NormalFrameTime;
@@ -160,15 +144,11 @@ void InitGame(void)
 	AvP.CurrentEnv = AvP.StartingEnv;
 	AvP.PlayerType = I_Marine;
 
-#if SupportWindows95
-
 	AvP.GameVideoRequestMode = VideoMode_DX_320x200x8; /* ignored */
 	if(HWAccel)
 		AvP.MenuVideoRequestMode = VideoMode_DX_640x480x15;
 	else
 		AvP.MenuVideoRequestMode = VideoMode_DX_640x480x8;
-
-#endif
 
 	AvP.ElapsedSeconds = 0;
 	AvP.ElapsedMinutes = 0;
@@ -242,24 +222,11 @@ void StartGame(void)
 	InitialiseSfxBlocks();
 	InitialiseLightElementSystem();
 
-	#if PSX
-	{
-	extern int RedOut;
-	RedOut=0;
-	}
-	#endif
 	AvP.DestructTimer=-1;
 
 	// DHM 18/11/97: I've put hooks for screen mode changes here for the moment:
 	DAVEHOOK_ScreenModeChange_Setup();
 	DAVEHOOK_ScreenModeChange_Cleanup();
-
-	/* KJL 11:46:42 30/03/98 - I thought it'd be nice to display the version details
-	when you start a game */
-	#if PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO
-	#else
-//	GiveVersionDetails();
-	#endif
 
 	#if MIRRORING_ON
 	if(Current_Level_Requires_Mirror_Image())
@@ -406,9 +373,7 @@ void UpdateGame(void)
 	/* netgame support: it seems necessary to collect all our messages here, as some
 	things depend on the player's behaviour running before anything else... 
 	including firing the player's weapon */
-	#if SupportWindows95
 	if(AvP.Network != I_No_Network)	NetCollectMessages();
-	#endif
 
 	RemoveDestroyedStrategyBlocks();
 
@@ -448,17 +413,11 @@ void UpdateGame(void)
 	Player->ObWorld.vz = -42249;
 	#endif
 	/* netgame support */
-	#if SupportWindows95
 	if(AvP.Network != I_No_Network)	NetSendMessages();
 
 	/* KJL 11:50:18 03/21/97 - cheat modes */
 	HandleCheatModes();
-	#endif
 	
-	#if PSX
-	HandleCheatModes();
-	#endif
-
 	/*------------Patrick 1/6/97---------------
 	New sound system 
 	-------------------------------------------*/
@@ -573,298 +532,3 @@ void TimeStampedMessage(char *stringPtr)
 	time = t;
 #endif
 }
-
-
-#if 0
-/* KJL 14:24:34 01/05/98 - Interesting floating point experiments
-(UpdateGame is a useful point at which to test things) */
-
-#define IEEE_MANT_BITS	23
-#define IEEE_EXP_BITS	8
-#define IEEE_SIGN_BITS	1
-#define IEEE_EXP_BIAS	127
-
-#define INVSQRT_TABLE_SEED_MANT_BITS	9
-#define INVSQRT_TABLE_SEED_EXP_BITS		1
-#define INVSQRT_TABLE_LENGTH_BITS		(INVSQRT_TABLE_SEED_MANT_BITS + INVSQRT_TABLE_SEED_EXP_BITS)
-#define INVSQRT_TABLE_NUM_ENTRIES		(1 << INVSQRT_TABLE_LENGTH_BITS)
-#define INVSQRT_TABLE_ENTRY_BITS		10
-
-#define EXP_OF(x)	(*(DWORD *)&(x) & 0x7f800000)
-
-
-typedef struct _tab_in
-{
-unsigned int mpad:			((IEEE_MANT_BITS + 1) - INVSQRT_TABLE_LENGTH_BITS);
-unsigned int lookup:		INVSQRT_TABLE_LENGTH_BITS;
-unsigned int epad:			7;
-unsigned int spad:			1;
-} tab_in;
-
-typedef struct _tab_out
-{
-unsigned int mpad:			(IEEE_MANT_BITS - INVSQRT_TABLE_ENTRY_BITS);
-unsigned int lookup:		INVSQRT_TABLE_ENTRY_BITS;
-unsigned int epad:			8;
-unsigned int spad:			1;
-} tab_out;
-
-
-union myfp
-{
-float fp;
-
-// used to build the lookup table
-tab_in	tab_in_;
-tab_out	tab_out_;
-};
-
-
-unsigned int InvSqrtTab[INVSQRT_TABLE_NUM_ENTRIES];
-
-
-void
-BuildInvSqrtTable()
-{
-	static int done = FALSE;
-	int i;
-
-	if (done) return;
-	done = TRUE;
-
-	for (i = 0; i < INVSQRT_TABLE_NUM_ENTRIES; i++)
-	{
-		union myfp fin, fout;
-
-		fin.fp = 1.0F;
-		fin.tab_in_.lookup = i;
-
-		// calculate the real value
-		fout.fp = 1.0F / (float)sqrt((double)fin.fp);
-
-		// Add the value to the table.  1.0 is special.
-		if (fout.fp == 1.0F)
-		InvSqrtTab[i] = 0x3FF << (IEEE_MANT_BITS - INVSQRT_TABLE_ENTRY_BITS);
-		else
-		InvSqrtTab[i] = fout.tab_out_.lookup << (IEEE_MANT_BITS -
-		INVSQRT_TABLE_ENTRY_BITS);
-	}
-} // BuildInvSqrtTable()
-
-
-float __stdcall
-InverseSquareRoot(float x)
-{
-unsigned int index;
-float r;
-DWORD *dptr = (DWORD *)&r;
-
-*(DWORD *)&r = ((((3 * IEEE_EXP_BIAS - 1) << IEEE_MANT_BITS) - EXP_OF(x)) >>
-1) & 0x7f800000;
-
-index = ((*(DWORD *)&x) >> (IEEE_MANT_BITS - INVSQRT_TABLE_ENTRY_BITS + 1))
-& (INVSQRT_TABLE_NUM_ENTRIES - 1);
-
-*dptr |= InvSqrtTab[index];
-
-return r;
-} // InverseSquareRoot()
-
-
-void NormaliseTest(void)
-{
-	int i;
-	float d;
-	int outside;
-	#if 0
-	i = 10000;
-	outside = 0;
-	ProfileStart();
-	while(i--)
-	{
-		VECTORCH v;
-		v.vx = (FastRandom()&65535)+1;
-		v.vy = (FastRandom()&65535)+1;
-		v.vz = (FastRandom()&65535)+1;
-
-		Normalise(&v);
-		{
-			int m = Magnitude(&v);
-			if (m<65530 || m>65540)
-				outside++;
-		}
-	}
-	ProfileStop("OLD NORM");
-	textprint("Outside Range: %d\n",outside);
-
-	i = 10000;
-	outside = 0;
-	ProfileStart();
-	while(i--)
-	{
-		VECTORCH v;
-		v.vx = (FastRandom()&65535)+1;
-		v.vy = (FastRandom()&65535)+1;
-		v.vz = (FastRandom()&65535)+1;
-
-		NewNormalise(&v);
-		{
-			int m = Magnitude(&v);
-			if (m<65536-50|| m>65536+50)
-				outside++;
-		}
-	}
-	ProfileStop("NEW NORM");
-	textprint("Outside Range: %d\n",outside);
-	#endif
-	i = 10000;
-	d=0;
-	while(--i)
-	{
-		int m;
-		VECTORCH v;
-		v.vx = FastRandom()&65535;
-		v.vy = FastRandom()&65535;
-		v.vz = FastRandom()&65535;
-		m = InverseMagnitude(&v);
-		d+=m;
-	}
-
-	#if 0
-	textprint("%f\n",d);
-	i = 10000;
-	d=0;
-	ProfileStart();
-	while(--i)
-	{
-		float m = sqrt((float)i);
-		d+=m;
-	}
-	ProfileStop("FSQRT");
-	#endif
-	textprint("%f\n",d);
-
-}
-static float fptmp;
-static int itmp;
-
-void IntToFloat(void);
-# pragma aux IntToFloat = \
-"fild itmp" \
-"fstp fptmp";
-
-/*
-
- This macro makes usage of the above function easier and more elegant
-
-*/
-
-#define i2f(a, b) { \
-itmp = (a); \
-IntToFloat(); \
-b = fptmp;}
-
-int InverseMagnitude(VECTORCH *v)
-{
-	int answer;
-	float m;
-	float mag;
-	{
-		float x,y,z;
-		x = v->vx;
-		y = v->vy;
-		z = v->vz;
-		mag = x*x+y*y+z*z;
-	}
-	{
-		unsigned int index;
-		float r;
-		DWORD *dptr = (DWORD *)&r;
-
-		*(DWORD *)&r = ((((3 * IEEE_EXP_BIAS - 1) << IEEE_MANT_BITS) - EXP_OF(mag)) >>
-		1) & 0x7f800000;
-
-		index = ((*(DWORD *)&mag) >> (IEEE_MANT_BITS - INVSQRT_TABLE_ENTRY_BITS + 1))
-		& (INVSQRT_TABLE_NUM_ENTRIES - 1);
-
-		*dptr |= InvSqrtTab[index];
-
-		m = 65536.0*r;	
-	}
-
-	
-	f2i(answer,m);	
-	return answer;
-}
-
-
-void CurrentQNormalise(QUAT *q)
-{
-	/* Normalise */
-	double oos = 1.0/(65536.0*65536.0); 
-
-	double wsq = (double)q->quatw * (double)q->quatw * oos;
-	double xsq = (double)q->quatx * (double)q->quatx * oos;
-	double ysq = (double)q->quaty * (double)q->quaty * oos;
-	double zsq = (double)q->quatz * (double)q->quatz * oos;
-
-	double m = sqrt(wsq + xsq + ysq + zsq);
-
-	if(m == 0.0) m = 1.0;			/* Just in case */
-	m = 1.0 / m;
-
-	q->quatw = (int) ((double)q->quatw * m);
-	q->quatx = (int) ((double)q->quatx * m);
-	q->quaty = (int) ((double)q->quaty * m);
-	q->quatz = (int) ((double)q->quatz * m);
-
-}
-
-void NewQNormalise(QUAT *q)
-{
-	float nw = q->quatw;
-	float nx = q->quatx;
-	float ny = q->quaty;
-	float nz = q->quatz;
-	
-	float m = sqrt(nw*nw+nx*nx+ny*ny+nz*nz);
-	
-	if (!m) return;
-		
-	m = 65536.0/m;
-
-	f2i(q->quatw,nw * m);
-	f2i(q->quatx,nx * m);
-	f2i(q->quaty,ny * m);
-	f2i(q->quatz,nz * m);
-}
-
-void QNormaliseTest(void)
-{
-	QUAT q,q2;
-	int i;
-
-	for (i=0; i<10000; i++)
-	{
-		q.quatw = FastRandom()&65535;
-		q.quatx = FastRandom()&65535;
-		q.quaty = FastRandom()&65535;
-		q.quatz = FastRandom()&65535;
-		q2=q;
-
-		NewQNormalise(&q);
-		CurrentQNormalise(&q2);
-
-		if (q.quatw!=q2.quatw)
-		textprint("w%d ",q.quatw-q2.quatw);
-		if (q.quatx!=q2.quatx)
-		textprint("x%d ",q.quatx-q2.quatx);
-		if (q.quaty!=q2.quaty)
-		textprint("y%d ",q.quaty-q2.quaty);
-		if (q.quatz!=q2.quatz)
-		textprint("z%d ",q.quatz-q2.quatz);
-	}
-		
-}
-#endif
-

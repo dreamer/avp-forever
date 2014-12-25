@@ -1,6 +1,6 @@
 /* Patrick 14/7/97----------------------------
   Source for Multi-Player ghost object support header
-d  ----------------------------------------------------------------------*/
+  ----------------------------------------------------------------------*/
 #include "3dc.h"
 #include "inline.h"
 #include "module.h"
@@ -24,7 +24,8 @@ d  ----------------------------------------------------------------------*/
 #include "psndplat.h"
 #include "bh_corpse.h"
 #include "bh_weap.h"
-#include "ShowCmds.h"
+#include "showcmds.h"
+#include "weapons.h"
 
 #define UseLocalAssert Yes
 #include "ourasert.h"
@@ -39,7 +40,6 @@ d  ----------------------------------------------------------------------*/
   ----------------------------------------------------------------------*/
 extern int NormalFrameTime;
 extern int GlobalFrameCounter;
-extern int cosine[], sine[];
 extern ACTIVESOUNDSAMPLE ActiveSounds[];
 extern DEATH_DATA Alien_Deaths[];
 extern HITLOCATIONTABLE *GetThisHitLocationTable(char *id);
@@ -51,7 +51,9 @@ extern MATRIXCH Identity_RotMat; /* From HModel.c */
   ----------------------------------------------------------------------*/
 
 static void SetPlayerGhostAnimationSequence(STRATEGYBLOCK *sbPtr, int sequence, int special);
+#if 0
 static void InitPlayerGhostAnimSequence(STRATEGYBLOCK *sbPtr);
+#endif
 static void UpdatePlayerGhostAnimSequence(STRATEGYBLOCK *sbPtr, int sequence, int special);
 
 SOUND3DDATA Ghost_Explosion_SoundData={
@@ -62,9 +64,6 @@ SOUND3DDATA Ghost_Explosion_SoundData={
 };
 
 void UpdateObjectTrails(STRATEGYBLOCK *sbPtr);
-void CreateMarineHModel(NETGHOSTDATABLOCK *ghostDataPtr, int weapon);
-void CreateAlienHModel(NETGHOSTDATABLOCK *ghostDataPtr,int alienType);
-void CreatePredatorHModel(NETGHOSTDATABLOCK *ghostDataPtr, int weapon);
 static void CalculatePosnForGhostAutoGunMuzzleFlash(STRATEGYBLOCK *sbPtr,VECTORCH *position, EULER *orientation);
 void UpdateAlienAIGhostAnimSequence(STRATEGYBLOCK *sbPtr,HMODEL_SEQUENCE_TYPES type, int subtype, int length, int tweeningtime);
 
@@ -882,7 +881,6 @@ void PostDynamicsExtrapolationUpdate()
 				{
 					if(MultiplayerObservedPlayer==ghostData->playerId)
 					{
-						PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 						Player->ObStrategyBlock->DynPtr->Position=sbPtr->DynPtr->Position;
 						Player->ObStrategyBlock->DynPtr->PrevPosition=sbPtr->DynPtr->Position;
 						
@@ -1669,6 +1667,7 @@ Update changes the sequence if appropriate (and calls set if the sbPtr has a dpt
 Set selects the correct sequence/type, infers the speed and follow-on sequences,
 etc, and sets it.
 ------------------------------------------------------------------------------*/
+#if 0
 static void InitPlayerGhostAnimSequence(STRATEGYBLOCK *sbPtr)
 {
 	NETGHOSTDATABLOCK *ghostData;
@@ -1705,6 +1704,7 @@ static void InitPlayerGhostAnimSequence(STRATEGYBLOCK *sbPtr)
 		}
 	}
 }
+#endif
 
 static void UpdatePlayerGhostAnimSequence(STRATEGYBLOCK *sbPtr, int sequence, int special)
 {
@@ -3669,16 +3669,20 @@ void MaintainGhosts(void)
 				{
 					if (ghostData->timer>ONE_FIXED*4)
 					{
-						ghostData->EventCounter += NormalFrameTime;
+						/* EventCounter - was in anon. union with currentAnimSequence */
+						ghostData->currentAnimSequence += NormalFrameTime;
 					}
 					else
 					{
-						ghostData->EventCounter += MUL_FIXED(NormalFrameTime,ghostData->timer)/4;
+						/* EventCounter */
+						ghostData->currentAnimSequence += MUL_FIXED(NormalFrameTime,ghostData->timer)/4;
 					}
 			   		
-					while (ghostData->EventCounter >= FLARE_PARTICLE_GENERATION_TIME)
+			   		/* EventCounter */
+					while (ghostData->currentAnimSequence >= FLARE_PARTICLE_GENERATION_TIME)
 					{
-						ghostData->EventCounter -= FLARE_PARTICLE_GENERATION_TIME;
+						/* EventCounter */
+						ghostData->currentAnimSequence -= FLARE_PARTICLE_GENERATION_TIME;
 						MakeFlareParticle(sbPtr->DynPtr);
 					}
 
@@ -3712,11 +3716,15 @@ void MaintainGhosts(void)
 							int scale = ONE_FIXED-ghostData->timer/PROX_GRENADE_LIFETIME;
 							scale = MUL_FIXED(scale,scale);
 							scale = MUL_FIXED(scale,scale)*8;
-							ghostData->EventCounter += NormalFrameTime + MUL_FIXED(NormalFrameTime,scale);
+							
+							/* EventCounter */
+							ghostData->currentAnimSequence += NormalFrameTime + MUL_FIXED(NormalFrameTime,scale);
 				   		}
-						while (ghostData->EventCounter >= PROX_GRENADE_SOUND_GENERATION_TIME)
+				   		/* EventCounter */
+						while (ghostData->currentAnimSequence >= PROX_GRENADE_SOUND_GENERATION_TIME)
 						{
-							ghostData->EventCounter -= PROX_GRENADE_SOUND_GENERATION_TIME;
+							/* EventCounter */
+							ghostData->currentAnimSequence -= PROX_GRENADE_SOUND_GENERATION_TIME;
 							Sound_Play(SID_PROX_GRENADE_ACTIVE,"d",&(dynPtr->Position));
 						}
 
@@ -4440,9 +4448,6 @@ int Deduce_PlayerMarineDeathSequence(STRATEGYBLOCK* sbPtr,DAMAGE_PROFILE* damage
 	NETCORPSEDATABLOCK *corpseDataPtr=(NETCORPSEDATABLOCK *)sbPtr->SBdataptr;
 	
 	int deathtype,gibbFactor;
-	int a;
-
-	SECTION_DATA *head;
 
 	/* Set GibbFactor  and death type*/
 	gibbFactor=0;
@@ -4711,7 +4716,6 @@ int Deduce_PlayerPredatorDeathSequence(STRATEGYBLOCK* sbPtr,DAMAGE_PROFILE* dama
 		HIT_FACING facing;
 		SECTION *root;
 		int burning;
-		int wounds;
 		int crouched;
 
 		root=GetNamedHierarchyFromLibrary("hnpcpredator","Template");

@@ -16,6 +16,7 @@
 #include "bh_corpse.h"
 #include "bh_debri.h"
 #include "pldnet.h"
+#include "maths.h"
 /* 
 	this attaches runtime and precompiled object
 	strategyblocks
@@ -36,10 +37,6 @@ STRATEGYBLOCK FreeStBlockData[maxstblocks];
 static STRATEGYBLOCK  **ActiveStBlockListPtr = &ActiveStBlockList[0];
 
 unsigned int IncrementalSBname;
-
-/**** improted globals ************/
-
-extern int cosine[], sine[];
 
 /*
 

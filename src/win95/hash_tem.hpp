@@ -242,7 +242,7 @@
 	inline unsigned HashFunction(void const * const _vP)
 	{
 		// treat as integer
-		return HashFunction(reinterpret_cast<unsigned>(_vP));
+		return HashFunction(reinterpret_cast<uintptr_t>(_vP));
 	}
 
 	// a hash function for strings
@@ -290,7 +290,7 @@ class _base_HashTable
 		_base_HashTable(unsigned = HT_DEFAULTTABLESIZESHIFT);
 		
 		// destructor
-		~_base_HashTable();
+		virtual ~_base_HashTable();
 		
 		// copy constructor and assignment not provided in v1.0
 		_base_HashTable(_base_HashTable<TYPE,ARG_TYPE,CMP_ARG_TYPE> const &);
@@ -432,24 +432,24 @@ class _base_HashTable
 				// remove the current entry pointed to, advancing to the next
 				void Remove()
 				{
-					if (!nEntriesRemaining)
+					if (!ConstIterator::nEntriesRemaining)
 					{
 						HT_FAIL("HTT: Tried to Remove() via an iterator which was Done()");
 					}
-					Node * oldP = *nodePP;
-					*nodePP = oldP->nextP;
+					Node * oldP = *ConstIterator::nodePP;
+					*ConstIterator::nodePP = oldP->nextP;
 					delete oldP;
-					if (!*nodePP)
+					if (!*ConstIterator::nodePP)
 					{
 						do
 						{
-							++ chainPP;
-							-- nChainsRemaining;
+							++ ConstIterator::chainPP;
+							-- ConstIterator::nChainsRemaining;
 						}
-						while (nChainsRemaining && !*chainPP);
-						nodePP = chainPP;
+						while (ConstIterator::nChainsRemaining && !*ConstIterator::chainPP);
+						ConstIterator::nodePP = ConstIterator::chainPP;
 					}
-					-- nEntriesRemaining;
+					-- ConstIterator::nEntriesRemaining;
 					-- *tableNEntriesP;
 				}
 
@@ -700,7 +700,9 @@ inline _base_HashTable<TYPE,ARG_TYPE,CMP_ARG_TYPE>::_base_HashTable(_base_HashTa
 {
 	for (unsigned i=0; i<tableSize; ++i) { chainPA[i] = NULL; }
 
-	for( HashTable<TYPE>::ConstIterator it(ht); !it.Done(); it.Next() )
+	
+//	for(HashTable<TYPE>::ConstIterator it(ht); !it.Done(); it.Next() )
+	for (typename _base_HashTable::ConstIterator it(ht); !it.Done(); it.Next() )
 	{
 		AddRegardless( it.Get() );
 	}
@@ -811,13 +813,13 @@ void _base_HashTable<TYPE,ARG_TYPE,CMP_ARG_TYPE>::RemoveAsserted(CMP_ARG_TYPE _d
 }
 
 template <class TYPE,class ARG_TYPE,class CMP_ARG_TYPE>
-_base_HashTable<TYPE,ARG_TYPE,CMP_ARG_TYPE>::Node * _base_HashTable<TYPE,ARG_TYPE,CMP_ARG_TYPE>::NewNode(ARG_TYPE _dataR,Node * _nextP)
+typename _base_HashTable<TYPE,ARG_TYPE,CMP_ARG_TYPE>::Node * _base_HashTable<TYPE,ARG_TYPE,CMP_ARG_TYPE>::NewNode(ARG_TYPE _dataR,Node * _nextP)
 {
 	return new Node(_dataR,_nextP);
 }
 
 template <class TYPE,class ARG_TYPE,class CMP_ARG_TYPE>
-_base_HashTable<TYPE,ARG_TYPE,CMP_ARG_TYPE>::Node * _base_HashTable<TYPE,ARG_TYPE,CMP_ARG_TYPE>::NewNode()
+typename _base_HashTable<TYPE,ARG_TYPE,CMP_ARG_TYPE>::Node * _base_HashTable<TYPE,ARG_TYPE,CMP_ARG_TYPE>::NewNode()
 {
 	return new Node;
 }
@@ -837,17 +839,8 @@ template <class TYPE> class HashTable;
 #define HT_WATCOM_DEFINE_FOR_SIMPLE_TYPE(TYPE) \
 	class HashTable<TYPE> HT_DEFINITION(TYPE,TYPE,TYPE)
 	
-#ifdef __WATCOMC__
-
-//watcom generartes errors if template<> is added to the start of the line - Richard.
-#define HT_DEFINE_FOR_SIMPLE_TYPE(SIMPLE_TYPE) HT_WATCOM_DEFINE_FOR_SIMPLE_TYPE(SIMPLE_TYPE)
-
-#else
-
 #define HT_DEFINE_FOR_SIMPLE_TYPE(SIMPLE_TYPE) template<> HT_WATCOM_DEFINE_FOR_SIMPLE_TYPE(SIMPLE_TYPE)
 
-#endif
-	
 HT_DEFINE_FOR_SIMPLE_TYPE(unsigned long)
 HT_DEFINE_FOR_SIMPLE_TYPE(signed long)
 HT_DEFINE_FOR_SIMPLE_TYPE(unsigned)

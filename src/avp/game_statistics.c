@@ -12,12 +12,13 @@
 #include "bh_debri.h"
 #include "bh_weap.h"
 #include "pldghost.h"
+#include "opengl.h"
 
 #define UseLocalAssert Yes
 #include "ourasert.h"
 
-#include "AvP_EnvInfo.h"
-#include "AvP_UserProfile.h"
+#include "avp_envinfo.h"
+#include "avp_userprofile.h"
 
 #define FIXED_MINUTE (ONE_FIXED*60)
 
@@ -40,14 +41,13 @@ extern int AlienEpisodeToPlay;
 extern char LevelName[];
 
 extern AvP_Level_Target_Desc LevelStatsTargets[I_MaxDifficulties][AVP_ENVIRONMENT_END_OF_LIST];
-extern void DoStatisticsScreen(int completed_level);
 
 /* Default structure: */
 AvP_GameStats_Stored DefaultLevelGameStats = {
-	{0,0,0,0,0,0,0,0,0,0,},
-	{0,0,0,0,0,0,0,0,0,0,},
-	{0,0,0,0,0,0,0,0,0,0,},
-	{0,0,0,0,0,0,0,0,0,0,},
+	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0},
+	{0,0,0,0,0,0,0,0,0,0}, /* TrophiesOrLiveHeadBites */
+	{0,0,0,0,0,0,0,0,0,0},
 	10000,
 	0,
 	100,
@@ -67,7 +67,7 @@ AvP_GameStats_Stored DefaultLevelGameStats = {
 		0,0,0,0,0,0,0,0,0,0,
 		0,0,0,0,0,0,0,0,0,0,
 		0,0,0,0,0,0,0,0,0,0,
-		0,0,0,0,0,0,0,0,0,0,
+		0,0,0,0,0,0,0,0,0,0
 	}
 
 };
@@ -78,7 +78,7 @@ AvP_GameStats_Stored DefaultLevelGameStats = {
 
 #define NEWLINE_SPACING	((ScreenDescriptorBlock.SDB_Height<400)? 12:15)
 
-extern void CurrentGameStats_Initialise(void)
+void CurrentGameStats_Initialise(void)
 {
 	int i;
 	for (i=0; i<STATS_VICTIM_MAXIMUM; i++)
@@ -828,12 +828,13 @@ extern void CurrentGameStats_CreatureKilled(STRATEGYBLOCK *sbPtr,SECTION_DATA *s
 			CurrentGameStatistics.Killed[STATS_VICTIM_PREDATOR]++;
 			break;
 		}
-
+		
+		default: ;
 	}
 }
 
 
-extern void DoFailedLevelStatisticsScreen(void)
+void DoFailedLevelStatisticsScreen(void)
 {
 	extern int deathFadeLevel;
 	D3D_FadeDownScreen(deathFadeLevel,0);
@@ -895,7 +896,7 @@ extern void DoStatisticsScreen(int completed_level)
 
 	int targets,targetspassed;
 
-	NPC_DATA *NpcData;
+	NPC_DATA *NpcData = NULL;
 	
 	switch (AvP.PlayerType)
 	{
@@ -1168,8 +1169,8 @@ extern void DoStatisticsScreen(int completed_level)
 		{
 			if ((CurrentGameStatistics.Killed[i])
 				||(LevelStatsTargets[AvP.Difficulty][level_num].StatTargets.Killed[i]>-1)
-				||((AvP.PlayerType==I_Predator)&&(LevelStatsTargets[AvP.Difficulty][level_num].StatTargets.Trophies[i]>-1))
-				||((AvP.PlayerType==I_Alien)&&(LevelStatsTargets[AvP.Difficulty][level_num].StatTargets.LiveHeadBites[i]>-1))
+				||((AvP.PlayerType==I_Predator)&&(LevelStatsTargets[AvP.Difficulty][level_num].StatTargets.TrophiesOrLiveHeadBites[i]>-1))
+				||((AvP.PlayerType==I_Alien)&&(LevelStatsTargets[AvP.Difficulty][level_num].StatTargets.TrophiesOrLiveHeadBites[i]>-1))
 				||((AvP.PlayerType==I_Alien)&&(LevelStatsTargets[AvP.Difficulty][level_num].StatTargets.DeadHeadBites[i]>-1))
 				) {
 				if ((completed_level)&&(level_num<AVP_ENVIRONMENT_END_OF_LIST)&&(NotCheating)) {
@@ -1234,8 +1235,8 @@ extern void DoStatisticsScreen(int completed_level)
 
 						if ((completed_level)&&(level_num<AVP_ENVIRONMENT_END_OF_LIST)&&(NotCheating)) {
 							/* Is it a new best? */
-							if (UserProfilePtr->PersonalBests[AvP.Difficulty][level_num].Trophies[i]<=CurrentGameStatistics.Trophies[i]) {
-								UserProfilePtr->PersonalBests[AvP.Difficulty][level_num].Trophies[i]=CurrentGameStatistics.Trophies[i];
+							if (UserProfilePtr->PersonalBests[AvP.Difficulty][level_num].TrophiesOrLiveHeadBites[i]<=CurrentGameStatistics.Trophies[i]) {
+								UserProfilePtr->PersonalBests[AvP.Difficulty][level_num].TrophiesOrLiveHeadBites[i]=CurrentGameStatistics.Trophies[i];
 								colour_to_draw=COLOUR_GREEN;
 							}
 						}
@@ -1248,7 +1249,7 @@ extern void DoStatisticsScreen(int completed_level)
 						
 						if ((level_num<AVP_ENVIRONMENT_END_OF_LIST)&&(NotCheating)) {
 							sprintf(buffer,"%d",
-								UserProfilePtr->PersonalBests[AvP.Difficulty][level_num].Trophies[i]
+								UserProfilePtr->PersonalBests[AvP.Difficulty][level_num].TrophiesOrLiveHeadBites[i]
 							);
 							RenderStringCentred(buffer,TABPOINT3,y,colour_to_draw);
 						} else {
@@ -1258,9 +1259,9 @@ extern void DoStatisticsScreen(int completed_level)
 						colour_to_draw=COLOUR_WHITE;
 						if ((completed_level)&&(level_num<AVP_ENVIRONMENT_END_OF_LIST)) {
 							/* Is it a completed target? */
-							if (LevelStatsTargets[AvP.Difficulty][level_num].StatTargets.Trophies[i]>-1) {
+							if (LevelStatsTargets[AvP.Difficulty][level_num].StatTargets.TrophiesOrLiveHeadBites[i]>-1) {
 								targets++;
-								if (LevelStatsTargets[AvP.Difficulty][level_num].StatTargets.Trophies[i]<=CurrentGameStatistics.Trophies[i]) {
+								if (LevelStatsTargets[AvP.Difficulty][level_num].StatTargets.TrophiesOrLiveHeadBites[i]<=CurrentGameStatistics.Trophies[i]) {
 									colour_to_draw=COLOUR_RED;
 									targetspassed++;
 								}
@@ -1268,9 +1269,9 @@ extern void DoStatisticsScreen(int completed_level)
 						}
 						if ((level_num<AVP_ENVIRONMENT_END_OF_LIST)&&(NotCheating)) {
 							if (UserProfilePtr->CheatMode[LevelStatsTargets[AvP.Difficulty][level_num].CheatModeToActivate]!=1) {
-								if (LevelStatsTargets[AvP.Difficulty][level_num].StatTargets.Trophies[i]>-1) {
+								if (LevelStatsTargets[AvP.Difficulty][level_num].StatTargets.TrophiesOrLiveHeadBites[i]>-1) {
 									sprintf(buffer,"%d",
-										LevelStatsTargets[AvP.Difficulty][level_num].StatTargets.Trophies[i]
+										LevelStatsTargets[AvP.Difficulty][level_num].StatTargets.TrophiesOrLiveHeadBites[i]
 									);
 									RenderStringCentred(buffer,TABPOINT4,y,colour_to_draw);
 								} else {
@@ -1298,8 +1299,8 @@ extern void DoStatisticsScreen(int completed_level)
 
 						if ((completed_level)&&(level_num<AVP_ENVIRONMENT_END_OF_LIST)&&(NotCheating)) {
 							/* Is it a new best? */
-							if (UserProfilePtr->PersonalBests[AvP.Difficulty][level_num].LiveHeadBites[i]<=CurrentGameStatistics.LiveHeadBites[i]) {
-								UserProfilePtr->PersonalBests[AvP.Difficulty][level_num].LiveHeadBites[i]=CurrentGameStatistics.LiveHeadBites[i];
+							if (UserProfilePtr->PersonalBests[AvP.Difficulty][level_num].TrophiesOrLiveHeadBites[i]<=CurrentGameStatistics.LiveHeadBites[i]) {
+								UserProfilePtr->PersonalBests[AvP.Difficulty][level_num].TrophiesOrLiveHeadBites[i]=CurrentGameStatistics.LiveHeadBites[i];
 								colour_to_draw=COLOUR_GREEN;
 							}
 						}
@@ -1312,7 +1313,7 @@ extern void DoStatisticsScreen(int completed_level)
 
 						if ((level_num<AVP_ENVIRONMENT_END_OF_LIST)&&(NotCheating)) {
 							sprintf(buffer,"%d",
-								UserProfilePtr->PersonalBests[AvP.Difficulty][level_num].LiveHeadBites[i]
+								UserProfilePtr->PersonalBests[AvP.Difficulty][level_num].TrophiesOrLiveHeadBites[i]
 							);
 							RenderStringCentred(buffer,TABPOINT3,y,colour_to_draw);
 						} else {
@@ -1322,9 +1323,9 @@ extern void DoStatisticsScreen(int completed_level)
 						colour_to_draw=COLOUR_WHITE;
 						if ((completed_level)&&(level_num<AVP_ENVIRONMENT_END_OF_LIST)) {
 							/* Is it a completed target? */
-							if (LevelStatsTargets[AvP.Difficulty][level_num].StatTargets.LiveHeadBites[i]>-1) {
+							if (LevelStatsTargets[AvP.Difficulty][level_num].StatTargets.TrophiesOrLiveHeadBites[i]>-1) {
 								targets++;
-								if (LevelStatsTargets[AvP.Difficulty][level_num].StatTargets.LiveHeadBites[i]<=CurrentGameStatistics.LiveHeadBites[i]) {
+								if (LevelStatsTargets[AvP.Difficulty][level_num].StatTargets.TrophiesOrLiveHeadBites[i]<=CurrentGameStatistics.LiveHeadBites[i]) {
 									colour_to_draw=COLOUR_RED;
 									targetspassed++;
 								}
@@ -1332,9 +1333,9 @@ extern void DoStatisticsScreen(int completed_level)
 						}
 						if ((level_num<AVP_ENVIRONMENT_END_OF_LIST)&&(NotCheating)) {
 							if (UserProfilePtr->CheatMode[LevelStatsTargets[AvP.Difficulty][level_num].CheatModeToActivate]!=1) {
-								if (LevelStatsTargets[AvP.Difficulty][level_num].StatTargets.LiveHeadBites[i]>-1) {
+								if (LevelStatsTargets[AvP.Difficulty][level_num].StatTargets.TrophiesOrLiveHeadBites[i]>-1) {
 									sprintf(buffer,"%d",
-										LevelStatsTargets[AvP.Difficulty][level_num].StatTargets.LiveHeadBites[i]
+										LevelStatsTargets[AvP.Difficulty][level_num].StatTargets.TrophiesOrLiveHeadBites[i]
 									);
 									RenderStringCentred(buffer,TABPOINT4,y,colour_to_draw);
 								} else {

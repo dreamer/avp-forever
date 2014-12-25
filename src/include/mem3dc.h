@@ -8,15 +8,11 @@
 
 #endif
 
+#include "fixer.h" // make sure system headers get included first, because windows headers use Yes/No
 #include "system.h"
 #include <stddef.h>
 
 /* defines */
-#if Saturn
-#define DBGMALLOC 1
-#endif
-
-#if SupportWindows95
 #if 1
 #define DBGMALLOC 0
 #else
@@ -29,11 +25,6 @@
 	#else /* default switch */
 		#define DBGMALLOC 1
 	#endif
-#endif
-#endif
-
-#if PSX
-#define DBGMALLOC 0
 #endif
 
 /* parameters for DumpMallocInfo */
@@ -51,11 +42,7 @@ a separate copy of the string for each malloc - just store the
 pointer.
 So, on PC this reduces the data size for the malloc records from 1.04Mb to 320K ! */
 
-#if SupportWindows95 || PSX
 #define COPY_FILENAME 0 /* new behavior */
-#else
-#define COPY_FILENAME 1 /* previous behavior */
-#endif
 
 /* platform specific memory allocation and deallocation declarations */
 extern void *AllocMem(size_t __size);

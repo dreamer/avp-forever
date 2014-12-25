@@ -21,10 +21,6 @@
 #define UseLocalAssert Yes
 #include "ourasert.h"
 
-#if PSX
-#include "psx_cdf.h"
-#endif
-
 /* prototypes for this file */
 //static void BuildFM_EntryPoints(MODULE *thisModule);
 //static void BuildFM_ASingleEP(MODULE *thisModule, MODULE *targetModule);
@@ -41,13 +37,8 @@ extern int ModuleArraySize;
 /* prototypes for external functions */
 int SetupPolygonAccessFromShapeIndex(int shapeIndex);
 int SetupPointAccessFromShapeIndex(int shapeIndex);
-#if PSX
-	SVECTOR* AccessNextPoint(void);
-	SVECTOR* AccessPointFromIndex(int index);
-#else
-	VECTORCH* AccessNextPoint(void);
-	VECTORCH* AccessPointFromIndex(int index);
-#endif
+VECTORCH* AccessNextPoint(void);
+VECTORCH* AccessPointFromIndex(int index);
 int *GetPolygonVertexIndices(void);
 
 /* globals for this file */
@@ -166,12 +157,6 @@ void BuildFarModuleLocs(void)
 		LOCALASSERT(ThisModuleIndex >= 0);
 		LOCALASSERT(ThisModuleIndex < ModuleArraySize);
 		
-		#if PSX
-		#ifndef CDEMUL
-		pollhost();
-		#endif
-		#endif
-		
 		#if logFarLocData
 		fprintf(logfile, "********************************* \n");
 		fprintf(logfile, "Module Index: %d %s\n", ThisModuleIndex,thisModule->name);
@@ -215,12 +200,6 @@ void BuildFarModuleLocs(void)
 		fprintf(logfile, "Module X range: %d %d \n", thisModule->m_minx, thisModule->m_maxx);
 		fprintf(logfile, "Module Z range: %d %d \n \n", thisModule->m_minz, thisModule->m_maxz);
 		#endif
-		
-		#if PSX
-		  #ifndef CDEMUL
-		    pollhost();
-		  #endif
-    	#endif
 		
 		/* check for entry points into this module if there	aren't any,
 		don't bother with auxilary locations */
@@ -605,6 +584,7 @@ typedef struct epbbextents
 	int	minZ;
 } EPBBEXTENTS;
 
+#if 0
 static EPBBEXTENTS MI_Volume1;
 static EPBBEXTENTS MI_Volume2;
 static EPBBEXTENTS MI_Volume3;
@@ -612,6 +592,7 @@ static EPBBEXTENTS MI_Volume3;
 static int GetModulesIntersection(MODULE *thisModule, MODULE *targetModule);
 static int GetModulePointBox(MODULE *thisModule, EPBBEXTENTS *extents);
 static void AddModuleEP(MODULE* thisModule, MODULE*fromModule, VECTORCH *posn);
+#endif
 
 /*-----------------------Patrick 16/12/96---------------------------
 This Function checks if a module has any adjacent modules, and if
@@ -943,6 +924,7 @@ static void BuildFM_ASingleEP(MODULE *thisModule, MODULE *targetModule)
   
   Returns 1 if the bounding box is valis, 0 if not.
   ------------------------------------------------------------------*/ 
+#if 0
 static int GetModulesIntersection(MODULE *thisModule, MODULE *targetModule)
 {
 	int thisExtent, targetExtent;
@@ -1005,13 +987,8 @@ static int GetModulePointBox(MODULE *thisModule, EPBBEXTENTS *extents)
 	pointCounter = SetupPointAccessFromShapeIndex(thisModule->m_mapptr->MapShape);
 	while(pointCounter>0)
 	{
-		#if PSX
-			SVECTOR* thisPt = AccessNextPoint();
-			VECTORCH thisWorldPoint;
-		#else
-			VECTORCH* thisPt = AccessNextPoint();
-			VECTORCH thisWorldPoint;
-		#endif
+		VECTORCH* thisPt = AccessNextPoint();
+		VECTORCH thisWorldPoint;
 
 		thisWorldPoint.vx = thisPt->vx + thisModule->m_world.vx;
 		thisWorldPoint.vy = thisPt->vy + thisModule->m_world.vy;
@@ -1051,7 +1028,7 @@ static void AddModuleEP(MODULE* thisModule, MODULE*fromModule, VECTORCH *posn)
 	FARENTRYPOINTSHEADER *epHeader = &FALLP_EntryPoints[thisModule->m_index];
 	FARENTRYPOINT *epList = epHeader->entryPointsList;
 
-	if(epHeader->numEntryPoints==(NumAdjacentModules(thisModule)))
+	if(epHeader->numEntryPoints==(NumAdjacentModules((AIMODULE*)thisModule)))
 	{
 		/* no room for any more eps. This may occur where two modules are not
 		mutually linked as adjacent... specifically, the target is missing the
@@ -1074,7 +1051,7 @@ static void AddModuleEP(MODULE* thisModule, MODULE*fromModule, VECTORCH *posn)
 	(epHeader->numEntryPoints)++;
 
 }
-
+#endif
 
 /*-----------------------Patrick 20/12/96---------------------------
 LOCAL FUNCTIONS FOR AUXILARY MODULE LOCATION SUPPORT
@@ -1276,10 +1253,6 @@ static void BuildFM_AuxilaryLocs(MODULE *thisModule)
   the location iiiiis inside the shape): if there is no up &
   down polygon, the location is invalidated, and an error code
   returned (either no up poly, no down poly, no up-or-down poly)
-
-  NB PSX!!!: uses kevin's shape access functions in platsup.c
-  I have added a new short one for Win95 - PSX needs it's own
-  version.
   ----------------------------------------------------------------*/
 static void GetFarLocHeight(FARVALIDATEDLOCATION *location, MODULE *thisModule)
 {

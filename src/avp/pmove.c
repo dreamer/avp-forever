@@ -32,12 +32,12 @@
 #include "equipmnt.h"
 #include "bh_agun.h"
 #include "los.h"
-#include "krender.h"
 #include "pldnet.h"
-#include "BonusAbilities.h"
+#include "bonusabilities.h"
 #include "avp_menus.h"
 #include "lighting.h"
 #include "scream.h"
+#include "player.h"
 #include "avp_userprofile.h"
 
 
@@ -67,7 +67,7 @@ extern int DebouncedGotAnyKey;
 *****************************************************KJL*/
 #define LOAD_IN_MOVEMENT_VALUES 0
 
-#if SupportWindows95 && LOAD_IN_MOVEMENT_VALUES	
+#if LOAD_IN_MOVEMENT_VALUES	
 
 static int AlienForwardSpeed;
 static int AlienStrafeSpeed;
@@ -93,21 +93,21 @@ int executeDemo;
 /* Global Externs */
 extern DISPLAYBLOCK* Player;
 extern int NormalFrameTime;
-extern int cosine[], sine[];
 extern int predHUDSoundHandle;
 extern int predOVision_SoundHandle;
 extern int TauntSoundPlayed;
 
-#if SupportWindows95
 extern unsigned char GotAnyKey;
-#else
-unsigned char GotAnyKey;
-#endif
 
 static char FlyModeOn = 0;			
+#if FLY_MODE_CHEAT_ON
 static char FlyModeDebounced = 0;
+#endif
 
+#if 0
 static char BonusAbilityDebounced = 0;
+static void MakePlayerLieDown(STRATEGYBLOCK* sbPtr);
+#endif
 
 extern int deathFadeLevel;
 extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
@@ -118,7 +118,6 @@ extern void DeInitialisePlayer(void);
 
 /* some prototypes for this source file */
 static void MakePlayerCrouch(STRATEGYBLOCK* sbPtr);
-static void MakePlayerLieDown(STRATEGYBLOCK* sbPtr);
 static void MaintainPlayerShape(STRATEGYBLOCK* sbPtr);
 static void NetPlayerDeadProcessing(STRATEGYBLOCK* sbPtr);
 static void CorpseMovement(STRATEGYBLOCK *sbPtr);
@@ -126,7 +125,6 @@ static void CorpseMovement(STRATEGYBLOCK *sbPtr);
 extern SECTION * GetNamedHierarchyFromLibrary(const char * rif_name, const char * hier_name);
 extern void NewOnScreenMessage(unsigned char *messagePtr);
 extern void RemoveAllThisPlayersDiscs(void);
-void NetPlayerRespawn(STRATEGYBLOCK *sbPtr);
 
 int timeInContactWithFloor;
 
@@ -161,7 +159,7 @@ void InitPlayerMovementData(STRATEGYBLOCK* sbPtr)
 	
 	timeInContactWithFloor=(ONE_FIXED/10);
 
-	#if SupportWindows95 && LOAD_IN_MOVEMENT_VALUES	
+	#if LOAD_IN_MOVEMENT_VALUES	
 	LoadInMovementValues();
 	#endif
 
@@ -369,7 +367,7 @@ void ExecuteFreeMovement(STRATEGYBLOCK* sbPtr)
 		int turnSpeed; 	
 		int jumpSpeed;
 
-		#if SupportWindows95 && LOAD_IN_MOVEMENT_VALUES	
+		#if LOAD_IN_MOVEMENT_VALUES	
 		switch (AvP.PlayerType)
 		{
 			case I_Alien:
@@ -913,12 +911,10 @@ void ExecuteFreeMovement(STRATEGYBLOCK* sbPtr)
 			AllowedLookDownAngle = 2048-128;
 		}
 
-		#if SupportWindows95
 		if (!ControlMethods.AutoCentreOnMovement)
 		{
 			timeBeenContinuouslyMoving = 0;
 		}
-		#endif
 
 		if (playerStatusPtr->Mvt_MotionIncrement == 0)
 		{
@@ -1174,9 +1170,6 @@ static void CorpseMovement(STRATEGYBLOCK *sbPtr)
   ------------------------------------------------------*/
 static void NetPlayerDeadProcessing(STRATEGYBLOCK *sbPtr)
 {
-	SECTION *root_section;
-
-	#if SupportWindows95
 	PLAYER_STATUS *psPtr= (PLAYER_STATUS *) (sbPtr->SBdataptr);
 
 	/* call the read input function so that we can still respawn/quit, etc */
@@ -1250,7 +1243,6 @@ static void NetPlayerDeadProcessing(STRATEGYBLOCK *sbPtr)
 			
 		}
 	}
-	#endif
 }
 
 extern void InitPlayerCloakingSystem(void);
@@ -1258,9 +1250,10 @@ extern void InitPlayerCloakingSystem(void);
 void NetPlayerRespawn(STRATEGYBLOCK *sbPtr)
 {
 	extern int LeanScale;
+#if 0
 	SECTION *root_section;
+#endif
 
-	#if SupportWindows95
 	PLAYER_STATUS *psPtr= (PLAYER_STATUS *) (sbPtr->SBdataptr);
 
 
@@ -1447,7 +1440,6 @@ void NetPlayerRespawn(STRATEGYBLOCK *sbPtr)
 	
 	//The player's dropped weapon (if there was one) can now be drawn
 	MakePlayersWeaponPickupVisible();
-#endif
 }
 
 
@@ -1644,7 +1636,7 @@ static void AlienContactWeapon(void)
 
 /* Demo code removed, CDF 28/9/98, by order of Kevin */
 
-#if SupportWindows95 && LOAD_IN_MOVEMENT_VALUES	
+#if LOAD_IN_MOVEMENT_VALUES	
 static void LoadInMovementValues(void)
 {
 
@@ -1685,25 +1677,12 @@ static void LoadInMovementValues(void)
 #endif
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-extern void ThrowAFlare(void)
+void ThrowAFlare(void)
 {
 	extern int NumberOfFlaresActive;
 	
 	if (NumberOfFlaresActive<4)
 	{
-		extern VECTORCH CentreOfMuzzleOffset;
 		extern VIEWDESCRIPTORBLOCK *ActiveVDBList[];
 		VIEWDESCRIPTORBLOCK *VDBPtr = ActiveVDBList[0];
  		MATRIXCH mat = VDBPtr->VDB_Mat;

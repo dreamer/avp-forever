@@ -11,7 +11,6 @@
 
 extern "C"
 {
-	extern LPDIRECTSOUND DSObject; 
 	extern int SoundSwitchedOn;
 	// Pat sets this up
 };
@@ -87,7 +86,7 @@ static int find_empty_game_sound()
 	
 }
 
-static int find_permanent_game_sound(char * wavname)
+static int find_permanent_game_sound(const char * wavname)
 {
 	if(!SoundSwitchedOn) return (-1);
 
@@ -110,7 +109,7 @@ LOADED_SOUND const * GetSound (char const * fname)
 {
 	if(!SoundSwitchedOn) return (0);
 
-	char * wavname = strrchr (fname, '\\');
+	const char * wavname = strrchr (fname, '\\');
 	
 	if (wavname)
 	{
@@ -118,7 +117,7 @@ LOADED_SOUND const * GetSound (char const * fname)
 	}
 	else
 	{
-		wavname = (char *)fname;
+		wavname = fname;
 	}
 	
 	// check if wavname already loaded

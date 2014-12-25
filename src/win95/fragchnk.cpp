@@ -56,7 +56,7 @@ Fragment_Type_Data_Chunk::Fragment_Type_Data_Chunk(Chunk_With_Children* const pa
 
 Fragment_Type_Data_Chunk::~Fragment_Type_Data_Chunk()
 {
-	if(frag_type_name) delete frag_type_name;
+	if(frag_type_name) delete [] frag_type_name;
 }											 
 
 void Fragment_Type_Data_Chunk::fill_data_block(char* data_start)
@@ -99,30 +99,6 @@ Fragment_Type_Shape_Chunk::Fragment_Type_Shape_Chunk(Chunk_With_Children* parent
 	pad1=pad2=pad3=0;
 }
 
-#if UseOldChunkLoader
-Fragment_Type_Shape_Chunk::Fragment_Type_Shape_Chunk(Chunk_With_Children* const parent,const char* data,size_t const )
-:Chunk(parent,"FRGTYPSC")
-{
-	int length=strlen(data)+1;
-	name=new char[length];
-	strcpy(name,data);
-	data+=(length+3)&~3;
-
-	num_fragments=*(int*)data;
-	data+=4;
-
-	location=*(ChunkVector*)data;
-	data+=sizeof(ChunkVector);
-
-	
-	pad1=*(int*)data;
-	data+=4;
-	pad2=*(int*)data;
-	data+=4;
-	pad3=*(int*)data;
-	data+=4;
-};
-#else
 Fragment_Type_Shape_Chunk::Fragment_Type_Shape_Chunk(Chunk_With_Children* const parent,const char* data,size_t const )
 :Chunk(parent,"FRGTYPSC")
 {
@@ -145,11 +121,10 @@ Fragment_Type_Shape_Chunk::Fragment_Type_Shape_Chunk(Chunk_With_Children* const 
 	pad3=*(int*)data;
 	data+=4;
 }
-#endif
 
 Fragment_Type_Shape_Chunk::~Fragment_Type_Shape_Chunk()
 {
-	if(name) delete name;
+	if(name) delete [] name;
 }											 
 
 void Fragment_Type_Shape_Chunk::fill_data_block(char* data_start)
@@ -220,7 +195,7 @@ Fragment_Type_Sound_Chunk::Fragment_Type_Sound_Chunk(Chunk_With_Children* const 
 
 Fragment_Type_Sound_Chunk::~Fragment_Type_Sound_Chunk()
 {
-	if(wav_name) delete wav_name;
+	if(wav_name) delete [] wav_name;
 }											 
 
 void Fragment_Type_Sound_Chunk::fill_data_block(char* data_start)

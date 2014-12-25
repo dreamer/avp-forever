@@ -8,12 +8,10 @@
 #include "gameplat.h"
 
 #include "bh_types.h"
-#include "krender.h"
 #include "huddefs.h"
 #include "language.h"
 #include "cheat.h"
 #include "weapons.h"
-#include "gameflow.h"
 #include "equipmnt.h"
 
 /* Extern for global keyboard buffer */

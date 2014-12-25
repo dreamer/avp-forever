@@ -6,19 +6,6 @@
 #include "obchunk.hpp"
 
 
-#if cencon || InterfaceEngine
-#include "fnamefnc.hpp"
-#include "zsp.hpp"
-#include "bmpnames.hpp"
-#include "envchunk.hpp"
-#include "animchnk.hpp"
-#include "chunkpal.hpp"
-#include "fragchnk.hpp"
-#endif
-
-#ifdef cencon
-#define new my_new
-#endif
 //macro for helping to force inclusion of chunks when using libraries
 FORCE_CHUNK_INCLUDE_IMPLEMENT(shpchunk)
 
@@ -97,14 +84,6 @@ Shape_Chunk::Shape_Chunk(Chunk_With_Children * parent, const char *data, size_t 
 **----------------------------------------------------------------------------*/
 
 	}
-	#if cencon || InterfaceEngine
-	List<Chunk*>chlist;
-	lookup_child("CONSHAPE",chlist);
-	for(LIF<Chunk*> chlif(&chlist);!chlif.done();chlif.next())
-	{
-		((Console_Shape_Chunk*)chlif())->generate_console_chunkshape();
-	}
-	#endif
 }
 
 Shape_Chunk::Shape_Chunk (Chunk_With_Children * parent, ChunkShape &shp_dat)
@@ -423,7 +402,9 @@ BOOL Shape_Chunk::assoc_with_object_list(File_Chunk *fc)
 	
 	for (LIF<char *> n(&(hdptr->object_names_store)); !n.done(); n.next())
 	{
-		for (LIF<Chunk *> l(&chlst); !l.done(); l.next())
+		LIF<Chunk *> l(&chlst);
+		
+		for (; !l.done(); l.next())
 		{
 			ob = (Object_Chunk *)l();
 			if ( !strcmp(ob->object_data.o_name, n()) )
@@ -955,6 +936,8 @@ BOOL Shape_Polygon_Chunk::output_chunk (HANDLE &hand)
 
 void Shape_Polygon_Chunk::fill_data_block(char * data_start)
 {
+	int i, j;
+	
 	strncpy (data_start, identifier, 8);
 
 	data_start += 8;
@@ -963,12 +946,12 @@ void Shape_Polygon_Chunk::fill_data_block(char * data_start)
 
 	data_start += 4;
 
-	for (int i=0;i<num_polys;i++) {
+	for (i=0;i<num_polys;i++) {
 		*((int *) (data_start + i*36)) = poly_data[i].engine_type;
 		*((int *) (data_start + i*36 + 4)) = poly_data[i].normal_index;
 		*((int *) (data_start + i*36 + 8)) = poly_data[i].flags;
 		*((int *) (data_start + i*36 + 12)) = poly_data[i].colour;
-		for (int j = 0; j<poly_data[i].num_verts; j++)
+		for (j = 0; j<poly_data[i].num_verts; j++)
 			*((int *) (data_start + i*36 + 16 + j*4)) = poly_data[i].vert_ind[j];
 		for (; j<5; j++)
 			*((int *) (data_start + i*36 + 16 + j*4)) = -1;
@@ -1129,7 +1112,7 @@ uv_data (NULL), num_uvs (*((int *) uvdata))
 	
 }
 
-Shape_UV_Coord_Chunk::output_chunk (HANDLE &hand)
+BOOL Shape_UV_Coord_Chunk::output_chunk (HANDLE &hand)
 {
 	unsigned long junk;
 	BOOL ok;
@@ -1237,7 +1220,7 @@ tex_fns (), num_tex_fns (*((int *) tfndata))
 		
 }
 
-Shape_Texture_Filenames_Chunk::output_chunk (HANDLE &hand)
+BOOL Shape_Texture_Filenames_Chunk::output_chunk (HANDLE &hand)
 {
 	unsigned long junk;
 	BOOL ok;
@@ -1251,8 +1234,7 @@ Shape_Texture_Filenames_Chunk::output_chunk (HANDLE &hand)
 
 	if (!ok) return FALSE;
 
-	return TRUE;
-		
+	return TRUE;		
 }
 
 
@@ -1541,7 +1523,7 @@ Shape_Merge_Data_Chunk::Shape_Merge_Data_Chunk (Shape_Sub_Shape_Chunk * parent, 
 
 Shape_Merge_Data_Chunk::~Shape_Merge_Data_Chunk()
 {
-	if (num_polys) delete merge_data;
+	if (num_polys) delete [] merge_data;
 }
 
 void Shape_Merge_Data_Chunk::fill_data_block(char * data_start)
@@ -1588,501 +1570,10 @@ Shape_External_File_Chunk::Shape_External_File_Chunk (Chunk_With_Children * pare
 	post_input_processing();
 }
 
-#if cencon || InterfaceEngine
-
-void Shape_External_File_Chunk::update_from_external_rif(BOOL force_scale_update)
-{
-	if(UpdatingExternalShape)
-	{
-		return;
-	}
-
-	Shape_Chunk * parent_shp = (Shape_Chunk *) parent;
-
-	Environment_Data_Chunk * envd = 0;
-	envd = (Environment_Data_Chunk *) parent_shp->parent->lookup_single_child("REBENVDT");
-	
-	BOOL fixpal = IsFixedPalette(envd);
-
-	List<Chunk *> chlst;
-	lookup_child("SHPEXTFN",chlst);
-	
-	if (chlst.size())
-	{
-		UpdatingExternalShape=TRUE;
-	
-		Shape_External_Filename_Chunk * sefc = (Shape_External_Filename_Chunk *)chlst.first_entry();
-		
-		#if cencon
-		twprintf("Locating %s\n",sefc->file_name);
-		char * locatedfile = FindExistingFileInPath_PreferWriteable(CWnd::GetActiveWindow(),sefc->file_name,"RifSearchPath");
-		twprintf("Loading %s\n",locatedfile ? locatedfile : sefc->file_name);
-		RIF_File_Chunk * rfc = new RIF_File_Chunk (this, locatedfile ? locatedfile : sefc->file_name);
-		#elif InterfaceEngine
-		RIF_File_Chunk * rfc;
-		char * locatedfile = FindExistingFile_PreferWriteable(sefc->file_name,"RifSearchPath",FALSE);
-		if (locatedfile)
-		{
-			rfc = new RIF_File_Chunk (this, locatedfile);
-		}
-		else
-		{
-			UpdatingExternalShape=FALSE;
-			return;
-		}
-		#endif
-		
-		//Now loaded external file,so UpdatingExternalShape can now be reset
-		UpdatingExternalShape=FALSE;
-
-		if (rfc->error_code != 0)
-		{
-			#if cencon
-			extern BOOL SuppressFailedToFindShapeRifErrors;
-			
-			if(!SuppressFailedToFindShapeRifErrors)
-			{
-				char message[300];
-				sprintf(message,"Error loading shape rif : %s",locatedfile ? locatedfile : sefc->file_name);
-				twMessageBox(CWnd::GetActiveWindow(),message,"Tools Control Area", MB_TASKMODAL+MB_OK+MB_ICONHAND);				
-			}
-			#endif
-			if (locatedfile)
-			{
-				delete[] locatedfile;
-			}
-			delete rfc;
-			return;
-		}
-		
-		Shape_Chunk* shp=0;
-		lookup_child("EXTOBJNM",chlst);
-		
-		
-		if(chlst.size())
-		{
-			//we have an object name so we need to search for the correct object in the file
-			Shape_External_Object_Name_Chunk* seonm=(Shape_External_Object_Name_Chunk*) chlst.first_entry();
-		
-			rfc->lookup_child("RBOBJECT",chlst);
-			for(LIF<Chunk*> chlif(&chlst);!chlif.done();chlif.next())
-			{
-				Object_Chunk* oc=(Object_Chunk*)chlif();
-				if(!strcmp(oc->object_data.o_name,seonm->object_name))break;
-			}
-			if(chlif.done())
-			{
-				//can't find the object
-				#if cencon
-				char message[300];
-				sprintf(message,"Failed to find %s in %s\n(There may be several different rif files with the same name)",seonm->object_name,locatedfile);
-				twMessageBox(CWnd::GetActiveWindow(),message,"Tools Control Area", MB_TASKMODAL+MB_OK+MB_ICONHAND);				
-				#endif
-				delete [] locatedfile;
-				delete rfc;
-				return;
-			}
-
-			shp=((Object_Chunk*)chlif())->get_assoc_shape();
-		}
-		else
-		{
-			//no object name,so there has to be just one shape in the file
-			rfc->lookup_child("REBSHAPE",chlst);
-		
-			if (chlst.size() != 1)
-			{
-				#if cencon
-				char message[300];
-				sprintf(message,"There are %d shapes in %s\n(There should only be one)\n",chlst.size(),locatedfile);
-				twMessageBox(CWnd::GetActiveWindow(),message,"Tools Control Area", MB_TASKMODAL+MB_OK+MB_ICONHAND);				
-				#endif
-				Environment_Data_Chunk * edc = 0;
-				edc = (Environment_Data_Chunk *)rfc->lookup_single_child("REBENVDT");
-				if(edc)
-				{
-					lookup_child("RIFFNAME",chlst);
-		
-					while (chlst.size())
-					{
-						delete chlst.first_entry();
-						chlst.delete_first_entry();
-					}
-					edc->lookup_child("RIFFNAME",chlst);
-			
-					if (chlst.size())
-					{
-						new RIF_Name_Chunk (this, ((RIF_Name_Chunk *)chlst.first_entry())->rif_name);
-					}
-				}
-				delete [] locatedfile;
-				delete rfc;
-				return;
-			}
-		
-			shp = (Shape_Chunk *)chlst.first_entry();
-		}
-		delete [] locatedfile;
-		locatedfile=0;
-
-		// set so that it updates it whatever
-		
-		if (shp->get_header()->version_no != sefc->version_no || TRUE)
-		{
-			//if the shape doesn't have any associated objects,get scale from external file's 
-			//environment scale chunk.
-			//also get scale if force_scale_update is true
-			if(parent_shp->list_assoc_objs().size()==0 || force_scale_update)
-			{
-				if(force_scale_update)
-				{
-					sefc->rescale=1;
-				}
-				List<Chunk*> chlist=rfc->lookup_child("REBENVDT");
-				if(chlist.size())
-				{
-					chlist=((Chunk_With_Children*)chlist.first_entry())->lookup_child("ENVSDSCL");
-					if(chlist.size())
-					{
-						Environment_Scale_Chunk* esc =(Environment_Scale_Chunk*)chlist.first_entry();
-						sefc->rescale=esc->scale;
-					}
-				}
-			}
-			// copy all the data over from the loaded shape into the parent
-			ChunkShape cs = shp->shape_data;
-
-			cs.rescale(sefc->rescale);
-			
-			
-			// here we may want to sort out texture index nos.
-			
-			
-			// hmmm fix me
-			// definitely fixme... 
-			// everytime the file is loaded, 
-			// the shape is updated, and its bmps
-			// and thus the palette-up-to-date flag is reset,
-			// and the machine reckons on a new palette.
-			
-			parent_shp->local_lock = TRUE;
-			
-			parent_shp->update_my_chunkshape (cs);
-			
-			parent_shp->local_lock = FALSE;
-			
-			// delete all other chunks in the parent shape
-			// apart form the header !!!!
-
-			parent_shp->destroy_auxiliary_chunks();
-		
-			char * tempbuffer;
-			Chunk* child_chunk;
-			
-			child_chunk=shp->lookup_single_child("SHPZSPDT");
-			if (child_chunk)
-			{
-				tempbuffer = child_chunk->make_data_block_from_chunk();
-				new Shape_ZSP_Data_Chunk (parent_shp, (tempbuffer + 12), (*(int *) (tempbuffer + 8))-12);
-				delete [] tempbuffer;
-			}
-			
-			child_chunk = shp->lookup_single_child("SHPMRGDT");
-			if (child_chunk)
-			{
-				tempbuffer = child_chunk->make_data_block_from_chunk();
-				new Shape_Merge_Data_Chunk (parent_shp, (tempbuffer + 12), (*(int *) (tempbuffer + 8))-12);
-				delete [] tempbuffer;
-			}
-
-			child_chunk = shp->lookup_single_child("SHPMORPH");
-			if (child_chunk)
-			{
-				tempbuffer = child_chunk->make_data_block_from_chunk();
-				new Shape_Morphing_Data_Chunk (parent_shp, (tempbuffer + 12), (*(int *) (tempbuffer + 8))-12);
-				delete [] tempbuffer;
-			}
-			
-			child_chunk = shp->lookup_single_child("TEXTANIM");
-			if (child_chunk)
-			{
-				tempbuffer = child_chunk->make_data_block_from_chunk();
-				new Animation_Chunk (parent_shp, (tempbuffer + 12), (*(int *) (tempbuffer + 8))-12);
-				delete [] tempbuffer;
-			}
-
-			child_chunk = shp->lookup_single_child("SHPPCINF");
-			if (child_chunk)
-			{
-				tempbuffer = child_chunk->make_data_block_from_chunk();
-				new Shape_Poly_Change_Info_Chunk (parent_shp, (tempbuffer + 12), (*(int *) (tempbuffer + 8))-12);
-				delete [] tempbuffer;
-			}
-
-						
-			child_chunk = shp->lookup_single_child("SHPFRAGS");
-			if (child_chunk)
-			{
-				tempbuffer = child_chunk->make_data_block_from_chunk();
-				Shape_Fragments_Chunk * sfc = new Shape_Fragments_Chunk (parent_shp, (tempbuffer + 12), (*(int *) (tempbuffer + 8))-12);
-				
-				List<Chunk *> cl2;
-				sfc->lookup_child("SUBSHAPE",cl2);
-				
-				for (LIF<Chunk *> cli2(&cl2); !cli2.done(); cli2.next())
-				{
-					Shape_Sub_Shape_Chunk * sssc = (Shape_Sub_Shape_Chunk *)cli2();
-					
-					ChunkShape sscs = sssc->shape_data;
-					sscs.rescale(sefc->rescale);
-					sssc->update_my_chunkshape (sscs);
-					
- 					Shape_Fragment_Location_Chunk * sflc = (Shape_Fragment_Location_Chunk *)sssc->lookup_single_child("FRAGLOCN");
-					if (sflc)
-					{
-						sflc->frag_loc.x =(int) (sflc->frag_loc.x*sefc->rescale);
-						sflc->frag_loc.y =(int) (sflc->frag_loc.y*sefc->rescale);
-						sflc->frag_loc.z =(int) (sflc->frag_loc.z*sefc->rescale);
-					}
-					
-				}
-				
-				delete [] tempbuffer;
-			}
-			
-			shp->lookup_child("ANIMSEQU",chlst);
-			for(LIF<Chunk*> chlif(&chlst);!chlif.done();chlif.next())
-			{
-				Anim_Shape_Sequence_Chunk* assc=(Anim_Shape_Sequence_Chunk*)chlif();
-				new Anim_Shape_Sequence_Chunk(parent_shp,&assc->sequence_data);
-			}
-
-			child_chunk = shp->lookup_single_child("PNOTINBB");
-			if(child_chunk)
-			{
-				tempbuffer = child_chunk->make_data_block_from_chunk();
-				new Poly_Not_In_Bounding_Box_Chunk (parent_shp, (tempbuffer + 12), (*(int *) (tempbuffer + 8))-12);
-				delete [] tempbuffer;
-			}
-			child_chunk = shp->lookup_single_child("ANSHCEN2");
-			if(child_chunk)
-			{
-				tempbuffer = child_chunk->make_data_block_from_chunk();
-				new Anim_Shape_Centre_Chunk (parent_shp, (tempbuffer + 12), (*(int *) (tempbuffer + 8))-12);
-				delete [] tempbuffer;
-			}
-			child_chunk = shp->lookup_single_child("ASALTTEX");
-			if(child_chunk)
-			{
-				tempbuffer = child_chunk->make_data_block_from_chunk();
-				new Anim_Shape_Alternate_Texturing_Chunk (parent_shp, (tempbuffer + 12), (*(int *) (tempbuffer + 8))-12);
-				delete [] tempbuffer;
-			}
-			shp->lookup_child("CONSHAPE",chlst);
-			for(chlif.restart();!chlif.done();chlif.next())
-			{
-				tempbuffer = chlif()->make_data_block_from_chunk();
-				Console_Shape_Chunk* csc=new Console_Shape_Chunk (parent_shp, (tempbuffer + 12), (*(int *) (tempbuffer + 8))-12);
-				csc->generate_console_chunkshape();
-				delete [] tempbuffer;
-			}
-			
-			parent_shp->updated = TRUE;
-			
-			sefc->version_no = shp->get_header()->version_no;
-			
-		}
-		
-		Bitmap_List_Store_Chunk * blsc = 0;
-		
-		Global_BMP_Name_Chunk * gbnc = 0;
-
-		Environment_Data_Chunk * edc = 0;
-
-		edc = (Environment_Data_Chunk *)rfc->lookup_single_child("REBENVDT");
-		
-
-		if (edc)
-		{
-			gbnc = (Global_BMP_Name_Chunk *) edc->lookup_single_child("BMPNAMES");
-			if (gbnc)
-			{
-				if (!gbnc->bmps.size()) gbnc = 0;
-			}
-			
-			List<Chunk *> oldlst;
-			lookup_child("BMPLSTST",oldlst);
-			if (oldlst.size()>1)
-			{
-				while (oldlst.size())
-				{
-					delete oldlst.first_entry();
-					oldlst.delete_first_entry();
-				}
-			}
-			
-			if (oldlst.size())
-			{
-				blsc = (Bitmap_List_Store_Chunk *)oldlst.first_entry();
-			}
-			else
-			{
-				if (gbnc) blsc = new Bitmap_List_Store_Chunk(this);
-			}
-
-			BMP_Names_ExtraData * extended = 0;
-			if (blsc)
-			{
-				extended = blsc->GetExtendedData();
-				if (fixpal)
-					extended->flags = (GlobalBMPFlags)(extended->flags | GBF_FIXEDPALETTE);
-				else
-					extended->flags = (GlobalBMPFlags)(extended->flags & ~GBF_FIXEDPALETTE);
-			}
-			if (gbnc)
-			{
-				//if ((gbnc->get_version_num()!=blsc->get_version_num()) || (gbnc->bmps.size() != blsc->bmps.size()))
-				/*update regardless of version number*/
-				{  // other checks could be done as well
-					if (blsc->bmps.size())
-					{
-						BOOL neednewpalette = FALSE;
-						
-						List<BMP_Name> newlist = gbnc->bmps;
-						for (LIF<BMP_Name> newLIF(&newlist); !newLIF.done(); newLIF.next())
-						{
-							BMP_Name newcur = newLIF();
-							newcur.flags = (BMPN_Flags) (newcur.flags & ~(COMPLETED_BMPN_FLAGS | ChunkBMPFlag_FixedPalette));
-							if (fixpal) newcur.flags = (BMPN_Flags) (newcur.flags | ChunkBMPFlag_FixedPalette);
-							for (LIF<BMP_Name> oldLIF(&blsc->bmps); !oldLIF.done(); oldLIF.next())
-							{
-								BMP_Name oldcur = oldLIF();
-								if (newcur == oldcur)
-								{
-									// do we need to requantize?
-									if ((oldcur.flags ^ newcur.flags) & CHECKMODIFY_BMPN_FLAGS
-										|| newcur.flags & ChunkBMPFlag_UsesTransparency
-										   && !(newcur.flags & ChunkBMPFlag_IFF)
-										   && !(oldcur.flags & ChunkBMPFlag_IFF)
-										   && oldcur.DifferentTransparencyColour(newcur))
-										oldcur.flags = (BMPN_Flags)(oldcur.flags & ~COMPLETED_BMPN_FLAGS);
-									// keep some of the old flags - the ones that can differ
-									newcur.flags = (BMPN_Flags)(newcur.flags & COPY_BMPN_FLAGS);
-									newcur.flags = (BMPN_Flags)(newcur.flags | oldcur.flags & ~COPY_BMPN_FLAGS);
-									if (oldcur.version_num != newcur.version_num)
-									{
-										neednewpalette = TRUE;
-										newcur.flags = (BMPN_Flags)(newcur.flags & ~ChunkBMPFlag_HistogramExists);
-										extended->flags = (GlobalBMPFlags)(extended->flags & ~GBF_HISTOGRAMEXISTS);
-									}
-									break;
-								}
-							}
-							if (oldLIF.done())
-							{
-							   	// reset palette up to date flag
-								neednewpalette = TRUE;
-								newcur.flags = (BMPN_Flags)(newcur.flags & ~(ChunkBMPFlag_HistogramExists | COMPLETED_BMPN_FLAGS));
-								extended->flags = (GlobalBMPFlags)(extended->flags & ~GBF_HISTOGRAMEXISTS);
-							}
-							newLIF.change_current(newcur);
-						}
-
-						// check if any bitmaps have been removed
-						for (LIF<BMP_Name> bli(&blsc->bmps); !bli.done(); bli.next())
-						{
-							if (!newlist.contains(bli()))
-							{
-								// delete assoc files
-								neednewpalette = TRUE;
-								extended->flags = (GlobalBMPFlags)(extended->flags & ~GBF_HISTOGRAMEXISTS);
-							}
-						}
-
-						if (neednewpalette)
-						{
-							Palette_Outdated(envd);
-							if (fixpal) FixedPalette_Outdated(envd);
-							envd->updated = TRUE;
-						}
-						blsc->bmps = newlist;
-					}
-					else
-					{
-						blsc->bmps = gbnc->bmps;
-						for (LIF<BMP_Name> flagresetLIF(&blsc->bmps); !flagresetLIF.done(); flagresetLIF.next())
-						{
-							BMP_Name current = flagresetLIF();
-							current.flags = (BMPN_Flags)(current.flags & (COPY_BMPN_FLAGS & ~ChunkBMPFlag_FixedPalette));
-							if (fixpal) current.flags = (BMPN_Flags) (current.flags | ChunkBMPFlag_FixedPalette);
-							flagresetLIF.change_current(current);
-						}
-						// reset palette up to date flag
-						extended->flags = (GlobalBMPFlags)(extended->flags & ~GBF_HISTOGRAMEXISTS);
-						Palette_Outdated(envd);
-						if (fixpal) FixedPalette_Outdated(envd);
-						envd->updated = TRUE;
-					}
-					blsc->max_index = gbnc->max_index;
-					blsc->set_version_num(gbnc->get_version_num());
-					parent_shp->updated = TRUE;
-				}
-			}
-			else
-			{
-				if (blsc)
-				{
-					if (blsc->bmps.size())
-					{
-						// reset palette up to date flag
-						extended->flags = (GlobalBMPFlags)(extended->flags & ~GBF_HISTOGRAMEXISTS);
-						Palette_Outdated(envd);
-						if (fixpal) FixedPalette_Outdated(envd);
-						envd->updated = TRUE;
-						parent_shp->updated = TRUE;
-					}
-					delete blsc;
-				}
-			}
-		}
-		
-		lookup_child("RIFFNAME",chlst);
-		
-		while (chlst.size())
-		{
-			delete chlst.first_entry();
-			chlst.delete_first_entry();
-		}
-		
-		if (edc)
-		{
-			edc->lookup_child("RIFFNAME",chlst);
-			
-			if (chlst.size())
-			{
-				new RIF_Name_Chunk (this, ((RIF_Name_Chunk *)chlst.first_entry())->rif_name);
-			}
-			
-		}
-		
-		delete rfc;
-	}
-	
-}
-
-void Shape_External_File_Chunk::post_input_processing()
-{
-
-	update_from_external_rif(FALSE);
-	Chunk_With_Children::post_input_processing();
-	
-}
-#else
 void Shape_External_File_Chunk::post_input_processing()
 {
 	Chunk_With_Children::post_input_processing();
 }
-#endif
 
 const char* Shape_External_File_Chunk::get_shape_name()
 {
@@ -2262,7 +1753,7 @@ Shape_Morphing_Data_Chunk::Shape_Morphing_Data_Chunk (Shape_Chunk * parent, cons
 	
 }	
 Shape_Morphing_Data_Chunk::Shape_Morphing_Data_Chunk (Shape_Sub_Shape_Chunk * parent, const char *data, size_t size)
-: Chunk_With_Children (parent, "SHPMORPH"), parent_sub_shape (parent), parent_shape (0)
+: Chunk_With_Children (parent, "SHPMORPH"), parent_shape (0), parent_sub_shape (parent) 
 {
 	const char * buffer_ptr = data;
 
@@ -2288,7 +1779,9 @@ void Shape_Morphing_Data_Chunk::prepare_for_output()
 	List<Chunk *> cl;
 	lookup_child("SUBSHAPE",cl);
 	
-	for (LIF<Chunk *> cli(&cl); !cli.done(); cli.next())
+	LIF<Chunk *> cli(&cl);
+	
+	for (; !cli.done(); cli.next())
 	{
 		max_id = max (max_id, ((Shape_Sub_Shape_Chunk *)cli())->get_header()->file_id_num);
 	}
@@ -2541,14 +2034,6 @@ Shape_Sub_Shape_Chunk::Shape_Sub_Shape_Chunk(Chunk_With_Children * parent, const
 		data += *(int *)(data + 8);
 
 	}
-	#if cencon || InterfaceEngine
-	List<Chunk*>chlist;
-	lookup_child("CONSHAPE",chlist);
-	for(LIF<Chunk*> chlif(&chlist);!chlif.done();chlif.next())
-	{
-		((Console_Shape_Chunk*)chlif())->generate_console_chunkshape();
-	}
-	#endif
 }
 
 Shape_Sub_Shape_Chunk::Shape_Sub_Shape_Chunk (Chunk_With_Children * parent, ChunkShape &shp_dat)
@@ -3090,7 +2575,7 @@ Shape_Fragment_Type_Chunk::Shape_Fragment_Type_Chunk(Chunk_With_Children* const 
 
 Shape_Fragment_Type_Chunk::~Shape_Fragment_Type_Chunk()
 {
-	if(frag_type_name) delete frag_type_name;
+	if(frag_type_name) delete [] frag_type_name;
 }											 
 
 void Shape_Fragment_Type_Chunk::fill_data_block(char* data_start)
@@ -3852,6 +3337,9 @@ void* Shape_Preprocessed_Data_Chunk::GetMemoryBlock()
 {
 	void* retval=memory_block;
 
+// 64HACK
+#pragma message ("64HACK")
+#if 0
 	unsigned int* current=(unsigned int*)&first_pointer;
 	unsigned int* next;
 	while((*current>>16)!=0xffff)
@@ -3861,7 +3349,7 @@ void* Shape_Preprocessed_Data_Chunk::GetMemoryBlock()
 		current=next;
 	}
 	*current=(unsigned int)&memory_block[(*current)&0xffff];
-
+#endif
 	memory_block=0;
 	block_size=0;
 	return retval;

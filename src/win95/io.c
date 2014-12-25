@@ -1,11 +1,10 @@
 #include "3dc.h"
 
-#include <sys\stat.h>
+#include <sys/stat.h>
 #include <string.h>
 
 #include "inline.h"
 #include "module.h"
-#include "krender.h"
 
 #include "chnktexi.h"
 #include "d3d_hud.h"
@@ -15,17 +14,6 @@
 
 #undef textprint
 
-
-#if SupportTLTFiles
-#define Output_TLT_File				No
-#endif
-
-#define Output_VEA_File				No
-
-#define Proper_8Bit_MIP No
-
-#define DontLet222ColoursGoToBlack Yes
-
 #define textprintOn Yes
 
 #define DHMtextprint Yes
@@ -34,25 +22,6 @@
 
 /* As specified by Roxby */
 #define ClearScreenColour 1000
-
-/*
-   To filter frame rate values from
-   Windows timer to provide a smoother
-   ride.  This may make some AI systems
-   etc behave better, though it will take
-   some time to catch up if there is a genuine
-   abrupt transition in the frame rate.
-
-   There may also be some sort of convergence
-   instability here!!!! IMPORTANT
-   FIXME!!!! (possibly)
-
-   Although this code was derived from
-   some of Jamie's filter algorithms, I have
-   mangled it hideously, so _don't blame him_!
-*/
-
-#define KalmanTimer No
 
 /*
   Experiment to try and fix mystery driver problems
@@ -89,13 +58,9 @@
 
 */
 
-extern SCENE Global_Scene;
 extern SHAPEHEADER **mainshapelist;
 extern SHAPEHEADER *testpaletteshapelist[];
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-extern int sine[];
-extern int cosine[];
-extern int AdaptiveHazingFlag;
 extern int *Global_ShapeNormals;
 extern int *Global_ShapePoints;
 extern int *ItemPointers[];
@@ -129,15 +94,10 @@ extern IMAGEHEADER ImageHeaderArray[]; /* Array of Image Headers */
 
 */
 
-	int DrawMode = DrawPerVDB;
-/* Win95 default ought to be per frame */
-
 /* Timer */
    long lastTickCount;
 
 	unsigned char *ScreenBuffer    = 0;		/* Ensure initialised to Null */
-	unsigned char *ScreenBuffer2   = 0;
-
 
 	unsigned char LPTestPalette[1024]; /* to cast to lp*/
 	
@@ -160,10 +120,8 @@ extern IMAGEHEADER ImageHeaderArray[]; /* Array of Image Headers */
 
 	unsigned char *PaletteRemapTable = 0;
 
-	int **ShadingTableArray = 0;
 	int NumShadingTables    = 0;
 
-	unsigned char **PaletteShadingTableArray = 0;
 	int NumPaletteShadingTables              = 0;
 
 	int FrameRate;
@@ -313,63 +271,6 @@ void GetDOSFilename(char *fnameptr)
 
 }
 
-
-/*
-
- Compare two strings.
-
- Return Yes if they're the same, else No.
-
-*/
-
-/*
-	       IMPORTANT!!!
-	This function is not ideal!!! It is used
-	here because this is only an initialisation
-	stage, but if you want to compare strings
-	elsewhere you should either use the C library
-	function or (if there's a problem with that)
-	write your own.
-*/
-
-int CompareStringCH(char *string1, char *string2)
-
-{
-
-	char *srtmp;
-	char *srtmp2;
-	int slen1 = 0;
-	int slen2 = 0;
-	int i;
-
-
-	srtmp = string1;
-
-	while(*srtmp++ != 0)
-		slen1++;
-
-	srtmp = string2;
-
-	while(*srtmp++ != 0)
-		slen2++;
-
-	if(slen1 != slen2) return No;
-
-	else {
-
-		srtmp = string1;
-		srtmp2 = string2;
-
-		for(i=slen1; i!=0; i--)
-			if(*srtmp++ != *srtmp2++) return No;
-
-		return Yes;
-
-	}
-
-}
-
-
 /*
 
  Compare two filenames.
@@ -487,15 +388,6 @@ int CompareFilenameCH(char *string1, char *string2)
 
 */
 
-
-#define remap_table_size (1 << (remap_table_rgb_bits * 3))
-
-
-#define cprt_info No
-#define cprt_cnt No
-
-
-
 int NearestColour(int rs, int gs, int bs, unsigned char *palette)
 
 {
@@ -539,59 +431,8 @@ int NearestColour(int rs, int gs, int bs, unsigned char *palette)
 }
 
 
-
-
-
-
-
-
-
-
 /*************************************************************************/
 /*************************************************************************/
-
-
-
-
-
-/*
-
- PC Video Mode Array Functions
-
-*/
-
-
-#define m320diag (378 + 6)
-
-
-
-
-
-/*
-
- PC Video Mode Function Arrays
-
-*/
-
-void (*SetVideoMode[]) (void) = {
-
-0
-
-};
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 /*
@@ -600,11 +441,12 @@ void (*SetVideoMode[]) (void) = {
 
 */
 
-void InitialiseSystem(HINSTANCE hInstance, int nCmdShow)
-
+void InitialiseSystem()
 {
 	BOOL 		rc;
-
+	HINSTANCE hInstance = 0;
+	int nCmdShow = 1;
+	
     /*
 		Pick up processor type
 	*/
@@ -652,6 +494,7 @@ void InitialiseSystem(HINSTANCE hInstance, int nCmdShow)
 	  video memory etc exist.
 	*/
 
+#if 0 /* LINUX */
 	if (InitialiseDirectDrawObject()
 	    == FALSE)
 	   /* 
@@ -683,6 +526,7 @@ void InitialiseSystem(HINSTANCE hInstance, int nCmdShow)
 	system memory...
 */
     TestMemoryAccess();
+#endif
 
     /* Initialise main window, windows procedure etc */
 	rc = InitialiseWindowsSystem(hInstance, nCmdShow, WinInitFull);
@@ -691,11 +535,13 @@ void InitialiseSystem(HINSTANCE hInstance, int nCmdShow)
     memset((void*)KeyboardInput, No, MAX_NUMBER_OF_INPUT_KEYS);
 	GotAnyKey = No;
 
+#if 0 /* LINUX */
 	/* launch Direct Input */
 	InitialiseDirectInput();
 	InitialiseDirectKeyboard();
 	InitialiseDirectMouse();
 	InitJoysticks();
+#endif
 
     /* Initialise textprint system */
     textprintPosX = 0;
@@ -813,61 +659,6 @@ void FrameCounterHandler(void)
 
 /*
 
-   This jump table has been provided
-   solely to ensure compatibility with
-   DOS and other versions.
-	
-*/
-
-void (*UpdateScreen[]) (void) = {
-
-    FlipBuffers,
-    FlipBuffers,
-    FlipBuffers,
-    FlipBuffers,
-
-    FlipBuffers,
-    FlipBuffers,
-    FlipBuffers,
-    FlipBuffers,
-
-    FlipBuffers,
-    FlipBuffers,
-    FlipBuffers,
-    FlipBuffers,
-
-    FlipBuffers,
-    FlipBuffers,
-    FlipBuffers,
-    FlipBuffers,
-
-    FlipBuffers,
-    FlipBuffers,
-    FlipBuffers,
-    FlipBuffers,
-
-    FlipBuffers,
-    FlipBuffers,
-    FlipBuffers,
-    FlipBuffers
-
-};
-
-
-/*
-	Not supported in Windows 95 !!!
-*/
-
-
-void PlotPixelTest(int x, int y, unsigned char col)
-
-{
-
-}
-
-
-/*
-
  Wait for Return Key
 
  Such a function may not be defined on some platforms
@@ -977,11 +768,6 @@ void GetProjectFilename(char *fname, char *image)
 }
 
 
-
-
-
-
-
 /*
 
  Attempts to load the image file.
@@ -1001,13 +787,6 @@ TEXTURE* LoadImageCH(char *fname, IMAGEHEADER *iheader)
 {
 	return 0;
 }	
-
-
-
-
-
-
-
 
 
 void ConvertToDDPalette(unsigned char* src, unsigned char* dst, int length, int flags)
@@ -1318,7 +1097,7 @@ static int DHM_MoveBufferToQueue(int* pPosX,int* pPosY,int fZeroLeftMargin)
 							/* It is a standard character or a space */
 							DHM_AddToQueue(*pPosX,(*pPosY)+textprint_Y_offset, *pCh);
 
-							(*pPosX)+=AAFontWidths[*pCh];//CharWidthInPixels(*pCh);
+							(*pPosX)+=AAFontWidths[(unsigned char)*pCh];//CharWidthInPixels(*pCh);
 
 							if ((*pPosX)>LastDisplayableXForChars())
 							{
@@ -1764,15 +1543,6 @@ void InitPrintQueue(void)
 	AND ONLY ONCE!!!!
 */
 
-#if debug || PreBeta
-extern LPDIRECTDRAWSURFACE lpDDDbgFont;
-#endif
-
-
-
-
-
-
 
 
 /*
@@ -1922,12 +1692,10 @@ int ChangeDisplayModes(HINSTANCE hInst, int nCmd,
 		obviously...
 		FIXME!!!
 	*/
-    /* test only!!! */
-    #if 0
-	chdir("d:\3dc");
-	#endif
 
+/*
     SetVideoMode[VideoMode]();
+*/
 
 /*
 	Lose all the textures and reload the 
@@ -1966,5 +1734,3 @@ void ConvertDDToInternalPalette(unsigned char* src, unsigned char* dst, int leng
 		 *dst++ = (*src++) >> 2;
 		}
 }	
-
-

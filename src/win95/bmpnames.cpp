@@ -2,41 +2,23 @@
 #include "bmpnames.hpp"
 #include "mishchnk.hpp"
 
-#if engine
 #define UseLocalAssert No
 #include "ourasert.h"
 #define assert(x) GLOBALASSERT(x)
-#else
-#if cencon
-#include "ccassert.h"
-#else
-#include <assert.h>
-#endif
-#endif
-
-#ifdef cencon
-#define new my_new
-#endif
 
 //macro for helping to force inclusion of chunks when using libraries
 FORCE_CHUNK_INCLUDE_IMPLEMENT(bmpnames)
 
 
 BMP_Name::BMP_Name (const char * fname, int const gbnc_version)
-: flags((BMPN_Flags)DEFAULT_BMPN_FLAGS), index(0), version_num (gbnc_version << BMPNAME_PARENT_VER_SHIFT), priority (DEFAULT_BMPN_PRIORITY), transparency_colour_union(0), enum_id(0)
-#if cencon
-, md5val(0)
-#endif
+: flags((BMPN_Flags)DEFAULT_BMPN_FLAGS), index(0), version_num (gbnc_version << BMPNAME_PARENT_VER_SHIFT), enum_id(0), priority (DEFAULT_BMPN_PRIORITY), transparency_colour_union(0)
 {
 	filename = new char [strlen(fname)+1];
 	strcpy (filename, fname);
 }
 
 BMP_Name::BMP_Name (const char * fname)
-: flags((BMPN_Flags)DEFAULT_BMPN_FLAGS), index(0), version_num (0), priority (DEFAULT_BMPN_PRIORITY), transparency_colour_union(0), enum_id(0)
-#if cencon
-, md5val(0)
-#endif
+: flags((BMPN_Flags)DEFAULT_BMPN_FLAGS), index(0), version_num (0), enum_id(0), priority (DEFAULT_BMPN_PRIORITY), transparency_colour_union(0)
 {
 	filename = new char [strlen(fname)+1];
 	strcpy (filename, fname);
@@ -60,9 +42,6 @@ BMP_Name::BMP_Name (const BMP_Name & bn)
 	enum_id = bn.enum_id;
 	priority = bn.priority;
 	transparency_colour_union = bn.transparency_colour_union;
-	#if cencon
-	md5val = bn.md5val;
-	#endif
 }
 
 void BMP_Name::Validate(void)
@@ -88,13 +67,8 @@ const BMP_Name & BMP_Name::operator=(const BMP_Name & bn)
 	enum_id = bn.enum_id;
 	priority = bn.priority;
 	transparency_colour_union = bn.transparency_colour_union;
-	#if cencon
-	md5val = bn.md5val;
-	#endif
 	
 	return(*this);
-	
-	
 }
 
 
@@ -129,7 +103,7 @@ Chunk_With_BMPs::Chunk_With_BMPs (Chunk_With_Children * parent, const char * con
 
 	bdata += 4;
 	
-	for (int i=0; i<num; i++)
+	for (int j=0; j<num; j++)
 	{
 		int f,i,d1,d2,d3;
 	
@@ -824,8 +798,6 @@ Matching_Images_Chunk::Matching_Images_Chunk(Chunk_With_Children * parent, char 
 : Chunk(parent,"MATCHIMG")
 , flags ((MICFlags)(*(int *)(datablock+8) & MICF_MASK))
 {
-	char const * datastart = datablock;
-	
 	spares[0] = *(int *)datablock;
 	spares[1] = *(int *)(datablock+4);
 
@@ -888,7 +860,7 @@ ImageDescriptor const & Matching_Images_Chunk::GetLoadImage(ImageDescriptor cons
 RIF_IMPLEMENT_DYNCREATE("BMPMD5ID",Bitmap_MD5_Chunk)
 
 Bitmap_MD5_Chunk::Bitmap_MD5_Chunk(Chunk_With_Children * parent, int const * md5id, BMP_Name const & rcbmp, char const * rname, char const * sname)
-: Chunk(parent,"BMPMD5ID"), spare(0), flags(BMD5F_0), version_num(rcbmp.version_num)
+: Chunk(parent,"BMPMD5ID"), flags(BMD5F_0), version_num(rcbmp.version_num), spare(0)
 {
 	memcpy(md5_val,md5id,16);
 	
@@ -907,7 +879,7 @@ Bitmap_MD5_Chunk::Bitmap_MD5_Chunk(Chunk_With_Children * parent, int const * md5
 }
 
 Bitmap_MD5_Chunk::Bitmap_MD5_Chunk(Chunk_With_Children * parent, char const * datablock, size_t)
-: Chunk(parent,"BMPMD5ID"), spare(*(int *)datablock), flags((BMPMD5_Flags)(*(int *)(datablock+4) & BMD5F_MASK)), version_num(*(int *)(datablock+8))
+: Chunk(parent,"BMPMD5ID"), flags((BMPMD5_Flags)(*(int *)(datablock+4) & BMD5F_MASK)), version_num(*(int *)(datablock+8)), spare(*(int *)datablock) 
 {
 	memcpy(md5_val,datablock+12,16);
 	datablock += 28;
@@ -958,7 +930,3 @@ size_t Bitmap_MD5_Chunk::size_chunk()
 		+(shapename ? strlen(shapename) : 0)
 		+3 +3&~3;
 }
-
-
-
-

@@ -13,7 +13,6 @@
 
 extern "C"
 {
-#include "3dc.h"
 #include "module.h"
 #include "inline.h"
 
@@ -29,17 +28,16 @@ extern "C"
 #include "cheat.h"
 #include "cd_player.h"
 #include "dynblock.h"
-#include "bh_RubberDuck.h"
+#include "bh_rubberduck.h"
 #include "pvisible.h"
 #include "pldnet.h"
 
 #include "lighting.h"
 #include "paintball.h"		  
 #include "decal.h"
-#include "ConsoleLog.hpp"
+#include "consolelog.hpp"
 #include "psndplat.h"
 #include "avp_menus.h"
-#include "smacker.h"
 #include "detaillevels.h"
 #include "savegame.h"
 
@@ -48,12 +46,12 @@ int DebuggingCommandsActive=0;
 extern void GimmeCharge(void);
 
 // just change these to prototypes etc.
-extern void QuickLoad()
+extern void QuickLoad(void)
 {
 	//set the load request
 	LoadGameRequest = 0; //(that's slot 0 - not false)
 }
-extern void QuickSave()
+extern void QuickSave(void)
 {
 	//set the save request
 	SaveGameRequest = 0; //(that's slot 0 - not false)
@@ -74,7 +72,7 @@ void ConsoleCommandSave(int slot)
 		SaveGameRequest = slot-1;
 	}
 }
-extern void DisplaySavesLeft();
+extern void DisplaySavesLeft(void);
 
 
 
@@ -84,7 +82,7 @@ extern void ChangeNetGameType_Individual();
 extern void ChangeNetGameType_Coop();
 extern void ChangeNetGameType_LastManStanding();
 extern void ChangeNetGameType_PredatorTag();
-extern void ShowNearestPlayersName();
+extern void ShowNearestPlayersName(void);
 extern void ScreenShot(void);
 extern void CastAlienBot(void);
 extern void CastMarineBot(int weapon);
@@ -99,6 +97,7 @@ static void ShowFPS(void)
 {
 	ShowDebuggingText.FPS = ~ShowDebuggingText.FPS;
 }
+#if CONSOLE_DEBUGGING_COMMANDS_ACTIVATED
 static void ShowEnvironment(void)
 {
 	ShowDebuggingText.Environment = ~ShowDebuggingText.Environment;
@@ -131,17 +130,19 @@ static void ShowTears(void)
 {
 	ShowDebuggingText.Tears = ~ShowDebuggingText.Tears;
 }
-static void ShowPolyCount(void)
-{
-	ShowDebuggingText.PolyCount = ~ShowDebuggingText.PolyCount;
-}
 static void ShowSounds(void)
 {
 	ShowDebuggingText.Sounds = ~ShowDebuggingText.Sounds;
 }
+#endif
+static void ShowPolyCount(void)
+{
+	ShowDebuggingText.PolyCount = ~ShowDebuggingText.PolyCount;
+}
 
 
 extern void ChangeToMarine();
+#if CONSOLE_DEBUGGING_COMMANDS_ACTIVATED
 static void ChangeToSpecialist_General()
 {
 	netGameData.myCharacterSubType=NGSCT_General;
@@ -210,7 +211,13 @@ static void ChangeToSpecialist_Pistols()
 	ChangeToMarine();
 }
 
-extern void ShowMultiplayerScores()
+static void ForceAssertionFailure(void)
+{
+	LOCALASSERT("This assertion has been forced to stop the game"==0);
+}
+#endif
+
+extern void ShowMultiplayerScores(void)
 {
 	ShowMultiplayerScoreTimer=5*ONE_FIXED;
 }
@@ -225,11 +232,6 @@ static void DoMultiplayerSay(char* string)
 static void DoMultiplayerSaySpecies(char* string)
 {
 	AddNetMsg_ChatBroadcast(string,TRUE);
-}
-
-static void ForceAssertionFailure(void)
-{
-	LOCALASSERT("This assertion has been forced to stop the game"==0);
 }
 
 
@@ -267,6 +269,7 @@ static void CDCommand_Volume(int volume)
 }
 
 
+#if CONSOLE_DEBUGGING_COMMANDS_ACTIVATED
 static void GunX(int x)
 {
 	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
@@ -291,28 +294,14 @@ static void GunZ(int z)
 
 	twPtr->RestPosition.vz = z;
 }
+#endif
 
 static void MakeRotatingLight(void)
 {
 	MakeLightElement(&Player->ObWorld,LIGHTELEMENT_ROTATING);
 }
-VECTORCH boing = {12345,12345,12345};
-VECTORCH boing2 = {23451,34512,45123};
 
-static void Trash_Frame_Rate(void)
-{
-	int i=0;
-
-	for (i=0; i<10000000; i++)
-	{
-	 //	Normalise(&boing);
-		boing.vx += boing2.vx+FastRandom();
-		boing.vy += boing2.vy;
-		boing.vz += boing2.vz;
-	}
-}
-
-
+#if CONSOLE_DEBUGGING_COMMANDS_ACTIVATED
 static void RestartMultiplayer(void)
 {
 	/* obviously have to be in a network game... */
@@ -327,6 +316,7 @@ static void CompleteLevel(void)
 {
 	AvP.LevelCompleted = 1;
 }
+#endif
 
 
 void CreateGameSpecificConsoleCommands(void)
@@ -549,14 +539,7 @@ void CreateGameSpecificConsoleCommands(void)
 		"RESTARTS A NETWORK GAME FROM SCRATCH",
 		RestartMultiplayer
 	);
-	#if 0
-	ConsoleCommand::Make
-	(
-		"NEWPLANET",
-		"",
-		NewPlanet
-	);
-	#endif
+
 	ConsoleCommand::Make
 	(
 		"PAINTBALL",
@@ -683,19 +666,13 @@ void CreateGameSpecificConsoleCommands(void)
 	#if 1
 	ConsoleCommand::Make
 	(
-		"TRASH_FRAME_RATE",
-		"",
-		Trash_Frame_Rate
-	);
-	
-	ConsoleCommand::Make
-	(
 		"COMPLETE_LEVEL",
 		"",
 		CompleteLevel
 	);
 	#endif
 	#endif
+
 	/* KJL 15:52:41 29/03/98 - version info */
 	ConsoleCommand::Make
 	(
@@ -810,9 +787,5 @@ void CreateGameSpecificConsoleCommands(void)
 	);
 
 }	
-
-
-
-						
 
 } // extern "C"

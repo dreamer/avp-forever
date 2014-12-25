@@ -2,7 +2,7 @@
 #define _avp_user_profile_h_ 1
 
 #include "usr_io.h"
-#include "AvP_EnvInfo.h"
+#include "avp_envinfo.h"
 #include "game_statistics.h"
 #include "detaillevels.h"
 /* KJL 14:17:41 10/12/98 - User profile
@@ -69,8 +69,11 @@ typedef struct
 {
 	char Name[MAX_SIZE_OF_USERS_NAME+1];
 
-	SYSTEMTIME TimeLastUpdated;
-	FILETIME FileTime;
+	// SBF: 32-bit time_t
+	uint32_t FileTime;
+
+	// SBF: used to be an incomplete SYSTEMTIME struct, TimeLastUpdated
+	int unused[6];
 
 	/* KJL 15:14:12 10/12/98 - array to hold level completion data
 	3 species, pad out to 16 levels each */
@@ -144,10 +147,8 @@ typedef struct
 
 
 
-
-
-#define USER_PROFILES_PATH "User_Profiles\\"
-#define USER_PROFILES_WILDCARD_NAME "User_Profiles\\*.prf"
+#define USER_PROFILES_PATH "User_Profiles/"
+#define USER_PROFILES_WILDCARD_NAME "*.prf"
 #define USER_PROFILES_SUFFIX ".prf"
 
 
@@ -163,6 +164,7 @@ extern AVP_USER_PROFILE *GetNextUserProfile(void);
 extern int SaveUserProfile(AVP_USER_PROFILE *profilePtr);
 extern void DeleteUserProfile(int number);
 
+extern void FixCheatModesInUserProfile(AVP_USER_PROFILE *profilePtr);
 
 extern void GetSettingsFromUserProfile(void);
 extern void SaveSettingsToUserProfile(AVP_USER_PROFILE *profilePtr);
@@ -173,8 +175,6 @@ extern int CheatMode_Active;
 extern int CheatMode_Species;
 extern int CheatMode_Environment;
 
-
-extern int EdmondsTest();
 
 #ifdef __cplusplus									 
 }; // extern "C"

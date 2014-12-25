@@ -1,13 +1,7 @@
 #ifndef _INCLUDED_MEDIA_HPP_
 #define _INCLUDED_MEDIA_HPP_
 
-#if defined(_WIN32) || defined(WIN32) || defined(WINDOWS) || defined(_WINDOWS)
-	#define _MEDIA_WIN_TARGET
-	#include <windows.h>
-#endif // WIN32 || _WIN32 || WINDOWS || _WINDOWS
-
 #include <stdio.h>
-#include <conio.h>
 #include <limits.h>
 #include <string.h>
 	
@@ -29,19 +23,21 @@ void MediaRead(MediaMedium * pThis, TYPE * p);
 template <class TYPE>
 void MediaWrite(MediaMedium * pThis, TYPE d);
 
-#ifdef __WATCOMC__
-template <class TYPE> class _Media_CompilerHack;
-#endif
-
 class MediaMedium
 {
 	protected:
 		// standard constructor
-		MediaMedium() : m_nRefCnt(1),
-			m_fError(0), m_nDefBufSize(1024),
-			m_nWriteBufPos(0), m_nReadBufPos(0),
-			m_nBufLenUsed(0), m_nBufSize(0),
-			m_pReadBuffer(NULL), m_pWriteBuffer(NULL) {}
+		MediaMedium() :
+			m_fError(0),
+			m_nDefBufSize(1024),
+			m_pWriteBuffer(NULL),
+			m_pReadBuffer(NULL),
+			m_nReadBufPos(0),
+			m_nWriteBufPos(0),
+			m_nBufSize(0),
+			m_nBufLenUsed(0),
+			m_nRefCnt(1)
+			{}
 			
 		virtual ~MediaMedium() {}
 	
@@ -278,15 +274,10 @@ class MediaMedium
 	friend class _Media_CompilerHack;
 };
 
-#ifdef __WATCOMC__
-template <class TYPE>
-#endif
 class _Media_CompilerHack
 {
 	public:
-		#ifndef __WATCOMC__
 		template <class TYPE>
-		#endif
 		static inline void MediaRead(MediaMedium * pThis, TYPE * p)
 		{
 			if (pThis->m_nReadBufPos + sizeof(TYPE) <= pThis->m_nBufSize)
@@ -311,9 +302,7 @@ class _Media_CompilerHack
 			}
 		}
 	
-		#ifndef __WATCOMC__
 		template <class TYPE>
-		#endif
 		static inline void MediaWrite(MediaMedium * pThis, TYPE d)
 		{
 			if (pThis->m_nWriteBufPos + sizeof(TYPE) <= pThis->m_nBufSize)
@@ -347,11 +336,7 @@ class _Media_CompilerHack
 template <class TYPE>
 inline void MediaRead(MediaMedium * pThis, TYPE * p)
 {
-	_Media_CompilerHack
-		#ifdef __WATCOMC__
-		<TYPE>
-		#endif
-		::MediaRead(pThis,p);
+	_Media_CompilerHack::MediaRead(pThis,p);
 }
 
 // use this to write simple data types
@@ -362,11 +347,7 @@ inline void MediaRead(MediaMedium * pThis, TYPE * p)
 template <class TYPE>
 inline void MediaWrite(MediaMedium * pThis, TYPE d)
 {
-	_Media_CompilerHack
-		#ifdef __WATCOMC__
-		<TYPE>
-		#endif
-		::MediaWrite(pThis,d);
+	_Media_CompilerHack::MediaWrite(pThis,d);
 }
 
 #ifdef _MEDIA_WIN_TARGET
@@ -386,7 +367,7 @@ class MediaWinFileMedium : public MediaMedium
 			m_hFile = INVALID_HANDLE_VALUE;
 		}
 		
-		void Open(LPCTSTR pszFileName, DWORD dwDesiredAccess)
+		void Open(char *pszFileName, DWORD dwDesiredAccess)
 		{
 			DWORD dwShareMode;
 			DWORD dwCreationDistribution;
@@ -413,10 +394,10 @@ class MediaWinFileMedium : public MediaMedium
 				pszFileName,
 				dwDesiredAccess,
 				dwShareMode,
-				NULL,
+				0,
 				dwCreationDistribution,
 				FILE_ATTRIBUTE_NORMAL,
-				NULL
+				0
 			);
 			if (INVALID_HANDLE_VALUE == m_hFile)
 				m_fError |= MME_OPENFAIL;
@@ -491,7 +472,12 @@ class MediaStdFileMedium : public MediaMedium
 		
 		void Open(char const * pszFileName, char const * pszOpenMode)
 		{
-			m_pFile = fopen(pszFileName,pszOpenMode);
+			if (pszOpenMode[0] != 'r' || pszOpenMode[1] != 'b') {
+				fprintf(stderr, "Open(%s, %s)\n", pszFileName, pszOpenMode);
+				m_fError |= MME_OPENFAIL;
+				return;
+			} 
+			m_pFile = OpenGameFile(pszFileName, FILEMODE_READONLY, FILETYPE_PERM);
 			if (!m_pFile)
 				m_fError |= MME_OPENFAIL;
 		}

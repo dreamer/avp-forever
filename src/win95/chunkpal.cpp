@@ -1,23 +1,12 @@
 #include "chunkpal.hpp"
 #include "mishchnk.hpp"
 
-#if engine
-
 #ifndef UseLocalAssert
 #define UseLocalAssert 1
 #endif
 #include "ourasert.h"
 #define assert(x) GLOBALASSERT(x)
 
-#else
-
-#if cencon
-#include "ccassert.h"
-#else
-#include <assert.h>
-#endif
-
-#endif
 //macro for helping to force inclusion of chunks when using libraries
 FORCE_CHUNK_INCLUDE_IMPLEMENT(chunkpal)
 
@@ -66,7 +55,9 @@ BOOL IsFixedPalette(Chunk_With_Children * parent)
 	{
 		List<Chunk *> plist;
 		parent->lookup_child("PRSETPAL",plist);
-		for (LIF<Chunk *> plit(&plist); !plit.done(); plit.next())
+		
+		LIF<Chunk *> plit(&plist);
+		for (; !plit.done(); plit.next())
 		{
 			for (LIF<Preset_Palette> findconst(&((Preset_Palette_Chunk *)plit())->pplist); !findconst.done(); findconst.next())
 			{
@@ -152,8 +143,8 @@ Preset_Palette::Preset_Palette (Preset_Palette const & c)
 , reserved1(c.reserved1)
 , reserved2(c.reserved2)
 , startpos(c.startpos)
-, pixel_data(grab_pixel_data(c.size, c.pixel_data))
 , name(0)
+, pixel_data(grab_pixel_data(c.size, c.pixel_data))
 {
 	if (c.name)
 	{
@@ -221,8 +212,8 @@ RIF_IMPLEMENT_DYNCREATE("PRSETPAL",Preset_Palette_Chunk)
 
 Preset_Palette_Chunk::Preset_Palette_Chunk(Chunk_With_Children * const parent, char const * sdata, size_t const /*ssize*/)
 : Chunk(parent,"PRSETPAL")
-, version_num(*(int *)sdata)
 , flags(*(int *)(sdata+4))
+, version_num(*(int *)sdata)
 , reserved1(*(int *)(sdata+8))
 , reserved2(*(int *)(sdata+12))
 , reserved3(*(int *)(sdata+16))
@@ -289,9 +280,11 @@ RIF_IMPLEMENT_DYNCREATE("ENVTXLIT",Environment_TLT_Chunk)
 
 Environment_TLT_Chunk::Environment_TLT_Chunk (Chunk_With_Children * parent, const char * sdata, size_t ssize)
 : Chunk (parent, "ENVTXLIT"), width (*((int*)(sdata))),
-	num_levels (*((int*)(sdata+4))), flags(*(int *)(sdata+28)), table (0), filename(0)
+	num_levels (*((int*)(sdata+4))), flags(*(int *)(sdata+28)), filename(0), table (0)
 {
-	for (int i=0; i<ChunkTLT_NumReserved; ++i) reserved[i] = *(int *)(sdata+8+(i<<2));
+	int i;
+	
+	for (i=0; i<ChunkTLT_NumReserved; ++i) reserved[i] = *(int *)(sdata+8+(i<<2));
 
 	if (flags & ChunkTLTFlag_ExternalFile)
 	{
@@ -340,6 +333,8 @@ size_t Environment_TLT_Chunk::size_chunk()
 
 void Environment_TLT_Chunk::fill_data_block (char * data_start)
 {
+	int i;
+	
 	strncpy (data_start, identifier, 8);
 
 	data_start += 8;
@@ -353,7 +348,7 @@ void Environment_TLT_Chunk::fill_data_block (char * data_start)
 	
 	data_start += 8;
 
-	for (int i=0; i < ChunkTLT_NumReserved ; ++i, data_start+=4)
+	for (i=0; i < ChunkTLT_NumReserved ; ++i, data_start+=4)
 		*((int *)data_start) = reserved[i];
 
 	*(int *)data_start = flags;
@@ -411,8 +406,8 @@ TLT_Config_Chunk::TLT_Config_Chunk (Chunk_With_Children * parent, const char * s
 : Chunk (parent, "TLTCONFG")
 , num_shades_white(*(unsigned int const *)sdata)
 , table_size(*(unsigned int const *)(sdata+4))
-, flags(*(unsigned int const *)(sdata+8))
 , palette_size(*(unsigned int const *)(sdata+12))
+, flags(*(unsigned int const *)(sdata+8))
 {
 	if (!table_size) table_size = 256;
 
@@ -774,7 +769,9 @@ void RIF_Child_Chunk::CreateMD5Chunk(BMP_Flags const & rcbmp, int const * md5id)
 RIF_Child_Chunk::RIF_Child_Chunk (Chunk_With_Children * const parent, const char * sdata, size_t const /*ssize*/)
 : Chunk(parent,"RIFCHILD"), egm_parent((Environment_Game_Mode_Chunk * const)parent)
 {
-	for (int i=0; i<ChunkRIFChild_NumReserved; i++, sdata+=4)
+	int i;
+
+	for (i=0; i<ChunkRIFChild_NumReserved; i++, sdata+=4)
 	{
 		reserved[i] = *((int *) sdata);
 	}
@@ -825,8 +822,8 @@ RIF_IMPLEMENT_DYNCREATE("SETPALST",Preset_Palette_Store_Chunk)
 
 Preset_Palette_Store_Chunk::Preset_Palette_Store_Chunk(Chunk_With_Children * const parent, char const * sdata, size_t const /*ssize*/)
 : Chunk(parent,"SETPALST")
-, version_num(*(int *)sdata)
 , flags(*(int *)(sdata+4))
+, version_num(*(int *)sdata)
 , reserved1(*(int *)(sdata+8))
 , reserved2(*(int *)(sdata+12))
 , reserved3(*(int *)(sdata+16))
@@ -912,7 +909,9 @@ Coloured_Polygons_Lookup_Chunk::Coloured_Polygons_Lookup_Chunk (Chunk_With_Child
 : Chunk (parent, "CLRLOOKP"), flags (*((int*)(sdata))),
 	filename(0), table (0)
 {
-	for (int i=0; i<ChunkCPLU_NumReserved; ++i) reserved[i] = *(int *)(sdata+4+(i<<2));
+	int i;
+	
+	for (i=0; i<ChunkCPLU_NumReserved; ++i) reserved[i] = *(int *)(sdata+4+(i<<2));
 
 	if (flags & ChunkCPLUFlag_ExternalFile)
 	{
@@ -961,6 +960,8 @@ size_t Coloured_Polygons_Lookup_Chunk::size_chunk()
 
 void Coloured_Polygons_Lookup_Chunk::fill_data_block (char * data_start)
 {
+	int i;
+	
 	strncpy (data_start, identifier, 8);
 
 	data_start += 8;
@@ -973,7 +974,7 @@ void Coloured_Polygons_Lookup_Chunk::fill_data_block (char * data_start)
 	
 	data_start += 4;
 
-	for (int i=0; i < ChunkCPLU_NumReserved ; ++i, data_start+=4)
+	for (i=0; i < ChunkCPLU_NumReserved ; ++i, data_start+=4)
 		*((int *)data_start) = reserved[i];
 
 	if (flags & ChunkCPLUFlag_ExternalFile)
@@ -1003,5 +1004,3 @@ void Coloured_Polygons_Lookup_Chunk::fill_data_block (char * data_start)
 		}
 	}
 }
-
-

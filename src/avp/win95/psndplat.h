@@ -26,7 +26,11 @@ typedef struct soundsampledata
 	int activeInstances;	 
 	int volume;		
 	int pitch;					
-	LPDIRECTSOUNDBUFFER dsBufferP;
+
+//	LPDIRECTSOUNDBUFFER dsBufferP;
+	int dsBufferP;
+	void *buffer;
+	
 	unsigned int flags;
 	int dsFrequency;
 	char * wavName;
@@ -57,10 +61,17 @@ typedef struct activesoundsample
 	unsigned int reverb_off :1;
 	SOUND3DDATA threedeedata;
 	
-	LPDIRECTSOUNDBUFFER dsBufferP;
-	LPDIRECTSOUND3DBUFFER ds3DBufferP;
-	LPKSPROPERTYSET	PropSetP;
+//	LPDIRECTSOUNDBUFFER dsBufferP;
+//	LPDIRECTSOUND3DBUFFER ds3DBufferP;
+//	LPKSPROPERTYSET	PropSetP;
+	int dsBufferP;
+	int ds3DBufferP;
+	float PropSetP_pos[3];
+	float PropSetP_vel[3];
 	
+	void *buffer;
+	void *buffer3d;
+	void *propset;	
 }ACTIVESOUNDSAMPLE;
 
 /* Patrick 5/6/97 -------------------------------------------------------------
@@ -198,7 +209,7 @@ extern ACTIVESOUNDSAMPLE ActiveSounds[];
 extern SOUNDSAMPLEDATA BlankGameSound;
 extern ACTIVESOUNDSAMPLE BlankActiveSound;
 
-
+void UpdateSoundFrequencies(void);
 
 #ifdef __cplusplus
 }

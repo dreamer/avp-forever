@@ -26,13 +26,14 @@
 #include "bh_videoscreen.h"
 #include "bh_plift.h"
 #include "bh_ldoor.h"
-#include "AvP_Menus.h"
+#include "avp_menus.h"
 #include "game_statistics.h"
-#include "AvP_UserProfile.h"
+#include "avp_userprofile.h"
+#include "huddefs.h"
+#include "fmv.h"
 
 #include "savegame.h"
 #include "huffman.hpp"
-#include "smacker.h"
 
 #define UseLocalAssert Yes
 #include "ourasert.h"
@@ -376,7 +377,7 @@ static BOOL SaveGameAllowed()
 			if(NumberOfSavesLeft > NUM_SAVES_FOR_HARD_MODE) 
 				NumberOfSavesLeft = NUM_SAVES_FOR_HARD_MODE;
 			break;
-
+		default: ;
 	}
 
 
@@ -398,8 +399,7 @@ static BOOL SaveGameAllowed()
 void SaveGame()
 {
 	char filename[100];
-	HANDLE file;
-	DWORD bytes_written;
+	FILE *file;
 	int headerLength;
 	HuffmanPackage *packagePtr;
 
@@ -457,32 +457,25 @@ void SaveGame()
 	SaveGameRequest = SAVELOAD_REQUEST_NONE;
 
 	//write the file
- 	file = CreateFile(filename,GENERIC_WRITE, 0, 0, CREATE_ALWAYS,FILE_FLAG_RANDOM_ACCESS, 0);
+ 	file = OpenGameFile(filename, FILEMODE_WRITEONLY, FILETYPE_CONFIG);
 	
-	if (file == INVALID_HANDLE_VALUE)
+	if (file == NULL)
 	{
 		GLOBALASSERT("Error saving file"==0);
 		return;
 	}
 
-	WriteFile(file,SaveInfo.BufferStart,headerLength,&bytes_written,0);
+	fwrite(SaveInfo.BufferStart, headerLength, 1, file);
 
 	packagePtr = HuffmanCompression(SaveInfo.BufferStart+headerLength,SaveInfo.BufferSpaceUsed-headerLength);
 
-	WriteFile(file,packagePtr,packagePtr->CompressedDataSize+sizeof(HuffmanPackage),&bytes_written,0);
-
-	CloseHandle(file);
-
+	fwrite(packagePtr, packagePtr->CompressedDataSize+sizeof(HuffmanPackage), 1, file);
+	
+	fclose(file);
 
 	NewOnScreenMessage(GetTextString(TEXTSTRING_SAVEGAME_GAMESAVED));
 	DisplaySavesLeft();
-
 }
-
-
- 
-
-
 
 
 
@@ -496,7 +489,6 @@ static void EndLoadGame()
 	LoadInfo.BufferPos = NULL;
 	LoadInfo.BufferSize = 0;
 	LoadInfo.BufferSpaceLeft = 0;
-
 }
 
 extern SAVE_SLOT_HEADER SaveGameSlot[];
@@ -536,9 +528,8 @@ void LoadSavedGame()
 {
 	SAVE_SLOT_HEADER* save_slot;
 	char filename[100];
-	HANDLE file;
+	FILE *file;
 	BOOL terminal_error = FALSE;
-	unsigned int bytes_read;
 
 	if(LoadGameRequest == SAVELOAD_REQUEST_NONE) return;
 
@@ -577,30 +568,31 @@ void LoadSavedGame()
 	LoadGameRequest = SAVELOAD_REQUEST_NONE;
 
 	//load the file
-	file = CreateFile(filename,GENERIC_READ, 0, 0, OPEN_EXISTING,FILE_FLAG_RANDOM_ACCESS, 0);
+	file = OpenGameFile(filename, FILEMODE_READONLY, FILETYPE_CONFIG);
 
-
-	if(file==INVALID_HANDLE_VALUE)
+	if(file==NULL)
 	{
 		//failed to load
 		EndLoadGame();
 		return;
 	}
 
-	LoadInfo.BufferSize = GetFileSize(file,0);
+	fseek(file, 0, SEEK_END);
+	LoadInfo.BufferSize = ftell(file);
+	rewind(file);
+	
    	if(!LoadInfo.BufferSize)
 	{
-		CloseHandle(file);
+		fclose(file);
 		EndLoadGame();
 		return;
 	}
 
 	//allocate buffer , and read file into memory
 	LoadInfo.BufferStart = (char*) AllocateMem(LoadInfo.BufferSize);
-	ReadFile(file,LoadInfo.BufferStart,LoadInfo.BufferSize,(LPDWORD)&bytes_read,0);
-	CloseHandle(file);
+	fread(LoadInfo.BufferStart, LoadInfo.BufferSize, 1, file);
+	fclose(file);
 
-	
 	
 	LoadInfo.BufferPos = LoadInfo.BufferStart;
 	LoadInfo.BufferSpaceLeft = LoadInfo.BufferSize;
@@ -1044,7 +1036,8 @@ static void SaveStrategies()
 			case I_BehaviourFrisbee :
 				SaveStrategy_Frisbee(sbPtr);
 				break;
-
+			
+			default: ;
 		}
 	}
 	
@@ -1233,7 +1226,8 @@ static void LoadStrategy(SAVE_BLOCK_STRATEGY_HEADER* header)
 		case I_BehaviourFrisbee :
 			LoadStrategy_Frisbee(header);
 			break;
-
+		
+		default: ;
 	}
 }
 
@@ -1339,10 +1333,6 @@ static void SaveMiscGlobalStuff()
 	GetFMVInformation(&block->FMV_MessageNumber,&block->FMV_FrameNumber);
 }
 
-
-
-
-
 extern void DisplaySavesLeft()
 {
 	char text [100];
@@ -1351,9 +1341,6 @@ extern void DisplaySavesLeft()
 
 	NewOnScreenMessage(text);
 }
-
-
-
 
 extern void ResetNumberOfSaves()
 {
@@ -1369,6 +1356,7 @@ extern void ResetNumberOfSaves()
 		case I_Impossible :
 			NumberOfSavesLeft = NUM_SAVES_FOR_HARD_MODE;
 			break;
-
+		default:
+			break;
 	}
 }

@@ -31,8 +31,6 @@
  * that fires at level 3 or above, use db_assert3().
  */
 
-#pragma once
-
 /* If you do not set the DB_LEVEL, it is set for you: to 3 */
 #ifndef DB_LEVEL
 	#define DB_LEVEL 3
@@ -68,11 +66,7 @@
 #define DB_H_INCLUDED
 
 /* I N C L U D E D S ************************************************** */
-#include "advwin32.h"
-#ifndef DB_NOWINDOWS
-	#include <windows.h>
-	#include "advwin32.h"
-#endif
+//#include "advwin32.h"
 
 /* Permit use in a C++ source file. */
 #ifdef __cplusplus
@@ -291,6 +285,8 @@ struct db_dd_mode_tag
 
 /* Don't prototype anything or declare globals if NDEBUG is defined. */
 #ifndef NDEBUG
+
+#define __cdecl
 
 /* New formatted debugging fns. */
 extern void __cdecl db_logf_fired(const char *fmtStrP, ...);

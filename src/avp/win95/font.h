@@ -60,19 +60,6 @@ typedef enum font_justification
 }FONT_JUST;
 
 
-// this prints a string packet
-
-typedef struct font_desc {
-	int fontnum;			// see list of PFFONTS;
-	char *string;	// this will eventually point into a resource fileMENU_GRAPHIC_ITEM Gamestart_MenuItems[] = {
-	short destx;
-	short desty;
-	FONT_JUST just;
-	short width; 	// width - the width we have to print
-								// the font in - overrides onto next line
-} FONT_DESC;
-
-
 // bitfield of flags
 
 typedef struct 
@@ -84,14 +71,13 @@ typedef struct
 
 typedef struct pffont
 {
-	LPDIRECTDRAWSURFACE data;	 						/*LPDIRECTDRAWSURFACE, etc - fill out*/
-	char filename[100];				 						/*compile in -filename */
-	int fontHeight;												/* max height of chars */
-	int num_chars_in_font;								/*number of chars in this font */
-	FONT_TYPE	font_type;
-	FONT_FLAGS  flags;
-	RECT_AVP srcRect[MAXNUM_CHARS_IN_FONT];  /*source rectangles*/
-
+	LPDIRECTDRAWSURFACE data;	 	/*LPDIRECTDRAWSURFACE, etc - fill out*/
+	char filename[100];			/*compile in -filename */
+	int fontHeight;				/* max height of chars */
+	int num_chars_in_font;			/*number of chars in this font */
+	FONT_TYPE font_type;
+	FONT_FLAGS flags;
+	RECT srcRect[MAXNUM_CHARS_IN_FONT];  /*source rectangles*/
 
 	int fttexWidth;                       /* filled in during loading */
 	int fttexHeight;
@@ -129,7 +115,7 @@ typedef struct pffont
 	{
 		if ( bPrintable(ProjCh) )
 		{
-			const RECT_AVP& charRect = srcRect[ ProjCharToOffset(ProjCh) ] ;
+			const RECT& charRect = srcRect[ ProjCharToOffset(ProjCh) ] ;
 
 			return (charRect . right - charRect . left);
 		}
@@ -200,12 +186,6 @@ extern int BLTFontOffsetToHUD(PFFONT* font , int xdest, int ydest, int offset);
 /* to lock a font and get the raw data - pPitch receives the pitch of the surface */
 extern void * FontLock(PFFONT const * pFont, unsigned * pPitch);
 extern void FontUnlock(PFFONT const * pFont);
-
-
-// drawing functions
-
-extern void BLTWholeFont(int fontnum, int x , int y, int win_width);
-extern void BLTString(FONT_DESC str_packet);
 
 
 // the array of all the Fonts int the game

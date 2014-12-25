@@ -17,6 +17,9 @@
  * stuff, which is, after all, a part of Windows. If you want Windows 
  * stuff, but NOT Direct Draw, define DB_NODIRECTDRAW.
  */
+
+#define DB_NOWINDOWS
+#define DB_NODIRECTDRAW
  
 /* ******************************************************************** *
  * 																		*
@@ -26,8 +29,9 @@
 
 /* I N C L U D E S **************************************************** */
 
+#include "fixer.h"
+
 /* Windows includes. Actually internal, but here to allow pre-compilation. */
-#include "advwin32.h"
 #ifndef DB_NOWINDOWS
 	#include <windows.h>
 	#include "advwin32.h"
@@ -36,10 +40,6 @@
 	#include <ddraw.h>
 #endif
 #include "db.h"	 /* Contains most off the interface. */
-
-/* G L O B A L S ****************************************************** */
-/* Have external linkage. */
-volatile BOOL DZ_NULL;
 
 /* This variable dictates whether macros ending _opt get executed. */
 int db_option = 0; /* Default is off. */
@@ -63,8 +63,6 @@ int db_option = 0; /* Default is off. */
 #include <stdio.h>
 #include <stdlib.h>
 #include <ctype.h>
-#include <conio.h>
-#include <direct.h>	/* For getcwd() */
 #include <stdarg.h>	/* For variable arguments. */
 
 /* C O N S T A N T S ************************************************** */
@@ -76,13 +74,13 @@ int db_option = 0; /* Default is off. */
 #define PROP_WIDTH 0
 
 /* Logfile name */
-#define LOGFILE_NAME "LOGFILE.TXT"
+#define LOGFILE_NAME "logfile.txt"
 
 /* Set this to 1 if the logfile name is an absolute path. Otherwise the
  * logfile will go in the directory that is current when db_log_init() 
  * is called.
  */
-#define ABSOLUTE_PATH	0
+#define ABSOLUTE_PATH	1
 
 /* M A C R O S ******************************************************** */
 
@@ -90,7 +88,8 @@ int db_option = 0; /* Default is off. */
 #define DB_FORCE_EXCEPTION()	( db_vol_zero = 1 / db_vol_zero )
 
 /* Cause a brakepoint. */
-#define DB_FORCE_BRAKEPOINT()	do {__asm int 3} while(0)
+//#define DB_FORCE_BRAKEPOINT()	do {__asm int 3} while(0)
+#define DB_FORCE_BRAKEPOINT() { }
 
 /* T Y P E S ********************************************************** */
 
@@ -133,8 +132,10 @@ static int InitialisedLog = 0;
 static int db_display_type = DB_DOS;
 
 /* For DirectDraw mode. */
+#ifndef DB_NODIRECTDRAW			
 static struct db_dd_mode_tag dd_mode = {NULL, NULL, 0, 0, 0, 0, 0, 0, 0, 0};
 static fontPtr FontP = NULL;
+#endif
 
 /* Volatile zero. */
 static volatile int db_vol_zero = 0;
@@ -146,10 +147,14 @@ static const char* db_assert_textA[ 3 ] =
 	"Expression: %s",
 	"File: %s Line: %d"
 };
+
+#ifndef DB_NOWINDOWS
 static const char* db_prompt_std =
 	"Quit program/force e(x)ception? [y/n/x]";
 static const char* db_prompt_windows =
 	"Quit program? [Yes/No]/force exception? [Cancel]";
+#endif
+	
 static const char* db_assert_log_begin_text =
 	"DB: FAILED ASSERTION BEGINS";
 static const char* db_assert_log_end_text =
@@ -386,7 +391,7 @@ void db_log_fired(const char *strP)
 	if(!InitialisedLog) db_log_init();
 	{
 		/* Open a file for appending, creating one if it doesn't yet exist. */
-		FILE *fP = fopen(LogFileNameP, "a+");
+		FILE *fP = OpenGameFile(LogFileNameP, FILEMODE_APPEND, FILETYPE_CONFIG);
 
 		if(!fP) return;
 
@@ -401,12 +406,12 @@ void db_log_init(void)
 	sprintf( LogFileNameP, "%s", db_log_file_name ); 
 	#else
 	/* Append the log file name to the current working directory. */
-	sprintf( LogFileNameP, "%s\\%s", getcwd( LogFileNameP, 240 ),
+	sprintf( LogFileNameP, "%s/%s", getcwd( LogFileNameP, 240 ),
 		db_log_file_name );
 	#endif
 	
 	/* Delete old log file. */
-	remove(LogFileNameP);
+	DeleteGameFile(LogFileNameP);
 	
 	/* Flag that we have initialised the log file. */
 	InitialisedLog = 1;
@@ -534,6 +539,7 @@ static void db_do_std_prompt(unsigned yOffset)
 	switch(db_display_type)
 	{
 		case DB_DOS:
+#if 0		
 			printf( db_prompt_std );
 			printf("\n");
 			do
@@ -541,6 +547,9 @@ static void db_do_std_prompt(unsigned yOffset)
 				ch = toupper(getch());
 			}
 			while((ch != 'N') && (ch != 'Y') && (ch != 'X'));
+#endif
+			ch = 'N';
+						
 			break;
 #ifndef DB_NODIRECTDRAW
 		case DB_DIRECTDRAW:
@@ -602,7 +611,7 @@ static void db_do_std_prompt(unsigned yOffset)
 	{
 		exit(-10);
 	}
-	else if(ch == 'X')
+	else if (ch == 'X')
 	{
 		if(db_use_brakepoints)
 		{

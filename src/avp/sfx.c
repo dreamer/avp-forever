@@ -23,8 +23,6 @@ static SFXBLOCK *FreeSfxBlockList[MAX_NO_OF_SFX_BLOCKS];
 static SFXBLOCK **FreeSfxBlockListPtr;
 
 
-void HandleObjectOnFire(DISPLAYBLOCK *dispPtr);
-
 
 /*KJL***************************************************************************
 * FUNCTIONS TO ALLOCATE AND DEALLOCATE SFX BLOCKS - KJL 12:02:14 11/13/96 *
@@ -286,7 +284,7 @@ void HandleObjectOnFire(DISPLAYBLOCK *dispPtr)
 			MakeParticle(&(position), &velocity, PARTICLE_FIRE);
 		}
 
-		if (FastRandom()&65535 > 32768)
+		if ((FastRandom()&65535) > 32768)
 		{
 			MakeParticle(&(position), &velocity, PARTICLE_IMPACTSMOKE);
 		}

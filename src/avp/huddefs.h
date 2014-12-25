@@ -164,8 +164,7 @@ extern void PlatformSpecificInitAlienHUD(void);
 ******************REH*/
 extern void PlatformSpecificExitingHUD(void);
 /*KJL******************************************************************************************
-* This is for the PSX (& possibly Saturn). Use this to pass your list of graphics to be drawn *
-* to your GPU.                                                                                *
+* Use this to pass your list of graphics to be drawn to your GPU.                                                                                *
 ******************************************************************************************KJL*/
 
 extern void PlatformSpecificEnteringHUD(void);
@@ -244,12 +243,6 @@ extern void NewOnScreenMessage(unsigned char *messagePtr);
 * the time defined in ON_SCREEN_MESSAGE_LIFETIME. Any previous message  *
 * still being displayed will be overwritten.                            *
 ********************************************************************KJL*/
-
-extern void DrawOnScreenMessage(unsigned char *messagePtr);
-/*KJL*********************************************************************
-* This is a platform specific fn which draws the required message to the *
-* screen. Implemented in ddplat.cpp on the PC.                           *
-*********************************************************************KJL*/
 
 	#ifdef __cplusplus
 		};	/* end of C-Linkage spec */

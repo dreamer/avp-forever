@@ -3,10 +3,6 @@
 //#include "strachnk.hpp"
 //#include "obchunk.hpp"
 
-#ifdef cencon
-#define new my_new
-#endif
-
 //macro for helping to force inclusion of chunks when using libraries
 FORCE_CHUNK_INCLUDE_IMPLEMENT(avpchunk)
 
@@ -58,38 +54,7 @@ size_t AVP_Generator_Chunk::size_chunk ()
 	return(chunk_size);
 	
 }
-#if UseOldChunkLoader
-AVP_Generator_Chunk::AVP_Generator_Chunk (Chunk_With_Children * parent, const char * data, size_t /*size*/)
-: Chunk (parent, "AVPGENER")
-{
-	location = *((ChunkVector *) data);
-	data += sizeof(ChunkVector);
-	
-	orientation = *((int *) data);
-	data += 4;
-	
-	type = *((int *) data);
-	data += 4;
 
-	flags = *((int *) data);
-	data += 4;
-	
-	textureID = *(data);
-	data ++;
-	
-	sub_type = *(data);
-	data ++;
-	
-	extra1 = *(unsigned char*)(data);
-	data ++;
-	
-	extra2 = *(unsigned char*)(data);
-	data ++;
-	
-	name = new char [strlen(data) + 1];
-	strcpy (name, data);
-}
-#else
 AVP_Generator_Chunk::AVP_Generator_Chunk (Chunk_With_Children * parent, const char * data, size_t /*size*/)
 : Chunk (parent, "AVPGENER")
 {
@@ -120,8 +85,6 @@ AVP_Generator_Chunk::AVP_Generator_Chunk (Chunk_With_Children * parent, const ch
 	name = new char [strlen(data) + 1];
 	strcpy (name, data);
 }
-#endif
-
 
 
 AVP_Generator_Chunk::~AVP_Generator_Chunk ()
@@ -143,19 +106,7 @@ ObjectID AVP_Generator_Chunk::CalculateID()
 	if(!chlist.size()) return retval;
 	char Name[100];
 
-	#if InterfaceEngine||cencon
-	//need to check for console specific rif files,and skip the 'sat' or 'psx'
-	//so that they get the same ids as the pc
-	const char* r_name=((RIF_Name_Chunk*)chlist.first_entry())->rif_name;
-	if(tolower(r_name[0])=='p' && tolower(r_name[1])=='s' && tolower(r_name[2])=='x' )
-		strcpy(Name,&r_name[3]);
-	else if (tolower(r_name[0])=='s' && tolower(r_name[1])=='a' && tolower(r_name[2])=='t' )
-		strcpy(Name,&r_name[3]);
-	else
-		strcpy(Name,r_name);
-	#else
 	strcpy(Name,((RIF_Name_Chunk*)chlist.first_entry())->rif_name);
-	#endif
 
 	strcat(Name,name);
 	char buffer[16];
@@ -291,7 +242,7 @@ AVP_Generator_Extra_Name_Chunk::AVP_Generator_Extra_Name_Chunk(Chunk_With_Childr
 
 AVP_Generator_Extra_Name_Chunk::~AVP_Generator_Extra_Name_Chunk()
 {
-	delete name;
+	delete [] name;
 }
 
 void AVP_Generator_Extra_Name_Chunk::fill_data_block(char* data_start)
@@ -329,7 +280,7 @@ AVP_Generator_Extended_Settings_Chunk::AVP_Generator_Extended_Settings_Chunk(Chu
 	CHUNK_EXTRACT(spare2,int)
     	
 	
-	size_t size=max(*(int*) data,sizeof(AVP_Generator_Weighting));
+	size_t size=max(*(int*) data,(int)sizeof(AVP_Generator_Weighting));
 
 	weights=(AVP_Generator_Weighting*)new unsigned char[size];
 	memset(weights,0,sizeof(AVP_Generator_Weighting));
@@ -341,7 +292,7 @@ AVP_Generator_Extended_Settings_Chunk::AVP_Generator_Extended_Settings_Chunk(Chu
 AVP_Generator_Extended_Settings_Chunk::AVP_Generator_Extended_Settings_Chunk(Chunk_With_Children* parent)
 :Chunk(parent,"GENEXSET")
 {
-	weights=new AVP_Generator_Weighting;
+	weights=(AVP_Generator_Weighting *)new unsigned char[sizeof(AVP_Generator_Weighting)];
 	memset(weights,0,sizeof(AVP_Generator_Weighting));
 	weights->data_size=sizeof(AVP_Generator_Weighting);
 	GenLimit=pad1=pad2=pad3=0;
@@ -352,7 +303,7 @@ AVP_Generator_Extended_Settings_Chunk::AVP_Generator_Extended_Settings_Chunk(Chu
 
 AVP_Generator_Extended_Settings_Chunk::~AVP_Generator_Extended_Settings_Chunk()
 {
-	delete  weights;
+	delete [] weights;
 }
 
 void AVP_Generator_Extended_Settings_Chunk::fill_data_block (char * data)
@@ -461,19 +412,7 @@ AVP_Player_Start_Chunk::AVP_Player_Start_Chunk(Chunk_With_Children* parent)
 	moduleID.id2=0;
 
 }
-#if UseOldChunkLoader
-AVP_Player_Start_Chunk::AVP_Player_Start_Chunk(Chunk_With_Children* parent,const char* data,size_t)
-:Chunk(parent,"AVPSTART")
-{
-	location=*(ChunkVector*)data;
-	data+=sizeof(ChunkVector);
-	orientation=*(ChunkMatrix*)data;
-	data+=sizeof(ChunkMatrix);
-	spare1=*(int*)data;
-	data+=4;	
-	spare2=*(int*)data;
-}
-#else
+
 AVP_Player_Start_Chunk::AVP_Player_Start_Chunk(Chunk_With_Children* parent,const char* data,size_t)
 :Chunk(parent,"AVPSTART")
 {
@@ -481,7 +420,6 @@ AVP_Player_Start_Chunk::AVP_Player_Start_Chunk(Chunk_With_Children* parent,const
 	CHUNK_EXTRACT(orientation,ChunkMatrix)
 	CHUNK_EXTRACT(moduleID,ObjectID)
 }
-#endif
 
 void AVP_Player_Start_Chunk::fill_data_block (char * data)
 {
@@ -642,7 +580,7 @@ AVP_Environment_Settings_Chunk::AVP_Environment_Settings_Chunk(Chunk_With_Childr
 AVP_Environment_Settings_Chunk::AVP_Environment_Settings_Chunk(Chunk_With_Children* parent)
 :Chunk(parent,"AVPENVIR")
 {
-	settings=new AVP_Environment_Settings;
+	settings=(AVP_Environment_Settings*)new unsigned char[sizeof(AVP_Environment_Settings)];
 	settings->data_size=sizeof(AVP_Environment_Settings);
 	settings->sky_colour_red=200;
 	settings->sky_colour_green=200;
@@ -663,7 +601,7 @@ AVP_Environment_Settings_Chunk::AVP_Environment_Settings_Chunk(Chunk_With_Childr
 
 AVP_Environment_Settings_Chunk::~AVP_Environment_Settings_Chunk()
 {
-	delete  settings;
+	delete [] settings;
 }
 
 void AVP_Environment_Settings_Chunk::fill_data_block (char * data_start)
@@ -704,7 +642,7 @@ AVP_Decal_Chunk::AVP_Decal_Chunk(Chunk_With_Children* parent,const char* data,si
 	int loaded_decal_size=*(int*)data;
 	data+=4;
 
-	decal_size=max(loaded_decal_size,sizeof(AVP_Decal));
+	decal_size=max(loaded_decal_size,(int)sizeof(AVP_Decal));
 
 	//allocate buffer for decals , and initialise to zero
 	decal_buffer=new char[num_decals*decal_size];
@@ -720,7 +658,7 @@ AVP_Decal_Chunk::AVP_Decal_Chunk(Chunk_With_Children* parent,const char* data,si
 
 	//only allow access to the decals if the loaded structure size is less than or equal
 	//to the current stucture size
-	if(loaded_decal_size<=sizeof(AVP_Decal))
+	if(loaded_decal_size<=(int)sizeof(AVP_Decal))
 	{
 		decals=(AVP_Decal*)decal_buffer;
 	}

@@ -1,23 +1,8 @@
 #ifndef _oechunk_h_
 #define _oechunk_h_ 1
 
-#include "Chunk.hpp"
+#include "chunk.hpp"
 #include "obchunk.hpp"
-
-#if objedit
-#include "Template.hpp"
-#endif
-//#if engine
-//#define VECTOR VECTORCH
-//#endif
-
-#if engine
-#else
-struct VECTORCH
-{
-	int vx, vy, vz;
-};
-#endif
 
 struct	ChunkMapBlock
 {
@@ -96,4 +81,5 @@ public :
 	//constructor from buffer
 	Strategy_Chunk (Chunk_With_Children * parent,const char* data,size_t);
 };
+
 #endif

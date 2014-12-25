@@ -2,6 +2,7 @@
 #include "3dc.h"
 #include "module.h"
 #include "inline.h"
+#include "kshape.h"
 
 #include "paintball.h"
 #include "showcmds.h"
@@ -34,7 +35,6 @@ extern void PaintBallMode_DrawCurrentDecalAtTarget(void)
 	extern DECAL_DESC DecalDescription[];
 	DECAL_DESC *decalDescPtr = &DecalDescription[PaintBallMode.CurrentDecalID];
 	extern void MakeMatrixFromDirection(VECTORCH *directionPtr, MATRIXCH *matrixPtr);
-	extern int sine[],cosine[];
 	extern MODULE *playerPherModule;
 	
 	MATRIXCH orientation;

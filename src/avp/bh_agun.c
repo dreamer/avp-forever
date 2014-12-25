@@ -17,7 +17,6 @@
 #include "comp_shp.h"
 #include "inventry.h"
 #include "triggers.h"
-#include "mslhand.h"
 
 #define UseLocalAssert Yes
 
@@ -38,15 +37,13 @@
 #include "bh_agun.h"
 #include "plat_shp.h"
 #include "psnd.h"
-#include "AI_Sight.h"
+#include "ai_sight.h"
 #include "sequnces.h"
 #include "huddefs.h"
-#include "ShowCmds.h"
+#include "showcmds.h"
 #include "sfx.h"
 #include "bh_marin.h"
 #include "bh_far.h"
-#include "pldghost.h"
-#include "pheromon.h"
 #include "targeting.h"
 #include "dxlog.h"
 #include "los.h"
@@ -54,11 +51,9 @@
 #include "bh_dummy.h"
 #include "bh_corpse.h"
 
-#if SupportWindows95
 /* for win95 net game support */
 #include "pldghost.h"
 #include "pldnet.h"
-#endif
 
 #define SENTRYGUN_DRAMA 0
 
@@ -722,7 +717,6 @@ int Autogun_TargetFilter(STRATEGYBLOCK *candidate) {
 		case I_BehaviourXenoborg:
 			return(1);
 			break;
-		#if SupportWindows95
 		case I_BehaviourNetGhost:
 			{
 				NETGHOSTDATABLOCK *dataptr;
@@ -739,7 +733,6 @@ int Autogun_TargetFilter(STRATEGYBLOCK *candidate) {
 				}
 			}
 			break;
-		#endif
 		default:
 			return(0);
 			break;
@@ -806,8 +799,8 @@ int AGunSight_FrustrumReject(VECTORCH *localOffset) {
 	fixed_offset=*localOffset;
 	fixed_offset.vy-=300; /* ish */
 
-	if ((fixed_offset.vz <0) && (
-		((fixed_offset.vy) < (-fixed_offset.vz))&&(fixed_offset.vy>=0))
+	if (((fixed_offset.vz <0) && (
+		((fixed_offset.vy) < (-fixed_offset.vz))&&(fixed_offset.vy>=0)))
  		||((fixed_offset.vy<0)&&((-fixed_offset.vy) < (-fixed_offset.vz))
  		)) {
 		/* 180 horizontal, 90 vertical. */
@@ -1374,8 +1367,6 @@ void AGun_MaintainGun(STRATEGYBLOCK *sbPtr)
 		agunStatusPointer->ammo-=multiple;
 	}
 	agunStatusPointer->roundsFired+=multiple;
-	
-	multiple;
 	
 	/* End of volley? */
 	if (agunStatusPointer->volleyFired==(AGUN_VOLLEYSIZE<<ONE_FIXED_SHIFT)) {

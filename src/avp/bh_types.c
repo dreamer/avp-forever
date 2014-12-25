@@ -7,12 +7,12 @@
 #include "stratdef.h"
 #include "gamedef.h"
 #include "bh_types.h"
+#include "bonusabilities.h"
 
 #include "weapons.h"
 #include "comp_shp.h"
 #include "inventry.h"
 #include "triggers.h"
-#include "mslhand.h"
 
 #include "dynblock.h"
 #include "dynamics.h"
@@ -64,10 +64,9 @@
 
 #include "db.h"
 
-#if SupportWindows95
 /* for win95 net game support */
 #include "pldghost.h"
-#endif
+
 #include "bh_corpse.h"
 
 /* 
@@ -619,73 +618,6 @@ void AssignRunTimeBehaviours(STRATEGYBLOCK* sbptr)
 
 	InitPlayer(sbptr, I_BehaviourMarinePlayer);
 }
-
-#if Saturn || PSX
-
-int SetUpDoor(int shape1, int shape2, MODULE* mptr)
-{
-	DISPLAYBLOCK* dptr = mptr->m_dptr;
-	MODULEMAPBLOCK* momptr = mptr->m_mapptr;
-	MORPHCTRL* morphctrl;	
-	MORPHHEADER* morphheader;
-	MORPHFRAME* morphframe;
-	STRATEGYBLOCK* sbptr;
-
-	GLOBALASSERT(dptr);
-	GLOBALASSERT(momptr);
-
-	sbptr =	AttachNewStratBlock(mptr, momptr, dptr);
-
-	// this code causes a memory leak
-
-	morphctrl = (MORPHCTRL*)AllocateMem(sizeof(MORPHCTRL));
-	if(!morphctrl) 
-	{
-		memoryInitialisationFailure = 1;
-		return 0;
-	}
-
-	morphheader = (MORPHHEADER*)AllocateMem(sizeof(MORPHHEADER));
-	if(!morphheader) 
-	{
-		memoryInitialisationFailure = 1;
-		return 0;
-	}
-
-	morphframe = (MORPHFRAME*)AllocateMem(sizeof(MORPHFRAME));
-	if(!morphframe) 
-	{
-		memoryInitialisationFailure = 1;
-		return 0;
-	}
-
-	#if Saturn
-	morphframe->mf_shape1 = shape2;
-	morphframe->mf_shape2 = shape1;
-	#else
-	morphframe->mf_shape1 = shape1;
-	morphframe->mf_shape2 = shape2;
-	#endif
-
-	dptr->ObShapeData = GetShapeData(shape1);
-
-	morphheader->mph_numframes = 1;
-	morphheader->mph_maxframes = ONE_FIXED;
-	morphheader->mph_frames = morphframe;
-
-	morphctrl->ObMorphCurrFrame = 0;
-	morphctrl->ObMorphFlags = 0;
-	morphctrl->ObMorphSpeed = 0;
-	morphctrl->ObMorphHeader = morphheader;
-
-	EnableBehaviourType(sbptr, I_BehaviourProximityDoor, (void*)morphctrl);
-
-	return 0;
-}
-
-#endif /*SupportSaturn*/
-
-
 
 /*----------------------------------------------------------------------
   Use this function to initialise binary loaded objects
@@ -1457,8 +1389,6 @@ void ObjectBehaviours(void)
 {
 	int i;	
 
-#if SupportWindows95
-
 #ifdef AVP_DEBUG_VERSION
 	for (i=0; i<NumActiveStBlocks; i++)
 	{
@@ -1475,8 +1405,6 @@ void ObjectBehaviours(void)
 			}
 		}
 	}
-#endif
-
 #endif
 
 	RequestEnvChangeViaLift	= 0;
@@ -2459,9 +2387,7 @@ void RequestState(STRATEGYBLOCK* sbptr, int message, STRATEGYBLOCK * SBRequester
 								lfxbb->current_state = LFXS_Flicking;
 							}
 							break;
-							
-
-					
+						default: ;
 					}
 				}
 				
@@ -3320,7 +3246,6 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 		}
 		case I_BehaviourNetGhost:
 		{
-			#if SupportWindows95
 			{
 				NETGHOSTDATABLOCK *ghostData;
 				ghostData = (NETGHOSTDATABLOCK *)(sbptr->SBdataptr);    
@@ -3333,7 +3258,6 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 					Dispel_HModel(&ghostData->HModelController);
 				}
 			}
-			#endif
 			break;
 		}	
 
@@ -3518,7 +3442,6 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 		}
 		case I_BehaviourNetCorpse:
 		{
-			#if SupportWindows95
 			{
 				NETCORPSEDATABLOCK *corpseData;
 				corpseData = (NETCORPSEDATABLOCK *)(sbptr->SBdataptr);    
@@ -3528,7 +3451,6 @@ void RemoveBehaviourStrategy(STRATEGYBLOCK* sbptr)
 					Dispel_HModel(&corpseData->HModelController);
 				}
 			}
-			#endif
 			break;
 		}	
 

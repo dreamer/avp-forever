@@ -165,15 +165,6 @@ typedef struct modulemapblock {
 
 	int MapInteriorType;
 
-	#if InterfaceEngine
-
-	/* This will point to the Object_Chunk, it will have to be */
-	/* cast within C++ though */
-	
-	void * o_chunk;
-
-	#endif
-
 	int MapLightType;			/* See LIGHTTYPES */
 
 
@@ -275,9 +266,7 @@ typedef struct module {
 
 	MATRIXCH m_mat;						/* Internal use only */
 	
-	#if SupportWindows95
 	char * name;
-	#endif
 
 	WAYPOINT_HEADER *m_waypoints;
 
@@ -395,6 +384,7 @@ void UpdateModules(void);
 void ModuleFunctions(MODULE *mptr, MFUNCTION mf);
 void AllocateModuleObject(MODULE *mptr);
 void DeallocateModuleObject(MODULE *mptr);
+void AllNewModuleHandler(void);
 
 
 /*
@@ -453,6 +443,7 @@ int SaveModuleArray(MODULE *mptr, char *filename);
 MODULE* LoadModuleArray(MODULE *mptr, int size, char *filename);
 
 int IsModuleVisibleFromModule(MODULE *source, MODULE *target);
+int ThisObjectIsInAModuleVisibleFromCurrentlyVisibleModules(struct strategyblock *sbPtr);
 
 #endif	/* IncludeModuleFunctionPrototypes */
 

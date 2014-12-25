@@ -12,8 +12,9 @@
 extern "C"
 {
 #include "language.h"
+#include "avp_menus.h"
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
-extern LPDIRECTDRAWSURFACE     lpDDSBack;      // DirectDraw back surface
+//extern LPDIRECTDRAWSURFACE     lpDDSBack;      // DirectDraw back surface
 extern int DebouncedGotAnyKey;
 
 extern void MinimalNetCollectMessages(void);
@@ -25,7 +26,10 @@ extern void ThisFramesRenderingHasFinished(void);
 
 extern int AAFontImageNumber;
 extern int FadingGameInAfterLoading;
-extern void RenderBriefingText(int centreY, int brightness);
+
+extern void InGameFlipBuffers();
+
+extern void BltImage(RECT *dest, DDSurface *image, RECT *src);
 };
 
 static int CurrentPosition=0;
@@ -45,19 +49,17 @@ RECT LoadingBarEmpty_SrcRect;
 RECT LoadingBarFull_DestRect;
 RECT LoadingBarFull_SrcRect;
 
-
-
 void Start_Progress_Bar()
 {
 	AAFontImageNumber = CL_LoadImageOnce("Common\\aa_font.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
-	
+
 	/* load other graphics */
 	{
 		char buffer[100];
 		CL_GetImageFileName(buffer, 100,Loading_Bar_Empty_Image_Name, LIO_RELATIVEPATH);
 		
 		//see if graphic can be found in fast file
-		unsigned int fastFileLength;
+		size_t fastFileLength;
 		void const * pFastFileData = ffreadbuf(buffer,&fastFileLength);
 		
 		if(pFastFileData)
@@ -87,7 +89,7 @@ void Start_Progress_Bar()
 		CL_GetImageFileName(buffer, 100,Loading_Bar_Full_Image_Name, LIO_RELATIVEPATH);
 		
 		//see if graphic can be found in fast file
-		unsigned int fastFileLength;
+		size_t fastFileLength;
 		void const * pFastFileData = ffreadbuf(buffer,&fastFileLength);
 		
 		if(pFastFileData)
@@ -113,7 +115,7 @@ void Start_Progress_Bar()
 		}
 	}
 	DDSurface* image=0;
-	
+
 	//set progress bar dimensions
 	BarLeft=ScreenDescriptorBlock.SDB_Width/6;
 	BarRight=(ScreenDescriptorBlock.SDB_Width*5)/6;
@@ -126,7 +128,7 @@ void Start_Progress_Bar()
 	
 
 	//see if graphic can be found in fast file
-	unsigned int fastFileLength;
+	size_t fastFileLength;
 	void const * pFastFileData = ffreadbuf(buffer,&fastFileLength);
 	
 	if(pFastFileData)
@@ -150,19 +152,7 @@ void Start_Progress_Bar()
 							0
 						);
 	}
-	#if 0
-	if(image)
-	{
-		//draw background image
-		lpDDSBack->Blt(0,image,0,DDBLT_WAIT,0);
-	}
-	else
-	{
-		//failed to load background graphic , make do with black background
-		ColourFillBackBuffer(0);
-	}
-	#endif
-  //	RenderGrabbedScreen();
+	
 	//draw initial progress bar
 
 	LoadingBarEmpty_SrcRect.left=0;
@@ -178,13 +168,9 @@ void Start_Progress_Bar()
 	for (int i=0; i<2; i++)
 	{
 		ColourFillBackBuffer(0);
-		if (LoadingBarEmpty) lpDDSBack->Blt(&LoadingBarEmpty_DestRect,LoadingBarEmpty,&LoadingBarEmpty_SrcRect,DDBLT_WAIT,0);
-
-		#if SOFTWARE_RENDERER
-		FlushSoftwareZBuffer();
-		#else
+		if (LoadingBarEmpty) BltImage(&LoadingBarEmpty_DestRect,LoadingBarEmpty,&LoadingBarEmpty_SrcRect);
+		
 		FlushD3DZBuffer();
-		#endif
 
 	 	ThisFramesRenderingHasBegun();
 
@@ -192,7 +178,8 @@ void Start_Progress_Bar()
 
 		ThisFramesRenderingHasFinished();
 
-		FlipBuffers();	
+/*		FlipBuffers();	*/
+		InGameFlipBuffers();
 	}
 
 	if(image)
@@ -203,6 +190,7 @@ void Start_Progress_Bar()
 	{
 		ReleaseDDSurface(LoadingBarEmpty);
 	}
+
 	CurrentPosition=0;
 
 
@@ -225,8 +213,10 @@ void Set_Progress_Bar_Position(int pos)
 		LoadingBarFull_DestRect.top=(ScreenDescriptorBlock.SDB_Height *11)/12;
 		LoadingBarFull_DestRect.bottom=ScreenDescriptorBlock.SDB_Height-1;
 		
-		if (LoadingBarFull) lpDDSBack->Blt(&LoadingBarFull_DestRect,LoadingBarFull,&LoadingBarFull_SrcRect,DDBLT_WAIT,0);
-		FlipBuffers();	
+		if (LoadingBarFull) BltImage(&LoadingBarFull_DestRect,LoadingBarFull,&LoadingBarFull_SrcRect);
+
+/*		FlipBuffers();	*/
+		InGameFlipBuffers();
 
 		/*
 		If this is a network game , then check the received network messages from 
@@ -243,6 +233,7 @@ void Set_Progress_Bar_Position(int pos)
 			{
 				//time to check our messages 
 				LastSendTime=time;
+
 				MinimalNetCollectMessages();
 				//send messages , mainly  needed so that the host will send the game description
 				//allowing people to join while the host is loading
@@ -272,8 +263,6 @@ void Game_Has_Loaded(void)
 		CheckForWindowsMessages();
 		ReadUserInput();
 	
-//		FlipBuffers();
-
 		ColourFillBackBufferQuad
 		(
 			0,
@@ -295,8 +284,9 @@ void Game_Has_Loaded(void)
 			int h = MUL_FIXED((ScreenDescriptorBlock.SDB_Height)/24,ONE_FIXED-f);
 			LoadingBarFull_DestRect.top=(ScreenDescriptorBlock.SDB_Height *11)/12+h;
 			LoadingBarFull_DestRect.bottom=ScreenDescriptorBlock.SDB_Height-1-h;
-			
-			if (LoadingBarFull) lpDDSBack->Blt(&LoadingBarFull_DestRect,LoadingBarFull,&LoadingBarFull_SrcRect,DDBLT_WAIT,0);
+
+			if (LoadingBarFull) BltImage(&LoadingBarFull_DestRect,LoadingBarFull,&LoadingBarFull_SrcRect);
+
 			f-=NormalFrameTime;
 			if (f<0) f=0;
 		}
@@ -311,7 +301,9 @@ void Game_Has_Loaded(void)
 			ThisFramesRenderingHasFinished();
 		}
 
-		FlipBuffers();	
+/*		FlipBuffers();	 */
+		InGameFlipBuffers();
+		
 		FrameCounterHandler();
 
 
@@ -319,6 +311,7 @@ void Game_Has_Loaded(void)
 		if(AvP.Network != I_No_Network)
 		{
 			MinimalNetCollectMessages();
+
 			//send messages , mainly  needed so that the host will send the game description
 			//allowing people to join while the host is loading
 			NetSendMessages();
@@ -328,14 +321,14 @@ void Game_Has_Loaded(void)
 	}
 	while(!DebouncedGotAnyKey);
 
+	while (0);
+	
 	FadingGameInAfterLoading=ONE_FIXED;
 
-	
 	if (LoadingBarFull)
 	{
 		ReleaseDDSurface(LoadingBarFull);
 	}
 }
-
 
 };

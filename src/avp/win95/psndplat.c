@@ -2,11 +2,7 @@
   AvP platform specific sound management source
   ----------------------------------------------------------------------------*/
 
-#ifdef DAVEW
-	#define DB_LEVEL 4
-#else
-	#define DB_LEVEL 3
-#endif
+#define DB_LEVEL 3
 
 #include "3dc.h"
 #include "inline.h"
@@ -769,7 +765,7 @@ void PlatEndSoundSys(void)
 	db_log3("PlatEndSoundSys finished.");
 }
 
-int PlatChangeGlobalVolume(volume)
+int PlatChangeGlobalVolume(int volume)
 {
 	int attenuation;
 	HRESULT hres;
@@ -797,7 +793,7 @@ int PlatChangeGlobalVolume(volume)
 	return SOUND_PLATFORMERROR;
 }
  
-int PlatPlaySound(activeIndex)
+int PlatPlaySound(int activeIndex)
 {
 	HRESULT hres;
 	SOUNDINDEX gameIndex;

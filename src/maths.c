@@ -1,28 +1,8 @@
-
-#if PSX
-#include <kernel.h>
-#include <sys/types.h>		   	  
-#include <libetc.h>
-#include <libgte.h>		
-#include <libgpu.h>
-#include <stdlib.h>					 
-#include <inline_c.h>
-#include <gtemac.h>
-#endif
-
 #include "3dc.h"
 #include "inline.h"
+#include "maths.h"
 
 #define UseTimsPinp Yes
-
-#define trip_debugger No
-
-#if trip_debugger
-int testa = 0;
-int testb = 100;
-int testc = 0;
-#endif
-
 
 /*
 
@@ -30,23 +10,12 @@ int testc = 0;
 
 */
 
-	#if platform_pc
-	extern int sine[];
-	extern int cosine[];
-	#endif
+extern const short ArcCosTable[4096];
+extern const short ArcSineTable[4096];
+extern const short ArcTanTable[256];
 
-	extern short ArcCosTable[];
-	extern short ArcSineTable[];
-	extern short ArcTanTable[];
+extern LONGLONGCH ll_zero;
 
-	extern LONGLONGCH ll_zero;
-
-	extern int NormalFrameTime;
-
-
-#if PSX
-extern unsigned long *scratchp;
-#endif
 
 /*
 
@@ -71,36 +40,6 @@ extern unsigned long *scratchp;
 */
 
 
-
-#if PSX
-inline void ch2psx(MATRIXCH *chm, MATRIX *psxm)
-{
-  psxm->m[0][0] = chm->mat11 >> 4;
-  psxm->m[0][1] = chm->mat21 >> 4;
-  psxm->m[0][2] = chm->mat31 >> 4;
-  psxm->m[1][0] = chm->mat12 >> 4;
-  psxm->m[1][1] = chm->mat22 >> 4;
-  psxm->m[1][2] = chm->mat32 >> 4;
-  psxm->m[2][0] = chm->mat13 >> 4;
-  psxm->m[2][1] = chm->mat23 >> 4;
-  psxm->m[2][2] = chm->mat33 >> 4;
-}
-
-inline void psx2ch(MATRIX *psxm, MATRIXCH *chm)
-{
-  
-  chm->mat11 = psxm->m[0][0] << 4;
-  chm->mat21 = psxm->m[0][1] << 4;
-  chm->mat31 = psxm->m[0][2] << 4;
-  chm->mat12 = psxm->m[1][0] << 4;
-  chm->mat22 = psxm->m[1][1] << 4;
-  chm->mat32 = psxm->m[1][2] << 4;
-  chm->mat13 = psxm->m[2][0] << 4;
-  chm->mat23 = psxm->m[2][1] << 4;
-  chm->mat33 = psxm->m[2][2] << 4;
-}
-
-#endif
 
 /* One over sin functions - CDF 4/2/98 */
 
@@ -314,12 +253,6 @@ int FindShift32(int value, int limit)
 
 	while(value > limit) {
 
-		#if trip_debugger
-		if(shift > 32) {
-			testa = testb / testc;
-		}
-		#endif
-
 		shift++;
 
 		value >>= 1;
@@ -400,27 +333,8 @@ int MinInt(int *iarray, int iarraysize)
 
 */
 
-void CreateEulerMatrix(e, m1)
-
-	EULER *e;
-	MATRIXCH *m1;
-
+void CreateEulerMatrix(EULER *e, MATRIXCH *m1)
 {
-
-#if 0
-
-	SVECTOR eulers;
-
-	eulers.vx=(e->EulerX)&4095;
-	eulers.vy=(e->EulerY)&4095;
-	eulers.vz=(e->EulerZ)&4095;
-
-	RotMatrix(&eulers,(MATRIX *)scratchp);
-
-	psx2ch((MATRIX *)scratchp,m1);
-
-#else
-
 	int t, sx, sy, sz, cx, cy, cz;
 
 
@@ -495,9 +409,6 @@ void CreateEulerMatrix(e, m1)
 /* m33 = cx*cy */
 
 	m1->mat33=MUL_FIXED(cx,cy);
-
-#endif
-
 }
 
 
@@ -580,27 +491,9 @@ void CreateEulerVector(EULER *e, VECTORCH *v)
 
 */
 
-void MatrixMultiply(m1, m2, m3)
-
-	struct matrixch *m1, *m2, *m3;
+void MatrixMultiply(struct matrixch *m1, struct matrixch *m2, struct matrixch *m3)
 
 {
-  
-	#if 0
- 		
-	PushMatrix();
-
-	ch2psx(m1,(MATRIX *)scratchp);
-	ch2psx(m2,(MATRIX *)(scratchp+(sizeof(MATRIX))));
-
-	MulMatrix0((MATRIX *)scratchp,(MATRIX *)(scratchp+(sizeof(MATRIX))),(MATRIX *)(scratchp+((sizeof(MATRIX)<<1))));
-
-	psx2ch((MATRIX *)(scratchp+((sizeof(MATRIX)<<1))),m3);
-
- 	PopMatrix();
-		
-	#else
-		 
 	MATRIXCH TmpMat;
 	 
 /* m11'' = c1.r1' */
@@ -660,82 +553,7 @@ void MatrixMultiply(m1, m2, m3)
 /* Finally, copy TmpMat to m3 */
 
 	CopyMatrix(&TmpMat, m3);
-
-	#endif
-
 }
-
-
-void PSXAccurateMatrixMultiply(m1, m2, m3)
-
-	struct matrixch *m1, *m2, *m3;
-
-{
- 	 
-	MATRIXCH TmpMat;
-	 
-/* m11'' = c1.r1' */
-
-	TmpMat.mat11=MUL_FIXED(m1->mat11,m2->mat11);
-	TmpMat.mat11+=MUL_FIXED(m1->mat21,m2->mat12);
-	TmpMat.mat11+=MUL_FIXED(m1->mat31,m2->mat13);
-
-/* m12'' = c2.r1' */
-
-	TmpMat.mat12=MUL_FIXED(m1->mat12,m2->mat11);
-	TmpMat.mat12+=MUL_FIXED(m1->mat22,m2->mat12);
-	TmpMat.mat12+=MUL_FIXED(m1->mat32,m2->mat13);
-
-/* m13'' = c3.r1' */
-
-	TmpMat.mat13=MUL_FIXED(m1->mat13,m2->mat11);
-	TmpMat.mat13+=MUL_FIXED(m1->mat23,m2->mat12);
-	TmpMat.mat13+=MUL_FIXED(m1->mat33,m2->mat13);
-
-/* m21'' = c1.r2' */
-
-	TmpMat.mat21=MUL_FIXED(m1->mat11,m2->mat21);
-	TmpMat.mat21+=MUL_FIXED(m1->mat21,m2->mat22);
-	TmpMat.mat21+=MUL_FIXED(m1->mat31,m2->mat23);
-
-/* m22'' = c2.r2' */
-
-	TmpMat.mat22=MUL_FIXED(m1->mat12,m2->mat21);
-	TmpMat.mat22+=MUL_FIXED(m1->mat22,m2->mat22);
-	TmpMat.mat22+=MUL_FIXED(m1->mat32,m2->mat23);
-
-/* m23'' = c3.r2' */
-
-	TmpMat.mat23=MUL_FIXED(m1->mat13,m2->mat21);
-	TmpMat.mat23+=MUL_FIXED(m1->mat23,m2->mat22);
-	TmpMat.mat23+=MUL_FIXED(m1->mat33,m2->mat23);
-
-/* m31'' = c1.r3' */
-
-	TmpMat.mat31=MUL_FIXED(m1->mat11,m2->mat31);
-	TmpMat.mat31+=MUL_FIXED(m1->mat21,m2->mat32);
-	TmpMat.mat31+=MUL_FIXED(m1->mat31,m2->mat33);
-
-/* m32'' = c2.r3' */
-
-	TmpMat.mat32=MUL_FIXED(m1->mat12,m2->mat31);
-	TmpMat.mat32+=MUL_FIXED(m1->mat22,m2->mat32);
-	TmpMat.mat32+=MUL_FIXED(m1->mat32,m2->mat33);
-
-/* m33'' = c3.r3' */
-
-	TmpMat.mat33=MUL_FIXED(m1->mat13,m2->mat31);
-	TmpMat.mat33+=MUL_FIXED(m1->mat23,m2->mat32);
-	TmpMat.mat33+=MUL_FIXED(m1->mat33,m2->mat33);
-
-/* Finally, copy TmpMat to m3 */
-
-	CopyMatrix(&TmpMat, m3);
-
-}
-
-
-
 
 
 /*
@@ -744,9 +562,7 @@ void PSXAccurateMatrixMultiply(m1, m2, m3)
 
 */
 
-void TransposeMatrixCH(m1)
-
-	MATRIXCH *m1;
+void TransposeMatrixCH(MATRIXCH *m1)
 
 {
 
@@ -959,11 +775,7 @@ void _RotateVector(VECTORCH *v, MATRIXCH*  m)
 
 */
 
-void _RotateAndCopyVector(v1, v2, m)
-
-	VECTORCH *v1;
-	VECTORCH *v2;
-	MATRIXCH *m;
+void _RotateAndCopyVector(VECTORCH *v1, VECTORCH *v2, MATRIXCH *m)
 
 {
 
@@ -980,9 +792,6 @@ void _RotateAndCopyVector(v1, v2, m)
 	v2->vz+=MUL_FIXED(m->mat33,v1->vz);
 
 }
-
-
-
 
 
 
@@ -1072,7 +881,7 @@ void MatrixToEuler(MATRIXCH *m, EULER *e)
 		}
 
 		else CosMatrixPitch = 1;
-	
+
 		SineMatrixYaw = WideMulNarrowDiv(
 			#if j_and_r_change
 			m->mat31 >> m2e_scale, ONE_FIXED_S, CosMatrixPitch);
@@ -1307,12 +1116,6 @@ void MatrixToEuler(MATRIXCH *m, EULER *e)
 }
 
 
-
-#if 1
-
-
-
-
 #define j_and_r_change_2 Yes
 
 void MatrixToEuler2(MATRIXCH *m, EULER *e)
@@ -1543,10 +1346,6 @@ void MatrixToEuler2(MATRIXCH *m, EULER *e)
 	#endif
 
 }
-
-
-
-#endif
 
 
 
@@ -1816,9 +1615,7 @@ int ArcSin(int s)
 
 */
 
-int ArcTan(height_x, width_z)
-
-	int height_x,width_z;
+int ArcTan(int height_x, int width_z)
 
 {
 
@@ -2153,9 +1950,12 @@ int PointInPolygon(int *point, int *polygon, int c, int ppsize)
   /* go back to first point */
   polyp = polygon;
 
+dx = 0; /* TODO: uninitialized?? */
+
   /* for each point */
   while (0 != c)
   {
+    
     /* is this line straddling the x co-ordinate of the point? */
     /* if not it is not worth testing for intersection with the half-line */
     /* we must be careful to get the strict and non-stict inequalities */
@@ -2210,7 +2010,7 @@ int PointInPolygon(int *point, int *polygon, int c, int ppsize)
           /* small line -- use 32-bit values */
           /* interpolate z */
           t = (polyp[1] - sz) * (x - sx) - (polyp[0] - sx) * (z - sz);
-          if (t < 0 && sgnx < 0 || 0 < t && 0 < sgnx)
+          if ((t < 0 && sgnx < 0) || (0 < t && 0 < sgnx))
           {
             /* we have an intersection */
             intersects++;
@@ -2511,7 +2311,7 @@ int PointInPolygon(int *point, int *polygon, int c, int ppsize)
 #define DEG_3	31
 #define SEP_3	3
 
-static long table [DEG_3] =
+static int32_t table [DEG_3] =
 {
   -851904987, -43806228, -2029755270, 1390239686, -1912102820,
   -485608943, 1969813258, -1590463333, -1944053249, 455935928,
@@ -2524,21 +2324,9 @@ static long table [DEG_3] =
 
 #define TABLE_END (table + sizeof (table) / sizeof (table [0]))
 
-static long * front_ptr = table + SEP_3;
-static long * rear_ptr = table;
+static int32_t * front_ptr = table + SEP_3;
+static int32_t * rear_ptr = table;
 
-
-
-/* This version doesn't support different types of random number
-   generators, or saving and restoring the state.  It is fast, short and
-   as simple as it can be while still generating numbers as good as the
-   Berkeley one.  The basic algorithm is to have a linear-feedback shift
-   register, whose bits are the least significant bits of each word in
-   the `table' array.  The higher-order bits are generated by carries
-   from the arithmetic on the shift register bits, and have an even
-   longer period than the shift register. */
-
-/* x**31 + x**3 + 1. */
 
 void SetSeededFastRandom(int seed);
 void SetFastRandom(void)
@@ -2571,7 +2359,7 @@ int FastRandom(void)
 
 {
 
-	long i;
+	int32_t i;
 
 	/*
 
@@ -2582,7 +2370,7 @@ int FastRandom(void)
 	*/
 
 	*front_ptr += *rear_ptr;
-	i = (long) ((unsigned long) *front_ptr >> 1);
+	i = (int32_t) ((uint32_t) *front_ptr >> 1);
 
 	/* `front_ptr' and `rear_ptr' can't wrap at the same time. */
 
@@ -2614,12 +2402,12 @@ int FastRandom(void)
 #define SEEDED_DEG_3	13
 #define SEEDED_SEP_3	3
 
-static long seeded_table [SEEDED_DEG_3];
+static int32_t seeded_table [SEEDED_DEG_3];
 
 #define SEEDED_TABLE_END (seeded_table + sizeof (seeded_table) / sizeof (seeded_table [0]))
 
-static long * seeded_front_ptr = seeded_table + SEEDED_SEP_3;
-static long * seeded_rear_ptr = seeded_table;
+static int32_t * seeded_front_ptr = seeded_table + SEEDED_SEP_3;
+static int32_t * seeded_rear_ptr = seeded_table;
 
 
 
@@ -2627,7 +2415,7 @@ int SeededFastRandom(void)
 
 {
 
-	long i;
+	int32_t i;
 
 	/*
 
@@ -2638,7 +2426,7 @@ int SeededFastRandom(void)
 	*/
 
 	*seeded_front_ptr += *seeded_rear_ptr;
-	i = (long) ((unsigned long) *seeded_front_ptr >> 1);
+	i = (int32_t) ((uint32_t) *seeded_front_ptr >> 1);
 
 	/* `front_ptr' and `rear_ptr' can't wrap at the same time. */
 
@@ -2670,7 +2458,7 @@ void SetSeededFastRandom(int seed)
 {
 
 	int i;
-	long number = seed;
+	int32_t number = seed;
 
 
 	for(i = 0; i < SEEDED_DEG_3; ++i) {
@@ -2930,4 +2718,3 @@ void QuatToMat(QUAT *q,MATRIXCH *m)
 	m->mat33=ONE_FIXED-q_2xx-q_2yy;
 
 }
-

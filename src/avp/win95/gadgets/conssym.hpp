@@ -11,7 +11,7 @@
 #ifndef _conssym_hpp
 #define _conssym_hpp 1
 
-	#if ( defined( __WATCOMC__ ) || defined( _MSC_VER ) )
+	#if defined( _MSC_VER )
 		#pragma once
 	#endif
 
@@ -30,6 +30,7 @@
 /* Macros ***************************************************************/
 
 /* Type definitions *****************************************************/
+
 	class ConsoleSymbol
 	{
 		friend class TextInputState;
@@ -50,10 +51,9 @@
 		(
 			ProjChar* pProjCh_ToUse
 		);
-		virtual ~ConsoleSymbol();
+		
 
 		SCString* pSCString_Symbol;
-
 
 	public:
 		SCString* GetpSCString(void) const
@@ -63,7 +63,11 @@
 
 
 	private:
-		static List <ConsoleSymbol*> List_pConsoleSym;
+		
+		static List <ConsoleSymbol *> List_pConsoleSym;
+
+	public:
+		virtual ~ConsoleSymbol();
 	};	// suggested naming: "ConsoleSym"
 
 /* Exported globals *****************************************************/

@@ -25,10 +25,10 @@
 #include "psnd.h"
 #include "equipmnt.h"
 #include "los.h"
-#include "AI_Sight.h"
+#include "ai_sight.h"
 #include "targeting.h"
 #include "dxlog.h"
-#include "ShowCmds.h"
+#include "showcmds.h"
 
 #define UseLocalAssert Yes
 #include "ourasert.h"
@@ -38,7 +38,7 @@
 /* Individual marines vary this by +/- 12.5%. */
 /* Predators and xenoborgs don't at the moment. */
 
-static MOVEMENT_DATA Movement_Stats[] = {
+static const MOVEMENT_DATA Movement_Stats[] = {
 	{
 		MDI_Marine_Mooch_Bored,
 		1500,
@@ -101,7 +101,7 @@ static MOVEMENT_DATA Movement_Stats[] = {
 	},
 };
 
-MOVEMENT_DATA *GetThisMovementData(MOVEMENT_DATA_INDEX index) {
+const MOVEMENT_DATA *GetThisMovementData(MOVEMENT_DATA_INDEX index) {
 	
 	int a;	
 	

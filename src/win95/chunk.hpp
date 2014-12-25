@@ -3,57 +3,22 @@
 #ifndef _chunk_hpp
 #define _chunk_hpp 1
 
+#include "fixer.h"
 
-#if engine
-
-	#include "3dc.h"
-	#include "mem3dc.h" // for debug new and delete
+#include "3dc.h"
+#include "mem3dc.h" // for debug new and delete
 	
 	
-	#include "inline.h"
+#include "inline.h"
 
 #if SupportModules
 
-	#include "module.h"
+  #include "module.h"
 
 #endif
 
-	#include "list_tem.hpp"
+#include "list_tem.hpp"
 	
-
-#endif
-
-#if cencon
-
-#include "AFXWIN.H"
-
-#ifdef _DEBUG
-#undef new
-#define new DEBUG_NEW
-#define my_new DEBUG_NEW
-#else
-#define my_new new
-#endif
-
-#include "list_tem.hpp"
-
-#endif
-
-#if objedit || sprite_edit || ANIMEXP
-#include "StdAfx.h"
-#include "list_tem.hpp"
-#endif
-
-#if shpedit
-#include "stdafx.h"
-#include "list_tem.hpp"
-#endif
-
-#if standard
-#include "advwin32.h"
-#include <windows.h>
-#include "list_tem.hpp"
-#endif
 
 
 #define CHUNK_FAILED_ON_LOAD -1
@@ -74,9 +39,7 @@
 // we start at the header of the chunk we are in
 // so that we can stop at the end of the chunk
 
-#if cencon
-extern char users_name[];
-#endif
+#include "list_tem.hpp"
 
 #ifndef RIFF_OPTIMIZE // define this to get compiler errors where you are calling the old slow functions
 extern List<int> list_chunks_in_file (HANDLE &, const char * chunk_id);
@@ -362,7 +325,7 @@ public:
 	virtual void fill_data_block_for_process(char * data_start);	
 
 
-	Chunk* Chunk_With_Children::DynCreate(const char* data);
+	Chunk* DynCreate(const char* data);
 
 protected:
 
@@ -652,36 +615,3 @@ FORCE_CHUNK_INCLUDE_END
 */
 
 #endif // !included
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

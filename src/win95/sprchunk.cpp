@@ -1,15 +1,6 @@
 #include "sprchunk.hpp"
 #include "mishchnk.hpp"
 
-#if cencon
-#include "fnamefnc.hpp"
-#include "bmpnames.hpp"
-#include "shpchunk.hpp"
-#endif
-
-#ifdef cencon
-#define new my_new
-#endif
 //macro for helping to force inclusion of chunks when using libraries
 FORCE_CHUNK_INCLUDE_IMPLEMENT(sprchunk)
 
@@ -184,10 +175,9 @@ Sprite_Header_Chunk::Sprite_Header_Chunk(const char * file_name, Chunk_With_Chil
 : Chunk_With_Children(parent,"SPRIHEAD")
 {
 // Load in whole chunk and traverse
-	HANDLE rif_file;
+	FILE *rif_file;
 	DWORD file_size;
 	DWORD file_size_from_file;
-	unsigned long bytes_read;
 	char * buffer;
 	char * buffer_ptr;
 	char id_buffer[9];
@@ -197,49 +187,51 @@ Sprite_Header_Chunk::Sprite_Header_Chunk(const char * file_name, Chunk_With_Chil
 	error_code = 0;
 
 
-	rif_file = CreateFileA (file_name, GENERIC_READ, 0, 0, OPEN_EXISTING, 
-					FILE_FLAG_RANDOM_ACCESS, 0);
-
-	if (rif_file == INVALID_HANDLE_VALUE) {
+	rif_file = OpenGameFile(file_name, FILEMODE_READONLY, FILETYPE_PERM);	
+	if (rif_file == NULL) {
 		return;
 	}
 
-	file_size = GetFileSize (rif_file, NULL);	
-
+	fseek(rif_file, 0, SEEK_END);
+	file_size = ftell(rif_file);
+	rewind(rif_file);
 	
-	if (!ReadFile(rif_file, id_buffer, 8, &bytes_read, 0)) {
+	if (fread(id_buffer, 1, 8, rif_file) != 8) {
 		error_code = CHUNK_FAILED_ON_LOAD;
-		CloseHandle (rif_file);
+		fclose(rif_file);
 		return;
 	}	
 
-	if (strncmp (id_buffer, "SPRIHEAD", 8)) {
+	if (strncmp(id_buffer, "SPRIHEAD", 8) != 0) {
 		error_code = CHUNK_FAILED_ON_LOAD_NOT_RECOGNISED;
-		CloseHandle (rif_file);
+		fclose(rif_file);
 		return;
 	}	
 
-	if (!ReadFile(rif_file, &file_size_from_file, 4, &bytes_read, 0)) {
+	if (fread(&file_size_from_file, 1, 4, rif_file) != 4) {
 		error_code = CHUNK_FAILED_ON_LOAD;
-		CloseHandle (rif_file);
+		fclose(rif_file);
 		return;
 	}	
 
 	if (file_size != file_size_from_file) {
 		error_code = CHUNK_FAILED_ON_LOAD_NOT_RECOGNISED;
-		CloseHandle (rif_file);
+		fclose(rif_file);
 		return;
 	}	
 
-
 	buffer = new char [file_size];
 
-	if (!ReadFile(rif_file, buffer, (file_size-12), &bytes_read, 0)) {
+	if (fread(buffer, 1, (file_size-12), rif_file) != (file_size-12)) {
 		error_code = CHUNK_FAILED_ON_LOAD;
-		CloseHandle (rif_file);
+		delete [] buffer;
+		
+		fclose(rif_file);
 		return;
 	}
 
+	fclose(rif_file);
+	
 	// Process the file
 
 	buffer_ptr = buffer;
@@ -248,7 +240,6 @@ Sprite_Header_Chunk::Sprite_Header_Chunk(const char * file_name, Chunk_With_Chil
 	// The start of the first chunk
 
 	while ((buffer_ptr-buffer)< ((signed) file_size-12) && !error_code) {
-
 		if ((*(int *)(buffer_ptr + 8)) + (buffer_ptr-buffer) > ((signed) file_size-12)) {
 			error_code = CHUNK_FAILED_ON_LOAD_NOT_RECOGNISED;
 			break;
@@ -256,17 +247,13 @@ Sprite_Header_Chunk::Sprite_Header_Chunk(const char * file_name, Chunk_With_Chil
 
 		DynCreate(buffer_ptr);
 		buffer_ptr += *(int *)(buffer_ptr + 8);
-
 	}
 
 	delete [] buffer;
-
-	CloseHandle (rif_file);
-
 }
 
 
-Sprite_Header_Chunk::write_file(const char* fname)
+int Sprite_Header_Chunk::write_file(const char* fname)
 {
 	HANDLE rif_file;
 
@@ -287,7 +274,7 @@ Sprite_Header_Chunk::write_file(const char* fname)
 	return 0;
 }
 
-Sprite_Header_Chunk::output_chunk(HANDLE & hand)
+BOOL Sprite_Header_Chunk::output_chunk(HANDLE & hand)
 {
 	unsigned long junk;
 	BOOL ok;
@@ -304,260 +291,6 @@ Sprite_Header_Chunk::output_chunk(HANDLE & hand)
 	return TRUE;
 }
 
-#if cencon
-void Sprite_Header_Chunk::post_input_processing()
-{
-	if (parent)
-	{
-		List<Chunk *> chlst;
-		GetRootChunk()->lookup_child("REBENVDT",chlst);
-		Lockable_Chunk_With_Children * envd = 0;
-		if (chlst.size()) envd = (Lockable_Chunk_With_Children *) chlst.first_entry();
-		
-		BOOL fixpal = IsFixedPalette(envd);
-
-		lookup_child("SHPEXTFN",chlst);
-		
-		if (chlst.size())
-		{
-			Shape_External_Filename_Chunk * sefc = (Shape_External_Filename_Chunk *)chlst.first_entry();
-			
-			#if cencon
-			twprintf("Locating %s\n",sefc->file_name);
-			char * locatedfile = FindExistingFileInPath_PreferWriteable(CWnd::GetActiveWindow(),sefc->file_name,"RifSearchPath");
-			twprintf("Loading %s\n",locatedfile ? locatedfile : sefc->file_name);
-			Sprite_Header_Chunk rfc(locatedfile ? locatedfile : sefc->file_name);
-			if (locatedfile)
-			{
-				delete[] locatedfile;
-			}
-			#else
-			Sprite_Header_Chunk rfc(sefc->file_name);
-			#endif
-
-			if (rfc.error_code != 0)
-			{
-				return;
-			}
-
-			lookup_child("SPRITVER",chlst);
-			int myver = -2;
-			if (chlst.size())
-			{
-				Sprite_Version_Number_Chunk * svnc = (Sprite_Version_Number_Chunk *)chlst.first_entry();
-				myver = svnc->version_num;
-			}
-			rfc.lookup_child("SPRITVER",chlst);
-			int yourver = -1;
-			if (chlst.size())
-			{
-				Sprite_Version_Number_Chunk * svnc = (Sprite_Version_Number_Chunk *)chlst.first_entry();
-				yourver = svnc->version_num;
-			}
-
-			if (yourver != myver)
-			{
-				#define NOT_A_BITMAP_RELATED_CHUNK \
-					strncmp ("BMPLSTST", child_ptr->identifier, 8) && \
-					strncmp ("BMNAMVER", child_ptr->identifier, 8) && \
-					strncmp ("BMNAMEXT", child_ptr->identifier, 8) && \
-					strncmp ("RIFFNAME", child_ptr->identifier, 8) && \
-					strncmp ("SHPEXTFN", child_ptr->identifier, 8) && \
-					strncmp ("BMPMD5ID", child_ptr->identifier, 8)
-				
-				Chunk * child_ptr = children;
-				List <Chunk *> chunks_to_delete;
-				while (child_ptr != NULL)
-				{
-					if (NOT_A_BITMAP_RELATED_CHUNK)
-					{
-						chunks_to_delete.add_entry(child_ptr);
-					}
-					child_ptr = child_ptr->next;
-				}
-				for (LIF<Chunk *> delchunks(&chunks_to_delete); !delchunks.done(); delchunks.next())
-				{
-					delete delchunks();
-				}
-				
-				child_ptr = rfc.children;
-				while (child_ptr != NULL)
-				{
-					if (NOT_A_BITMAP_RELATED_CHUNK)
-					{
-						#define CREATE_CHUNK_END(_datablock) \
-							new Miscellaneous_Chunk(this,_datablock,_datablock+12,*(int *)(_datablock+8)-12);
-
-						#define CREATE_CHUNK_FOR(_datablock,_id,_chunkclass) \
-							if (!strncmp(_datablock,_id,8)) { \
-								new _chunkclass(this,_datablock+12,*(int *)(_datablock+8)-12); \
-							} else
-
-						child_ptr->prepare_for_output();
-						char * datablock = child_ptr->make_data_block_from_chunk();
-
-						CREATE_CHUNK_FOR(datablock,"SPRITVER",Sprite_Version_Number_Chunk)
-						CREATE_CHUNK_FOR(datablock,"SPRITEPC",PC_Sprite_Chunk)
-						CREATE_CHUNK_FOR(datablock,"SPRITEPS",Playstation_Sprite_Chunk)
-						CREATE_CHUNK_FOR(datablock,"SPRITESA",Saturn_Sprite_Chunk)
-						CREATE_CHUNK_FOR(datablock,"SPRISIZE",Sprite_Size_Chunk)
-						CREATE_CHUNK_FOR(datablock,"SPRBMPSC",Sprite_Bitmap_Scale_Chunk)
-						CREATE_CHUNK_FOR(datablock,"SPRBMPCE",Sprite_Bitmap_Centre_Chunk)
-						CREATE_CHUNK_FOR(datablock,"SPREXTEN",Sprite_Extent_Chunk)
-						CREATE_CHUNK_END(datablock)
-
-						delete[] datablock;
-					}
-					child_ptr = child_ptr->next;
-				}
-				
-			}
-
-			Chunk_With_BMPs * blsc = 0;
-			Chunk_With_BMPs * gbnc = 0;
-
-			rfc.lookup_child("BMPLSTST",chlst);
-			if (chlst.size())
-			{
-				gbnc = (Chunk_With_BMPs *) chlst.first_entry();
-				if (!gbnc->bmps.size()) gbnc = 0;
-			}
-			
-			List<Chunk *> oldlst;
-			lookup_child("BMPLSTST",oldlst);
-			assert (oldlst.size()<2);
-			
-			if (oldlst.size())
-			{
-				blsc = (Bitmap_List_Store_Chunk *)oldlst.first_entry();
-			}
-			else
-			{
-				if (gbnc) blsc = new Bitmap_List_Store_Chunk(this);
-			}
-
-			BMP_Names_ExtraData * extended = 0;
-			if (blsc)
-			{
-				extended = blsc->GetExtendedData();
-				if (fixpal)
-					extended->flags = (GlobalBMPFlags)(extended->flags | GBF_FIXEDPALETTE);
-				else
-					extended->flags = (GlobalBMPFlags)(extended->flags & ~GBF_FIXEDPALETTE);
-			}
-			if (gbnc)
-			{
-				if ((gbnc->get_version_num()!=blsc->get_version_num()) || (gbnc->bmps.size() != blsc->bmps.size()))
-				{  // other checks could be done as well
-					if (blsc->bmps.size())
-					{
-						BOOL neednewpalette = FALSE;
-						
-						List<BMP_Name> newlist = gbnc->bmps;
-						for (LIF<BMP_Name> newLIF(&newlist); !newLIF.done(); newLIF.next())
-						{
-							BMP_Name newcur = newLIF();
-							newcur.flags = (BMPN_Flags) (newcur.flags & ~(COMPLETED_BMPN_FLAGS | ChunkBMPFlag_FixedPalette));
-							if (fixpal) newcur.flags = (BMPN_Flags) (newcur.flags | ChunkBMPFlag_FixedPalette);
-							for (LIF<BMP_Name> oldLIF(&blsc->bmps); !oldLIF.done(); oldLIF.next())
-							{
-								BMP_Name oldcur = oldLIF();
-								if (newcur == oldcur)
-								{
-									// do we need to requantize?
-									if ((oldcur.flags ^ newcur.flags) & CHECKMODIFY_BMPN_FLAGS
-										|| newcur.flags & ChunkBMPFlag_UsesTransparency
-										   && !(newcur.flags & ChunkBMPFlag_IFF)
-										   && !(oldcur.flags & ChunkBMPFlag_IFF)
-										   && oldcur.DifferentTransparencyColour(newcur))
-										oldcur.flags = (BMPN_Flags)(oldcur.flags & ~COMPLETED_BMPN_FLAGS);
-									// keep some of the old flags - the ones that can differ
-									newcur.flags = (BMPN_Flags)(newcur.flags & COPY_BMPN_FLAGS);
-									newcur.flags = (BMPN_Flags)(newcur.flags | oldcur.flags & ~COPY_BMPN_FLAGS);
-									if (oldcur.version_num != newcur.version_num)
-									{
-										neednewpalette = TRUE;
-										newcur.flags = (BMPN_Flags)(newcur.flags & ~ChunkBMPFlag_HistogramExists);
-										extended->flags = (GlobalBMPFlags)(extended->flags & ~GBF_HISTOGRAMEXISTS);
-									}
-									break;
-								}
-							}
-							if (oldLIF.done())
-							{
-							   	// reset palette up to date flag
-								neednewpalette = TRUE;
-								newcur.flags = (BMPN_Flags)(newcur.flags & ~(ChunkBMPFlag_HistogramExists | COMPLETED_BMPN_FLAGS));
-								extended->flags = (GlobalBMPFlags)(extended->flags & ~GBF_HISTOGRAMEXISTS);
-							}
-							newLIF.change_current(newcur);
-						}
-
-						// check if any bitmaps have been removed
-						for (LIF<BMP_Name> bli(&blsc->bmps); !bli.done(); bli.next())
-						{
-							if (!newlist.contains(bli()))
-							{
-								// delete assoc files
-								neednewpalette = TRUE;
-								extended->flags = (GlobalBMPFlags)(extended->flags & ~GBF_HISTOGRAMEXISTS);
-							}
-						}
-
-						if (neednewpalette)
-						{
-							Palette_Outdated(envd);
-							if (fixpal) FixedPalette_Outdated(envd);
-							envd->updated = TRUE;
-						}
-						blsc->bmps = newlist;
-					}
-					else
-					{
-						blsc->bmps = gbnc->bmps;
-						for (LIF<BMP_Name> flagresetLIF(&blsc->bmps); !flagresetLIF.done(); flagresetLIF.next())
-						{
-							BMP_Name current = flagresetLIF();
-							current.flags = (BMPN_Flags)(current.flags & (COPY_BMPN_FLAGS & ~ChunkBMPFlag_FixedPalette));
-							if (fixpal) current.flags = (BMPN_Flags) (current.flags | ChunkBMPFlag_FixedPalette);
-							flagresetLIF.change_current(current);
-						}
-						// reset palette up to date flag
-						extended->flags = (GlobalBMPFlags)(extended->flags & ~GBF_HISTOGRAMEXISTS);
-						Palette_Outdated(envd);
-						if (fixpal) FixedPalette_Outdated(envd);
-						envd->updated = TRUE;
-					}
-					blsc->max_index = gbnc->max_index;
-					blsc->set_version_num(gbnc->get_version_num());
-					assert (!strcmp("RSPRITES",parent->identifier));
-					((Lockable_Chunk_With_Children *)parent)->updated = TRUE;
-				}
-			}
-			else
-			{
-				if (blsc)
-				{
-					if (blsc->bmps.size())
-					{
-						// reset palette up to date flag
-						extended->flags = (GlobalBMPFlags)(extended->flags & ~GBF_HISTOGRAMEXISTS);
-						Palette_Outdated(envd);
-						if (fixpal) FixedPalette_Outdated(envd);
-						envd->updated = TRUE;
-						assert (!strcmp("RSPRITES",parent->identifier));
-						((Lockable_Chunk_With_Children *)parent)->updated = TRUE;
-					}
-					delete blsc;
-				}
-			}
-			
-		}
-		
-	}
-	Chunk_With_Children::post_input_processing();
-}
-#endif
 RIF_IMPLEMENT_DYNCREATE_DECLARE_PARENT("SPRITEPC",PC_Sprite_Chunk,"SPRIHEAD",Sprite_Header_Chunk)
 
 PC_Sprite_Chunk::PC_Sprite_Chunk(Sprite_Header_Chunk* parent,const char* data,size_t datasize)
@@ -960,5 +693,4 @@ void Sprite_Extent_Chunk::fill_data_block(char* data_start)
 	data_start+=4;
 	*(int*)data_start=spare2;
 	data_start+=4;
-
 }

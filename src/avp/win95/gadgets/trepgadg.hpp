@@ -27,10 +27,6 @@
 
 	#endif
 
-#ifdef __cplusplus
-	extern "C" {
-#endif
-
 /* Version settings *****************************************************/
 
 /* Constants  ***********************************************************/
@@ -60,12 +56,12 @@
 			int FixP_Alpha
 		);
 
-		struct r2pos TextReportGadget :: GetPos_Rel
+		struct r2pos GetPos_Rel
 		(
 			const struct r2rect& R2Rect_Parent
 		) const;
 
-		r2size TextReportGadget :: GetSize
+		r2size GetSize
 		(
 			const struct r2rect& R2Rect_Parent
 		) const;
@@ -154,10 +150,5 @@
 
 
 /* End of the header ****************************************************/
-
-
-#ifdef __cplusplus
-	};
-#endif
 
 #endif

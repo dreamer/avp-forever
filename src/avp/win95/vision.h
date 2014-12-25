@@ -5,7 +5,7 @@
 extern "C" {
 #endif
 
-#include "d3_func.h"
+//#include "d3_func.h"
 
 /*KJL****************************************************************************************
 *                                    P R O T O T Y P E S	                                *
@@ -59,27 +59,6 @@ struct D3DLightColourControl
 	int (*GetB)(int);
 };
 extern struct D3DLightColourControl d3d_light_ctrl;
-
-/* JH 6/4/97 - define a structure to control an alpha channelled coloured overlay */
-extern D3DINFO d3d;
-#define d3d_overlays_available ((d3d.ThisDriver.dpcTriCaps.dwSrcBlendCaps & (D3DPBLENDCAPS_SRCALPHA|D3DPBLENDCAPS_INVSRCALPHA))==(D3DPBLENDCAPS_SRCALPHA|D3DPBLENDCAPS_INVSRCALPHA))
-
-enum D3DOCC_Mode
-{
-	OCCM_NORMAL, /* default behaviour - all other parms ignored */
-	OCCM_ON, /* r,g,b,alpha specify a colour of a light to use instead of white */
-};
-struct D3DOverlayColourControl
-{
-	enum D3DOCC_Mode ctrl;
-
-	/* these should be in [0..255] */
-	int r;
-	int g;
-	int b;
-	int alpha;
-};
-
 
 /* KJL 17:07:29 10/02/98 - all new vision modes */
 enum VISION_MODE_ID

@@ -1,15 +1,20 @@
 #ifndef _included_AvP_Menus_h_
 #define _included_AvP_Menus_h_
 
+#ifndef MARINE_DEMO
 #define MARINE_DEMO 0
+#endif
+
+#ifndef PREDATOR_DEMO
 #define PREDATOR_DEMO 0
+#endif
+
+#ifndef ALIEN_DEMO
 #define ALIEN_DEMO 0
- // Edmond modified for Mplayer Demo
- #ifdef MPLAYER_DEMO
- #define DEATHMATCH_DEMO 1
- #else
- #define DEATHMATCH_DEMO 0 // more multiplayer-only demo really
- #endif
+#endif
+
+#define DEATHMATCH_DEMO 0 // more multiplayer-only demo really
+
 
 #ifdef AVP_DEBUG_VERSION
 	#define CONSOLE_DEBUGGING_COMMANDS_ACTIVATED 1
@@ -34,7 +39,7 @@
 
 #define SAVE_GAME_ON 1 
 
-#include "AvP_MenuGfx.hpp"
+#include "avp_menugfx.hpp"
 #include "language.h"
 
 enum MENUSSTATE_ID
@@ -210,7 +215,7 @@ typedef struct
 	{
 		enum TEXTSTRING_ID TextDescription;
 		enum AVPMENUGFX_ID GfxID;
-	};
+	} a;
 
 	union
 	{
@@ -218,7 +223,7 @@ typedef struct
 		int MaxSliderValue;
 		int MaxTextLength;
 		int MaxValue; //for number fields
-	};
+	} b;
 
 	union
 	{
@@ -227,23 +232,20 @@ typedef struct
 		char *TextPtr;
 		int *NumberPtr;
 		int Value;
-	};
+	} c;
 
 	union
 	{
 		enum TEXTSTRING_ID FirstTextSliderString;
 		enum TEXTSTRING_ID NumberFieldUnitsString; 
 		char** TextSliderStringPointer;
-	};
+	} d;
 	
 	enum TEXTSTRING_ID HelpString;
 	
-	union
-	{
-		enum TEXTSTRING_ID NumberFieldZeroString; //special string for 0
-	};
-	int Brightness;
+	enum TEXTSTRING_ID NumberFieldZeroString; //special string for 0
 
+	int Brightness;
 } AVPMENU_ELEMENT;
 
 typedef struct
@@ -254,8 +256,6 @@ typedef struct
 	AVPMENU_ELEMENT		*MenuElements;
 	enum AVPMENU_ID		ParentMenu;
 	int					DefaultElement;
-
-
 } AVPMENU;
 
 
@@ -280,7 +280,6 @@ typedef struct
 	unsigned int		UserEnteringNumber :1;
 	unsigned int		UserChangingKeyConfig :1;
 	unsigned int		ChangingPrimaryConfig :1;
-
 } AVP_MENUS;
 
 
@@ -314,7 +313,9 @@ typedef struct
 {
 	char Name[40];
 	char levelIndex;//local level index
-	GUID Guid;
+//	GUID Guid;
+	int Guid;
+	
 	BOOL AllowedToJoin;
 } SESSION_DESC;
 #define MAX_NO_OF_SESSIONS 10
@@ -336,10 +337,22 @@ typedef struct
 	unsigned char	ElapsedTime_Seconds;
 	unsigned char	Difficulty;
 
-	SYSTEMTIME 		TimeStamp;
-
+	time_t TimeStamp;
 } SAVE_SLOT_HEADER;
 
 #define NUMBER_OF_SAVE_SLOTS 8
+
+
+void KeyboardEntryQueue_Add(char c);
+
+int AvP_MainMenus(void);
+
+int AvP_InGameMenus(void);
+
+int InGameMenusAreRunning(void);
+
+void RenderBriefingText(int centreY, int brightness);
+void GetFilenameForSaveSlot(int i, unsigned char *filenamePtr);
+void ScanSaveSlots(void);
 
 #endif

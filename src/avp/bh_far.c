@@ -22,7 +22,8 @@
 #include "pvisible.h"
 #include "bh_marin.h"
 #include "weapons.h"
-#include "ShowCmds.h"
+#include "showcmds.h"
+#include "pldnet.h"
 
 #define UseLocalAssert Yes
 #include "ourasert.h"
@@ -147,6 +148,7 @@ void FarAlienBehaviour(STRATEGYBLOCK *sbPtr)
 		}
 		default:
 		{
+			descriptor=NULL;
 			LOCALASSERT(1==0); /* should never get here */
 		}
 	}
@@ -189,7 +191,6 @@ void FarAlienBehaviour(STRATEGYBLOCK *sbPtr)
 		
 		if(PointIsInModule(thisModule, &localCoords)==0)
 		{
-			#if (!PSX)
 			textprint("FAR ALIEN MODULE CONTAINMENT FAILURE \n");
 
 			LOGDXFMT(("Alien containment failure: %s alien is in %s, position is %d,%d,%d:\nModule extents are: %d:%d, %d:%d, %d:%d",
@@ -199,7 +200,6 @@ void FarAlienBehaviour(STRATEGYBLOCK *sbPtr)
 				thisModule->m_maxz,thisModule->m_minz));
 
 			LOCALASSERT(1==0);
-			#endif
 		}  
 	}
 	#endif
@@ -920,7 +920,6 @@ void LocateFarNPCInAIModule(STRATEGYBLOCK *sbPtr, AIMODULE *targetModule)
 		
 		if(PointIsInModule(thisModule, &localCoords)==0)
 		{
-			#if (!PSX)
 			textprint("FAR ALIEN MODULE CONTAINMENT FAILURE \n");
 
 			LOGDXFMT(("Alien containment failure: alien is in %s, position is %d,%d,%d:\nModule extents are: %d:%d, %d:%d, %d:%d",
@@ -929,7 +928,6 @@ void LocateFarNPCInAIModule(STRATEGYBLOCK *sbPtr, AIMODULE *targetModule)
 				thisModule->m_maxz,thisModule->m_minz));
 
 			LOCALASSERT(1==0);
-			#endif
 		}  
 	}
 	#endif
@@ -1063,8 +1061,6 @@ AIMODULE *FarNPC_GetTargetAIModuleForHunt(STRATEGYBLOCK *sbPtr, int alien)
 /* Patrick 2/7/96: this function returns a module for wandering to */
 AIMODULE *FarNPC_GetTargetAIModuleForWander(STRATEGYBLOCK *sbPtr, AIMODULE *exception, int alien)
 {
-	extern int cosine[], sine[];
-
 	AIMODULE **AdjModuleRefPtr;
 	DYNAMICSBLOCK *dynPtr;
 	AIMODULE* targetModule = (AIMODULE *)0;

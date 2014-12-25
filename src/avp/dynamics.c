@@ -28,6 +28,7 @@ you should have seen the previous versions. */
 #include "dxlog.h"
 #include "avp_userprofile.h"
 #include "pfarlocs.h"
+#include "particle.h"
 
 #define UseLocalAssert Yes
 #include "ourasert.h"
@@ -164,6 +165,7 @@ static void MakeStaticBoundingBoxForNRBB(STRATEGYBLOCK *sbPtr);
 static int RelocateNRBB(STRATEGYBLOCK *sbPtr);
 
 static void FindLandscapePolygonsInObjectsVicinity(STRATEGYBLOCK *sbPtr);
+#if 0
 static signed int DistanceMovedBeforeNRBBHitsNegYPolygon(DYNAMICSBLOCK *dynPtr, struct ColPolyTag *polyPtr, int distanceToMove);
 static signed int DistanceMovedBeforeNRBBHitsPosYPolygon(DYNAMICSBLOCK *dynPtr, struct ColPolyTag *polyPtr, int distanceToMove);
 static signed int DistanceMovedBeforeNRBBHitsNegXPolygon(DYNAMICSBLOCK *dynPtr, struct ColPolyTag *polyPtr, int distanceToMove);
@@ -171,6 +173,7 @@ static signed int DistanceMovedBeforeNRBBHitsPosXPolygon(DYNAMICSBLOCK *dynPtr, 
 static signed int DistanceMovedBeforeNRBBHitsNegZPolygon(DYNAMICSBLOCK *dynPtr, struct ColPolyTag *polyPtr, int distanceToMove);
 static signed int DistanceMovedBeforeNRBBHitsPosZPolygon(DYNAMICSBLOCK *dynPtr, struct ColPolyTag *polyPtr, int distanceToMove);
 static void TestForValidMovement(STRATEGYBLOCK *sbPtr);
+#endif
 static int MoveObject(STRATEGYBLOCK *sbPtr);
 static void TestForValidPlayerStandUp(STRATEGYBLOCK *sbPtr);
 static int SteppingUpIsValid(STRATEGYBLOCK *sbPtr);
@@ -187,7 +190,6 @@ static int (*RelocationIsValid)(STRATEGYBLOCK *sbPtr);
 
 static void MovePlatformLift(STRATEGYBLOCK *sbPtr);
 static void FindLandscapePolygonsInParticlesPath(PARTICLE *particlePtr, VECTORCH *displacementPtr);
-void AddEffectsOfForceGenerators(VECTORCH *positionPtr, VECTORCH *impulsePtr, int mass);
 
 VECTORCH *GetNearestModuleTeleportPoint(MODULE* thisModulePtr, VECTORCH* positionPtr);
 
@@ -515,7 +517,6 @@ extern void ObjectDynamics(void)
 		DYNAMICSBLOCK *dynPtr = Player->ObStrategyBlock->DynPtr;
 		MODULE *newModule = (ModuleFromPosition(&(dynPtr->Position), playerPherModule));
 		
-		extern unsigned char KeyboardInput[];
 		if (!newModule)
 		{
 			/* hmm, player isn't in a module */
@@ -1305,11 +1306,6 @@ static void VectorHomingForSurfaceAlign(VECTORCH *currentPtr, VECTORCH *targetPt
 	return;
 }
 
-
-
-
-
-
 extern void DynamicallyRotateObject(DYNAMICSBLOCK *dynPtr)
 {
 	extern int NormalFrameTime;
@@ -1331,6 +1327,8 @@ extern void DynamicallyRotateObject(DYNAMICSBLOCK *dynPtr)
   	MatrixMultiply(&dynPtr->OrientMat,&mat,&dynPtr->OrientMat);
  	MatrixToEuler(&dynPtr->OrientMat, &dynPtr->OrientEuler);
 }
+
+static int InterferenceAt(int lambda, DYNAMICSBLOCK *dynPtr);
 
 /* Move an object. At this stage, we have a list of the polygons in the
 environment with which the object the may collide. */									   
@@ -1573,17 +1571,13 @@ static int MoveObject(STRATEGYBLOCK *sbPtr)
 	    	
 		if (!wentUpStep)
 		{
-			STRATEGYBLOCK *obstacleSBPtr;
+			STRATEGYBLOCK *obstacleSBPtr = 0;
 			
 			if (polygonPtr->ParentObject)
-			if (polygonPtr->ParentObject->ObStrategyBlock)
-			{
-				obstacleSBPtr = polygonPtr->ParentObject->ObStrategyBlock;
-			}
-			else
-			{
-				obstacleSBPtr = 0;
-			}
+                if (polygonPtr->ParentObject->ObStrategyBlock)
+                {
+                    obstacleSBPtr = polygonPtr->ParentObject->ObStrategyBlock;
+                }
 		
 			DistanceToStepUp = 0;
 
@@ -3482,9 +3476,7 @@ static int AxisToIgnore(VECTORCH *normal)
 	}
 }
 
-
-
-   
+#if 0
 static void TestForValidMovement(STRATEGYBLOCK *sbPtr)
 {
 	#if 1
@@ -3509,6 +3501,7 @@ static void TestForValidMovement(STRATEGYBLOCK *sbPtr)
 	}
 	#endif
 }   
+#endif
 
 static int RelocateSphere(STRATEGYBLOCK *sbPtr)
 {
@@ -5765,6 +5758,8 @@ static int RelocatedDueToFallout(DYNAMICSBLOCK *dynPtr)
 	#endif
 #endif
 
+static signed int DistanceMovedBeforeParticleHitsPolygon(PARTICLE *particlePtr, struct ColPolyTag *polyPtr, int distanceToMove);
+
 #if 1
 
 /*KJL****************
@@ -6388,7 +6383,6 @@ VECTORCH *GetNearestModuleTeleportPoint(MODULE* thisModulePtr, VECTORCH* positio
 	{
 		VECTORCH p = *positionPtr;
 		int d;		
-		char buffer[100];
 
 		p.vx -= thisModulePtr->m_aimodule->m_world.vx + epList->position.vx;
 		p.vy -= thisModulePtr->m_aimodule->m_world.vy + epList->position.vy;
@@ -6415,30 +6409,3 @@ VECTORCH *GetNearestModuleTeleportPoint(MODULE* thisModulePtr, VECTORCH* positio
 		return &(thisEp->position);
 	}
 }
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-

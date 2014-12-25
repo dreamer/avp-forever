@@ -32,11 +32,14 @@
 #include "bh_dummy.h"
 #include "bh_videoscreen.h"
 #include "bh_plift.h"
+#include "bh_light.h"
+#include "weapons.h"
+#include "bh_agun.h"
+#include "bh_corpse.h"
+#include "chnkload.h"
 
-#if SupportWindows95
 /* for win95 net game support */
 #include "pldghost.h"
-#endif
 
 #include "pfarlocs.h"
 
@@ -73,8 +76,8 @@ MODULEMAPBLOCK VisibilityDefaultObjectMap =
 {
         MapType_Default,
         I_ShapeCube, /* this is a default value */
-    0,0,0,
-        0,0,0,
+        {0,0,0},
+        {0,0,0},
         #if StandardStrategyAndCollisions
         ObFlag_Dynamic|ObFlag_NewtonMovement|ObFlag_MatMul,
         #else
@@ -96,14 +99,16 @@ MODULEMAPBLOCK VisibilityDefaultObjectMap =
         0,                                                      
         0,0,0,                                  
         #endif
-        0,0,0,                                  
+        {0,0,0},
         0,                                               
         0,                                               
         #if StandardStrategyAndCollisions
         0,                                               
         0,
         #endif                                           
-        0,0,0,                                  
+        0,
+        0,
+        {0,0,0}
 };
 
 
@@ -468,14 +473,14 @@ void DoObjectVisibility(STRATEGYBLOCK *sbPtr)
                                 }
                                 case(I_BehaviourPlatform):
                                 {
-										PLATFORMLIFT_BEHAVIOUR_BLOCK *platformliftdata = (PLATFORMLIFT_BEHAVIOUR_BLOCK *)sbPtr->SBdataptr;
-										//don't make platform lift far if it is currently moving
-										//(otherwise the lift won't be able to move)
-										if(platformliftdata->state!=PLBS_GoingUp &&
-										   platformliftdata->state!=PLBS_GoingDown)
-										{	
-											MakeObjectFar(sbPtr);
-										}
+					PLATFORMLIFT_BEHAVIOUR_BLOCK *platformliftdata = (PLATFORMLIFT_BEHAVIOUR_BLOCK *)sbPtr->SBdataptr;
+					//don't make platform lift far if it is currently moving
+					//(otherwise the lift won't be able to move)
+					if(platformliftdata->state!=PLBS_GoingUp &&
+					   platformliftdata->state!=PLBS_GoingDown)
+					{	
+						MakeObjectFar(sbPtr);
+					}
                                         break;          
                                 }                               
                                 case(I_BehaviourBinarySwitch):
@@ -532,11 +537,7 @@ void DoObjectVisibility(STRATEGYBLOCK *sbPtr)
                                 }
                                 case(I_BehaviourNetGhost):
                                 {
-                                        #if PSX
-                                                GLOBALASSERT(1==2);
-                                        #else
-                                                MakeGhostFar(sbPtr); 
-                                        #endif
+                                        MakeGhostFar(sbPtr); 
                                         break;          
                                 }
                                 case(I_BehaviourTrackObject):
@@ -602,9 +603,8 @@ void MakeObjectNear(STRATEGYBLOCK *sbPtr)
         tempModule.m_lightarray = (struct lightblock *)0;
         tempModule.m_extraitemdata = (struct extraitemdata *)0;
         tempModule.m_dptr = NULL; /* this is important */
-        #if SupportWIndows95
         tempModule.name = NULL; /* this is important */
-        #endif
+
         AllocateModuleObject(&tempModule); 
         dPtr = tempModule.m_dptr;               
         if(dPtr==NULL) return; /* cannot create displayblock, so leave object "far" */
@@ -683,7 +683,7 @@ of reasons, eg: an object is blown out of the visible part of the
 environment, or an npc falls out...
 NB returns 0 if relocation failed.
 --------------------------------------------------------------------*/
-static EmergRelocCalls = 0;
+static int EmergRelocCalls = 0;
 static int EmergencyRelocateObject(STRATEGYBLOCK *sbPtr)
 {
 
@@ -718,8 +718,8 @@ static int EmergencyRelocateObject(STRATEGYBLOCK *sbPtr)
         nearest invisible module that has entry point locations, and relocate to one of 
         these locations. */
         {       
-                extern SCENE Global_Scene;
-                extern SCENEMODULE **Global_ModulePtr;
+                //extern SCENE Global_Scene;
+                //extern SCENEMODULE **Global_ModulePtr;
                 
                 AIMODULE *targetModule = 0;
                 int targetModuleDistance = 0;
@@ -1085,15 +1085,10 @@ void InitInanimateObject(void* bhdata, STRATEGYBLOCK *sbPtr)
         /* set the default inanimate object dynamics template: Inanimate for single player,
         and Static for multiplayer 
         NB some objects are always static, and initialised using
-        the static dynamics template directly
-        NB2 PSX: all objects are static */
-        #if SupportWindows95
+        the static dynamics template directly */
 //      if(AvP.Network==I_No_Network) inanimateDynamicsInitialiser = DYNAMICS_TEMPLATE_INANIMATE;
 //      else inanimateDynamicsInitialiser = DYNAMICS_TEMPLATE_STATIC;
         inanimateDynamicsInitialiser = DYNAMICS_TEMPLATE_INANIMATE;
-        #else
-        inanimateDynamicsInitialiser = DYNAMICS_TEMPLATE_STATIC;
-        #endif
         
         /* Initialise object's stats */
         {
@@ -1538,7 +1533,6 @@ void InanimateObjectIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int 
         INANIMATEOBJECT_STATUSBLOCK* objectstatusptr = sbPtr->SBdataptr;
         LOCALASSERT(objectstatusptr);
 
-        #if SupportWindows95
         if((AvP.Network==I_Peer)&&(!InanimateDamageFromNetHost))
         {
                 /* this means that the damage was generated locally in a net-game:
@@ -1551,7 +1545,6 @@ void InanimateObjectIsDamaged(STRATEGYBLOCK *sbPtr, DAMAGE_PROFILE *damage, int 
                 /* if we're the host, inform everyone that the object is dead */
                 if(sbPtr->SBDamageBlock.Health <= 0) AddNetMsg_InanimateObjectDestroyed(sbPtr);
         }
-        #endif
 
 		if(sbPtr->SBflags.please_destroy_me)
 		{

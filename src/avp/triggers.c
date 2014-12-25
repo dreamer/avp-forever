@@ -12,6 +12,7 @@
 #include "huddefs.h"
 #include "triggers.h"
 #include "pldnet.h"
+#include "los.h"
 
 #define UseLocalAssert Yes
 #include "ourasert.h"
@@ -85,12 +86,10 @@ void OperateObjectInLineOfSight(void)
 			{
 				case I_BehaviourBinarySwitch:
 				{
-					#if SupportWindows95
 					if(AvP.Network!=I_No_Network)
 					{
 						AddNetMsg_LOSRequestBinarySwitch(nearestObjectPtr->ObStrategyBlock);
 					}
-					#endif
 					RequestState(nearestObjectPtr->ObStrategyBlock,1, 0);
 					break;
 				}
@@ -110,28 +109,8 @@ void OperateObjectInLineOfSight(void)
 				}
 				case I_BehaviourDatabase:
 				{
-					#if PC_E3DEMO||PSX_DEMO
-					/* KJL 10:56:39 05/28/97 - E3DEMO change */
-					/* KJL 10:55:44 05/28/97 - display 'Access Denied' message */
-					NewOnScreenMessage(GetTextString(TEXTSTRING_DB_ACCESSDENIED));
-					#else
 					AvP.GameMode = I_GM_Menus;
-
-					#if PSX
-					{
-						extern int Global_Database_Num;
-						Global_Database_Num=((DATABASE_BLOCK *)nearestObjectPtr->ObStrategyBlock->SBdataptr)->num;
-					}
-					#else
-						AvP.DatabaseAccessNum=((DATABASE_BLOCK *)nearestObjectPtr->ObStrategyBlock->SBdataptr)->num;
-					#endif
-					
-
-					/* KJL 16:43:01 03/19/97 - CHANGE ME! Need to pass database number */
-					// RJHG - would be ((*DATABASEBLOCK)nearestObjectPtr->ObStrategyBlock->SBDataPtr)->num
-					// CDF - I think it would be ((DATABASE_BLOCK *)nearestObjectPtr->ObStrategyBlock->SBdataptr)->num
-					#endif
-					
+					AvP.DatabaseAccessNum=((DATABASE_BLOCK *)nearestObjectPtr->ObStrategyBlock->SBdataptr)->num;
 					break;
 				}
 				default:

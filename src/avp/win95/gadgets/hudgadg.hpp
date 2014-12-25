@@ -12,8 +12,6 @@
 	#endif
 
 #ifdef __cplusplus
-	extern "C" {
-#endif
 
 /* Version settings *****************************************************/
 
@@ -41,10 +39,6 @@
 					#include "scstring.hpp"
 				}
 			#endif
-		#endif
-
-		#ifndef _statpane_h
-		#include "statpane.h"
 		#endif
 
 	class TextReportGadget; // fully declared in TREPGADG.HPP
@@ -99,7 +93,7 @@
 
 
 		// Destructor:
-		virtual ~HUDGadget();
+		
 
 	protected:
 		// Constructor is protected since an abstract class
@@ -118,7 +112,9 @@
 	protected:
 		SCString* pSCString_Current;
 	#endif
-
+	
+	public:
+		virtual ~HUDGadget();
 	};
 
 	// Inline methods:
@@ -137,8 +133,6 @@
 /* End of the header ****************************************************/
 
 
-#ifdef __cplusplus
-	};
 #endif
 
 #endif

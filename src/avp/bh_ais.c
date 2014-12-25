@@ -26,10 +26,10 @@
 #include "psnd.h"
 #include "equipmnt.h"
 #include "los.h"
-#include "AI_Sight.h"
+#include "ai_sight.h"
 #include "targeting.h"
 #include "dxlog.h"
-#include "ShowCmds.h"
+#include "showcmds.h"
 #include "huddefs.h"
 
 #define UseLocalAssert Yes
@@ -731,7 +731,7 @@ int NPCSetVelocity(STRATEGYBLOCK *sbPtr, VECTORCH* targetDirn, int in_speed)
         } else {
                 int accelerationThisFrame,deltaVMag,dotProduct;
                 VECTORCH deltaV,targetV,yDirection,movementOffset;
-                MOVEMENT_DATA *movementData;
+                const MOVEMENT_DATA *movementData;
 
                 /* Mode 2, for marines 'n' predators.  And xenoborgs. */
                 
@@ -891,8 +891,6 @@ int NPCSetVelocity(STRATEGYBLOCK *sbPtr, VECTORCH* targetDirn, int in_speed)
   -----------------------------------------------------------------------*/
 int NPCOrientateToVector(STRATEGYBLOCK *sbPtr, VECTORCH *zAxisVector,int turnspeed, VECTORCH *offset)
 {
-        extern int cosine[], sine[];
-
         int maxTurnThisFrame;
         int turnThisFrame;
         VECTORCH localZAxisVector;
@@ -970,8 +968,7 @@ int NPCOrientateToVector(STRATEGYBLOCK *sbPtr, VECTORCH *zAxisVector,int turnspe
                 mat.mat33 = cos;                
                         
                 // NOTE : It seems like OrientMat is not being set per frame which
-                // leads to inaccuracy build-up from the matrix multiplies. When this
-                // is fixed, the following PSXAccurateMatrixMultiply can be removed
+                // leads to inaccuracy build-up from the matrix multiplies.
 
                 if (offset) {
                         VECTORCH new_offset,delta_offset;
@@ -1002,11 +999,7 @@ int NPCOrientateToVector(STRATEGYBLOCK *sbPtr, VECTORCH *zAxisVector,int turnspe
 
                 }               
 
-                #if PSX
-                PSXAccurateMatrixMultiply(&sbPtr->DynPtr->OrientMat,&mat,&sbPtr->DynPtr->OrientMat);
-                #else
                 MatrixMultiply(&sbPtr->DynPtr->OrientMat,&mat,&sbPtr->DynPtr->OrientMat);
-                #endif
                 MatrixToEuler(&sbPtr->DynPtr->OrientMat, &sbPtr->DynPtr->OrientEuler);
         }
 
@@ -1417,9 +1410,7 @@ void NPCGetMovementDirection(STRATEGYBLOCK *sbPtr, VECTORCH *velocityDirection, 
                                         (GMD_myPolyPoints[point1].vy == GMD_myPolyPoints[point2].vy) && 
                                         (GMD_myPolyPoints[point1].vz == GMD_myPolyPoints[point2].vz))
                                         {
-                                                #if (!Saturn)
                                                 LOCALASSERT(1==0);
-                                                #endif
                                                 myPolyEdgeMoveDistances[i] = 0;
                                         }                       
                         }
@@ -1600,7 +1591,7 @@ static int VectorIntersects2dZVector(VECTORCH *vecStart,VECTORCH *vecEnd, int zE
   Tries to find a floor polygon for a given world space location in
   a given module
   --------------------------------------------------------------------*/
-int FindMyFloorPoly(VECTORCH* currentPosition, MODULE* currentModule)
+static int FindMyFloorPoly(VECTORCH* currentPosition, MODULE* currentModule)
 {
         struct ColPolyTag polygonData;
         int positionPoints[2];
@@ -3226,7 +3217,7 @@ int New_NPC_IsObstructed(STRATEGYBLOCK *sbPtr, NPC_AVOIDANCEMANAGER *manager)
 								/* Consider explosive objects as obstructions to most things. */
 								if ((objectstatusptr->explosionType==0)||(manager->ClearanceDamage!=AMMO_NPC_OBSTACLE_CLEAR)) {
 		                            /* aha: an object which the npc can destroy... damage it, and return zero. */
-		                            CauseDamageToObject(nextReport->ObstacleSBPtr,&TemplateAmmo[manager->ClearanceDamage].MaxDamage, ONE_FIXED,NULL);
+		                            CauseDamageToObject(nextReport->ObstacleSBPtr,TemplateAmmo[manager->ClearanceDamage].MaxDamage, ONE_FIXED,NULL);
 		                            return(0);
 		                            /* After a few frames of that, there'll just be real obstructions. */
 								}
@@ -3521,7 +3512,6 @@ int New_GetAvoidanceDirection(STRATEGYBLOCK *sbPtr, NPC_AVOIDANCEMANAGER *manage
                         {
                                 // What follows is an attempt to make sure we don't jump off any cliffs...
                                 VECTORCH test_location;
-                                int test_distance = this_distance / 2;
                                 testDirn.vx *= this_distance;
                                 testDirn.vy *= this_distance;
                                 testDirn.vz *= this_distance;

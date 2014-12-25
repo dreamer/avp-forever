@@ -4,8 +4,7 @@
 #include "tallfont.hpp"
 #include "strtab.hpp"
 
-#include "awTexLd.h"
-#include "alt_tab.h"
+#include "awtexld.h"
 
 #include "chnktexi.h"
 #include "hud_layout.h"
@@ -19,10 +18,10 @@ extern void D3D_RenderHUDString(char *stringPtr,int x,int y,int colour);
 
 extern "C"
 {
-#include "AvP_Menus.h"
+#include "avp_menus.h"
 extern unsigned char *ScreenBuffer;
 extern long BackBufferPitch;
-extern DDPIXELFORMAT DisplayPixelFormat;
+/* extern DDPIXELFORMAT DisplayPixelFormat; */
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 
 char AAFontWidths[256];
@@ -144,7 +143,7 @@ extern int LengthOfMenuText(char *textPtr)
 	return (pFont->CalcSize(textPtr).w);
 }
 
-extern int RenderMenuText(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format) 
+extern int RenderMenuText(const char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format) 
 {
 	IndexedFont* pFont = IndexedFont :: GetFont(IntroFont_Light);
 	r2pos R2Pos_StartOfRow;
@@ -256,20 +255,6 @@ extern int RenderMenuText_Clipped(char *textPtr, int x, int y, int alpha, enum A
 	return R2Pos_StartOfRow.x;
 }
 
-extern int LengthOfSmallMenuText(char *textPtr)
-{
-	int length = 0;
-	if(textPtr)
-	{
-		char *ptr = textPtr;
-
-		while(*ptr)
-		{
-			length+=AAFontWidths[*ptr++];
-		}
-	}
-	return length;
-}
 
 extern int RenderSmallMenuText(char *textPtr, int x, int y, int alpha, enum AVPMENUFORMAT_ID format) 
 {
@@ -651,7 +636,7 @@ static int RenderSmallFontString(char *textPtr,int sx,int sy,int alpha, int red,
 }
 
 
-extern void RenderSmallFontString_Wrapped(char *textPtr,RECT* area,int alpha,int* output_x,int* output_y)
+extern void RenderSmallFontString_Wrapped(const char *textPtr,RECT* area,int alpha,int* output_x,int* output_y)
 {
 	DDSURFACEDESC ddsdimage;
    	unsigned short *destPtr;

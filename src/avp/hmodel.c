@@ -27,6 +27,8 @@
 #include "load_shp.h"
 #include "plat_shp.h"
 #include "avp_userprofile.h"
+#include "maths.h"
+#include "opengl.h"
 
 #define UseLocalAssert Yes
 #include "ourasert.h"
@@ -45,7 +47,6 @@ int Simplify_HModel_Rendering=0;
 extern enum PARTICLE_ID GetBloodType(STRATEGYBLOCK *sbPtr);
 extern void DoShapeAnimation (DISPLAYBLOCK * dptr);
 extern void RenderThisHierarchicalDisplayblock(DISPLAYBLOCK *dbPtr);
-extern void MakeSprayOfSparks(MATRIXCH *orientationPtr, VECTORCH *positionPtr);
 void MatToQuat (MATRIXCH *m, QUAT *quat);
 
 /* protos for this file */
@@ -58,8 +59,6 @@ void Budge_HModel(HMODELCONTROLLER *controller,VECTORCH *offset);
 
 /* external globals */
 extern int NormalFrameTime;
-extern int sine[];
-extern int cosine[];
 extern int GlobalFrameCounter;
 extern VIEWDESCRIPTORBLOCK *Global_VDB_Ptr;
 
@@ -1388,8 +1387,6 @@ void Process_Section(HMODELCONTROLLER *controller,SECTION_DATA *this_section_dat
 		&&(render)) {
 		/* Unreal things don't get plotted, either. */
 	
-		extern MATRIXCH IdentityMatrix;
-
 		DISPLAYBLOCK dummy_displayblock;
 		SHAPEHEADER *shape_to_use;
 
@@ -2118,8 +2115,6 @@ static void HMTimer_Kernel(HMODELCONTROLLER *controller) {
 
 void DoHModel(HMODELCONTROLLER *controller, DISPLAYBLOCK *dptr) {
 
-	extern int NormalFrameTime;
-
 	GLOBALASSERT(controller);
 	GLOBALASSERT(dptr);
 
@@ -2244,8 +2239,6 @@ void DoHModelTimer_Recursion(HMODELCONTROLLER *controller,SECTION_DATA *this_sec
 }
 
 void DoHModelTimer(HMODELCONTROLLER *controller) {
-
-	extern int NormalFrameTime;
 
 	/* Be VERY careful with this function - it can put the timer and the
 	position computations out of step.  Once you've called this, call NO
@@ -4947,7 +4940,7 @@ void LoadHierarchy(SAVE_BLOCK_HEADER* header,HMODELCONTROLLER* controller)
 	{
 		SAVE_BLOCK_HEADER* delta_header;
 
-		while(delta_header = GetNextBlockIfOfType(SaveBlock_HierarchyDelta))
+		while((delta_header = GetNextBlockIfOfType(SaveBlock_HierarchyDelta)))
 		{
 			LoadHierarchyDelta(delta_header,controller);
 		}

@@ -1,11 +1,15 @@
-#include <windows.h>
 #include <string.h>
-#include <string.hpp>
+
+#include "fixer.h"
+
+#include "string.hpp"
 #ifndef DB_LEVEL
 	#define DB_LEVEL 4
 #endif
 #include "db.h"
-#include "awTexLd.h"
+
+#include "awtexld.h"
+
 #include "chnkload.hpp"
 #include "chunkpal.hpp"
 
@@ -16,12 +20,12 @@
 	#include "ffstdio.h"
 #endif
 
-#ifndef CL_SUPPORT_ALTTAB
-	#error "Please #define CL_SUPPORT_ALTTAB to 0 or 1 in projload.hpp"
-#endif
-#if CL_SUPPORT_ALTTAB
-	#include "alt_tab.h"
-#endif
+//#ifndef CL_SUPPORT_ALTTAB
+//	#error "Please #define CL_SUPPORT_ALTTAB to 0 or 1 in projload.hpp"
+//#endif
+//#if CL_SUPPORT_ALTTAB
+//	#include "alt_tab.h"
+//#endif
 
 #include "chnktexi.h"
 
@@ -36,7 +40,9 @@ char const * cl_pszGameMode = NULL;
 // used to determine if the display is palettized
 // currently assuming that if this is <= 8 then all
 // surfaces et. except d3d textures have a global palette
-extern "C" extern int VideoModeColourDepth;
+extern "C" {
+	extern int VideoModeColourDepth;
+};
 
 // useful filename handling functions
 
@@ -96,19 +102,20 @@ static char * RiffBasename(Chunk_With_Children * pEnvDataChunk)
 #if CL_SUPPORT_FASTFILE
 static inline bool IsFileInFastFile(char const * pszFileName)
 {
-	unsigned nLen;
+	size_t nLen;
 	return ffreadbuf(pszFileName,&nLen) ? true : false;
 }
 #endif
 
 static bool DoesFileExist(char const * pszFileName)
 {
-	DWORD dwFileAttributes = GetFileAttributes(pszFileName);
-	
-	if (0xffffffff == dwFileAttributes || dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+	unsigned int attr = GetGameFileAttributes(pszFileName, FILETYPE_PERM);
+
+	if ((attr & FILEATTR_DIRECTORY) != 0)
 		return false;
-	else
-		return true;
+	if ((attr & FILEATTR_READABLE) == 0)
+		return false;
+	return true;
 }
 
 static char * GetPath(char * pszFileNameBuf, unsigned nBufSize, ImageDescriptor const & idsc, Chunk_With_Children * pEnvDataChunk, bool bGloballyPalettized)
@@ -649,7 +656,9 @@ char * CL_GetImageFileName(char * pszDestBuf, unsigned nBufSize, char const * ps
 	}
 }
 
-extern "C" extern void CheckForWindowsMessages(void);
+extern "C" {
+	extern void CheckForWindowsMessages(void);
+};
 
 int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 {
@@ -705,7 +714,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 		case LIO_DDSURFACE:
 		{
 			#if CL_SUPPORT_FASTFILE
-			unsigned nFastFileLen;
+			size_t nFastFileLen;
 			void const * pFastFileData = ffreadbuf(szBuf,&nFastFileLen);
 			if (pFastFileData)
 			{
@@ -814,7 +823,7 @@ int CL_LoadImageOnce(char const * pszFileName, unsigned fFlagsEtc)
 		{
 			fAwLoad |= AW_TLF_COMPRESS; // required on some cards!!
 			#if CL_SUPPORT_FASTFILE
-			unsigned nFastFileLen;
+			size_t nFastFileLen;
 			void const * pFastFileData = ffreadbuf(szBuf,&nFastFileLen);
 			if (pFastFileData)
 			{

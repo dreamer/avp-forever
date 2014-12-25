@@ -14,9 +14,9 @@
 
 
 #if ALIEN_DEMO
-#define DIRECTORY_FOR_RIFS "alienavp_huds\\"
+#define DIRECTORY_FOR_RIFS "alienavp_huds/"
 #else
-#define DIRECTORY_FOR_RIFS "avp_huds\\"
+#define DIRECTORY_FOR_RIFS "avp_huds/"
 #endif
 #define FIRST_FREE_IMAGE_GROUP 3 // 0 for char,1 for weapon rif ,2 for env
 
@@ -115,8 +115,8 @@ List<LoadedNPC> loaded_npcs;
 LoadedNPC::LoadedNPC(RIF_Child_Chunk const * rcc)
 : rifname(0)
 , filename(0)
-, npc_rif(INVALID_RIFFHANDLE)
 , img_group(-1)
+, npc_rif(INVALID_RIFFHANDLE)
 {
 	if (rcc->filename && *rcc->filename)
 	{
@@ -145,8 +145,8 @@ LoadedNPC::LoadedNPC(RIF_Child_Chunk const * rcc)
 LoadedNPC::LoadedNPC(char const * name)
 : rifname(0)
 , filename(0)
-, npc_rif(INVALID_RIFFHANDLE)
 , img_group(-1)
+, npc_rif(INVALID_RIFFHANDLE)
 {
 	if (name && *name)
 	{
@@ -168,16 +168,16 @@ LoadedNPC::LoadedNPC(char const * name)
 LoadedNPC::LoadedNPC()
 : rifname(0)
 , filename(0)
-, npc_rif(INVALID_RIFFHANDLE)
 , img_group(-1)
+, npc_rif(INVALID_RIFFHANDLE)
 {
 }
 
 LoadedNPC::LoadedNPC(LoadedNPC const & npc2)
 : rifname(npc2.rifname ? new char[strlen(npc2.rifname)+1] : 0)
 , filename(npc2.filename ? new char[strlen(npc2.filename)+1] : 0)
-, npc_rif(npc2.npc_rif)
 , img_group(npc2.img_group)
+, npc_rif(npc2.npc_rif)
 {
 	if (rifname) strcpy(rifname,npc2.rifname);
 	if (filename) strcpy(filename,npc2.filename);
@@ -277,7 +277,9 @@ List<int> LoadedNPC::image_groups;
 extern "C"
 {
 	extern BOOL Current_Level_Requires_Mirror_Image();
+    extern int AllowGoldWeapons;
 };
+
 void InitNPCs(RIFFHANDLE h)
 {
 	
@@ -319,10 +321,9 @@ void InitNPCs(RIFFHANDLE h)
 				DefaultGeneratorEnemy=HNPC_Marine;
 				break;					
 			default :
+				DefaultGeneratorEnemy=HNPC_Marine;
 				GLOBALASSERT("Invalid enemy type"==0);
-				
 		}
-
 	}
 	else
 	{
@@ -545,7 +546,7 @@ void InitNPCs(RIFFHANDLE h)
 	
 	List<LoadedNPC> newnpcs;
 
-	for(i=0;i<HNPC_Last;i++)
+	for(int i=0;i<HNPC_Last;i++)
 	{
 		if(Load_HNPC[i])
 		{
@@ -556,7 +557,9 @@ void InitNPCs(RIFFHANDLE h)
 			}
 		}
 	}
-	#if 1
+
+/* predator disk not included in demos */
+#if !(PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO)
 	if(AvP.PlayerType==I_Predator || Load_HNPC[HNPC_Predator])
 	{
 		//need to load the disk hierarchy
@@ -567,19 +570,28 @@ void InitNPCs(RIFFHANDLE h)
 		}
 
 	}
+#endif
 
 	if(AvP.PlayerType==I_Marine || Load_HNPC[HNPC_Marine])
 	{
-		//need to load the mdisk hierarchy
-		LoadedNPC tempnpc("mdisk.rif");
-		if (tempnpc.IsValid())
-		{
-			newnpcs.add_entry(tempnpc);
-		}
+        // if the mdisk.rif file exists, add it.  Note: Only the Gold version
+        // has this file, so the OpenGameFile is called just to check if it
+        // is available.
+        FILE *rifFile = OpenGameFile(DIRECTORY_FOR_RIFS"mdisk.rif", 
+                FILEMODE_READONLY, FILETYPE_PERM);
+        if (rifFile != NULL)
+        {
+            CloseGameFile(rifFile);
 
+            //need to load the mdisk hierarchy
+            LoadedNPC tempnpc("mdisk.rif");
+            if (tempnpc.IsValid())
+            {
+                AllowGoldWeapons = 1;
+                newnpcs.add_entry(tempnpc);
+            }
+        }
 	}
-	#endif
-	
 	
 	// see what we already have, unloading what we don't need, and ensuring we don't load a npc twice
 	for (LIF<LoadedNPC> i_loaded_npc(&loaded_npcs); !i_loaded_npc.done(); )
@@ -596,8 +608,10 @@ void InitNPCs(RIFFHANDLE h)
 			i_loaded_npc.delete_current();
 		}
 	}
-	
+
+#if debug	
 	if(!KeepMainRifFile)
+#endif	
 	{
 		//at this point we no longer need the main level rif file
 		unload_rif(h);
@@ -633,11 +647,13 @@ void InitNPCs(RIFFHANDLE h)
 	}
 	Set_Progress_Bar_Position(PBAR_NPC_START+PBAR_NPC_INTERVAL);
 
+#if debug
 	if(KeepMainRifFile)
 	{
 		Env_Chunk = old_env_chunk; // pop Env_Chunk
 	}
 	else
+#endif	
 	{
 		Env_Chunk=0;
 	}

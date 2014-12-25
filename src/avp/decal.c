@@ -23,6 +23,7 @@
 #include "paintball.h"
 #include "detaillevels.h"
 #include "savegame.h"
+#include "decal.h"
 
 #define UseLocalAssert Yes
 #include "ourasert.h"
@@ -618,7 +619,6 @@ void AddDecal(enum DECAL_ID decalID, VECTORCH *normalPtr, VECTORCH *positionPtr,
 	DECAL *decalPtr;
 	MATRIXCH orientation;
 	int decalSize; 
-	extern int sine[],cosine[];
 	int theta = FastRandom()&4095;
 	int sin = GetSin(theta);
 	int cos = GetCos(theta);
@@ -957,7 +957,6 @@ void AddDecalToHModel(VECTORCH *normalPtr, VECTORCH *positionPtr, SECTION_DATA *
 	VECTORCH v;
 
 	int decalSize; 
-	extern int sine[],cosine[];
 	int theta,sin,cos;
 
 	if (!LocalDetailLevels.DrawHierarchicalDecals) return;

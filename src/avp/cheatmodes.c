@@ -3,17 +3,17 @@
 #include "module.h"
 #include "stratdef.h"
 
-#include "AvP_UserProfile.h"
-#include "AvP_Menus.h"
+#include "avp_userprofile.h"
+#include "avp_menus.h"
+#include "cheatmodes.h"
 
 int CheatMode_Active=0;
 int CheatMode_Species=0;
 int CheatMode_Environment=0;
 
 
-extern void CheatMode_GetNextAllowedSpecies(int *speciesPtr, int searchForward);
-extern void CheatMode_GetNextAllowedEnvironment(int *environmentPtr, int searchForward);
-extern void CheatMode_CheckOptionsAreValid(void);
+static int ThereIsAnAllowedEnvironment(void);
+static int EnvironmentPlayableBySpecies(int environment);
 
 #define NUMBER_OF_ENVIRONMENTS (MAX_NO_OF_MARINE_EPISODES+MAX_NO_OF_PREDATOR_EPISODES+MAX_NO_OF_ALIEN_EPISODES)
 #define NUMBER_OF_SPECIES 3

@@ -19,13 +19,11 @@ rounds fired etc etc etc*/
 #include "weapons.h"
 #include "inventry.h"
 
-#if SupportWindows95
 /* for win95 net game support */
 #include "pldnet.h"
 #include "pldghost.h"
-#endif
 
-#include "AvP_UserProfile.h"
+#include "avp_userprofile.h"
 
 #define UseLocalAssert Yes
 #include "ourasert.h"
@@ -33,7 +31,6 @@ rounds fired etc etc etc*/
 void InitialisePlayersInventory(PLAYER_STATUS *playerStatusPtr);
 void MaintainPlayersInventory(void);
 void SetPlayerSecurityClearance(STRATEGYBLOCK *sbPtr, unsigned int securityLevel);
-int SlotForThisWeapon(enum WEAPON_ID weaponID);
 
 static int AbleToPickupAmmo(enum AMMO_ID ammoID);
 static int AbleToPickupWeapon(enum WEAPON_ID weaponID);
@@ -155,7 +152,7 @@ void MaintainPlayersInventory(void)
 						break;
 					}
 
-
+					default: ;
 				}
 			}
 		} else if((collidedWith) && (collidedWith->I_SBtype == I_BehaviourNetGhost)) {
@@ -1493,9 +1490,8 @@ extern void RemovePickedUpObject(STRATEGYBLOCK *objectPtr)
 
 	if (objStatPtr->ghosted_object) {
 		/* Must be a runtime pickup... */
-		#if SupportWindows95
 		AddNetMsg_LocalObjectDestroyed(objectPtr);
-		#endif
+
 		DestroyAnyStrategyBlock(objectPtr);
 		return;
 	}
@@ -1512,9 +1508,8 @@ extern void RemovePickedUpObject(STRATEGYBLOCK *objectPtr)
 	if(AvP.Network==I_No_Network) DestroyAnyStrategyBlock(objectPtr);
 	else
 	{
-		#if SupportWindows95
 		AddNetMsg_ObjectPickedUp(&objectPtr->SBname[0]);
-		#endif
+
 		KillInanimateObjectForRespawn(objectPtr);
 	}
 
@@ -1817,9 +1812,8 @@ void Recall_Disc(void) {
 					Sound_Stop(bbPtr->soundHandle);
 					Sound_Play(SID_PREDATOR_DISK_RECOVERED,"h");
 
-					#if SupportWindows95
 					if(AvP.Network != I_No_Network)	AddNetMsg_LocalObjectDestroyed(nearest);
-					#endif
+
 				    DestroyAnyStrategyBlock(nearest);	
 				
 				}
@@ -1872,9 +1866,8 @@ void RemoveAllThisPlayersDiscs(void) {
 
 			/* Are we the right type? */
 			if (ObjectIsPlayersDisc(candidate)) {
-				#if SupportWindows95
 				AddNetMsg_LocalObjectDestroyed(candidate);
-				#endif
+
 				DestroyAnyStrategyBlock(candidate);
 			}
 		}

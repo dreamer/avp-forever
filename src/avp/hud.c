@@ -21,7 +21,6 @@
 #include "huddefs.h"
 #include "dynblock.h"
 #include "weapons.h"
-#include "hud_map.h"
 
 #include "psnd.h"
 #include "psndplat.h"
@@ -31,10 +30,12 @@
 #include "gadget.h"
 #include "lighting.h"
 #include "d3d_hud.h"
-#include "frustrum.h"
+#include "frustum.h"
 #include "pldghost.h"
 
 #include "d3d_render.h"
+#include "kshape.h"
+#include "opengl.h"
 #include "bh_ais.h"
 #include "bh_alien.h"
 
@@ -42,13 +43,14 @@
 #include "ourasert.h"
 
 #include "vision.h"
-#include "BonusAbilities.h"
+#include "bonusabilities.h"
 #include "avp_menus.h"
 #include "showcmds.h"
 #include "game_statistics.h"
-#include "psndplat.h"
 #include "pldnet.h"
 #include "avp_userprofile.h"
+#include "hud.h"
+#include "chnkload.h"
 
 extern int ScanDrawMode;
 
@@ -62,8 +64,6 @@ extern int ScanDrawMode;
 
 
 extern DISPLAYBLOCK* Player;
-
-extern int sine[], cosine[]; /* these externs should be with the GetCos GetSin macros!! */
 
 extern int NumActiveBlocks;
 extern DISPLAYBLOCK *ActiveBlockList[];
@@ -101,7 +101,7 @@ int predHUDSoundHandle=SOUND_NOACTIVEINDEX;
 static int HUD_PrimaryRounds;
 static int HUD_SecondaryRounds;
 /* numerics buffer - the marine has more digits on his HUD than the other species */
-char ValueOfHUDDigit[MAX_NO_OF_COMMON_HUD_DIGITS];
+char ValueOfHUDDigit[MAX_NO_OF_MARINE_HUD_DIGITS];
 
 
 #define PREDATOR_LOCK_ON_TIME (ONE_FIXED*5/3)
@@ -147,15 +147,12 @@ static void InitAlienHUD();
 //static void CalcCoordsAndBLTWeapon(WEAPON_DATA* wptr);
 
 
-void MaintainHUD(void);
-
 static void DisplayHealthAndArmour(void);
 static void DisplayMarinesAmmo(void);
 
 
 static void DoMotionTracker(void);
 static int DoMotionTrackerBlips(void);
-static void UpdateMarineStatusValues(void);
 
 static void HandleMarineWeapon(void);
 static void AimGunSight(int aimingSpeed, TEMPLATE_WEAPON_DATA *twPtr);
@@ -168,7 +165,7 @@ void CentreGunSight(void);
 
 
 static void InitPredatorHUD();
-static int FindPredatorThreats(void);
+//static int FindPredatorThreats(void);
 #if DO_PREDATOR_OVERLAY
 static void UpdatePredatorStatusValues(void);
 #endif
@@ -181,8 +178,6 @@ static void UpdateAlienStatusValues(void);
 
 int Fast2dMagnitude(int dx, int dy);
 
-
-void RotateVertex(VECTOR2D *vertexPtr, int theta);
 
 /*KJL****************************************************************************************
 *                                     F U N C T I O N S	                                    *
@@ -208,10 +203,8 @@ void InitHUD(void)
 	
 	// This should be set elsewhere as well, but just to be sure!!
 	RequestFadeToBlackLevel = 0;
-
-	/* KJL 11:18:36 04/25/97 - initialise HUD map code */
-	//InitHUDMap();
 }
+
 void KillHUD(void)
 {
 	switch(AvP.PlayerType)
@@ -244,7 +237,7 @@ void InitMarineHUD(void)
 
 	{
 		int i;
-		for (i=0; i<MAX_NO_OF_MARINE_HUD_DIGITS; i++)
+		for (i=0; i<sizeof(ValueOfHUDDigit)/sizeof(ValueOfHUDDigit[0]); i++)
 			ValueOfHUDDigit[i]=0;
 	}
 	
@@ -273,7 +266,7 @@ static void InitAlienHUD(void)
 
 }
 
-extern void ReInitHUD(void)
+void ReInitHUD(void)
 {
 	/* KJL 14:21:33 17/11/98 - Alien */
 	AlienTeethOffset = 0;
@@ -311,11 +304,8 @@ void MaintainHUD(void)
 	}
 	RenderGrapplingHook();
 	
-	#if SOFTWARE_RENDERER
-	FlushSoftwareZBuffer();
-	#else
 	SecondFlushD3DZBuffer();
-	#endif
+
 	//DrawFontTest();
 	if (Observer)
 	{
@@ -366,9 +356,9 @@ void MaintainHUD(void)
 			case I_Marine:
 			{
 				HandleMarineWeapon();
-//	   			UpdateHUDMap();
+
 	  	 	 	if (CurrentVisionMode==VISION_MODE_NORMAL) DoMotionTracker();
-//	            UpdateMarineStatusValues();
+
 				CheckWireFrameMode(0);
 				//flash health if invulnerable
 				if((playerStatusPtr->invulnerabilityTimer/12000 %2)==0)
@@ -578,7 +568,7 @@ void MaintainHUD(void)
 	}
 }	
 
-extern void DoCompletedLevelStatisticsScreen(void)
+void DoCompletedLevelStatisticsScreen(void)
 {
 	extern int DebouncedGotAnyKey;
 	extern unsigned char DebouncedKeyboardInput[];
@@ -763,7 +753,7 @@ static void DoMotionTracker(void)
 /*KJL*********************************************************
 * DoMotionTrackerBlips() looks a bit messy but works well.   *
 *********************************************************KJL*/
-extern int ObjectShouldAppearOnMotionTracker(STRATEGYBLOCK *sbPtr)
+int ObjectShouldAppearOnMotionTracker(STRATEGYBLOCK *sbPtr)
 {
 	DYNAMICSBLOCK *objectDynPtr = sbPtr->DynPtr;
 
@@ -897,11 +887,10 @@ static int DoMotionTrackerBlips(void)
 
 static void DisplayHealthAndArmour(void)
 {
-//	extern void D3D_RenderHUDString(char *stringPtr,int x,int y,int colour);
 	int health,armour;
     /* access the extra data hanging off the strategy block */
 	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
-	NPC_DATA *NpcData;
+	NPC_DATA *NpcData = NULL;
 	
 	switch (AvP.PlayerType)
 	{
@@ -1048,135 +1037,7 @@ static void DisplayMarinesAmmo(void)
 	}
 
 }				   
-#if 0
-static void UpdateMarineStatusValues(void)
-{
-	PLAYER_WEAPON_DATA *weaponPtr;
 
-    /* access the extra data hanging off the strategy block */
-	PLAYER_STATUS *playerStatusPtr= (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
-    GLOBALASSERT(playerStatusPtr);
-    	
-	{
-		/* player's current weapon */
-    	GLOBALASSERT(playerStatusPtr->SelectedWeaponSlot<MAX_NO_OF_WEAPON_SLOTS);
-        
-        /* init a pointer to the weapon's data */
-        weaponPtr = &(playerStatusPtr->WeaponSlot[playerStatusPtr->SelectedWeaponSlot]);
-    }
-    
-
-	{
-    	int value=playerStatusPtr->Health>>16;	/* stored in 16.16 so shift down */
-        ValueOfHUDDigit[MARINE_HUD_HEALTH_UNITS]=value%10;
-		value/=10;
-        ValueOfHUDDigit[MARINE_HUD_HEALTH_TENS]=value%10;
-        value/=10;
-		ValueOfHUDDigit[MARINE_HUD_HEALTH_HUNDREDS]=value%10;
-	}
-	{
-    	#if PC_E3DEMO
-    	int value=playerStatusPtr->Energy>>16;	/* stored in 16.16 so shift down */
-        #else
-		extern int FrameRate;
-		int value=FrameRate;
-		#endif
-        ValueOfHUDDigit[MARINE_HUD_ENERGY_UNITS]=value%10;
-		value/=10;
-        ValueOfHUDDigit[MARINE_HUD_ENERGY_TENS]=value%10;
-        value/=10;
-		ValueOfHUDDigit[MARINE_HUD_ENERGY_HUNDREDS]=value%10;
-	}
-	{
-    	int value=playerStatusPtr->Armour>>16;	/* stored in 16.16 so shift down */
-        ValueOfHUDDigit[MARINE_HUD_ARMOUR_UNITS]=value%10;
-		value/=10;
-        ValueOfHUDDigit[MARINE_HUD_ARMOUR_TENS]=value%10;
-        value/=10;
-		ValueOfHUDDigit[MARINE_HUD_ARMOUR_HUNDREDS]=value%10;
-	}
-	
-	{
-    	int value=weaponPtr->PrimaryRoundsRemaining>>16;
-        /* ammo is in 16.16. we want the integer part, rounded up */
-        if ( (weaponPtr->PrimaryRoundsRemaining&0xffff) ) value+=1;
-        
-        ValueOfHUDDigit[MARINE_HUD_PRIMARY_AMMO_ROUNDS_UNITS]=value%10;
-		value/=10;
-        ValueOfHUDDigit[MARINE_HUD_PRIMARY_AMMO_ROUNDS_TENS]=value%10;
-        value/=10;
-		ValueOfHUDDigit[MARINE_HUD_PRIMARY_AMMO_ROUNDS_HUNDREDS]=value%10;
-	}
-	{
-    	int value=weaponPtr->PrimaryMagazinesRemaining;
-        ValueOfHUDDigit[MARINE_HUD_PRIMARY_AMMO_MAGAZINES_UNITS]=value%10;
-		value/=10;
-        ValueOfHUDDigit[MARINE_HUD_PRIMARY_AMMO_MAGAZINES_TENS]=value%10;
-    }	
-	
-	/* KJL 14:54:39 03/26/97 - secondary ammo */
-	if ( (weaponPtr->WeaponIDNumber == WEAPON_PULSERIFLE)
-	   ||(weaponPtr->WeaponIDNumber == WEAPON_MYSTERYGUN) )
-	{
-    	int value=weaponPtr->SecondaryRoundsRemaining>>16;
-        /* ammo is in 16.16. we want the integer part, rounded up */
-        if ( (weaponPtr->SecondaryRoundsRemaining&0xffff) ) value+=1;
-        
-        ValueOfHUDDigit[MARINE_HUD_SECONDARY_AMMO_ROUNDS_UNITS]=value%10;
-		value/=10;
-        ValueOfHUDDigit[MARINE_HUD_SECONDARY_AMMO_ROUNDS_TENS]=value%10;
-        value/=10;
-		ValueOfHUDDigit[MARINE_HUD_SECONDARY_AMMO_ROUNDS_HUNDREDS]=value%10;
-
-    	value=weaponPtr->SecondaryMagazinesRemaining;
-        ValueOfHUDDigit[MARINE_HUD_SECONDARY_AMMO_MAGAZINES_UNITS]=value%10;
-		value/=10;
-        ValueOfHUDDigit[MARINE_HUD_SECONDARY_AMMO_MAGAZINES_TENS]=value%10;
-		
-		BLTMarineNumericsToHUD(MARINE_HUD_SECONDARY_AMMO_MAGAZINES_TENS);
-    }	
-	else if (weaponPtr->WeaponIDNumber == WEAPON_GRENADELAUNCHER)
- 	{
-		/* KJL 11:46:57 04/09/97 - use to display your ammo type */
-		int value;
-		switch(GrenadeLauncherData.SelectedAmmo)
-		{
-			case AMMO_GRENADE:
-			{
-				value=1;
-				break;
-			}
-			case AMMO_FLARE_GRENADE:
-			{
-				value=2;
-				break;
-			}
-			case AMMO_FRAGMENTATION_GRENADE:
-			{
-				value=3;
-				break;
-			}
-			case AMMO_PROXIMITY_GRENADE:
-			{
-				value=4;
-				break;
-			}
-			default:
-			{
-				LOCALASSERT(0);
-				break;
-			}
-		}
-        ValueOfHUDDigit[MARINE_HUD_SECONDARY_AMMO_ROUNDS_UNITS]=value;
-		BLTMarineNumericsToHUD(MARINE_HUD_SECONDARY_AMMO_ROUNDS_UNITS);
-	}
-	else
-	{
-		BLTMarineNumericsToHUD(MARINE_HUD_PRIMARY_AMMO_MAGAZINES_TENS);
-	}
-
-}
-#endif
 static void HandleMarineWeapon(void)
 {
 	PLAYER_WEAPON_DATA *weaponPtr;
@@ -1888,7 +1749,6 @@ void DrawWristDisplay(void)
 {
 	extern HMODELCONTROLLER PlayersWeaponHModelController;
 	SECTION_DATA *sectionPtr;
-	int i;
 
  	char *sectionName[]= {"Dum bar display","Dum 1 display","Dum 2 display","Dum 3 display","Dum 4 display"};
 
@@ -1897,7 +1757,7 @@ void DrawWristDisplay(void)
 	
 	RenderPredatorPlasmaCasterCharge(PlayerStatusPtr->PlasmaCasterCharge, &sectionPtr->World_Offset, &sectionPtr->SecMat);
 	#if 0
-   	for (i=0; i<5; i++)
+   	for (int i=0; i<5; i++)
    	{
    		DECAL CurrentDecal;	
 		extern MODULE *playerPherModule;
@@ -1952,7 +1812,6 @@ void DrawWristDisplay(void)
 }
 void RotateVertex(VECTOR2D *vertexPtr, int theta)
 {
-	extern int sine[],cosine[];
 	int vx,vy;
 	int sin = GetSin(theta);
 	int cos = GetCos(theta);
@@ -2074,7 +1933,6 @@ static void DrawAlienTeeth(void)
 
 	if (AlienTeethOffset)
 	{
-		extern int CloakingPhase;
 		int offsetY;
 
 	   	DISPLAYBLOCK displayblock;
@@ -2172,9 +2030,7 @@ int Fast2dMagnitude(int dx, int dy)
 
 extern void NewOnScreenMessage(unsigned char *messagePtr)
 {
-	#if SupportWindows95
 	GADGET_NewOnScreenMessage( messagePtr );	
-	#endif
 }
 
 static void AimGunSight(int aimingSpeed, TEMPLATE_WEAPON_DATA *twPtr)
@@ -2269,8 +2125,6 @@ int Fast3dMagnitude(VECTORCH *v)
 #define ZOOM_SCALE_1 0.4f
 #define ZOOM_SCALE_2 0.1f
 #define ZOOM_SCALE_3 0.02f
-
-static int CurrentCameraZoomLevel=0;
 
 static float ZoomLevels[] = {1.0f,0.4f,0.1f,0.02f};
 

@@ -7,6 +7,8 @@
 
 #include "kzsort.h"
 #include "kshape.h"
+#include "pldnet.h"
+#include "avpview.h"
 
 #include "d3d_render.h"
 #define UseLocalAssert Yes
@@ -31,20 +33,24 @@ extern int NumVertices;
 extern int WireFrameMode;
 extern int DrawingAReflection;
 
-struct KItem KItemList[maxpolyptrs]={0,};
-static struct KItem KItemList2[maxpolyptrs]={0,};
+struct KItem KItemList[maxpolyptrs];
+#if 0
+static struct KItem KItemList2[maxpolyptrs];
+#endif
 
-static struct KObject VisibleModules[MAX_NUMBER_OF_VISIBLE_MODULES]={0,};
-static struct KObject VisibleModules2[MAX_NUMBER_OF_VISIBLE_MODULES]={0,};
+static struct KObject VisibleModules[MAX_NUMBER_OF_VISIBLE_MODULES];
+static struct KObject VisibleModules2[MAX_NUMBER_OF_VISIBLE_MODULES];
 static struct KObject *SortedModules;
-static struct KObject VisibleObjects[maxobjects]={0,};
+static struct KObject VisibleObjects[maxobjects];
 
+static int PointIsInModule(VECTORCH *pointPtr,MODULE *modulePtr);
 
 /*KJL*****************************
 * externs for new shape function *
 *****************************KJL*/
 int *MorphedObjectPointsPtr=0;
 
+#if 0
 static void MergeItems(struct KItem *src1, int n1, struct KItem *src2, int n2, struct KItem *dest)
 {
 	/* merge the 2 sorted lists: at src1, length n1, and at src2, length n2, into dest */
@@ -84,6 +90,7 @@ static void MergeItems(struct KItem *src1, int n1, struct KItem *src2, int n2, s
 	   }
 	}
 }
+#endif
 
 static void MergeObjects(struct KObject *src1, int n1, struct KObject *src2, int n2, struct KObject *dest)
 {
@@ -306,7 +313,6 @@ void SortModules(unsigned int noOfItems)
 /* KJL 12:21:51 02/11/97 - This routine is too big and ugly. Split & clean up required! */
 void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 {
-	extern int NumActiveBlocks;
 	extern int NumOnScreenBlocks;
 	extern DISPLAYBLOCK *OnScreenBlockList[];
 	int numOfObjects = NumOnScreenBlocks;
@@ -471,7 +477,9 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 
 	ProfileStart();
 	{
+#if FOG_ON
 		int fogDistance = 0x7f000000;
+#endif
 
 		int o = numVisObjs;
 		while(o--)
@@ -519,9 +527,10 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 				VisibleObjects[o].DrawBeforeEnvironment = 0;
 			}
 		}
-
+#if FOG_ON
 		if (fogDistance<0) fogDistance=0;
 		SetFogDistance(fogDistance);
+#endif	
 	}
 	ProfileStop("OBJS IN MOD TESTS");
 	DrawingAReflection=0;
@@ -716,7 +725,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 
 	#endif
 
-		#if 0//SupportWindows95
+		#if 0
 		if (ScanDrawMode != ScanDrawDirectDraw)
 		{
 			WriteEndCodeToExecuteBuffer();
@@ -734,6 +743,7 @@ void KRenderItems(VIEWDESCRIPTORBLOCK *VDBPtr)
 	}
 }
 
+#if 0
 static int ObjectIsInModule(DISPLAYBLOCK *objectPtr,MODULE *modulePtr)
 {
 	int objectSize = objectPtr->ObRadius;
@@ -754,6 +764,8 @@ static int ObjectIsInModule(DISPLAYBLOCK *objectPtr,MODULE *modulePtr)
 	return 0;
 
 }
+#endif
+
 static int PointIsInModule(VECTORCH *pointPtr,MODULE *modulePtr)
 {
 	VECTORCH position = *pointPtr;
@@ -961,14 +973,6 @@ void KShapeItemsInstr(SHAPEINSTR *shapeinstrptr)
 			/* KJL 17:15:46 06/07/97 - I'm not sure that we need 3dTexturedPolys */
 			if(pheaderPtr->PolyItemType == I_3dTexturedPolygon)
 				pheaderPtr->PolyItemType = I_2dTexturedPolygon;
-
-			/* KJL 12:57:43 05/29/97 - E3DEMO hack to draw everything in 3d */
-			#if PC_E3DEMO
-			pheaderPtr->PolyFlags &= ~iflag_tx2dor3d;
-			if(pheaderPtr->PolyItemType == I_Gouraud2dTexturedPolygon)
-				pheaderPtr->PolyItemType = I_Gouraud3dTexturedPolygon;
-			#endif
-			
 
 			if(ItemOCSBlock.ocs_clipstate == ocs_cs_totally_on)
 			{

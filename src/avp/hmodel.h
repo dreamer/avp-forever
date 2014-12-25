@@ -56,13 +56,16 @@ I'm going to try storing the quaternions as shorts within the keyframes ,
 because there are loads of them.
 -Richard.
 */
+PACKED_PUSH
 typedef struct quat_short
 {
 	short quatx;
 	short quaty;
 	short quatz;
 	short quatw;
-}QUAT_SHORT;
+} PACKED QUAT_SHORT;
+PACKED_POP
+
 /*A couple of conversion functions */
 extern void CopyShortQuatToInt(QUAT_SHORT* qs_from,QUAT* q_to);
 extern void CopyIntQuatToShort(QUAT* q_from,QUAT_SHORT* qs_to);
@@ -71,7 +74,8 @@ extern void CopyIntQuatToShort(QUAT* q_from,QUAT_SHORT* qs_to);
 #define KEYFRAME_VECTOR_SHIFT 4
 
 //make sure the keyframe structure packs as much as possible
-#pragma pack(push,1) 
+
+PACKED_PUSH
 typedef struct keyframe_data {
 	short Offset_x; /*Offset values may need to be scaled*/
 	short Offset_y;	/*In practice scaling should only be needed for 'placed' hierarchies*/
@@ -95,9 +99,8 @@ typedef struct keyframe_data {
 
 	unsigned short Sequence_Length; /* Time between these values and the next ones. */
 	struct keyframe_data *Next_Frame; /*This is no longer Null for the last frame - look at the last_frame setting instead*/
-} KEYFRAME_DATA;
-#pragma pack(pop)
-
+} PACKED KEYFRAME_DATA;
+PACKED_POP
 
 
 /*Two functions for extracting and setting the key frame offset */
@@ -391,6 +394,7 @@ extern int HModel_DepthTest(HMODELCONTROLLER *controller,SECTION_DATA *test_sect
 extern void DeInitialise_HModel(HMODELCONTROLLER *controller);
 
 
+struct save_block_header; // savegame.h
 extern void LoadHierarchy(struct save_block_header* header,HMODELCONTROLLER* controller);
 extern void SaveHierarchy(HMODELCONTROLLER* controller);
 

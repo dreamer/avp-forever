@@ -1,9 +1,7 @@
 #ifndef _chnktype_hpp
 #define _chnktype_hpp 1
 
-#if engine
 #include "3dc.h"
-#endif
 #include "list_tem.hpp"
 
 struct ChunkVectorInt;
@@ -28,10 +26,7 @@ struct ChunkVector
   	ChunkVector friend operator*(const ChunkVector&, const ChunkVector&); //cross prod
 
 
-	
-	#if engine
 	operator VECTORCH () const;
-	#endif
 	operator ChunkVectorInt () const;
 	operator ChunkVectorFloat () const;
 
@@ -57,12 +52,8 @@ struct ChunkVectorInt
  	ChunkVectorInt friend operator/(const ChunkVectorInt&, const double); 
   	
   	//ChunkVectorInt friend operator*(const ChunkVectorInt&, const ChunkVectorInt&); //cross prod
-
-
 	
-	#if engine
 	operator VECTORCH () const;
-	#endif
 
   	//friend double dot(const ChunkVector&, const ChunkVector&);//dot product
   	friend double mod(const ChunkVectorInt&);//magnitude of vector
@@ -84,9 +75,8 @@ struct ChunkVectorFloat
  	ChunkVectorFloat friend operator/(const ChunkVectorFloat&, const double); 
 	
 	//ChunkVectorInt friend operator*(const ChunkVectorInt&, const ChunkVectorInt&); //cross prod
-	#if engine
+
 	operator VECTORCH () const;
-	#endif
 
   	//friend double dot(const ChunkVector&, const ChunkVector&);//dot product
   	friend double mod(const ChunkVectorFloat&);//magnitude of vector
@@ -177,10 +167,6 @@ struct ChunkShape
 	int num_verts;
 	ChunkVectorInt * v_list;
 
-	#if UseOldChunkLoader
-	ChunkVector * float_v_list;
-	#endif
-
 	//int num_vert_normals; //I don't think num_vert_normals is ever used
 	ChunkVectorFloat * v_normal_list;
 
@@ -195,7 +181,6 @@ struct ChunkShape
 	char ** texture_fns;
 
 	void rescale (double);
-
 };
 
 struct ChunkQuat
@@ -217,12 +202,7 @@ struct ObjectID
 
 struct ChunkObject
 {
-
 	ChunkVectorInt location;
-
-	#if UseOldChunkLoader
-	ChunkVector float_location;
-	#endif
 
 	ChunkQuat orientation;
 
@@ -233,7 +213,6 @@ struct ChunkObject
 	int index_num; //this won't get changed by update_my_chunkobject
 
 	ObjectID ID;
-
 };
 
 
@@ -250,13 +229,8 @@ struct VMod_Arr_Item
 	int spare;
 	int object_index;
 	
-	#if UseOldChunkLoader
-	char * o_name; //replaced by object_index
-	#endif
-
 	friend BOOL operator==(const VMod_Arr_Item &, const VMod_Arr_Item &);
-	friend BOOL operator!=(const VMod_Arr_Item &, const VMod_Arr_Item &);
-	
+	friend BOOL operator!=(const VMod_Arr_Item &, const VMod_Arr_Item &);	
 };
 
 struct Adjacent_Module
@@ -271,13 +245,8 @@ struct Adjacent_Module
 	ChunkVectorInt entry_point;
 	int object_index;
 
-	#if UseOldChunkLoader
-	char * o_name;
-	#endif 
-
 	friend BOOL operator==(const Adjacent_Module & am1, const Adjacent_Module & am2);
-	friend BOOL operator!=(const Adjacent_Module & am1, const Adjacent_Module & am2);
-	
+	friend BOOL operator!=(const Adjacent_Module & am1, const Adjacent_Module & am2);	
 };
 
 class Shape_Chunk;

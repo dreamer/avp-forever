@@ -7,9 +7,6 @@
 #include "md5.h"
 // Class Object_Chunk functions
 
-#ifdef cencon
-#define new my_new
-#endif
 //macro for helping to force inclusion of chunks when using libraries
 FORCE_CHUNK_INCLUDE_IMPLEMENT(obchunk)
 
@@ -228,7 +225,8 @@ BOOL Object_Chunk::assoc_with_shape_no(File_Chunk *fc)
 	List<Chunk *> chlst;
 	fc->lookup_child("REBSHAPE",chlst);
 	
-	for (LIF<Chunk *> l(&chlst); !l.done(); l.next())
+	LIF<Chunk *> l(&chlst);
+	for (; !l.done(); l.next())
 	{
 		shp = (Shape_Chunk *)l();
 		shphd = shp->get_header();
@@ -401,19 +399,7 @@ ObjectID Object_Chunk::CalculateID()
 	if(!chlist.size()) return retval;
 	char Name[100];
 
-	#if InterfaceEngine||cencon
-	//need to check for console specific rif files,and skip the 'sat' or 'psx'
-	//so that they get the same ids as the pc
-	const char* r_name=((RIF_Name_Chunk*)chlist.first_entry())->rif_name;
-	if(tolower(r_name[0])=='p' && tolower(r_name[1])=='s' && tolower(r_name[2])=='x' )
-		strcpy(Name,&r_name[3]);
-	else if (tolower(r_name[0])=='s' && tolower(r_name[1])=='a' && tolower(r_name[2])=='t' )
-		strcpy(Name,&r_name[3]);
-	else
-		strcpy(Name,r_name);
-	#else
 	strcpy(Name,((RIF_Name_Chunk*)chlist.first_entry())->rif_name);
-	#endif
 
 	strcat(Name,object_data.o_name);
 	char buffer[16];
@@ -430,41 +416,6 @@ ObjectID Object_Chunk::CalculateID()
 RIF_IMPLEMENT_DYNCREATE("OBJHEAD1",Object_Header_Chunk)
 
 // from buffer
-#if UseOldChunkLoader
-Object_Header_Chunk::Object_Header_Chunk(Object_Chunk * parent, const char * hdata, size_t /*hsize*/)
-: Chunk (parent, "OBJHEAD1"), object_data (parent->object_data_store),
-flags(0), version_no (0), associated_shape (0)
-{
-	flags = *((int *) hdata);
-
-	if (flags & OBJECT_FLAG_BASE_OBJECT)
-		parent->object_data_store->is_base_object = TRUE;
-	else
-	{
-		parent->object_data_store->is_base_object = FALSE;
-	}
-
-	strncpy (lock_user, (hdata + 4), 16);
-	lock_user[16] = '\0';
-
-	parent->object_data_store->float_location = *((ChunkVector *) (hdata + 20));
-	parent->object_data_store->location = parent->object_data_store->float_location;
-	
-	parent->object_data_store->orientation.x =- *((double *) (hdata + 44));
-	parent->object_data_store->orientation.y =- *((double *) (hdata + 52));
-	parent->object_data_store->orientation.z =- *((double *) (hdata + 60));
-	parent->object_data_store->orientation.w = *((double *) (hdata + 68));
-
-	version_no = *((int *) (hdata + 76));
-
-	shape_id_no = *((int *) (hdata + 80));
-
-	strcpy (parent->object_data_store->o_name, (hdata + 84));
-	parent->object_data_store->ID.id1=0;
-	parent->object_data_store->ID.id2=0;
-	parent->object_data_store->index_num=-1;
-}
-#else
 Object_Header_Chunk::Object_Header_Chunk(Chunk_With_Children * parent, const char * hdata, size_t /*hsize*/)
 : Chunk (parent, "OBJHEAD1"), object_data (((Object_Chunk*)parent)->object_data_store),
 flags(0), version_no (0), associated_shape (0)
@@ -504,7 +455,6 @@ flags(0), version_no (0), associated_shape (0)
 	parent_object->object_data_store->ID.id1=0;
 	parent_object->object_data_store->ID.id2=0;
 }
-#endif
 
 //from data
 
@@ -629,8 +579,7 @@ RIF_IMPLEMENT_DYNCREATE("OBJNOTES",Object_Notes_Chunk)
 
 Object_Notes_Chunk::Object_Notes_Chunk (Chunk_With_Children * parent,
  const char * _data, size_t _data_size) 
-: Chunk(parent, "OBJNOTES"), 
-data(NULL), data_size(_data_size) 
+: Chunk(parent, "OBJNOTES"), data_size(_data_size), data(NULL)
 {
 	data_store = new char [data_size];
 
@@ -772,49 +721,6 @@ size_t VModule_Array_Chunk::size_chunk()
 		
 }
 
-#if UseOldChunkLoader
-VModule_Array_Chunk::VModule_Array_Chunk (Object_Module_Data_Chunk * parent, const char * vmdata, size_t /*vmsize*/)
-: Chunk (parent, "VMDARRAY")
-{
-	num_array_items = *((int *) vmdata);
-
-	vmdata += 4;
-	
-	vmod_array = new VMod_Arr_Item [num_array_items];
-
-	for (int i=0; i<num_array_items; i++)
-	{
-		//vmod_array[i].type = *((int *) vmdata);
-		vmdata += 4;
-		vmod_array[i].branch_no = *((int *) vmdata);
-		vmdata += 4;
-		
-		//vmod_array[i].dir.x = *((double *) vmdata);
-		vmdata += 8;
-		//vmod_array[i].dir.y = *((double *) vmdata);
-		vmdata += 8;
-		//vmod_array[i].dir.z = *((double *) vmdata);
-		vmdata += 8;
-		
-		//vmod_array[i].angle = *((double *) vmdata);
-		vmdata += 8;
-
-		vmod_array[i].flags = *((int *) vmdata);
-		vmdata += 4;
-
-		vmod_array[i].spare = *((int *) vmdata);
-		vmdata += 4;
-
-		vmod_array[i].object_index=-1;
-
-		vmod_array[i].o_name = new char [strlen(vmdata) + 1];
-		strcpy (vmod_array[i].o_name, vmdata);
-		vmdata += (strlen(vmod_array[i].o_name) + 1) + (4-(strlen(vmod_array[i].o_name) + 1)%4)%4;
-			
-	}
-
-}
-#else
 VModule_Array_Chunk::VModule_Array_Chunk (Chunk_With_Children * parent, const char * vmdata, size_t /*vmsize*/)
 : Chunk (parent, "VMDARRAY")
 {
@@ -842,7 +748,6 @@ VModule_Array_Chunk::VModule_Array_Chunk (Chunk_With_Children * parent, const ch
 	}
 
 }
-#endif
 
 VModule_Array_Chunk::~VModule_Array_Chunk ()
 {
@@ -959,35 +864,6 @@ size_t Adjacent_Module_Entry_Points_Chunk::size_chunk()
 	return(chunk_size);
 }
 
-#if UseOldChunkLoader
-Adjacent_Module_Entry_Points_Chunk::Adjacent_Module_Entry_Points_Chunk (Object_Module_Data_Chunk * parent, const char * data, size_t /*size*/)
-: Chunk (parent, "ADJMDLEP")
-{
-	int num_array_items = *((int *) data);
-
-	data += 4;
-	
-	for (int i=0; i<num_array_items; i++)
-	{
-		Adjacent_Module am;
-
-		am.flags = *((int *) data);
-		data += 4;
-
-		am.entry_point = *((ChunkVector *) data);
-		data += sizeof(ChunkVector);
-
-		am.o_name = new char [strlen(data) + 1];
-		strcpy (am.o_name, data);
-		data += (strlen(am.o_name) + 4)&~3;
-
-		am.object_index=-1;
-		
-		adjacent_modules_list.add_entry(am);	
-			
-	}
-}
-#else
 Adjacent_Module_Entry_Points_Chunk::Adjacent_Module_Entry_Points_Chunk (Chunk_With_Children * parent, const char * data, size_t /*size*/)
 : Chunk (parent, "ADJMDLEP")
 {
@@ -1014,7 +890,6 @@ Adjacent_Module_Entry_Points_Chunk::Adjacent_Module_Entry_Points_Chunk (Chunk_Wi
 	}
 
 }
-#endif
 
 ///////////////////////////////////////
 RIF_IMPLEMENT_DYNCREATE("MODFLAGS",Module_Flag_Chunk)
@@ -1137,7 +1012,7 @@ Object_Track_Chunk2::Object_Track_Chunk2(Object_Chunk * parent)
 
 Object_Track_Chunk2::~Object_Track_Chunk2()
 {
-	if(sections) delete sections;
+	if(sections) delete [] sections;
 }
 
 void Object_Track_Chunk2::fill_data_block (char *data_start)
@@ -1174,10 +1049,11 @@ size_t Object_Track_Chunk2::size_chunk ()
 	return(chunk_size);
 }
 
-#if UseOldChunkLoader
 Object_Track_Chunk2::Object_Track_Chunk2 (Chunk_With_Children * parent,const char * data, size_t /*size*/)
 : Chunk (parent, "OBJTRAK2")
 {
+	int i;
+	
 	num_sections=*(int*)data;
 	data+=4;
 
@@ -1186,62 +1062,7 @@ Object_Track_Chunk2::Object_Track_Chunk2 (Chunk_With_Children * parent,const cha
 	else
 		sections=0;
 
-	for(int i=0;i<num_sections;i++)
-	{
-		sections[i].quat_start.w=(*(int*)data)/65536.0;
-		data+=4;
-		sections[i].quat_start.x=(*(int*)data)/-65536.0;
-		data+=4;
-		sections[i].quat_start.y=(*(int*)data)/-65536.0;
-		data+=4;
-		sections[i].quat_start.z=(*(int*)data)/-65536.0;
-		data+=4;
-		
-		sections[i].quat_end.w=(*(int*)data)/65536.0;
-		data+=4;
-		sections[i].quat_end.x=(*(int*)data)/-65536.0;
-		data+=4;
-		sections[i].quat_end.y=(*(int*)data)/-65536.0;
-		data+=4;
-		sections[i].quat_end.z=(*(int*)data)/-65536.0;
-		data+=4;
-		
-
-		sections[i].pivot_start=*(ChunkVector*)data;
-		data+=sizeof(ChunkVector);
-		sections[i].pivot_end=*(ChunkVector*)data;
-		data+=sizeof(ChunkVector);
-		sections[i].object_offset=*(ChunkVector*)data;
-		data+=sizeof(ChunkVector);
-
-		sections[i].time_for_section=*(int*)data;
-		data+=sizeof(int);
-		sections[i].spare=*(int*)data;
-		data+=sizeof(int);
-		
-		
-	}
-
-	flags=*(int*)data;
-	flags|=TrackFlag_QuatProblemSorted;
-	data+=4;
-	spare2=*(int*)timer_start;
-	
-	
-}
-#else
-Object_Track_Chunk2::Object_Track_Chunk2 (Chunk_With_Children * parent,const char * data, size_t /*size*/)
-: Chunk (parent, "OBJTRAK2")
-{
-	num_sections=*(int*)data;
-	data+=4;
-
-	if(num_sections)
-		sections=new ChunkTrackSection[num_sections];
-	else
-		sections=0;
-
-	for(int i=0;i<num_sections;i++)
+	for(i=0;i<num_sections;i++)
 	{
 		sections[i]=*(ChunkTrackSection*)data;
 		data+=sizeof(ChunkTrackSection);
@@ -1271,7 +1092,6 @@ Object_Track_Chunk2::Object_Track_Chunk2 (Chunk_With_Children * parent,const cha
 	}
 	
 }
-#endif
 
 ///////////////////////////////////////
 RIF_IMPLEMENT_DYNCREATE("TRAKSOUN",Object_Track_Sound_Chunk)
@@ -1312,7 +1132,7 @@ Object_Track_Sound_Chunk::Object_Track_Sound_Chunk(Chunk_With_Children* const pa
 
 Object_Track_Sound_Chunk::~Object_Track_Sound_Chunk()
 {
-	if(wav_name) delete wav_name;
+	if(wav_name) delete [] wav_name;
 }											 
 
 void Object_Track_Sound_Chunk::fill_data_block(char* data_start)

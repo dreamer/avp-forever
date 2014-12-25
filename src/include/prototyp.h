@@ -1,4 +1,5 @@
 #ifndef PROTOTYP_INCLUDED
+#define PROTOTYP_INCLUDED
 
 /*
 
@@ -28,29 +29,8 @@
 
 */
 
-
-
-/* Grrr!!  That's the last time these will be missing! */
-/* Oh, CDF 18/12/97 */
-
-#if platform_pc
-extern int sine[];
-extern int cosine[];
-#endif
-
-/*
-
- A general system file header structure, storing the TYPE of the file as a
- four character string, and the SIZE of the file as an unsigned 32-bit value.
-
-*/
-
-typedef struct fileheaderch {
-
-	char fh_type[4];
-	unsigned int fh_size;
-
-} FILEHEADERCH;
+extern const int sine[4096];
+extern const int cosine[4096];
 
 
 typedef struct vectorch {
@@ -70,8 +50,6 @@ typedef struct quat {
 
 } QUAT;
 
-#if SupportFPMathsFunctions
-
 typedef struct vectorchf {
 
 	float vx;
@@ -82,18 +60,12 @@ typedef struct vectorchf {
 
 void FNormalise(VECTORCHF *n);
 
-#endif
-
-
 typedef struct vector2d {
 
 	int vx;
 	int vy;
 
 } VECTOR2D;
-
-
-#if SupportFPMathsFunctions
 
 typedef struct vector2df {
 
@@ -104,18 +76,12 @@ typedef struct vector2df {
 
 void FNormalise2d(VECTOR2DF *n);
 
-#endif
-
-
 typedef struct line {
 
 	VECTORCH v0;
 	VECTORCH v1;
 
 } LINE;
-
-
-
 
 
 
@@ -155,9 +121,6 @@ typedef struct matrixch {
 
 } MATRIXCH;
 
-
-#if SupportFPMathsFunctions
-
 typedef struct matrixchf {
 
 	float mat11;
@@ -173,9 +136,6 @@ typedef struct matrixchf {
 	float mat33;
 
 } MATRIXCHF;
-
-#endif
-
 
 /* Sorry about this... */
 
@@ -370,15 +330,6 @@ typedef struct mapblock6 {
 
 	int MapInteriorType;
 
-	#if InterfaceEngine
-
-	/* This will point to the Object_Chunk, it will have to be */
-	/* cast within C++ though */
-	
-	void * o_chunk;
-
-	#endif
-
 } MAPBLOCK6;
 
 
@@ -407,15 +358,6 @@ typedef struct mapblock7 {
 	MAPSETVDB *MapVDBData;
 
 	int MapInteriorType;
-
-	#if InterfaceEngine
-
-	/* This will point to the Object_Chunk, it will have to be */
-	/* cast within C++ though */
-	
-	void * o_chunk;
-
-	#endif
 
 	int MapLightType;			/* See LIGHTTYPES */
 
@@ -502,9 +444,7 @@ typedef struct screendescriptorblock {
 	int SDB_Width;
 	int SDB_Height;
 	int SDB_Depth;
-	#if SupportWindows95
 	int SDB_ScreenDepth;
-	#endif
 	int SDB_Size;
 
 	int SDB_DiagonalWidth;
@@ -616,9 +556,7 @@ typedef struct viewdescriptorblock {
 	int VDB_Width;
 	int VDB_Height;
 	int VDB_Depth;
-	#if SupportWindows95
 	int VDB_ScreenDepth;
-	#endif
 
 	int VDB_CentreX;
 	int VDB_CentreY;
@@ -721,15 +659,6 @@ typedef struct viewdescriptorblock {
 */
 
 #define ViewDB_Flag_drawtx3das2d	0x00080000
-
-
-/*
-  Neal - for starfields (currently only available
-  on Windows 95, all modes)
-*/
-
-
-#define ViewDB_Flag_Starfield	0x00100000
 
 
 /* test the flags with "& VDB_Trunc" to see if any truncation occurred */
@@ -897,9 +826,7 @@ typedef struct displayblock
 
 	SHAPEHEADER* ObShapeData;
 
-	#if SupportWindows95
 	char * name;
-	#endif
 	
 	#if (SupportMorphing && LazyEvaluationForMorphing)
 	VECTORCH *ObMorphedPts;
@@ -1129,50 +1056,6 @@ typedef struct p3d {
 
 } P3D;
 
-
-/*
-
- Standard Points - Z-Buffered
-
-*/
-
-#if ZBufferTest
-
-typedef struct p2d_zb {
-
-	VECTOR2D point2d;
-	int z2d;
-
-} P2D_ZB;
-
-typedef struct p3d_zb {
-
-	VECTORCH point3d;
-	int z3d;
-
-} P3D_ZB;
-
-#endif
-
-#if SupportZBuffering
-
-typedef struct p2d_zb {
-
-	VECTOR2D point2d;
-	float z2d;
-
-} P2D_ZB;
-
-typedef struct p3d_zb {
-
-	VECTORCH point3d;
-	float z3d;
-
-} P3D_ZB;
-
-#endif
-
-
 /*
 
  Gouraud Points
@@ -1192,55 +1075,6 @@ typedef struct p3d_gouraud {
 	int i3d;
 
 } P3D_GOURAUD;
-
-
-/*
-
- Gouraud Points - Z-Buffered
-
-*/
-
-#if ZBufferTest
-
-typedef struct p2d_gouraud_zb {
-
-	VECTOR2D point2d;
-	int i2d;
-	int zg2d;
-
-} P2D_GOURAUD_ZB;
-
-typedef struct p3d_gouraud_zb {
-
-	VECTORCH point3d;
-	int i3d;
-	int zg3d;
-
-} P3D_GOURAUD_ZB;
-
-#endif
-
-#if SupportZBuffering
-
-typedef struct p2d_gouraud_zb {
-
-	VECTOR2D point2d;
-	int i2d;
-	float zg2d;
-
-} P2D_GOURAUD_ZB;
-
-typedef struct p3d_gouraud_zb {
-
-	VECTORCH point3d;
-	int i3d;
-	float zg3d;
-
-} P3D_GOURAUD_ZB;
-
-#endif
-
-
 
 /*
 
@@ -1369,39 +1203,6 @@ typedef struct p3d_texture3d {
 #endif
 
 #endif
-
-
-/*
-
- Texture 3d Points - Z-Buffered
-
-*/
-
-#if 0
-#if (support3dtextures && SupportZBuffering)
-
-typedef struct p2d_texture3d_zb {
-
-	VECTOR2D point2d;
-	float u2d_tx3d;
-	float v2d_tx3d;
-	float z2d_tx3d;
-
-} P2D_TEXTURE3D_ZB;
-
-
-typedef struct p3d_texture3d_zb {
-
-	VECTORCH point3d;
-	float u3d_tx3d;
-	float v3d_tx3d;
-	float z3d_tx3d;
-
-} P3D_TEXTURE3D_ZB;
-
-#endif
-#endif
-
 
 /*
 
@@ -2154,9 +1955,7 @@ typedef struct i_gouraud3dtexturepolygon_scan {
 
 */
 
-#if SupportWindows95
 void ClearScreen(SCREENDESCRIPTORBLOCK *sdb, int Colour);
-#endif
 
 
 void PlatformSpecificShowViewEntry(VIEWDESCRIPTORBLOCK *vdb, SCREENDESCRIPTORBLOCK *sdb);
@@ -2200,36 +1999,6 @@ void UpdateGame(void);
 
 
 SHAPEHEADER* GetShapeData(int shapenum);
-
-
-#if flic_player
-
-/*
-
- FLIC File Player and Options
-
-*/
-
-int PlayFLICFile(char *fname, int fflags, int floops, unsigned char *pal);
-
-#define FFlag_DiskPlay			0x00000001		/* Force a disk play */
-
-#define FFlag_FadeDownFirst	0x00000002		/* First FLIC only */
-
-#define FFlag_RestoreScreen	0x00000004		/* Last FLIC only -
-																Copy the current contents
-																of the screen buffer back to
-																the video memory and fade up
-																the old palette */
-
-#define FFlag_EnableFade		0x00000008		/* NOT fading is the default */
-
-	#endif
-
-
-
-
-
 
 
 void InitialiseObjectBlocks(void);
@@ -2322,8 +2091,6 @@ int DestroyActiveVDB(VIEWDESCRIPTORBLOCK *dblockptr);
 void PlatformSpecificVDBInit(VIEWDESCRIPTORBLOCK *vdb);
 
 
-int SqRoot32(int A);
-int SqRoot64(LONGLONGCH *A);
 /* CDF 4/2/98 */
 int GetOneOverSin(int a);
 /* CDF 4/2/98 */
@@ -2470,22 +2237,14 @@ void BackFaceCullPointOutcodeFlagging(void);
 
 */
 
-#if SupportWindows95
-void InitialiseSystem(HINSTANCE hInstance, int nCmdShow);
-#else
 void InitialiseSystem(void);
-#endif
-
 void InitialiseRenderer(void);
-
 void ExitSystem(void);
-
 void InitialVideoMode(void);
-
+void RestartLevel();
 void ResetFrameCounter(void);
 void FrameCounterHandler(void);
 
-#if SupportWindows95
 void DirectWriteD3DLine(VECTOR2D* LineStart, VECTOR2D* LineEnd, int LineColour);
 void* LoadImageIntoDirectDrawSurface(char *fname, IMAGEHEADER *iheader,
       int ImageLoadMode, BOOL Sysmem);
@@ -2499,19 +2258,6 @@ int GetTextureHandle(IMAGEHEADER *imageHeaderPtr);
 
 void* LoadFontIntoDirectDrawSurface(char *fname, IMAGEHEADER *iheader);
 void ClearScreen(SCREENDESCRIPTORBLOCK* sdb, int Colour);
-#ifdef __cplusplus
-LPDIRECTDRAWSURFACE LoadPPMInD3DMode(char* fname,
-        LPDDSURFACEDESC lpFormat, IMAGEHEADER* iheader,
-        int MemoryType);
-LPDIRECTDRAWSURFACE LoadPPMIntoDDSurface(LPDIRECTDRAWSURFACE lpDDS,
-        DDSURFACEDESC format, int Height, int Width,
-        IMAGEHEADER* iheader, BOOL Quantise, FILE* fp, 
-        int psize, int pcaps, char* fname, int MipNum);
-LPDIRECTDRAWSURFACE LoadPGMInD3DMode(char* fname,
-        LPDDSURFACEDESC lpFormat, IMAGEHEADER* iheader,
-        int MemoryType);
-#endif // for __cplusplus
-#endif // for SupportWindows95
 
 void InitGame(void);
 void StartGame(void);
@@ -2522,211 +2268,7 @@ void UpdateParallelStrategy(void);
 
 unsigned char* AllocateScreenBuffer(int sbuffersize);
 
-
-#if 0
-
-#if 0
-void *AllocateMem(size_t __size);
-void DeallocateMem(void *__ptr);
-#endif
-
-#if PSX
-  #ifdef DBGMALLOC
-  extern void *record_malloc(long size, char string[], unsigned long lineno);
-  extern void record_free(void *ptr,char string[], unsigned long lineno);
-  #define AllocateMem(x) record_malloc(x,__FILE__, __LINE__)
-  #define DeallocateMem(x) record_free(x,__FILE__, __LINE__)
-  #else
-  void *AllocateMem(size_t __size);
-  void DeallocateMem(void *__ptr);
-  #endif
-#else
-void *AllocateMem(size_t __size);
-void DeallocateMem(void *__ptr);
-#endif
-
-#endif
-
-
-void ScanDraw_Item_Polygon_VideoModeType_8(int *itemptr);
-void ScanDraw_Item_Polygon_VideoModeType_15(int *itemptr);
-void ScanDraw_Item_Polygon_VideoModeType_24(int *itemptr);
-void ScanDraw_Item_Polygon_VideoModeType_8T(int *itemptr);
-
-#if (ZBufferTest || SupportZBuffering)
-void ScanDraw_Item_Polygon_ZBuffer_VideoModeType_8(int *itemptr);
-void ScanDraw_Item_Polygon_ZBuffer_VideoModeType_15(int *itemptr);
-void ScanDraw_Item_Polygon_ZBuffer_VideoModeType_24(int *itemptr);
-void ScanDraw_Item_Polygon_ZBuffer_VideoModeType_8T(int *itemptr);
-#endif
-
-void ScanDraw_Item_GouraudPolygon_VideoModeType_8(int *itemptr);
-void ScanDraw_Item_GouraudPolygon_VideoModeType_15(int *itemptr);
-void ScanDraw_Item_GouraudPolygon_VideoModeType_24(int *itemptr);
-void ScanDraw_Item_GouraudPolygon_VideoModeType_8T(int *itemptr);
-
-void ScanDraw_Item_GouraudPolygon_HPV_VideoModeType_15(int *itemptr);
-void ScanDraw_Item_GouraudPolygon_HPV_VideoModeType_24(int *itemptr);
-void ScanDraw_Item_GouraudPolygon_HPV_VideoModeType_8T(int *itemptr);
-
-#if ZBufferTest
-void ScanDraw_Item_GouraudPolygon_ZBuffer_VideoModeType_8(int *itemptr);
-void ScanDraw_Item_GouraudPolygon_ZBuffer_VideoModeType_15(int *itemptr);
-void ScanDraw_Item_GouraudPolygon_ZBuffer_VideoModeType_24(int *itemptr);
-void ScanDraw_Item_GouraudPolygon_ZBuffer_VideoModeType_8T(int *itemptr);
-#endif
-
-#if SupportZBuffering
-void ScanDraw_ZB_Item_GouraudPolygon_VideoModeType_8(int *itemptr);
-void ScanDraw_ZB_Item_GouraudPolygon_VideoModeType_15(int *itemptr);
-void ScanDraw_ZB_Item_GouraudPolygon_VideoModeType_24(int *itemptr);
-void ScanDraw_ZB_Item_GouraudPolygon_VideoModeType_8T(int *itemptr);
-#endif
-
-void ScanDraw_Item_2dTexturePolygon_VideoModeType_8(int *itemptr);
-void ScanDraw_Item_2dTexturePolygon_VideoModeType_15(int *itemptr);
-void ScanDraw_Item_2dTexturePolygon_VideoModeType_24(int *itemptr);
-void ScanDraw_Item_2dTexturePolygon_VideoModeType_8T(int *itemptr);
-
-#if SupportZBuffering
-void ScanDraw_ZB_Item_2dTexturePolygon_VideoModeType_8(int *itemptr);
-void ScanDraw_ZB_Item_2dTexturePolygon_VideoModeType_15(int *itemptr);
-void ScanDraw_ZB_Item_2dTexturePolygon_VideoModeType_24(int *itemptr);
-void ScanDraw_ZB_Item_2dTexturePolygon_VideoModeType_8T(int *itemptr);
-#endif
-
-void ScanDraw_Item_Gouraud2dTexturePolygon_VideoModeType_8(int *itemptr);
-void ScanDraw_Item_Gouraud2dTexturePolygon_VideoModeType_15(int *itemptr);
-void ScanDraw_Item_Gouraud2dTexturePolygon_VideoModeType_24(int *itemptr);
-void ScanDraw_Item_Gouraud2dTexturePolygon_VideoModeType_8T(int *itemptr);
-
-void ScanDraw_Item_ZB_Gouraud2dTexturePolygon_VideoModeType_8(int *itemptr);
-void ScanDraw_Item_ZB_Gouraud2dTexturePolygon_VideoModeType_15(int *itemptr);
-void ScanDraw_Item_ZB_Gouraud2dTexturePolygon_VideoModeType_24(int *itemptr);
-void ScanDraw_Item_ZB_Gouraud2dTexturePolygon_VideoModeType_8T(int *itemptr);
-
-
-#if support3dtextures
-void ScanDraw_Item_3dTexturePolygon_VideoModeType_8(int *itemptr);
-void ScanDraw_Item_3dTexturePolygon_VideoModeType_15(int *itemptr);
-void ScanDraw_Item_3dTexturePolygon_VideoModeType_24(int *itemptr);
-void ScanDraw_Item_3dTexturePolygon_VideoModeType_8T(int *itemptr);
-#endif
-
-#if SupportGouraud3dTextures
-
-void ScanDraw_Item_Gouraud3dTexturePolygon_VideoModeType_8(int *itemptr);
-void ScanDraw_Item_Gouraud3dTexturePolygon_VideoModeType_15(int *itemptr);
-void ScanDraw_Item_Gouraud3dTexturePolygon_VideoModeType_24(int *itemptr);
-void ScanDraw_Item_Gouraud3dTexturePolygon_VideoModeType_8T(int *itemptr);
-
-void ScanDraw_Item_Gouraud3dTexturePolygon_Linear_VideoModeType_8(int *itemptr);
-void ScanDraw_Item_Gouraud3dTexturePolygon_Linear_VideoModeType_15(int *itemptr);
-void ScanDraw_Item_Gouraud3dTexturePolygon_Linear_VideoModeType_24(int *itemptr);
-void ScanDraw_Item_Gouraud3dTexturePolygon_Linear_VideoModeType_8T(int *itemptr);
-
-void ScanDraw_Item_Gouraud3dTexturePolygon_Linear_S_VideoModeType_8(int *itemptr);
-void ScanDraw_Item_Gouraud3dTexturePolygon_Linear_S_VideoModeType_15(int *itemptr);
-void ScanDraw_Item_Gouraud3dTexturePolygon_Linear_S_VideoModeType_24(int *itemptr);
-void ScanDraw_Item_Gouraud3dTexturePolygon_Linear_S_VideoModeType_8T(int *itemptr);
-
-#if SupportZBuffering
-
-void ScanDraw_Item_ZB_Gouraud3dTexturePolygon_VideoModeType_8(int *itemptr);
-void ScanDraw_Item_ZB_Gouraud3dTexturePolygon_VideoModeType_15(int *itemptr);
-void ScanDraw_Item_ZB_Gouraud3dTexturePolygon_VideoModeType_24(int *itemptr);
-void ScanDraw_Item_ZB_Gouraud3dTexturePolygon_VideoModeType_8T(int *itemptr);
-
-void ScanDraw_Item_ZB_Gouraud3dTexturePolygon_Linear_VideoModeType_8(int *itemptr);
-void ScanDraw_Item_ZB_Gouraud3dTexturePolygon_Linear_VideoModeType_15(int *itemptr);
-void ScanDraw_Item_ZB_Gouraud3dTexturePolygon_Linear_VideoModeType_24(int *itemptr);
-void ScanDraw_Item_ZB_Gouraud3dTexturePolygon_Linear_VideoModeType_8T(int *itemptr);
-
-void ScanDraw_Item_ZB_Gouraud3dTexturePolygon_Linear_S_VideoModeType_8(int *itemptr);
-void ScanDraw_Item_ZB_Gouraud3dTexturePolygon_Linear_S_VideoModeType_15(int *itemptr);
-void ScanDraw_Item_ZB_Gouraud3dTexturePolygon_Linear_S_VideoModeType_24(int *itemptr);
-void ScanDraw_Item_ZB_Gouraud3dTexturePolygon_Linear_S_VideoModeType_8T(int *itemptr);
-
-#endif	/* SupportZBuffering */
-
-#endif	/* SupportGouraud3dTextures */
-
-#if support3dtextures
-
-#if SupportZBuffering
-void ScanDraw_Item_ZB_3dTexturePolygon_VideoModeType_8(int *itemptr);
-void ScanDraw_Item_ZB_3dTexturePolygon_VideoModeType_15(int *itemptr);
-void ScanDraw_Item_ZB_3dTexturePolygon_VideoModeType_24(int *itemptr);
-void ScanDraw_Item_ZB_3dTexturePolygon_VideoModeType_8T(int *itemptr);
-#endif
-
-void ScanDraw_Item_3dTexturePolygon_QuadI_VideoModeType_8(int *itemptr);
-void ScanDraw_Item_3dTexturePolygon_QuadI_VideoModeType_15(int *itemptr);
-void ScanDraw_Item_3dTexturePolygon_QuadI_VideoModeType_24(int *itemptr);
-void ScanDraw_Item_3dTexturePolygon_QuadI_VideoModeType_8T(int *itemptr);
-
-#if SupportZBuffering
-void ScanDraw_ZB_Item_3dTexturePolygon_QuadI_VideoModeType_8(int *itemptr);
-void ScanDraw_ZB_Item_3dTexturePolygon_QuadI_VideoModeType_15(int *itemptr);
-void ScanDraw_ZB_Item_3dTexturePolygon_QuadI_VideoModeType_24(int *itemptr);
-void ScanDraw_ZB_Item_3dTexturePolygon_QuadI_VideoModeType_8T(int *itemptr);
-#endif
-
-void ScanDraw_Item_3dTexturePolygon_Linear_VideoModeType_8(int *itemptr);
-void ScanDraw_Item_3dTexturePolygon_Linear_VideoModeType_15(int *itemptr);
-void ScanDraw_Item_3dTexturePolygon_Linear_VideoModeType_24(int *itemptr);
-void ScanDraw_Item_3dTexturePolygon_Linear_VideoModeType_8T(int *itemptr);
-
-#if SupportZBuffering
-void ScanDraw_Item_ZB_3dTexturePolygon_Linear_VideoModeType_8(int *itemptr);
-void ScanDraw_Item_ZB_3dTexturePolygon_Linear_VideoModeType_15(int *itemptr);
-void ScanDraw_Item_ZB_3dTexturePolygon_Linear_VideoModeType_24(int *itemptr);
-void ScanDraw_Item_ZB_3dTexturePolygon_Linear_VideoModeType_8T(int *itemptr);
-#endif
-
-void ScanDraw_Item_3dTexturePolygon_Linear_S_VideoModeType_8(int *itemptr);
-void ScanDraw_Item_3dTexturePolygon_Linear_S_VideoModeType_15(int *itemptr);
-void ScanDraw_Item_3dTexturePolygon_Linear_S_VideoModeType_24(int *itemptr);
-void ScanDraw_Item_3dTexturePolygon_Linear_S_VideoModeType_8T(int *itemptr);
-
-#if SupportZBuffering
-void ScanDraw_Item_ZB_3dTexturePolygon_Linear_S_VideoModeType_8(int *itemptr);
-void ScanDraw_Item_ZB_3dTexturePolygon_Linear_S_VideoModeType_15(int *itemptr);
-void ScanDraw_Item_ZB_3dTexturePolygon_Linear_S_VideoModeType_24(int *itemptr);
-void ScanDraw_Item_ZB_3dTexturePolygon_Linear_S_VideoModeType_8T(int *itemptr);
-#endif
-
-#endif	/* support3dtextures */
-
-void ScanDraw_Item_Polyline_VideoModeType_8(int *itemptr);
-void ScanDraw_Item_Polyline_VideoModeType_15(int *itemptr);
-void ScanDraw_Item_Polyline_VideoModeType_24(int *itemptr);
-void ScanDraw_Item_Polyline_VideoModeType_8T(int *itemptr);
-
-void ScanDraw_Item_FilledPolyline_VideoModeType_8(int *itemptr);
-void ScanDraw_Item_FilledPolyline_VideoModeType_15(int *itemptr);
-void ScanDraw_Item_FilledPolyline_VideoModeType_24(int *itemptr);
-void ScanDraw_Item_FilledPolyline_VideoModeType_8T(int *itemptr);
-
-void ScanDraw_Item_Wireframe_VideoModeType_8(int *itemptr);
-void ScanDraw_Item_Wireframe_VideoModeType_15(int *itemptr);
-void ScanDraw_Item_Wireframe_VideoModeType_24(int *itemptr);
-void ScanDraw_Item_Wireframe_VideoModeType_8T(int *itemptr);
-
-#if 0
-void ScanDraw_Item_HUDPolyline_VideoModeType_8(int *itemptr);
-void ScanDraw_Item_HUDPolyline_VideoModeType_15(int *itemptr);
-void ScanDraw_Item_HUDPolyline_VideoModeType_24(int *itemptr);
-void ScanDraw_Item_HUDPolyline_VideoModeType_8T(int *itemptr);
-#endif
-
 void SetPalette(unsigned char *palette);
-
-void MakeTextureLightingTable6(void);
-void MakeTextureLightingTable6G(void);
-void MakeTextureLightingTable15(void);
-void MakeTextureLightingTable24(void);
-void MakeTextureLightingTable8T(void);
 
 void CreatePaletteRemapTable(unsigned char *palette);
 unsigned char GetRemappedPaletteColour(int r, int g, int b, int bitsize);
@@ -2777,35 +2319,19 @@ int LoadBackdrop(char *image, IMAGEHEADER *ihdr);
 void GetProjectFilename(char *fname, char *image);
 
 
-int CompareStringCH(char *string1, char *string2);
-
 void GetDOSFilename(char *fnameptr);
 int CompareFilenameCH(char *string1, char *string2);
-
-void CopyMemoryCH(void *source, void *dest, int c);
 
 TEXTURE* LoadImageCH(char *fname, IMAGEHEADER *iheader);
 TEXTURE* LoadBMP(char *fname, IMAGEHEADER *iheader);
 TEXTURE* LoadPGM(char *fname, IMAGEHEADER *iheader);
 int LoadPGMPalette(char *fname, unsigned char *palette);
 int LoadPGMPaletteLightingTable(char *filename, unsigned char *palette);
-void MakeTextureLightingTableRaw256(unsigned char *palette);
 
 void Create_MIP_Map(IMAGEHEADER *iheader);
 
 
-int** ShadingTables(SHAPEHEADER **sh_list);
-PALCREATIONDATA* CreatePaletteCH(SHAPEHEADER **sh_list, int pstart, int pent, unsigned char *pal);
-PALCREATIONDATA* CreateRaw256PaletteCH(SHAPEHEADER **sh_list, unsigned char *pal);
-void RemapShapesForCreatePaletteCH(SHAPEHEADER **sh_list);
-
-void ClearShadingTables(void);
-void ClearPaletteShadingTables(void);
-
 int NextLowPower2(int i);
-
-
-void PlotPixelTest(int x, int y, unsigned char col);
 
 
 /* User Input */
@@ -2829,32 +2355,6 @@ typedef struct mousedata {
 
 
 void ReadKeyboard(void);
-
-
-#if 0
-void ReadEmulatedSaturnControlPad(void);
-unsigned int CheckPad(void);
-void ExaminePad(void);
-/*
- Saturn Control Pad
- See pad.h
- Model S Pad, direct mode
-*/
-#define PAD_DOWN	0x0001
-#define PAD_UP  	0x0002
-#define PAD_LEFT	0x0004
-#define PAD_RIGHT	0x0008
-#define PAD_BUTC	0x0010
-#define PAD_BUTB	0x0020
-#define PAD_BUTA	0x0040
-#define PAD_START	0x0080
-#define PAD_BUTZ	0x0100
-#define PAD_BUTY	0x0200
-#define PAD_BUTX	0x0400
-#define PAD_MODE	0x0800
-#define	PAD_R	    0x0800
-#define PAD_L     0x1000
-#endif
 
 
 void WaitForReturn(void);
@@ -2919,15 +2419,6 @@ void DrawPalette(int x0, int y0, int x1, int y1);
 
 typedef enum {
 
-	DrawPerFrame,
-	DrawPerVDB,
-	DrawPerObject
-
-} DRAWMODES;
-
-
-typedef enum {
-
 	Boundary_Left,
 	Boundary_Right,
 	Boundary_Up,
@@ -2986,6 +2477,6 @@ int Approximate3dMagnitude(VECTORCH *v);
 #endif
 
 
-#define PROTOTYP_INCLUDED
+
 
 #endif

@@ -3,9 +3,9 @@
 #include "module.h"
 #include "stratdef.h"
 #include "gamedef.h"
-#include "AvP_EnvInfo.h"
-#include "AvP_UserProfile.h"
-#include "AvP_MP_Config.h"
+#include "avp_envinfo.h"
+#include "avp_userprofile.h"
+#include "avp_mp_config.h"
 #include "pldnet.h"
 
 static enum AVP_ENVIRONMENT_ID MarineEpisodes[] =
@@ -182,26 +182,25 @@ static char *RifNamesForEnvironments[] =
 	"Not a Level",//AVP_ENVIRONMENT_END_OF_LIST
 
 	//multipack multiplayer levels
-	"Leadworks",//AVP_ENVIRONMENT_LEADWORKS_MP,
-	"HadleysHope",//AVP_ENVIRONMENT_HADLEYSHOPE_MP,
-	"Meat_Factory",//AVP_ENVIRONMENT_MEATFACTORY_MP,
-	"Nostromo",//AVP_ENVIRONMENT_NOSTROMO_MP,
-	"Subway",//AVP_ENVIRONMENT_SUBWAY_MP,
-	"Elevator",//AVP_ENVIRONMENT_ELEVATOR_MP,
-	"Lab14",//AVP_ENVIRONMENT_LAB14_MP,
-	"Compound",//AVP_ENVIRONMENT_COMPOUND_MP,
-	"Office",//AVP_ENVIRONMENT_OFFICE_MP,
+	"leadworks",//AVP_ENVIRONMENT_LEADWORKS_MP,
+	"hadleyshope",//AVP_ENVIRONMENT_HADLEYSHOPE_MP,
+	"meat_factory",//AVP_ENVIRONMENT_MEATFACTORY_MP,
+	"nostromo",//AVP_ENVIRONMENT_NOSTROMO_MP,
+	"subway",//AVP_ENVIRONMENT_SUBWAY_MP,
+	"elevator",//AVP_ENVIRONMENT_ELEVATOR_MP,
+	"lab14",//AVP_ENVIRONMENT_LAB14_MP,
+	"compound",//AVP_ENVIRONMENT_COMPOUND_MP,
+	"office",//AVP_ENVIRONMENT_OFFICE_MP,
 
 	//multipack multiplayer cooperative levels
-	"Leadworks_coop",//AVP_ENVIRONMENT_LEADWORKS_COOP,
+	"leadworks_coop",//AVP_ENVIRONMENT_LEADWORKS_COOP,
 	"hadleyshope_coop",//AVP_ENVIRONMENT_HADLEYSHOPE_COOP,
-	"Co-op_Meat_Factory",//AVP_ENVIRONMENT_MEATFACTORY_COOP,
-	"Nostromo_Coop",//AVP_ENVIRONMENT_NOSTROMO_COOP,
-	"SubwayCoop",//AVP_ENVIRONMENT_SUBWAY_COOP,
-	"Elevator_co-op",//AVP_ENVIRONMENT_ELEVATOR_COOP,
-	"Lab14coop",//AVP_ENVIRONMENT_LAB14_COOP,
-	"CompoundCoop",//AVP_ENVIRONMENT_COMPOUND_COOP,
-	
+	"co-op_meat_factory",//AVP_ENVIRONMENT_MEATFACTORY_COOP,
+	"nostromo_coop",//AVP_ENVIRONMENT_NOSTROMO_COOP,
+	"subwaycoop",//AVP_ENVIRONMENT_SUBWAY_COOP,
+	"elevator_co-op",//AVP_ENVIRONMENT_ELEVATOR_COOP,
+	"lab14coop",//AVP_ENVIRONMENT_LAB14_COOP,
+	"compoundcoop",//AVP_ENVIRONMENT_COMPOUND_COOP,
 };
 
 extern char LevelName[];
@@ -210,10 +209,10 @@ AvP_Level_Target_Desc LevelStatsTargets[I_MaxDifficulties][AVP_ENVIRONMENT_END_O
 {
 	{
 		{	/* Derelict / Easy */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Creatures Killed */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Creatures decapitated*/
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Trophies / Live Head Bites */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Dead Head Bites */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Creatures Killed */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Creatures decapitated*/
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Trophies / Live Head Bites */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Dead Head Bites */
 			-1,		/* Shots Fired */
 			-1,		/* Accuracy */
 			-1,		/* Spotted */
@@ -232,17 +231,17 @@ AvP_Level_Target_Desc LevelStatsTargets[I_MaxDifficulties][AVP_ENVIRONMENT_END_O
 				0,0,0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,0,0,
-				0,0,0,0,0,0,0,0,0,0,
-			},
+				0,0,0,0,0,0,0,0,0,0
+			}
 		},
-		CHEATMODE_NONACTIVE,	/* Cheat to activate */
+		CHEATMODE_NONACTIVE	/* Cheat to activate */
 	},
 	{
 		{	/* Colony / Easy */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Creatures Killed */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Creatures decapitated*/
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Trophies / Live Head Bites */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Dead Head Bites */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Creatures Killed */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Creatures decapitated*/
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Trophies / Live Head Bites */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Dead Head Bites */
 			-1,		/* Shots Fired */
 			-1,		/* Accuracy */
 			-1,		/* Spotted */
@@ -261,17 +260,17 @@ AvP_Level_Target_Desc LevelStatsTargets[I_MaxDifficulties][AVP_ENVIRONMENT_END_O
 				0,0,0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,0,0,
-				0,0,0,0,0,0,0,0,0,0,
-			},
+				0,0,0,0,0,0,0,0,0,0
+			}
 		},
-		CHEATMODE_NONACTIVE,	/* Cheat to activate */
+		CHEATMODE_NONACTIVE	/* Cheat to activate */
 	},
 	{
 		{	/* Invasion / Easy */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Creatures Killed */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Creatures decapitated*/
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Trophies / Live Head Bites */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Dead Head Bites */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Creatures Killed */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Creatures decapitated*/
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Trophies / Live Head Bites */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Dead Head Bites */
 			-1,		/* Shots Fired */
 			-1,		/* Accuracy */
 			-1,		/* Spotted */
@@ -290,17 +289,17 @@ AvP_Level_Target_Desc LevelStatsTargets[I_MaxDifficulties][AVP_ENVIRONMENT_END_O
 				0,0,0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,0,0,
-				0,0,0,0,0,0,0,0,0,0,
-			},
+				0,0,0,0,0,0,0,0,0,0
+			}
 		},
-		CHEATMODE_NONACTIVE,	/* Cheat to activate */
+		CHEATMODE_NONACTIVE	/* Cheat to activate */
 	},
 	{
 		{	/* Orbital / Easy */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Creatures Killed */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Creatures decapitated*/
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Trophies / Live Head Bites */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Dead Head Bites */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Creatures Killed */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Creatures decapitated*/
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Trophies / Live Head Bites */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Dead Head Bites */
 			-1,		/* Shots Fired */
 			-1,		/* Accuracy */
 			-1,		/* Spotted */
@@ -319,17 +318,17 @@ AvP_Level_Target_Desc LevelStatsTargets[I_MaxDifficulties][AVP_ENVIRONMENT_END_O
 				0,0,0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,0,0,
-				0,0,0,0,0,0,0,0,0,0,
-			},
+				0,0,0,0,0,0,0,0,0,0
+			}
 		},
-		CHEATMODE_NONACTIVE,	/* Cheat to activate */
+		CHEATMODE_NONACTIVE	/* Cheat to activate */
 	},
 	{
 		{	/* Tyrago / Easy */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Creatures Killed */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Creatures decapitated*/
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Trophies / Live Head Bites */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Dead Head Bites */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Creatures Killed */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Creatures decapitated*/
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Trophies / Live Head Bites */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Dead Head Bites */
 			-1,		/* Shots Fired */
 			-1,		/* Accuracy */
 			-1,		/* Spotted */
@@ -348,17 +347,17 @@ AvP_Level_Target_Desc LevelStatsTargets[I_MaxDifficulties][AVP_ENVIRONMENT_END_O
 				0,0,0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,0,0,
-				0,0,0,0,0,0,0,0,0,0,
-			},
+				0,0,0,0,0,0,0,0,0,0
+			}
 		},
-		CHEATMODE_NONACTIVE,	/* Cheat to activate */
+		CHEATMODE_NONACTIVE	/* Cheat to activate */
 	},
 	{
 		{	/* Hangar / Easy */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Creatures Killed */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Creatures decapitated*/
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Trophies / Live Head Bites */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Dead Head Bites */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Creatures Killed */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Creatures decapitated*/
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Trophies / Live Head Bites */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Dead Head Bites */
 			-1,		/* Shots Fired */
 			-1,		/* Accuracy */
 			-1,		/* Spotted */
@@ -377,17 +376,17 @@ AvP_Level_Target_Desc LevelStatsTargets[I_MaxDifficulties][AVP_ENVIRONMENT_END_O
 				0,0,0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,0,0,
-				0,0,0,0,0,0,0,0,0,0,
-			},
+				0,0,0,0,0,0,0,0,0,0
+			}
 		},
-		CHEATMODE_NONACTIVE,	/* Cheat to activate */
+		CHEATMODE_NONACTIVE	/* Cheat to activate */
 	},
 	{
 		{	/* Waterfall / Easy */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Creatures Killed */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Creatures decapitated*/
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Trophies / Live Head Bites */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Dead Head Bites */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Creatures Killed */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Creatures decapitated*/
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Trophies / Live Head Bites */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Dead Head Bites */
 			-1,		/* Shots Fired */
 			-1,		/* Accuracy */
 			-1,		/* Spotted */
@@ -406,17 +405,17 @@ AvP_Level_Target_Desc LevelStatsTargets[I_MaxDifficulties][AVP_ENVIRONMENT_END_O
 				0,0,0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,0,0,
-				0,0,0,0,0,0,0,0,0,0,
-			},
+				0,0,0,0,0,0,0,0,0,0
+			}
 		},
-		CHEATMODE_NONACTIVE,	/* Cheat to activate */
+		CHEATMODE_NONACTIVE	/* Cheat to activate */
 	},
 	{
 		{	/* Area52 / Easy */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Creatures Killed */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Creatures decapitated*/
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Trophies / Live Head Bites */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Dead Head Bites */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Creatures Killed */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Creatures decapitated*/
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Trophies / Live Head Bites */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Dead Head Bites */
 			-1,		/* Shots Fired */
 			-1,		/* Accuracy */
 			-1,		/* Spotted */
@@ -435,17 +434,17 @@ AvP_Level_Target_Desc LevelStatsTargets[I_MaxDifficulties][AVP_ENVIRONMENT_END_O
 				0,0,0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,0,0,
-				0,0,0,0,0,0,0,0,0,0,
-			},
+				0,0,0,0,0,0,0,0,0,0
+			}
 		},
-		CHEATMODE_NONACTIVE,	/* Cheat to activate */
+		CHEATMODE_NONACTIVE	/* Cheat to activate */
 	},
 	{
 		{	/* Vaults / Easy */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Creatures Killed */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Creatures decapitated*/
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Trophies / Live Head Bites */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Dead Head Bites */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Creatures Killed */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Creatures decapitated*/
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Trophies / Live Head Bites */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Dead Head Bites */
 			-1,		/* Shots Fired */
 			-1,		/* Accuracy */
 			-1,		/* Spotted */
@@ -464,10 +463,10 @@ AvP_Level_Target_Desc LevelStatsTargets[I_MaxDifficulties][AVP_ENVIRONMENT_END_O
 				0,0,0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,0,0,
-				0,0,0,0,0,0,0,0,0,0,
-			},
+				0,0,0,0,0,0,0,0,0,0
+			}
 		},
-		CHEATMODE_NONACTIVE,	/* Cheat to activate */
+		CHEATMODE_NONACTIVE	/* Cheat to activate */
 	},
 	{
 		{	/* Fury161 / Easy */
@@ -5091,10 +5090,10 @@ AvP_Level_Target_Desc LevelStatsTargets[I_MaxDifficulties][AVP_ENVIRONMENT_END_O
 	},
 	{
 		{	/* E3DemoSP / Impossible */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Creatures Killed */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Creatures decapitated*/
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Trophies / Live Head Bites */
-			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1,},	/* Dead Head Bites */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Creatures Killed */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Creatures decapitated*/
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Trophies / Live Head Bites */
+			{-1,-1,-1,-1,-1,-1,-1,-1,-1,-1},	/* Dead Head Bites */
 			-1,		/* Shots Fired */
 			-1,		/* Accuracy */
 			-1,		/* Spotted */
@@ -5113,12 +5112,12 @@ AvP_Level_Target_Desc LevelStatsTargets[I_MaxDifficulties][AVP_ENVIRONMENT_END_O
 				0,0,0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,0,0,
 				0,0,0,0,0,0,0,0,0,0,
-				0,0,0,0,0,0,0,0,0,0,
-			},
+				0,0,0,0,0,0,0,0,0,0
+			}
 		},
-		CHEATMODE_NONACTIVE,	/* Cheat to activate */
-	},
-},
+		CHEATMODE_NONACTIVE	/* Cheat to activate */
+	}
+}
 
 };
 
@@ -5142,7 +5141,7 @@ void SetLevelToLoadForMultiplayer(int episode)
 	{
 		//it certainly is
 		//(the game type sent passed to the function doesn't really matter , as long as it isn't NGT_COOP)
-		sprintf(LevelName,"Custom\\%s",GetCustomMultiplayerLevelName(episode,NGT_Individual));
+		sprintf(LevelName,"Custom/%s",GetCustomMultiplayerLevelName(episode,NGT_Individual));
 	}
 	else
 	{
@@ -5155,7 +5154,7 @@ void SetLevelToLoadForCooperative(int episode)
 	if(episode>=MAX_NO_OF_COOPERATIVE_EPISODES)
 	{
 		//it certainly is
-		sprintf(LevelName,"Custom\\%s",GetCustomMultiplayerLevelName(episode,NGT_Coop));
+		sprintf(LevelName,"Custom/%s",GetCustomMultiplayerLevelName(episode,NGT_Coop));
 	}
 	else
 	{
@@ -5200,14 +5199,14 @@ int NumberForCurrentLevel(void) {
 
 static BOOL DoesNamedLevelExist(const char* level_name)
 {
-	HANDLE file_handle;
+	FILE *file_handle;
 	char filename[200];
 	
-	sprintf(filename,"avp_rifs\\%s.rif",level_name);
+	sprintf(filename, "avp_rifs/%s.rif", level_name);
 
-	file_handle = CreateFile(filename,GENERIC_READ,0,0,OPEN_EXISTING,FILE_FLAG_RANDOM_ACCESS, 0);
-	if(file_handle == INVALID_HANDLE_VALUE)	return FALSE;
-	CloseHandle(file_handle);
+	file_handle = OpenGameFile(filename, FILEMODE_READONLY, FILETYPE_PERM);
+	if(file_handle == NULL)	return FALSE;
+	fclose(file_handle);
 
 	return TRUE;
 }

@@ -10,7 +10,6 @@
 #include "comp_shp.h"
 #include "inventry.h"
 #include "triggers.h"
-#include "mslhand.h"
 
 #include "dynblock.h"
 #include "dynamics.h"
@@ -34,10 +33,8 @@
 #include "psnd.h"
 #include "savegame.h"
 
-#if SupportWindows95
 /* for win95 net game support */
 #include "pldghost.h"
-#endif
 
 
 extern int NormalFrameTime;

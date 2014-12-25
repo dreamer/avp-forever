@@ -15,7 +15,6 @@
 #include "comp_shp.h"
 #include "inventry.h"
 #include "triggers.h"
-#include "mslhand.h"
 
 #define UseLocalAssert Yes
 
@@ -36,27 +35,23 @@
 #include "bh_agun.h"
 #include "plat_shp.h"
 #include "psnd.h"
-#include "AI_Sight.h"
+#include "ai_sight.h"
 #include "sequnces.h"
 #include "huddefs.h"
-#include "ShowCmds.h"
+#include "showcmds.h"
 #include "sfx.h"
 #include "bh_marin.h"
 #include "bh_dummy.h"
 #include "bh_far.h"
-#include "pldghost.h"
-#include "pheromon.h"
 #include "targeting.h"
 #include "dxlog.h"
 #include "los.h"
 #include "psndplat.h"
 #include "extents.h"
 
-#if SupportWindows95
 /* for win95 net game support */
 #include "pldghost.h"
 #include "pldnet.h"
-#endif
 
 extern int NormalFrameTime;
 extern unsigned char Null_Name[8];

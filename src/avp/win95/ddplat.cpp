@@ -22,9 +22,8 @@ extern "C" {
 #include "font.h"
 
 #include "kshape.h"
-#include "krender.h"
 #include "chnktexi.h"
-#include "awTexLd.h"
+#include "awtexld.h"
 #include "ffstdio.h"
 
 
@@ -41,11 +40,10 @@ extern "C++"
 #include "pcmenus.h"
 };
 
-#include "alt_tab.h"
+//#include "alt_tab.h"
 
 extern int ScanDrawMode;
 extern int ZBufferMode;
-extern int sine[],cosine[];
 extern IMAGEHEADER ImageHeaderArray[];
 int BackdropImage;
 //#define UseLocalAssert Yes
@@ -58,6 +56,8 @@ int UsingDataBase = 0;
 
 /* HUD globals */
 extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
+
+#if 0 // SBF - unused
 static int TrackerPolyBuffer[25];
 static int ScanlinePolyBuffer[25];
 static int MotionTrackerWidth;
@@ -68,6 +68,8 @@ static RECT MT_BarDestRect;
 static int MT_BlipHeight;
 static int MT_BlipWidth;
 struct LittleMDescTag *MTLittleMPtr;
+#endif
+
 enum HUD_RES_ID HUDResolution;
 
 /* display co-ords, etc. */
@@ -91,7 +93,12 @@ void PlatformSpecificEnteringHUD(void);
 void BLTMotionTrackerToHUD(int scanLineSize);
 void BLTMotionTrackerBlipToHUD(int x, int y, int brightness);
 
+#if 0
 static void BLTDigitToHUD(char digit, int x, int y, int font);
+void BLTPredatorOverlayToHUD(void);
+static void DrawMotionTrackerPoly(void);
+static void BLTPredatorDigitToHUD(char digit, int x, int y, int font);
+#endif
 
 void BLTGunSightToScreen(int screenX, int screenY, enum GUNSIGHT_SHAPE gunsightShape);
 void BLTWeaponToHUD(PLAYER_WEAPON_DATA* weaponPtr);
@@ -99,16 +106,13 @@ int CueWeaponFrameFromSequence(struct WeaponFrameTag *weaponFramePtr, int timeOu
 
 
 
-void BLTPredatorOverlayToHUD(void);
 void BLTPredatorNumericsToHUD(void);
-static void BLTPredatorDigitToHUD(char digit, int x, int y, int font);
 
 void LoadDDGraphic(struct DDGraphicTag *DDGfxPtr, char *Filename);
 
-
-static void DrawMotionTrackerPoly(void);
+#if 0 // SBF - unused
 static void SetupScanlinePoly(char const *filenamePtr, int width);
-
+#endif
 
 extern void D3D_InitialiseMarineHUD(void);
 extern void D3D_BLTMotionTrackerToHUD(int scanLineSize);
@@ -122,22 +126,28 @@ extern void LoadCommonTextures(void);
 ****************************************************************************************KJL*/
 
 
+void LoadDDGraphic(struct DDGraphicTag *DDGfxPtr, char *Filename)
+{
+	fprintf(stderr, "LoadDDGraphic(%p, %s)\n", DDGfxPtr, Filename);
+}
+
 /****************************************
 *          SETTING UP THE HUD           *
 ****************************************/
 void PlatformSpecificInitMarineHUD(void)
 {
-	if ((ScanDrawMode != ScanDrawDirectDraw) && (ZBufferOn==ZBufferMode))
+// SBF
+//	if ((ScanDrawMode != ScanDrawDirectDraw) && (ZBufferOn==ZBufferMode))
+
 	{
 		D3D_InitialiseMarineHUD();
 		LoadCommonTextures();
 //		ChromeImageNumber = CL_LoadImageOnce("Common\\chromelike.RIM",LIO_D3DTEXTURE|LIO_RELATIVEPATH|LIO_RESTORABLE);
 		return;
 	}
-	
-	//SelectGenTexDirectory(ITI_TEXTURE);
 
-	extern unsigned char *ScreenBuffer;
+#if 0 // SBF - unused	
+	//SelectGenTexDirectory(ITI_TEXTURE);
 
 	/* set game mode: different, though for multiplayer game */
 	if(AvP.Network==I_No_Network)
@@ -246,6 +256,7 @@ void PlatformSpecificInitMarineHUD(void)
 
 
 	LoadDDGraphic(&PauseDDInfo,"paused");	
+#endif // SBF
 }
 
 void PlatformSpecificInitPredatorHUD(void)
@@ -268,6 +279,7 @@ void PlatformSpecificInitPredatorHUD(void)
 	}
 	return;
 
+#if 0 // SBF - unused
 	int gfxID = NO_OF_PREDATOR_HUD_GFX;
 	
 	if (ScreenDescriptorBlock.SDB_Width>=640)
@@ -301,6 +313,7 @@ void PlatformSpecificInitPredatorHUD(void)
 		LoadDDGraphic(&E3FontDDInfo,"e3font");	
 	}
   	LoadDDGraphic(&PauseDDInfo,"paused");	
+#endif // SBF
 }
 
 
@@ -323,7 +336,8 @@ void PlatformSpecificInitAlienHUD(void)
 	}
 
 	return;
-	
+
+#if 0 // SBF - unused	
 	int gfxID = NO_OF_ALIEN_HUD_GFX;
 
 	if (ScreenDescriptorBlock.SDB_Width==640)
@@ -358,6 +372,7 @@ void PlatformSpecificInitAlienHUD(void)
 		LoadDDGraphic(&E3FontDDInfo,"e3font");	
 	}
 	LoadDDGraphic(&PauseDDInfo,"paused");	
+#endif // SBF
 }
 
 
@@ -378,7 +393,9 @@ void PlatformSpecificKillMarineHUD(void)
 			AwDestroyBackupTexture( HUDDDInfo[gfxID].hBackup );
 		}
 		if (HUDDDInfo[gfxID].LPDDS)
-			HUDDDInfo[gfxID].LPDDS->Release();
+//			HUDDDInfo[gfxID].LPDDS->Release();
+			fprintf(stderr, "PlatformSpecificKillMarineHUD: HUDDDInfo[gfxID].LPDDS\n");
+			
 		HUDDDInfo[gfxID].LPDDS = 0;
 		HUDDDInfo[gfxID].hBackup = 0;
 	}
@@ -389,7 +406,9 @@ void PlatformSpecificKillMarineHUD(void)
 		AwDestroyBackupTexture( PauseDDInfo.hBackup );
 	}
 	if (PauseDDInfo.LPDDS)
-		PauseDDInfo.LPDDS->Release();	
+//		PauseDDInfo.LPDDS->Release();	
+		fprintf(stderr, "PlatformSpecificKillMarineHUD: PauseDDInfo.LPDDS\n");
+		
 	PauseDDInfo.LPDDS = 0;
 	PauseDDInfo.hBackup = 0;
 	
@@ -399,7 +418,9 @@ void PlatformSpecificKillMarineHUD(void)
 		AwDestroyBackupTexture( E3FontDDInfo.hBackup );
 	}
 	if (E3FontDDInfo.LPDDS)
-		E3FontDDInfo.LPDDS->Release();	
+//		E3FontDDInfo.LPDDS->Release();	
+		fprintf(stderr, "PlatformSpecificKillMarineHUD: E3FontDDInfo.LPDDS\n");
+		
 	E3FontDDInfo.LPDDS = 0;
 	E3FontDDInfo.hBackup = 0;
 }
@@ -417,7 +438,9 @@ void PlatformSpecificKillPredatorHUD(void)
 			AwDestroyBackupTexture( HUDDDInfo[gfxID].hBackup );
 		}
 		if (HUDDDInfo[gfxID].LPDDS)
-			HUDDDInfo[gfxID].LPDDS->Release();
+//			HUDDDInfo[gfxID].LPDDS->Release();
+			fprintf(stderr, "PlatformSpecificKillPredatorHUD: HUDDDInfo[gfxID].LPDDS\n");
+			
 		HUDDDInfo[gfxID].LPDDS = 0;
 		HUDDDInfo[gfxID].hBackup = 0;
 	}
@@ -428,7 +451,9 @@ void PlatformSpecificKillPredatorHUD(void)
 		AwDestroyBackupTexture( PauseDDInfo.hBackup );
 	}
 	if (PauseDDInfo.LPDDS)
-		PauseDDInfo.LPDDS->Release();	
+//		PauseDDInfo.LPDDS->Release();	
+		fprintf(stderr, "PlatformSpecificKillPredatorHUD: PauseDDInfo.LPDDS\n");
+		
 	PauseDDInfo.LPDDS = 0;
 	PauseDDInfo.hBackup = 0;
 	
@@ -438,7 +463,9 @@ void PlatformSpecificKillPredatorHUD(void)
 		AwDestroyBackupTexture( E3FontDDInfo.hBackup );
 	}
 	if (E3FontDDInfo.LPDDS)
-		E3FontDDInfo.LPDDS->Release();	
+//		E3FontDDInfo.LPDDS->Release();	
+		fprintf(stderr, "PlatformSpecificKillPredatorHUD: E3FontDDInfo.LPDDS\n");
+		
 	E3FontDDInfo.LPDDS = 0;
 	E3FontDDInfo.hBackup = 0;
 }
@@ -455,7 +482,9 @@ void PlatformSpecificKillAlienHUD(void)
 			AwDestroyBackupTexture( HUDDDInfo[gfxID].hBackup );
 		}
 		if (HUDDDInfo[gfxID].LPDDS)
-			HUDDDInfo[gfxID].LPDDS->Release();
+//			HUDDDInfo[gfxID].LPDDS->Release();
+			fprintf(stderr, "PlatformSpecificKillAlienHUD: HUDDDInfo[gfxID].LPDDS\n");
+			
 		HUDDDInfo[gfxID].LPDDS = 0;
 		HUDDDInfo[gfxID].hBackup = 0;
 	}
@@ -466,7 +495,9 @@ void PlatformSpecificKillAlienHUD(void)
 		AwDestroyBackupTexture( PauseDDInfo.hBackup );
 	}
 	if (PauseDDInfo.LPDDS)
-		PauseDDInfo.LPDDS->Release();	
+//		PauseDDInfo.LPDDS->Release();	
+		fprintf(stderr, "PlatformSpecificKillAlienHUD: PauseDDInfo.LPDDS\n");
+		
 	PauseDDInfo.LPDDS = 0;
 	PauseDDInfo.hBackup = 0;
 	
@@ -476,7 +507,9 @@ void PlatformSpecificKillAlienHUD(void)
 		AwDestroyBackupTexture( E3FontDDInfo.hBackup );
 	}
 	if (E3FontDDInfo.LPDDS)
-		E3FontDDInfo.LPDDS->Release();	
+//		E3FontDDInfo.LPDDS->Release();	
+		fprintf(stderr, "PlatformSpecificKillAlienHUD: E3FontDDInfo.LPDDS\n");
+		
 	E3FontDDInfo.LPDDS = 0;
 	E3FontDDInfo.hBackup = 0;
 }
@@ -587,9 +620,11 @@ extern void BLTMarineNumericsToHUD(enum MARINE_HUD_DIGIT digitsToDraw)
     }
     while(digit--);
 }	
+
+#if 0 /* SBF - TODO: remove */
 static void BLTDigitToHUD(char digit, int x, int y, int font)
 {
-	HRESULT ddrval;
+//	HRESULT ddrval;
 	struct HUDFontDescTag *FontDescPtr;
  	RECT srcRect;
 	int gfxID;
@@ -639,7 +674,7 @@ static void BLTDigitToHUD(char digit, int x, int y, int font)
 	srcRect.bottom =srcRect.top + FontDescPtr->Height;
 	srcRect.left = FontDescPtr->XOffset;
    	srcRect.right = srcRect.left + FontDescPtr->Width;
-	   
+/*	   
    	ddrval = lpDDSBack->BltFast
    	(
    		x,y,
@@ -653,8 +688,10 @@ static void BLTDigitToHUD(char digit, int x, int y, int font)
    		ReleaseDirect3D();
    		exit(0x666004);
 	}
+*/
+	fprintf(stderr, "BLTDigitToHUD(%d, %d, %d, %d)\n", digit, x, y, font);	
 }		  
-
+#endif
 
 
 void BLTGunSightToScreen(int screenX, int screenY, enum GUNSIGHT_SHAPE gunsightShape)
@@ -665,6 +702,10 @@ void BLTGunSightToScreen(int screenX, int screenY, enum GUNSIGHT_SHAPE gunsightS
 		return;
 	}
 }
+
+
+#if 0 /* SBF - TODO: remove this directdraw code */
+
 
 /*KJL************************
 * PREDATOR DRAWING ROUTINES *
@@ -680,9 +721,10 @@ void BLTPredatorOverlayToHUD(void)
 		EndD3DScene();
 	}
 
-  	HRESULT ddrval;
+//  	HRESULT ddrval;
 	if ((ScreenDescriptorBlock.SDB_Height ==200) ||(ScreenDescriptorBlock.SDB_Width ==320) )
 	{  	
+/*
 	   	ddrval = lpDDSBack->BltFast
 	   	(
 	   		0,
@@ -699,9 +741,12 @@ void BLTPredatorOverlayToHUD(void)
 	   		&(HUDDDInfo[PREDATOR_HUD_GFX_BOTTOM].SrcRect),
 	   		DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY
 	   	);
+*/	   	
+		fprintf(stderr, "BLTPredatorOverlayToHUD: blit 1\n");
 	}	
 	else if ((ScreenDescriptorBlock.SDB_Height ==480) ||(ScreenDescriptorBlock.SDB_Width ==640) )
 	{  	
+/*
 	   	ddrval = lpDDSBack->BltFast
 	   	(
 	   		1,
@@ -718,6 +763,8 @@ void BLTPredatorOverlayToHUD(void)
 	   		&(HUDDDInfo[PREDATOR_HUD_GFX_BOTTOM].SrcRect),
 	   		DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY
 	   	);
+*/
+		fprintf(stderr, "BLTPredatorOverlayToHUD: blit 2\n");
 	}	
 }
 void BLTPredatorNumericsToHUD(void)
@@ -753,7 +800,7 @@ void BLTPredatorNumericsToHUD(void)
 }	
 static void BLTPredatorDigitToHUD(char digit, int x, int y, int font)
 {
-	HRESULT ddrval;
+//	HRESULT ddrval;
  	RECT srcRect;
 
 	srcRect.top = digit*12;
@@ -761,7 +808,8 @@ static void BLTPredatorDigitToHUD(char digit, int x, int y, int font)
 	
    	srcRect.left = 0;
    	srcRect.right = HUDDDInfo[font].SrcRect.right;
-	   
+
+/*	   
    	ddrval = lpDDSBack->BltFast
    	(
    		x,
@@ -776,7 +824,8 @@ static void BLTPredatorDigitToHUD(char digit, int x, int y, int font)
    		ReleaseDirect3D();
    		exit(0x666004);
 	}
-	
+*/
+	fprintf(stderr, "BLTPredatorDigitToHUD(%d, %d, %d, %d)\n", digit, x, y, font);	
 }		  
 
 /*KJL*********************
@@ -796,9 +845,10 @@ extern void BLTAlienOverlayToHUD(void)
 	/* KJL 10:24:49 7/17/97 - no overlay, please */
 	return;
 
-	HRESULT ddrval;
+//	HRESULT ddrval;
 	if ((ScreenDescriptorBlock.SDB_Height ==200)&&(ScreenDescriptorBlock.SDB_Width ==320))
 	{
+/*
 	 	ddrval = lpDDSBack->BltFast
 		(
 		  	0,
@@ -831,9 +881,12 @@ extern void BLTAlienOverlayToHUD(void)
 			&(HUDDDInfo[ALIEN_HUD_GFX_BOTTOM].SrcRect),
 	        DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY
 	    );
+*/
+		fprintf(stderr, "BLTAlienOverlayToHUD: blit 1\n");	    
 	}
 	else if ((ScreenDescriptorBlock.SDB_Height ==480)&&(ScreenDescriptorBlock.SDB_Width ==640))
 	{
+/*
 	 	ddrval = lpDDSBack->BltFast
 		(
 		  	0,
@@ -866,6 +919,8 @@ extern void BLTAlienOverlayToHUD(void)
 			&(HUDDDInfo[ALIEN_HUD_GFX_BOTTOM].SrcRect),
 	        DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY
 	    );
+*/
+		fprintf(stderr, "BLTAlienOverlayToHUD: blit 2\n");
 	}
 
 }
@@ -917,6 +972,7 @@ void BLTAlienNumericsToHUD(void)
 
 void BLTPausedToScreen(void)
 {
+/*
 	lpDDSBack->BltFast
 	(
 	  	(ScreenDescriptorBlock.SDB_Width-PauseDDInfo.SrcRect.right)/2,
@@ -925,7 +981,8 @@ void BLTPausedToScreen(void)
 		&(PauseDDInfo.SrcRect),
         DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY
     );
-	
+*/
+	fprintf(stderr, "BLTPausedToScreen()\n");	
 }
 
 
@@ -1016,7 +1073,8 @@ void MinimizeAllDDGraphics(void)
 		if (HUDDDInfo[gfxID].LPDDS)
 		{
 			ATRemoveSurface(HUDDDInfo[gfxID].LPDDS);
-			HUDDDInfo[gfxID].LPDDS->Release();
+//			HUDDDInfo[gfxID].LPDDS->Release();
+			fprintf(stderr, "MinimizeAllDDGraphics: HUDDDInfo[gfxID].LPDDS\n");
 			HUDDDInfo[gfxID].LPDDS = 0;
 		}
 	}
@@ -1024,14 +1082,16 @@ void MinimizeAllDDGraphics(void)
 	if (PauseDDInfo.LPDDS)
 	{
 		ATRemoveSurface(PauseDDInfo.LPDDS);
-		PauseDDInfo.LPDDS->Release();	
+//		PauseDDInfo.LPDDS->Release();
+		fprintf(stderr, "MinimizeAllDDGraphics: PauseDDInfo.LPDDS\n");	
 		PauseDDInfo.LPDDS = 0;
 	}
 	
 	if (E3FontDDInfo.LPDDS)
 	{
 		ATRemoveSurface(E3FontDDInfo.LPDDS);
-		E3FontDDInfo.LPDDS->Release();	
+//		E3FontDDInfo.LPDDS->Release();	
+		fprintf(stderr, "MinimizeAllDDGraphics: E3FontDDInfo.LPDDS\n");
 		E3FontDDInfo.LPDDS = 0;
 	}
 }
@@ -1070,82 +1130,6 @@ void RestoreAllDDGraphics(void)
 	}
 }
 	
-
-void ReleaseHUDGraphic(HUDGRAPHIC* hgptr)
-{
-	GLOBALASSERT(hgptr);
-	GLOBALASSERT(hgptr->data);
-	ReleaseDDSurface((void*)(*(int*)hgptr->data));
-}
-
-
-
-/*
-	Windows externs. See win_func
-*/
-
-
-void BLTGraphicToScreen(HUDGRAPHIC* hgptr)
-{
-	/*
-		 sets up the drawing of general hud graphics. Bltted
-		 to full screen if there is no width and heiht information in
-		 the DD HUDGRAPHIC
-	*/
-
-	RECT destRect;
-
-	GLOBALASSERT(hgptr != NULL);
-
-	GLOBALASSERT(1 > 0);
-
-	HRESULT ddrval;
-
-	LPDIRECTDRAWSURFACE wdds = *((LPDIRECTDRAWSURFACE*)hgptr->data);
-
-	GLOBALASSERT(hgptr->srcRect->top < hgptr->srcRect->bottom);
-	GLOBALASSERT(hgptr->srcRect->left < hgptr->srcRect->right);
-
-#if 0
-	textprint("%d TOP %d BOTTOM\n", hgptr->srcRect->top , hgptr->srcRect->bottom); 
-	textprint("%d LEFT %d RIGHT\n", hgptr->srcRect->left , hgptr->srcRect->right); 
-
-	textprint("/n%d TOP %d BOTTOM\n", screenRect.top , screenRect.bottom); 
-	textprint("%d LEFT %d RIGHT\n", screenRect.left , screenRect.right); 
-
-	WaitForReturn();
-#endif
-
-
-	if((hgptr->width == 0) || (hgptr->height == 0))
-		{	
-			ddrval = lpDDSBack->Blt(NULL, wdds, hgptr->srcRect, DDBLT_WAIT, NULL);
-		}
-	else		
-		{
-			/* fill in the structure for the dest rect*/
-	
-			destRect.top = hgptr->ydest;
-			destRect.bottom = hgptr->ydest + hgptr->height;
-			
-			destRect.left = hgptr->xdest;
-			destRect.right = hgptr->xdest + hgptr->width;
-			
-			ddrval = lpDDSBack->Blt(&destRect, wdds, hgptr->srcRect, DDBLT_WAIT, NULL);
-			
-		}
-
-	if(ddrval != DD_OK)
-		{
-			ReleaseDirect3D();
-			exit(0x666009);
-		}
-
-}
-
-
-
-
 
 /************************** FONTS *************************/
 /**********************************************************/
@@ -1186,8 +1170,7 @@ PFFONT AvpFonts[] =
 	 	11,	 // font height
 	 	59,	 // num chars
 		I_FONT_UC_NUMERIC
- 	},
-
+ 	}
 };
 
 extern int VideoModeColourDepth;
@@ -1262,6 +1245,8 @@ void * FontLock(PFFONT const * pFont, unsigned * pPitch)
 	GLOBALASSERT(pFont);
 	GLOBALASSERT(pFont->data);
 	
+	fprintf(stderr, "FontLock(%p, %p)\n", pFont, pPitch);
+/*	
 	DDSURFACEDESC ddsd;
 	memset(&ddsd,0,sizeof ddsd);
 	ddsd.dwSize = sizeof ddsd;
@@ -1270,6 +1255,8 @@ void * FontLock(PFFONT const * pFont, unsigned * pPitch)
 	
 	*pPitch = ddsd.lPitch;
 	return ddsd.lpSurface;
+*/
+	return NULL;	
 }
 
 void FontUnlock(PFFONT const * pFont)
@@ -1277,8 +1264,9 @@ void FontUnlock(PFFONT const * pFont)
 	GLOBALASSERT(pFont);
 	GLOBALASSERT(pFont->data);
 	
-	HRESULT hResult = pFont->data->Unlock(NULL);
-	GLOBALASSERT(DD_OK == hResult);
+//	HRESULT hResult = pFont->data->Unlock(NULL);
+//	GLOBALASSERT(DD_OK == hResult);
+	fprintf(stderr, "FontUnlock(%p)\n", pFont);
 }
 
 
@@ -1339,7 +1327,7 @@ void FillCharacterSlot(int u, int v,
 
 int BLTFontOffsetToHUD(PFFONT* font , int xdest, int ydest, int offset)
 {
-	HRESULT ddrval;
+//	HRESULT ddrval;
 
 	RECT *rect = &(font->srcRect[offset]);
 
@@ -1349,7 +1337,7 @@ int BLTFontOffsetToHUD(PFFONT* font , int xdest, int ydest, int offset)
 	if(rect->bottom - rect->top <= 0)
 		return(rect->right - rect->left	+ 1);
 
-
+/*
   	ddrval = lpDDSBack->BltFast(xdest, ydest,	font->data, rect,	DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY);
   	
   	LOGDXERR(ddrval);
@@ -1361,22 +1349,24 @@ int BLTFontOffsetToHUD(PFFONT* font , int xdest, int ydest, int offset)
 			finiObjects();
 			exit(ddrval);
 		}
-
+*/
+	fprintf(stderr, "BLTFontOffsetToHUD(%p, %d, %d, %d)\n", font, xdest, ydest, offset);
+	
 	return(font->srcRect[offset].right - font->srcRect[offset].left);
 }
 
 
 
+#endif // SBF
 
 
 
 
 
-
-#if 1
 void YClipMotionTrackerVertices(struct VertexTag *v1, struct VertexTag *v2);
 void XClipMotionTrackerVertices(struct VertexTag *v1, struct VertexTag *v2);
 
+#if 0 /* SBF - not used */
 static void DrawMotionTrackerPoly(void)
 {
 	struct VertexTag vertex[4];
@@ -1475,6 +1465,7 @@ static void DrawMotionTrackerPoly(void)
 		Draw_Item_2dTexturePolygon(TrackerPolyBuffer);
 	}
 }
+#endif /* SBF */
 
 void YClipMotionTrackerVertices(struct VertexTag *v1, struct VertexTag *v2)
 {
@@ -1549,6 +1540,7 @@ void XClipMotionTrackerVertices(struct VertexTag *v1, struct VertexTag *v2)
 	}
 }				    
 
+#if 0 // SBF - unused
 static void SetupScanlinePoly(char const *filenamePtr, int width)
 {
 	int imageNumber;
@@ -1573,87 +1565,6 @@ static void SetupScanlinePoly(char const *filenamePtr, int width)
 
 	ScanlinePolyBuffer[20] = Term;
 }
-
-
-
-#endif
-
-#define MAX_MESSAGE_LENGTH 50
-#define MESSAGE_FONT_WIDTH 5
-#define MESSAGE_FONT_HEIGHT 8
-extern void DrawOnScreenMessage(unsigned char *messagePtr)
-{
-	RECT srcRect;
-	int destX,destY;
-	int lengthOfMessage=0;
-	int messageFontHeight,messageFontWidth;
-
-	{
-		unsigned char *textPtr = messagePtr;
-
-		while(*textPtr++)
-		{
-			lengthOfMessage++;
-			if(lengthOfMessage>MAX_MESSAGE_LENGTH)
-			{
-				/* message is too long; this could indicate a corrupt ptr */
-				LOCALASSERT(0);
-				return;
-			}
-		}
-	}
-	if (HUDResolution == HUD_RES_LO)
-	{
-		messageFontWidth = MESSAGE_FONT_WIDTH;
-		messageFontHeight = MESSAGE_FONT_HEIGHT;
-		srcRect.top = 0;
-		srcRect.bottom = messageFontHeight;
-	}
-	else
-	{
-		messageFontWidth = MESSAGE_FONT_WIDTH*2;
-		messageFontHeight = MESSAGE_FONT_HEIGHT*2;
-		srcRect.left = 0;
-		srcRect.right = messageFontWidth;
-	}
-
-	destX = (ScreenDescriptorBlock.SDB_Width - (messageFontWidth+1)*lengthOfMessage)/2;
-	destX &= 0xfffffffe;
-	destY = ScreenDescriptorBlock.SDB_Height/2 - messageFontHeight*3;
-	
-
-	while(*messagePtr)
-	{
-		signed int letter;
-
-		letter = *messagePtr++;
-		letter -= 'A';
-
-		/* needs changing for other languages! */
-		if (letter>=0 && letter<=26)
-		{
-			if (HUDResolution == HUD_RES_LO)
-			{
-			   	srcRect.left = letter*messageFontWidth;
-			  	srcRect.right = srcRect.left+messageFontWidth;
-			}
-			else
-			{
-			   	srcRect.top = letter*messageFontHeight;
-			  	srcRect.bottom = srcRect.top+messageFontHeight;
-			}
-
-		   	lpDDSBack->BltFast
-		   	(
-		   		destX,destY,
-		   		E3FontDDInfo.LPDDS,
-		   		&srcRect,
-		   		DDBLTFAST_WAIT | DDBLTFAST_SRCCOLORKEY
-		   	);
-		}
-		destX += messageFontWidth+2;
-	}
-}
-
+#endif // SBF
 
 }; // extern 

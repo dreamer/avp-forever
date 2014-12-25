@@ -5,7 +5,13 @@
 #include "stratdef.h"
 #include "gamedef.h"
 #include "bh_types.h"
+#include "bh_marin.h"
+#include "game.h"
 #include "gameplat.h"
+#include "lighting.h"
+#include "messagehistory.h"
+#include "particle.h"
+#include "pldnet.h"
 #define UseLocalAssert Yes
 #include "ourasert.h"
 
@@ -13,16 +19,20 @@
 #include "bh_far.h"
 #include "pheromon.h"
 #include "huddefs.h"
-#include "hudgfx.h"
+#include "hud.h"
+//#include "hudgfx.h"
+#include "fmv.h"
 #include "font.h"
 #include "bh_gener.h"
 #include "pvisible.h"
+#include "system.h"
 
 #include "projload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
 #include "chnkload.hpp" // c++ header which ignores class definitions/member functions if __cplusplus is not defined ?
 
 #include "ffstdio.h" // fast file stdio
 #include "avp_menus.h"
+#include "cdplayer.h"
 
 /*------------Patrick 1/6/97---------------
 New sound system 
@@ -31,7 +41,7 @@ New sound system
 #include "progress_bar.h"
 #include "bh_rubberduck.h"
 #include "game_statistics.h"
-#include "CDTrackSelection.h"
+#include "cdtrackselection.h"
 
 
 // EXTERNS
@@ -82,7 +92,7 @@ WINSCALEXY ExtentXYSubWindow;
 
 // static 
 
-int ReadModuleMapList(MODULEMAPBLOCK *mmbptr);
+static int ReadModuleMapList(MODULEMAPBLOCK *mmbptr);
 RIFFHANDLE env_rif = INVALID_RIFFHANDLE;
 RIFFHANDLE player_rif = INVALID_RIFFHANDLE;
 RIFFHANDLE alien_weapon_rif = INVALID_RIFFHANDLE;
@@ -257,7 +267,6 @@ int AVP_ChangeDisplayMode
 	/* JH 3/6/97 - don't quit kill off the images - still keep buffers in system memory
 	   that are not linked to direct draw */
     MinimizeAllImages();
-	MinimizeAllDDGraphics();
     ReleaseDirect3DNotDDOrImages();
 
     finiObjectsExceptDD();
@@ -312,9 +321,9 @@ int AVP_ChangeDisplayMode
 		and other request modes such as
 		zbuffering.
 	*/
-
+/*
 	SetVideoMode[VideoMode]();
-
+*/
 
 
     return TRUE;
@@ -399,29 +408,29 @@ void InitCharacter()
 				{
 					case I_Marine:
 						{
-							marine_weapon_rif = avp_load_rif("avp_huds\\marwep.rif");
+							marine_weapon_rif = avp_load_rif("avp_huds/marwep.rif");
 							Set_Progress_Bar_Position(PBAR_HUD_START+PBAR_HUD_INTERVAL*.25);
-							player_rif = avp_load_rif("avp_huds\\marine.rif");
+							player_rif = avp_load_rif("avp_huds/marine.rif");
 							break;
 						}
 					case I_Predator:
 						{
-							predator_weapon_rif = avp_load_rif("avp_huds\\pred_hud.rif");
+							predator_weapon_rif = avp_load_rif("avp_huds/pred_hud.rif");
 							Set_Progress_Bar_Position(PBAR_HUD_START+PBAR_HUD_INTERVAL*.25);
-							player_rif = avp_load_rif("avp_huds\\predator.rif");
+							player_rif = avp_load_rif("avp_huds/predator.rif");
 							break;
 						}
 
 					case I_Alien:
 						{
 							#if ALIEN_DEMO
-							alien_weapon_rif = avp_load_rif("alienavp_huds\\alien_hud.rif");
+							alien_weapon_rif = avp_load_rif("alienavp_huds/alien_hud.rif");
 							Set_Progress_Bar_Position(PBAR_HUD_START+PBAR_HUD_INTERVAL*.25);
-							player_rif = avp_load_rif("alienavp_huds\\alien.rif");
+							player_rif = avp_load_rif("alienavp_huds/alien.rif");
 							#else
-							alien_weapon_rif = avp_load_rif("avp_huds\\alien_hud.rif");
+							alien_weapon_rif = avp_load_rif("avp_huds/alien_hud.rif");
 							Set_Progress_Bar_Position(PBAR_HUD_START+PBAR_HUD_INTERVAL*.25);
-							player_rif = avp_load_rif("avp_huds\\alien.rif");
+							player_rif = avp_load_rif("avp_huds/alien.rif");
 							#endif
 							break;
 						}
@@ -440,12 +449,12 @@ void InitCharacter()
 				// set up a multiplayer game - here becuse we might end
 				// up with a cooperative game
 				//load all weapon rifs
-				marine_weapon_rif = avp_load_rif("avp_huds\\marwep.rif");
-				predator_weapon_rif = avp_load_rif("avp_huds\\pred_hud.rif");
-				alien_weapon_rif = avp_load_rif("avp_huds\\alien_hud.rif");
+				marine_weapon_rif = avp_load_rif("avp_huds/marwep.rif");
+				predator_weapon_rif = avp_load_rif("avp_huds/pred_hud.rif");
+				alien_weapon_rif = avp_load_rif("avp_huds/alien_hud.rif");
 				
 				Set_Progress_Bar_Position(PBAR_HUD_START+PBAR_HUD_INTERVAL*.25);
-				player_rif = avp_load_rif("avp_huds\\multip.rif");
+				player_rif = avp_load_rif("avp_huds/multip.rif");
 			}
 	}
 	Set_Progress_Bar_Position(PBAR_HUD_START+PBAR_HUD_INTERVAL*.5);
@@ -459,13 +468,13 @@ void InitCharacter()
 	
 	
 	if(alien_weapon_rif!=INVALID_RIFFHANDLE)
-		copy_rif_data(alien_weapon_rif,CCF_LOAD_AS_HIERARCHY_IF_EXISTS|CCF_IMAGEGROUPSET+CCF_DONT_INITIALISE_TEXTURES,PBAR_HUD_START+PBAR_HUD_INTERVAL*.5,PBAR_HUD_INTERVAL*.25);
+		copy_rif_data(alien_weapon_rif,CCF_LOAD_AS_HIERARCHY_IF_EXISTS|CCF_IMAGEGROUPSET|CCF_DONT_INITIALISE_TEXTURES,PBAR_HUD_START+PBAR_HUD_INTERVAL*.5,PBAR_HUD_INTERVAL*.25);
 
 	if(marine_weapon_rif!=INVALID_RIFFHANDLE)
-		copy_rif_data(marine_weapon_rif,CCF_LOAD_AS_HIERARCHY_IF_EXISTS|CCF_IMAGEGROUPSET+CCF_DONT_INITIALISE_TEXTURES,PBAR_HUD_START+PBAR_HUD_INTERVAL*.5,PBAR_HUD_INTERVAL*.25);
+		copy_rif_data(marine_weapon_rif,CCF_LOAD_AS_HIERARCHY_IF_EXISTS|CCF_IMAGEGROUPSET|CCF_DONT_INITIALISE_TEXTURES,PBAR_HUD_START+PBAR_HUD_INTERVAL*.5,PBAR_HUD_INTERVAL*.25);
 
 	if(predator_weapon_rif!=INVALID_RIFFHANDLE)
-		copy_rif_data(predator_weapon_rif,CCF_LOAD_AS_HIERARCHY_IF_EXISTS|CCF_IMAGEGROUPSET+CCF_DONT_INITIALISE_TEXTURES,PBAR_HUD_START+PBAR_HUD_INTERVAL*.5,PBAR_HUD_INTERVAL*.25);
+		copy_rif_data(predator_weapon_rif,CCF_LOAD_AS_HIERARCHY_IF_EXISTS|CCF_IMAGEGROUPSET|CCF_DONT_INITIALISE_TEXTURES,PBAR_HUD_START+PBAR_HUD_INTERVAL*.5,PBAR_HUD_INTERVAL*.25);
 
 	Set_Progress_Bar_Position(PBAR_HUD_START+PBAR_HUD_INTERVAL);
 	//copy_chunks_from_environment(0);
@@ -576,71 +585,8 @@ void RestartLevel()
 	}
 }
 
-
-ELO Gen1 = {"GEN1"};
-ELO Gen2 = {"GEN2"};
-ELO Gen3 = {"GEN3"};
-ELO Gen4 = {"GEN4"};
-ELO Medlab = { "MEDLAB"};
-ELO Cmc1 = {"CMC1"};
-ELO Cmc2 = {"CMC2"};
-ELO Cmc3 = {"CMC3"};
-ELO Cmc4 = {"CMC4"};
-ELO Cmc5 = {"CMC5"};
-
-ELO Cmc6 = {"CMC6"};
-ELO Sp1 =	{"SP1"};
-ELO Sp2 =	{"SP2"};
-ELO Sp3 =	{"SP3"};
-ELO Rnd1 = {"RND1"};
-ELO Rnd2 = {"RND2"};
-ELO Rnd3 = {"RND3"};
-ELO Rnd4 = {"RND4"};
-ELO Mps1 = {"MPS01"};
-ELO Mps2 = {"MPS02"};
-
-ELO Mps3 = {"MPS3"};
-ELO Mps4 = {"MPS4"};
-ELO Surface = {"SURFACE"};
-ELO Entrance = {"ENTRANCE"};
-ELO Dm1 = {"VERTIGO"};	
-ELO	Dm2 = {"TOWERS"};
-ELO	Dm3 = {"INVASION"};
-ELO	Dm4 = {"SHAFTED"};
-ELO	Dm5 = {"RANCOUR"};
-ELO	Dm6 = {"DM6"};
-ELO	Dm7 = {"DM7"};
-ELO	Dm8 = {"DM8"};
-ELO	Dm9 = {"DM9"};
-ELO	Dm10 = {"DM10"};
-
-
-
-
- // Modified by Edmond for Mplayer Demo
- ELO* Env_List[I_Num_Environments] = 
- {
- #ifndef MPLAYER_DEMO
- 	&Gen1,		&Gen2,
- 	&Gen3,		&Gen4,
- 	&Medlab, 	&Cmc1,
- 	&Cmc2,		&Cmc3,
- 	&Cmc4,		&Cmc5,  // 10
- 	&Cmc6, 		&Sp1,
- 	&Sp2,		&Sp3,
- 	&Rnd1, 		&Rnd2,
- 	&Rnd3,		&Rnd4,
- 	&Mps1,		&Mps2,	// 20
- 	&Mps3, 		&Mps4,
- 	&Surface, 	&Entrance,
- 	&Dm1, 		&Dm2,
- 	&Dm3, 		&Dm4,
- 	&Dm5,		&Dm6,	// 30
- 	&Dm7, 		&Dm8,
- 	&Dm9,
- #endif
- 				&Dm10
-  };
+static ELO JunkEnv; /* This is not needed */
+ELO* Env_List[I_Num_Environments] = { &JunkEnv };
 
 /**** Construct filename and go for it ***************/
 
@@ -699,7 +645,7 @@ void ProcessSystemObjects()
 	#endif
 }
 
-int ReadModuleMapList(MODULEMAPBLOCK *mmbptr)
+static int ReadModuleMapList(MODULEMAPBLOCK *mmbptr)
 {
 	MODULE m_temp;
 
@@ -795,8 +741,8 @@ void IntegrateNewEnvironment()
 }
 
 
-const char GameDataDirName[20] = {"AVP_RIFS"};
-const char FileNameExtension[5] =  {".RIF"};
+const char GameDataDirName[20] = {"avp_rifs"};
+const char FileNameExtension[5] =  {".rif"};
  
 void LoadRifFile()
 {
@@ -831,17 +777,13 @@ void LoadRifFile()
 				
 	  };
 
-//	#ifdef __WATCOMC__
-//	#pragma message("Note: use copy_chunks_from_envronment(CCF_ENVIRONMENT) iff a character rif is loaded")
-//	#endif
-
 	#if MaxImageGroups>1
 	SetCurrentImageGroup(2); // FOR ENV
 	#endif
 	copy_rif_data(env_rif,CCF_ENVIRONMENT,PBAR_LEVEL_START+PBAR_LEVEL_INTERVAL*.4,PBAR_LEVEL_INTERVAL*.6);
 	//setup_shading_tables();
-	//LoadBackdropImage();
 }
+
 int Destroy_CurrentEnvironment(void)
 {
 	// RWH destroys all en specific data

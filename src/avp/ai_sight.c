@@ -9,19 +9,19 @@
 #include "dynblock.h"
 #include "dynamics.h"
 #include "los.h"
-#include "ShowCmds.h"
+#include "showcmds.h"
 #include "equipmnt.h"
 #include "bh_marin.h"
 #include "bh_xeno.h"
 #include "targeting.h"
 #include "bh_weap.h"
+#include "bh_agun.h"
 
-#include "AI_Sight.h"
+#include "ai_sight.h"
 
 #define UseLocalAssert Yes
 #include "ourasert.h"
 
-extern int MarineSight_FrustrumReject(STRATEGYBLOCK *sbPtr,VECTORCH *localOffset,STRATEGYBLOCK *target);
 extern int FrisbeeSight_FrustrumReject(STRATEGYBLOCK *sbPtr,VECTORCH *localOffset,STRATEGYBLOCK *target);
 
 int NPCCanSeeTarget(STRATEGYBLOCK *sbPtr, STRATEGYBLOCK *target, int viewRange)

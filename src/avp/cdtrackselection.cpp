@@ -4,12 +4,11 @@ extern "C"
 #include "ourasert.h"
 #include "psndplat.h"
 #include "dxlog.h"
-#include "CD_player.h"
+#include "cd_player.h"
 #include "avp_menus.h"
 #include "gamedef.h"
 
-#include "AvP_EnvInfo.h"
-#include "dxlog.h"
+#include "avp_envinfo.h"
 };
 
 #include "list_tem.hpp"
@@ -32,13 +31,13 @@ void EmptyCDTrackList()
 		while(LevelCDTracks[i].size()) LevelCDTracks[i].delete_first_entry();
 	}
 
-	for(i=0;i<3;i++)
+	for(int i=0;i<3;i++)
 	{
 		while(MultiplayerCDTracks[i].size()) MultiplayerCDTracks[i].delete_first_entry();
 	}
 }
 
-#define CDTrackFileName "CD Tracks.txt"
+#define CDTrackFileName "cd tracks.txt"
 
 
 static void ExtractTracksForLevel(char* & buffer,List<int> & track_list)
@@ -90,7 +89,7 @@ static void ExtractTracksForLevel(char* & buffer,List<int> & track_list)
 		}
 		else
 		{
-			*buffer++;
+			buffer++;
 		}
 	}
 
@@ -113,8 +112,9 @@ void LoadCDTrackList()
 	//clear out the old list first
 	EmptyCDTrackList();
 
-	HANDLE file=CreateFile(CDTrackFileName,GENERIC_READ, 0, 0, OPEN_EXISTING,FILE_FLAG_RANDOM_ACCESS, 0);
-	if(file==INVALID_HANDLE_VALUE)
+	FILE *file = OpenGameFile(CDTrackFileName, FILEMODE_READONLY, FILETYPE_OPTIONAL);
+	
+	if(file==NULL)
 	{
 		LOGDXFMT(("Failed to open %s",CDTrackFileName));
 		return;
@@ -122,13 +122,15 @@ void LoadCDTrackList()
 
 	char* buffer;
 	int file_size;
-	unsigned long bytes_read;
 
+	fseek(file, 0, SEEK_END);
+	file_size = ftell(file);
+	rewind(file);
+	
 	//copy the file contents into a buffer
-	file_size= GetFileSize(file,0);
 	buffer=new char[file_size+1];
-	ReadFile(file,buffer,file_size,&bytes_read,0);
-	CloseHandle(file);
+	fread(buffer, 1, file_size, file);
+	fclose(file);
 	
 	char* bufferptr=buffer;
 
@@ -140,7 +142,7 @@ void LoadCDTrackList()
 	}
 	
 	//now the level tracks
-	for(i=0 ;i<AVP_ENVIRONMENT_END_OF_LIST;i++)
+	for(int i=0 ;i<AVP_ENVIRONMENT_END_OF_LIST;i++)
 	{
 		ExtractTracksForLevel(bufferptr,LevelCDTracks[i]);
 	}

@@ -246,7 +246,9 @@ struct Object_Animation_Frame
 {
 	ChunkQuat orientation;
 	ChunkVectorInt transform;
-	signed long at_frame_no;  //frame start time (0-65535)
+	
+	// SBF: 64HACK - changed long to int32_t as this structure isn't serialized correctly
+	int32_t at_frame_no;  //frame start time (0-65535)
 	int flags;
 
 	int get_sound_index(){return ((flags & HierarchyFrame_SoundIndexMask )>>24);}

@@ -10,14 +10,8 @@
 #include "bh_types.h"
 #include "pvisible.h"
 
-
-
-#if SupportWindows95
-#include "krender.h" /* KJL 10:48:25 02/05/97 */
 #include "kzsort.h"
 #include "kshape.h"
-#endif
-
 
 /*
 
@@ -492,8 +486,6 @@ void ShapePointsInstr(SHAPEINSTR *shapeinstrptr)
  together, divides the summed product with another integer and then returns
  the result of that divide, which is also an integer.
 
- It is not inlined for Watcom C, although the functions it calls ARE.
-
 */
 
 int WideMul2NarrowDiv(int a, int b, int c, int d, int e)
@@ -511,88 +503,6 @@ int WideMul2NarrowDiv(int a, int b, int c, int d, int e)
 	return NarrowDivide(&f, e);
 
 }
-
-
-
-
-
-/*
-
- Square Root
-
- Returns the Square Root of a 32-bit number
-
-*/
-
-#if (SupportFPMathsFunctions || SupportFPSquareRoot)
-#else
-
-
-int SqRoot32(int A)
-
-{
-
-	unsigned int edx = A;
-	unsigned int ecx;
-
-	unsigned int ax = 0;
-	unsigned int bx = 0;
-	unsigned int di = 0;
-
-
-	for(ecx = 15; ecx!=0; ecx--) {
-
-		bx <<= 1;
-		if(edx & 0x80000000) bx |= 1;
-		edx <<= 1;
-
-		bx <<= 1;
-		if(edx & 0x80000000) bx |= 1;
-		edx <<= 1;
-
-		ax += ax;
-		di =  ax;
-		di += di;
-
-		if(bx > di) {
-
-			di++;
-			ax++;
-
-			bx -= di;
-
-		}
-
-	}
-
-	bx <<= 1;
-	if(edx & 0x80000000) bx |= 1;
-	edx <<= 1;
-
-	bx <<= 1;
-	if(edx & 0x80000000) bx |= 1;
-	edx <<= 1;
-
-	ax += ax;
-	di =  ax;
-	di += di;
-
-	if(bx > di) {
-
-		ax++;
-
-	}
-
-	return ((int)ax);
-
-}
-
-
-#endif	/* SupportFPMathsFunctions */
-
-
-
-
 
 
 /*
@@ -613,10 +523,6 @@ int SqRoot32(int A)
 void MakeNormal(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3, VECTORCH *v4)
 
 {
-
-
-#if SupportFPMathsFunctions
-
 
 	VECTORCHF vect0;
 	VECTORCHF vect1;
@@ -661,137 +567,6 @@ void MakeNormal(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3, VECTORCH *v4)
 	WaitForReturn();
 	#endif
 
-
-
-#else	/* SupportFPMathsFunctions */
-
-
-	LONGLONGCH x;
-	LONGLONGCH y;
-	LONGLONGCH z;
-	LONGLONGCH tmp;
-	VECTORCH vect0;
-	VECTORCH vect1;
-	LONGLONGCH max_abs_xyz64;
-	LONGLONGCH abs_xyz[3];
-	int s, shift;
-
-
-	/* vect0 = v2 - v1 */
-
-	vect0.vx = v2->vx - v1->vx;
-	vect0.vy = v2->vy - v1->vy;
-	vect0.vz = v2->vz - v1->vz;
-
-	/* vect1 = v3 - v1 */
-
-	vect1.vx = v3->vx - v1->vx;
-	vect1.vy = v3->vy - v1->vy;
-	vect1.vz = v3->vz - v1->vz;
-
-
-	/* nx = v0y.v1z - v0z.v1y */
-
-	#if 0
-	x =
-	(long long)vect0.vy * (long long)vect1.vz
-	-(long long)vect0.vz * (long long)vect1.vy;
-	#endif
-
-	MUL_I_WIDE(vect0.vy, vect1.vz, &x);
-	MUL_I_WIDE(vect0.vz, vect1.vy, &tmp);
-	SUB_LL_MM(&x, &tmp);
-
-
-	/* ny = v0z.v1x - v0x.v1z */
-
-	#if 0
-	y =
-	(long long)vect0.vz * (long long)vect1.vx
-	-(long long)vect0.vx * (long long)vect1.vz;
-	#endif
-
-	MUL_I_WIDE(vect0.vz, vect1.vx, &y);
-	MUL_I_WIDE(vect0.vx, vect1.vz, &tmp);
-	SUB_LL_MM(&y, &tmp);
-
-
-	/* nz = v0x.v1y - v0y.v1x */
-
-	#if 0
-	z =
-	(long long)vect0.vx * (long long)vect1.vy
-	-(long long)vect0.vy * (long long)vect1.vx;
-	#endif
-
-	MUL_I_WIDE(vect0.vx, vect1.vy, &z);
-	MUL_I_WIDE(vect0.vy, vect1.vx, &tmp);
-	SUB_LL_MM(&z, &tmp);
-
-
-	/* Before we can normalise we must bring these vectors down to 14-bits */
-
-	#if 0
-	abs_xyz[0] = x;
-	if(abs_xyz[0] < 0) abs_xyz[0] = -abs_xyz[0];
-
-	abs_xyz[1] = y;
-	if(abs_xyz[1] < 1) abs_xyz[1] = -abs_xyz[1];
-
-	abs_xyz[2] = z;
-	if(abs_xyz[2] < 0) abs_xyz[2] = -abs_xyz[2];
-
-	#endif
-
-	EQUALS_LL(&abs_xyz[0], &x);
-	s = CMP_LL(&abs_xyz[0], &ll_zero);
-	if(s < 0) NEG_LL(&abs_xyz[0]);
-
-	EQUALS_LL(&abs_xyz[1], &y);
-	s = CMP_LL(&abs_xyz[1], &ll_zero);
-	if(s < 0) NEG_LL(&abs_xyz[1]);
-
-	EQUALS_LL(&abs_xyz[2], &z);
-	s = CMP_LL(&abs_xyz[2], &ll_zero);
-	if(s < 0) NEG_LL(&abs_xyz[2]);
-
-	MaxLONGLONGCH(&abs_xyz[0], 3, &max_abs_xyz64);
-
-	shift = FindShift64(&max_abs_xyz64, &ll_one14);
-
-	#if 0
-	x >>= shift;
-	y >>= shift;
-	z >>= shift;
-	#endif
-
-	ASR_LL(&x, shift);
-	ASR_LL(&y, shift);
-	ASR_LL(&z, shift);
-
-	/* Watcom specific copying of lower 32-bits of LONGLONGCH values */
-
-	v4->vx = x.lo32;
-	v4->vy = y.lo32;
-	v4->vz = z.lo32;
-
-
-
-	/* Normalise the vector */
-
-	#if 0
-	textprint("v4 = %d,%d,%d\n", x.lo32, y.lo32, z.lo32);
-	textprint("v4 = %d,%d,%d\n", v4->vx, v4->vy, v4->vz);
-	#endif
-
-	Normalise(v4);
-
-	#if 0
-	textprint(" - v4 = %d,%d,%d\n", v4->vx, v4->vy, v4->vz);
-	#endif
-
-#endif	/* SupportFPMathsFunctions */
-
 }
 
 
@@ -823,11 +598,6 @@ void MakeNormal(VECTORCH *v1, VECTORCH *v2, VECTORCH *v3, VECTORCH *v4)
 void Normalise(VECTORCH *nvector)
 
 {
-
-
-#if SupportFPMathsFunctions
-
-
 	VECTORCHF n;
 	float m;
 
@@ -841,71 +611,6 @@ void Normalise(VECTORCH *nvector)
 	f2i(nvector->vx, (n.vx * m) );
 	f2i(nvector->vy, (n.vy * m) );
 	f2i(nvector->vz, (n.vz * m) );
-
-
-#else	/* SupportFPMathsFunctions */
-
-
-	int m, s;
-	int xsq, ysq, zsq;
-
-	LONGLONGCH max_abs_xyz64;
-
-	LONGLONGCH abs_xyz[3];
-
-	int shift;
-
-
-	/* Before we can normalise we must bring these vectors down to 14-bits */
-
-	IntToLL(&abs_xyz[0], &nvector->vx);
-	s = CMP_LL(&abs_xyz[0], &ll_zero);
-	if(s < 0) NEG_LL(&abs_xyz[0]);
-
-	IntToLL(&abs_xyz[1], &nvector->vy);
-	s = CMP_LL(&abs_xyz[1], &ll_zero);
-	if(s < 0) NEG_LL(&abs_xyz[1]);
-
-	IntToLL(&abs_xyz[2], &nvector->vz);
-	s = CMP_LL(&abs_xyz[2], &ll_zero);
-	if(s < 0) NEG_LL(&abs_xyz[2]);
-
-	MaxLONGLONGCH(&abs_xyz[0], 3, &max_abs_xyz64);
-
-
-	#if 0
-	textprint("value to shift = %d, %d\n", max_abs_xyz64.lo32, max_abs_xyz64.hi32);
-	#endif
-
-	shift = FindShift64(&max_abs_xyz64, &ll_one14);
-
-	#if 0
-	textprint("shift = %d\n", shift);
-	#endif
-
-	nvector->vx >>= shift;
-	nvector->vy >>= shift;
-	nvector->vz >>= shift;
-
-
-	/* Normalise */
-
-	xsq = nvector->vx * nvector->vx;
-	ysq = nvector->vy * nvector->vy;
-	zsq = nvector->vz * nvector->vz;
-
-	m = SqRoot32(xsq + ysq + zsq);
-
-	if(m == 0) m = 1;			/* Just in case */
-
-	nvector->vx = WideMulNarrowDiv(nvector->vx, ONE_FIXED, m);
-	nvector->vy = WideMulNarrowDiv(nvector->vy, ONE_FIXED, m);
-	nvector->vz = WideMulNarrowDiv(nvector->vz, ONE_FIXED, m);
-
-
-#endif	/* SupportFPMathsFunctions */
-
-
 }
 
 
@@ -917,11 +622,6 @@ void Normalise(VECTORCH *nvector)
 void Normalise2d(VECTOR2D *nvector)
 
 {
-
-
-#if SupportFPMathsFunctions
-
-
 	VECTOR2DF n;
 	float m;
 
@@ -933,70 +633,8 @@ void Normalise2d(VECTOR2D *nvector)
 
 	nvector->vx = (n.vx * ONE_FIXED) / m;
 	nvector->vy = (n.vy * ONE_FIXED) / m;
-
-
-#else	/* SupportFPMathsFunctions */
-
-
-	int m, s;
-	int xsq, ysq;
-	LONGLONGCH max_abs_xy64;
-	LONGLONGCH abs_xy[2];
-	int shift;
-
-
-	/* Before we can normalise we must bring these vectors down to 14-bits */
-
-	IntToLL(&abs_xyz[0], &nvector->vx);
-	s = CMP_LL(&abs_xyz[0], &ll_zero);
-	if(s < 0) NEG_LL(&abs_xyz[0]);
-
-	IntToLL(&abs_xyz[1], &nvector->vy);
-	s = CMP_LL(&abs_xyz[1], &ll_zero);
-	if(s < 0) NEG_LL(&abs_xyz[1]);
-
-	MaxLONGLONGCH(&abs_xy[0], 2, &max_abs_xy64);
-
-
-	#if 0
-	textprint("value to shift = %d, %d\n", max_abs_xyz64.lo32, max_abs_xyz64.hi32);
-	#endif
-
-	shift = FindShift64(&max_abs_xy64, &ll_one14);
-
-	#if 0
-	textprint("shift = %d\n", shift);
-	#endif
-
-	nvector->vx >>= shift;
-	nvector->vy >>= shift;
-
-
-	/* Normalise */
-
-	xsq = nvector->vx * nvector->vx;
-	ysq = nvector->vy * nvector->vy;
-
-	m = SqRoot32(xsq + ysq);
-
-	if(m == 0) m = 1;			/* Just in case */
-
-	nvector->vx = WideMulNarrowDiv(nvector->vx, ONE_FIXED, m);
-	nvector->vy = WideMulNarrowDiv(nvector->vy, ONE_FIXED, m);
-
-
-#endif	/* SupportFPMathsFunctions */
-
-
 }
 
-
-
-
-
-
-
-#if SupportFPMathsFunctions
 
 void FNormalise(VECTORCHF *n)
 
@@ -1027,8 +665,6 @@ void FNormalise2d(VECTOR2DF *n)
 
 }
 
-#endif	/* SupportFPMathsFunctions */
-
 
 /*
 
@@ -1039,12 +675,6 @@ void FNormalise2d(VECTOR2DF *n)
 int Magnitude(VECTORCH *v)
 
 {
-
-
-#if SupportFPMathsFunctions
-
-
-
 	VECTORCHF n;
 	int m;
 
@@ -1056,157 +686,7 @@ int Magnitude(VECTORCH *v)
 	f2i(m, sqrt((n.vx * n.vx) + (n.vy * n.vy) + (n.vz * n.vz)));
 
 	return m;
-
-
-#else	/* SupportFPMathsFunctions */
-
-
-	VECTORCH vtemp;
-	LONGLONGCH max_abs_xyz64;
-	LONGLONGCH abs_xyz[3];
-	int shift;
-	int m;
-	int xsq, ysq, zsq;
-	int s;
-
-
-	/*
-
-	Before we can square and add the components we must bring these vectors
-	down to 14-bits
-
-	*/
-
-	IntToLL(&abs_xyz[0], &v->vx);
-	s = CMP_LL(&abs_xyz[0], &ll_zero);
-	if(s < 0) NEG_LL(&abs_xyz[0]);
-
-	IntToLL(&abs_xyz[1], &v->vy);
-	s = CMP_LL(&abs_xyz[1], &ll_zero);
-	if(s < 0) NEG_LL(&abs_xyz[1]);
-
-	IntToLL(&abs_xyz[2], &v->vz);
-	s = CMP_LL(&abs_xyz[2], &ll_zero);
-	if(s < 0) NEG_LL(&abs_xyz[2]);
-
-	MaxLONGLONGCH(&abs_xyz[0], 3, &max_abs_xyz64);
-
-	shift = FindShift64(&max_abs_xyz64, &ll_one14);
-
-	CopyVector(v, &vtemp);
-
-	vtemp.vx >>= shift;
-	vtemp.vy >>= shift;
-	vtemp.vz >>= shift;
-
-	xsq = vtemp.vx * vtemp.vx;
-	ysq = vtemp.vy * vtemp.vy;
-	zsq = vtemp.vz * vtemp.vz;
-
-	m = SqRoot32(xsq + ysq + zsq);
-
-	m <<= shift;
-
-	return m;
-
-
-#endif	/* SupportFPMathsFunctions */
-
-
 }
-
-
-
-
-
-
-
-
-
-
-/*
-
- 64-bit Square Root returns 32-bit result
-
- All 64-bit operations are now done using the type LONGLONGCH whose format
- varies from platform to platform, although it is always 64-bits in size.
-
- NOTE:
-
- Function currently not available to Watcom C users
- A Floating point version is STRONGLY advised for the PC anyway
-
-*/
-
-#if 0
-int SqRoot64(LONGLONGCH *A)
-
-{
-
-#if 0
-
-	unsigned long long edx = *A;
-
-	unsigned int eax = 0;
-	unsigned int ebx = 0;
-	unsigned int edi = 0;
-
-	unsigned int ecx;
-
-
-	unsigned long long TopBit = 0x8000000000000000LL;
-
-	for(ecx = 31; ecx != 0; ecx--) {
-
-		ebx <<= 1;
-		if(edx & TopBit) ebx |= 1;
-		edx <<= 1;
-
-		ebx <<= 1;
-		if(edx & TopBit) ebx |= 1;
-		edx <<= 1;
-
-		eax += eax;
-		edi  = eax;
-		edi += edi;
-
-		if(ebx > edi) {
-
-			edi++;
-			eax++;
-			ebx -= edi;
-
-		}
-
-	}
-
-	ebx <<= 1;
-	if(edx & TopBit) ebx |= 1;
-	edx <<= 1;
-
-	ebx <<= 1;
-	if(edx & TopBit) ebx |= 1;
-	edx <<= 1;
-
-	eax += eax;
-	edi  = eax;
-	edi += edi;
-
-	if(ebx > edi) {
-
-		eax++;
-
-	}
-
-	return eax;
-
-#endif
-
-	return (0);
-
-}
-
-#endif /* for #if 0 */
 
 /*
 
@@ -1289,9 +769,6 @@ void MaxLONGLONGCH(LONGLONGCH *llarrayptr, int llarraysize, LONGLONGCH *llmax)
 /*
 
  Some operators derived from the 64-bit CMP function.
-
- These were first defined for pcwatcom\plspecfn.h and transferred as and
- when needed to other platforms.
 
 */
 

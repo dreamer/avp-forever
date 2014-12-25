@@ -1,11 +1,9 @@
 #include <stdio.h>
+#include <inttypes.h>
 
 #include "system.h"
-
-#if PSX
-#else //PSX
-
 #include "shape.h"
+
 /*
 
 CUBE_
@@ -72,12 +70,12 @@ SHAPEHEADER CUBE_header={
 };
 
 SHAPEINSTR CUBE_instructions[]={
-	I_ShapePoints,8,&CUBE_points[0],
-	I_ShapeNormals,6,&CUBE_normals[0],
-	I_ShapeProject,8,&CUBE_points[0],
-	I_ShapeVNormals,8,&CUBE_vnormals[0],
-	I_ShapeItems,6,&CUBE_items[0],
-	I_ShapeEnd,0,0
+    {I_ShapePoints,8,&CUBE_points[0]},
+    {I_ShapeNormals,6,&CUBE_normals[0]},
+    {I_ShapeProject,8,&CUBE_points[0]},
+    {I_ShapeVNormals,8,&CUBE_vnormals[0]},
+    {I_ShapeItems,6,&CUBE_items[0]},
+    {I_ShapeEnd,0,0}
 };
 
 int *CUBE_points[]={
@@ -164,5 +162,3 @@ int *CUBE_items[]={
 	2*1,1*1,0*1,3*1,
 	Term
 };
-
-#endif //PSX

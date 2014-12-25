@@ -20,12 +20,13 @@
 
 #include "pmove.h"
 #include "usr_io.h"
-#include "hud_map.h"
-#include "krender.h"
+#include "hud.h"
+#include "messagehistory.h"
 
 #include "iofocus.h"
 
 #include "paintball.h"
+#include "ahudgadg.hpp"
 #include "avp_menus.h"
 
 extern int InGameMenusAreRunning(void);
@@ -85,18 +86,18 @@ PLAYER_INPUT_CONFIGURATION DefaultMarineInputPrimaryConfig =
 	KEY_LMOUSE, 		// FirePrimaryWeapon;
 	KEY_RMOUSE, 		// FireSecondaryWeapon;
 
-	KEY_RBRACKET,  		// NextWeapon;
-	KEY_LBRACKET,  		// PreviousWeapon;
-	KEY_BACKSPACE,		// FlashbackWeapon;
+    {KEY_RBRACKET},  	// NextWeapon;
+    {KEY_LBRACKET},  	// PreviousWeapon;
+    {KEY_BACKSPACE},	// FlashbackWeapon;
 
-	KEY_SLASH,	  		// ImageIntensifier;
-	KEY_FSTOP,    		// ThrowFlare;
-	KEY_APOSTROPHE,	  	// Jetpack;
-	KEY_SEMICOLON,		// Taunt
-	KEY_F1,
-	KEY_F11,
-	KEY_F12,
-	KEY_TAB,
+    {KEY_SLASH},	  	// ImageIntensifier;
+    {KEY_FSTOP},    	// ThrowFlare;
+    {KEY_APOSTROPHE},  	// Jetpack;
+    {KEY_SEMICOLON},	// Taunt
+    {KEY_F1},
+    {KEY_F11},
+    {KEY_F12},
+    {KEY_TAB}
 };
 PLAYER_INPUT_CONFIGURATION DefaultPredatorInputPrimaryConfig =
 {
@@ -122,21 +123,21 @@ PLAYER_INPUT_CONFIGURATION DefaultPredatorInputPrimaryConfig =
 	KEY_LMOUSE, 		// FirePrimaryWeapon;
 	KEY_RMOUSE, 		// FireSecondaryWeapon;
 	
-	KEY_RBRACKET,		// NextWeapon;
-	KEY_LBRACKET, 			// PreviousWeapon;
-	KEY_BACKSPACE,		// FlashbackWeapon;
+    {KEY_RBRACKET},		// NextWeapon;
+    {KEY_LBRACKET}, 	// PreviousWeapon;
+    {KEY_BACKSPACE},	// FlashbackWeapon;
 	
-	KEY_FSTOP,	 		// Cloak;
-	KEY_SLASH,	 		// CycleVisionMode;
-	KEY_PAGEUP,			// ZoomIn;
-	KEY_PAGEDOWN,		// ZoomOut;
-	KEY_APOSTROPHE,	  	// GrapplingHook
-	KEY_COMMA,			// RecallDisk
-	KEY_SEMICOLON,		// Taunt
-	KEY_F1,
-	KEY_F11,
-	KEY_F12,
-	KEY_TAB,
+    {KEY_FSTOP},	 	// Cloak;
+    {KEY_SLASH},	 	// CycleVisionMode;
+    {KEY_PAGEUP},		// ZoomIn;
+    {KEY_PAGEDOWN},		// ZoomOut;
+    {KEY_APOSTROPHE},  	// GrapplingHook
+    {KEY_COMMA},		// RecallDisk
+    {KEY_SEMICOLON},	// Taunt
+    {KEY_F1},
+    KEY_F11,
+    KEY_F12,
+    KEY_TAB
 };
 
 PLAYER_INPUT_CONFIGURATION DefaultAlienInputPrimaryConfig =
@@ -163,12 +164,12 @@ PLAYER_INPUT_CONFIGURATION DefaultAlienInputPrimaryConfig =
 	KEY_LMOUSE, 		// FirePrimaryWeapon;
 	KEY_RMOUSE, 		// FireSecondaryWeapon;
 
-	KEY_SLASH,			// AlternateVision;
-	KEY_FSTOP,				// Taunt;
-	KEY_F1,
-	KEY_F11,
-	KEY_F12,
-	KEY_TAB,
+    {KEY_SLASH},		// AlternateVision;
+    {KEY_FSTOP},		// Taunt;
+    {KEY_F1},
+    {KEY_F11},
+    {KEY_F12},
+    {KEY_TAB}
 };
 #elif 0	// Dutch
 PLAYER_INPUT_CONFIGURATION DefaultMarineInputPrimaryConfig =
@@ -635,19 +636,19 @@ PLAYER_INPUT_CONFIGURATION DefaultMarineInputSecondaryConfig =
 	KEY_NUMPAD0, 		// FirePrimaryWeapon;
 	KEY_NUMPADDEL, 		// FireSecondaryWeapon;
 
-	KEY_MOUSEWHEELUP,  		// NextWeapon;
-	KEY_MOUSEWHEELDOWN,		// PreviousWeapon;
-	KEY_VOID,			// FlashbackWeapon;
+    {KEY_MOUSEWHEELUP},  	// NextWeapon;
+    {KEY_MOUSEWHEELDOWN},	// PreviousWeapon;
+    {KEY_VOID},			// FlashbackWeapon;
 
-	KEY_VOID,			// ImageIntensifier;
-	KEY_VOID, 			// ThrowFlare;
-	KEY_VOID, 			// Jetpack;
-	KEY_VOID,			// Taunt
+    {KEY_VOID},			// ImageIntensifier;
+    {KEY_VOID}, 		// ThrowFlare;
+    {KEY_VOID}, 		// Jetpack;
+    {KEY_VOID},			// Taunt
 
-	KEY_VOID,
-	KEY_VOID,
-	KEY_VOID,
-	KEY_VOID,
+    {KEY_VOID},
+    {KEY_VOID},
+    {KEY_VOID},
+    {KEY_VOID}
 };
 
 
@@ -677,22 +678,22 @@ PLAYER_INPUT_CONFIGURATION DefaultPredatorInputSecondaryConfig =
 	KEY_NUMPAD0, 		// FirePrimaryWeapon;
 	KEY_NUMPADDEL, 		// FireSecondaryWeapon;
 
-	KEY_VOID,			// NextWeapon;
-	KEY_VOID, 			// PreviousWeapon;
-	KEY_VOID,			// FlashbackWeapon;
+    {KEY_VOID},			// NextWeapon;
+    {KEY_VOID}, 		// PreviousWeapon;
+    {KEY_VOID},			// FlashbackWeapon;
 	
-	KEY_VOID,	 		// Cloak;
-	KEY_VOID,	 		// CycleVisionMode;
-	KEY_MOUSEWHEELUP,		// ZoomIn;
-	KEY_MOUSEWHEELDOWN,		// ZoomOut;
-	KEY_VOID,	 		// GrapplingHook;
-	KEY_VOID,			// RecallDisk
-	KEY_VOID,			// Taunt
+    {KEY_VOID},	 		// Cloak;
+    {KEY_VOID},	 		// CycleVisionMode;
+    {KEY_MOUSEWHEELUP},	// ZoomIn;
+    {KEY_MOUSEWHEELDOWN},	// ZoomOut;
+    {KEY_VOID},	 		// GrapplingHook;
+    {KEY_VOID},			// RecallDisk
+    {KEY_VOID},			// Taunt
 	
-	KEY_VOID,
-	KEY_VOID,
-	KEY_VOID,
-	KEY_VOID,
+    {KEY_VOID},
+    KEY_VOID,
+    KEY_VOID,
+    KEY_VOID
 
 };
 
@@ -720,12 +721,12 @@ PLAYER_INPUT_CONFIGURATION DefaultAlienInputSecondaryConfig =
 	KEY_NUMPAD0, 		// FirePrimaryWeapon;
 	KEY_NUMPADDEL, 		// FireSecondaryWeapon;
 	
-	KEY_VOID, 			// AlternateVision;
-	KEY_VOID,	 		// Taunt;
-	KEY_VOID,
-	KEY_VOID,
-	KEY_VOID,
-	KEY_VOID,
+    {KEY_VOID}, 		// AlternateVision;
+    {KEY_VOID},	 		// Taunt;
+    {KEY_VOID},
+    {KEY_VOID},
+    {KEY_VOID},
+    {KEY_VOID}
 };
 
 
@@ -854,6 +855,7 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 
 	switch (AvP.PlayerType)
 	{
+		default:
 		case I_Marine:
 		{
 			primaryInput = &MarineInputPrimaryConfig;
@@ -943,38 +945,38 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 		{
 			case I_Marine:
 			{
-				if(KeyboardInput[primaryInput->ImageIntensifier]
-				 ||KeyboardInput[secondaryInput->ImageIntensifier])
+				if(KeyboardInput[primaryInput->d.ImageIntensifier]
+				 ||KeyboardInput[secondaryInput->d.ImageIntensifier])
 					playerStatusPtr->Mvt_InputRequests.Flags.Rqst_ChangeVision = 1;
 
-				if(DebouncedKeyboardInput[primaryInput->ThrowFlare]
-				 ||DebouncedKeyboardInput[secondaryInput->ThrowFlare])
+				if(DebouncedKeyboardInput[primaryInput->e.ThrowFlare]
+				 ||DebouncedKeyboardInput[secondaryInput->e.ThrowFlare])
 					ThrowAFlare();
 
 				#if !(MARINE_DEMO||DEATHMATCH_DEMO)
-				if(KeyboardInput[primaryInput->Jetpack]
-				 ||KeyboardInput[secondaryInput->Jetpack])
+				if(KeyboardInput[primaryInput->f.Jetpack]
+				 ||KeyboardInput[secondaryInput->f.Jetpack])
 					playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Jetpack = 1;
 				#endif
 				
-				if(KeyboardInput[primaryInput->MarineTaunt]
-				 ||KeyboardInput[secondaryInput->MarineTaunt])
+				if(KeyboardInput[primaryInput->g.MarineTaunt]
+				 ||KeyboardInput[secondaryInput->g.MarineTaunt])
 					StartPlayerTaunt();
 				
-				if(DebouncedKeyboardInput[primaryInput->Marine_MessageHistory]
-				 ||DebouncedKeyboardInput[secondaryInput->Marine_MessageHistory])
+				if(DebouncedKeyboardInput[primaryInput->h.Marine_MessageHistory]
+				 ||DebouncedKeyboardInput[secondaryInput->h.Marine_MessageHistory])
 					MessageHistory_DisplayPrevious();
 					
-				if(DebouncedKeyboardInput[primaryInput->Marine_Say]
-				 ||DebouncedKeyboardInput[secondaryInput->Marine_Say])
+				if(DebouncedKeyboardInput[primaryInput->i.Marine_Say]
+				 ||DebouncedKeyboardInput[secondaryInput->i.Marine_Say])
 					BringDownConsoleWithSayTypedIn();
 
-				if(DebouncedKeyboardInput[primaryInput->Marine_SpeciesSay]
-				 ||DebouncedKeyboardInput[secondaryInput->Marine_SpeciesSay])
+				if(DebouncedKeyboardInput[primaryInput->j.Marine_SpeciesSay]
+				 ||DebouncedKeyboardInput[secondaryInput->j.Marine_SpeciesSay])
 					BringDownConsoleWithSaySpeciesTypedIn();
 
-				if(KeyboardInput[primaryInput->Marine_ShowScores]
-				 ||KeyboardInput[secondaryInput->Marine_ShowScores])
+				if(KeyboardInput[primaryInput->k.Marine_ShowScores]
+				 ||KeyboardInput[secondaryInput->k.Marine_ShowScores])
 					ShowMultiplayerScores();
 					
 
@@ -984,43 +986,43 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 			{
 				extern int CameraZoomLevel;
 				
-				if(KeyboardInput[primaryInput->Cloak]
-				 ||KeyboardInput[secondaryInput->Cloak])
+				if(KeyboardInput[primaryInput->d.Cloak]
+				 ||KeyboardInput[secondaryInput->d.Cloak])
 					playerStatusPtr->Mvt_InputRequests.Flags.Rqst_ChangeVision = 1;
 				
-				if(DebouncedKeyboardInput[primaryInput->CycleVisionMode]
-				 ||DebouncedKeyboardInput[secondaryInput->CycleVisionMode])
+				if(DebouncedKeyboardInput[primaryInput->e.CycleVisionMode]
+				 ||DebouncedKeyboardInput[secondaryInput->e.CycleVisionMode])
 					playerStatusPtr->Mvt_InputRequests.Flags.Rqst_CycleVisionMode = 1;
 
 				#if !(PREDATOR_DEMO||DEATHMATCH_DEMO)
-				if(DebouncedKeyboardInput[primaryInput->GrapplingHook]
-				 ||DebouncedKeyboardInput[secondaryInput->GrapplingHook])
+				if(DebouncedKeyboardInput[primaryInput->h.GrapplingHook]
+				 ||DebouncedKeyboardInput[secondaryInput->h.GrapplingHook])
 					playerStatusPtr->Mvt_InputRequests.Flags.Rqst_GrapplingHook = 1;
 				#endif
 
-				if(DebouncedKeyboardInput[primaryInput->ZoomIn]
-				 ||DebouncedKeyboardInput[secondaryInput->ZoomIn])
+				if(DebouncedKeyboardInput[primaryInput->f.ZoomIn]
+				 ||DebouncedKeyboardInput[secondaryInput->f.ZoomIn])
 				{
 					if (CameraZoomLevel<3) CameraZoomLevel++;
 				}
-				if(DebouncedKeyboardInput[primaryInput->ZoomOut]
-				 ||DebouncedKeyboardInput[secondaryInput->ZoomOut])
+				if(DebouncedKeyboardInput[primaryInput->g.ZoomOut]
+				 ||DebouncedKeyboardInput[secondaryInput->g.ZoomOut])
 				{
 					if (CameraZoomLevel>0) CameraZoomLevel--;
 				}
 				
 				MaintainZoomingLevel();
 				
-				if(KeyboardInput[primaryInput->PredatorTaunt]
-				 ||KeyboardInput[secondaryInput->PredatorTaunt])
+				if(KeyboardInput[primaryInput->j.PredatorTaunt]
+				 ||KeyboardInput[secondaryInput->j.PredatorTaunt])
 					StartPlayerTaunt();
 
-				if(KeyboardInput[primaryInput->RecallDisc]
-				 ||KeyboardInput[secondaryInput->RecallDisc])
+				if(KeyboardInput[primaryInput->i.RecallDisc]
+				 ||KeyboardInput[secondaryInput->i.RecallDisc])
 					Recall_Disc();
 					
-				if(DebouncedKeyboardInput[primaryInput->Predator_MessageHistory]
-				 ||DebouncedKeyboardInput[secondaryInput->Predator_MessageHistory])
+				if(DebouncedKeyboardInput[primaryInput->k.Predator_MessageHistory]
+				 ||DebouncedKeyboardInput[secondaryInput->k.Predator_MessageHistory])
 					MessageHistory_DisplayPrevious();
 					
 				if(DebouncedKeyboardInput[primaryInput->Predator_Say]
@@ -1040,28 +1042,28 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 
 			case I_Alien:
 			{
-				if(KeyboardInput[primaryInput->AlternateVision]
-				 ||KeyboardInput[secondaryInput->AlternateVision])
+				if(KeyboardInput[primaryInput->a.AlternateVision]
+				 ||KeyboardInput[secondaryInput->a.AlternateVision])
 					playerStatusPtr->Mvt_InputRequests.Flags.Rqst_ChangeVision = 1;
 
-				if(KeyboardInput[primaryInput->Taunt]
-				 ||KeyboardInput[secondaryInput->Taunt])
+				if(KeyboardInput[primaryInput->b.Taunt]
+				 ||KeyboardInput[secondaryInput->b.Taunt])
 					StartPlayerTaunt();
 	
-				if(DebouncedKeyboardInput[primaryInput->Alien_MessageHistory]
-				 ||DebouncedKeyboardInput[secondaryInput->Alien_MessageHistory])
+				if(DebouncedKeyboardInput[primaryInput->c.Alien_MessageHistory]
+				 ||DebouncedKeyboardInput[secondaryInput->c.Alien_MessageHistory])
 					MessageHistory_DisplayPrevious();
 					
-				if(DebouncedKeyboardInput[primaryInput->Alien_Say]
-				 ||DebouncedKeyboardInput[secondaryInput->Alien_Say])
+				if(DebouncedKeyboardInput[primaryInput->d.Alien_Say]
+				 ||DebouncedKeyboardInput[secondaryInput->d.Alien_Say])
 					BringDownConsoleWithSayTypedIn();
 
-				if(DebouncedKeyboardInput[primaryInput->Alien_SpeciesSay]
-				 ||DebouncedKeyboardInput[secondaryInput->Alien_SpeciesSay])
+				if(DebouncedKeyboardInput[primaryInput->e.Alien_SpeciesSay]
+				 ||DebouncedKeyboardInput[secondaryInput->e.Alien_SpeciesSay])
 					BringDownConsoleWithSaySpeciesTypedIn();
 
-				if(KeyboardInput[primaryInput->Alien_ShowScores]
-				 ||KeyboardInput[secondaryInput->Alien_ShowScores])
+				if(KeyboardInput[primaryInput->f.Alien_ShowScores]
+				 ||KeyboardInput[secondaryInput->f.Alien_ShowScores])
 					ShowMultiplayerScores();
 
 				break;
@@ -1096,16 +1098,16 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 			 ||KeyboardInput[secondaryInput->CentreView])
 				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_CentreView = 1;
 
-			if(KeyboardInput[primaryInput->NextWeapon]
-			 ||KeyboardInput[secondaryInput->NextWeapon])
+			if(KeyboardInput[primaryInput->a.NextWeapon]
+			 ||KeyboardInput[secondaryInput->a.NextWeapon])
 				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_NextWeapon = 1;
 			
-			if(KeyboardInput[primaryInput->PreviousWeapon]
-			 ||KeyboardInput[secondaryInput->PreviousWeapon])
+			if(KeyboardInput[primaryInput->b.PreviousWeapon]
+			 ||KeyboardInput[secondaryInput->b.PreviousWeapon])
 				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_PreviousWeapon = 1;
 
-			if(DebouncedKeyboardInput[primaryInput->FlashbackWeapon]
-			 ||DebouncedKeyboardInput[secondaryInput->FlashbackWeapon])
+			if(DebouncedKeyboardInput[primaryInput->c.FlashbackWeapon]
+			 ||DebouncedKeyboardInput[secondaryInput->c.FlashbackWeapon])
 			{
 				if (playerStatusPtr->PreviouslySelectedWeaponSlot!=playerStatusPtr->SelectedWeaponSlot)
 				{
@@ -1172,14 +1174,14 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 		#if !(PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO||DEATHMATCH_DEMO)
 		else // Cool - paintball mode				`
 		{
-			if(DebouncedKeyboardInput[primaryInput->NextWeapon]
-			 ||DebouncedKeyboardInput[secondaryInput->NextWeapon])
+			if(DebouncedKeyboardInput[primaryInput->a.NextWeapon]
+			 ||DebouncedKeyboardInput[secondaryInput->a.NextWeapon])
 			{
 				PaintBallMode_ChangeSelectedDecalID(+1);
 			}
 			
-			if(DebouncedKeyboardInput[primaryInput->PreviousWeapon]
-			 ||DebouncedKeyboardInput[secondaryInput->PreviousWeapon])
+			if(DebouncedKeyboardInput[primaryInput->b.PreviousWeapon]
+			 ||DebouncedKeyboardInput[secondaryInput->b.PreviousWeapon])
 			{
 				PaintBallMode_ChangeSelectedDecalID(-1);
 			}
@@ -1350,7 +1352,6 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 	if (GotJoystick)
 	{
 		#define JOYSTICK_DEAD_ZONE 12000
-		extern int GotJoystick;
 		extern JOYINFOEX JoystickData;
 		extern JOYCAPS JoystickCaps;
 		
@@ -1575,8 +1576,8 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 			}
 
 		}
-					   
-		#if 1
+
+		#if 0
 		textprint("%d\n%d\n%d\n%d\n%d\n%d\n%d\n%d\n",
 			JoystickData.dwXpos,
 			JoystickData.dwYpos,
@@ -1589,30 +1590,6 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 		#endif
 	}
 
-	/* KJL 16:03:06 05/11/97 - Handle map options */
-	#if 0
-	if(KeyboardInput[KEY_NUMPADADD])
-		HUDMapOn();
-	else if(KeyboardInput[KEY_NUMPADSUB])
-		HUDMapOff();
-	if(KeyboardInput[KEY_NUMPAD7])
-		HUDMapZoomIn();
-	else if(KeyboardInput[KEY_NUMPAD9])
-		HUDMapZoomOut();
-	if(KeyboardInput[KEY_NUMPAD1])
-		HUDMapSmaller();
-	else if(KeyboardInput[KEY_NUMPAD3])
-		HUDMapLarger();
-	if(KeyboardInput[KEY_NUMPAD4])
-		HUDMapLeft();
-	else if(KeyboardInput[KEY_NUMPAD6])
-		HUDMapRight();
-	if(KeyboardInput[KEY_NUMPAD8])
-		HUDMapUp();
-	else if(KeyboardInput[KEY_NUMPAD2])
-		HUDMapDown();
-	#endif
-		
 	/* KJL 10:55:22 10/9/97 - HUD transparency */
 	#if 0
 	{
@@ -1715,7 +1692,7 @@ void SaveAKeyConfiguration(char* Filename)
 
 void SaveDefaultPrimaryConfigs(void)
 {
-	FILE* file=fopen("default.cfg","wb");
+	FILE *file = OpenGameFile("default.cfg", FILEMODE_WRITEONLY, FILETYPE_CONFIG);
 	if(!file) return;
 
 	fwrite(&DefaultMarineInputPrimaryConfig,sizeof(PLAYER_INPUT_CONFIGURATION),1,file);
@@ -1726,7 +1703,7 @@ void SaveDefaultPrimaryConfigs(void)
 }
 void LoadDefaultPrimaryConfigs(void)
 {
-	FILE* file=fopen("default.cfg","rb");
+	FILE *file = OpenGameFile("default.cfg", FILEMODE_READONLY, FILETYPE_CONFIG);
 	if(!file) return;
 
 	fread(&DefaultMarineInputPrimaryConfig,sizeof(PLAYER_INPUT_CONFIGURATION),1,file);
@@ -1735,14 +1712,3 @@ void LoadDefaultPrimaryConfigs(void)
 
 	fclose(file);
 }
-
-
-
-
-
-
-
-
-
-
-

@@ -3,8 +3,7 @@
 
 #include "3dc.h"
 
-#include <conio.h>
-#include <sys\stat.h>
+#include <sys/stat.h>
 
 #include "inline.h"
 
@@ -18,8 +17,7 @@
 #else
 
 #include <stdio.h>
-#include <conio.h>
-#include <sys\stat.h>
+#include <sys/stat.h>
 
 #include "system.h"
 #include "equates.h"
@@ -36,8 +34,11 @@
 #endif
 
 
-#include "awTexLd.h"
+#include "awtexld.h"
+
+#if 0 /* SBF - commented out */
 #include "alt_tab.h"
+#endif
 
 /*
 	#define for experimental purposes 
@@ -47,16 +48,6 @@
 #define DefinedTextureType TextureTypePPM
 
 
-#if 0
-#if debug
-int tripa = 100;
-int tripb = 100;
-int tripc = 0;
-#define trip_up tripa = tripb / tripc;
-#endif
-#endif
-
-
 /*
 
  externs for commonly used global variables and arrays
@@ -64,7 +55,6 @@ int tripc = 0;
 */
 
 	extern SHAPEHEADER **mainshapelist;
-	extern (*ShapeLanguageFunctions[])(SHAPEINSTR *shapeinstrptr);
 	extern SCREENDESCRIPTORBLOCK ScreenDescriptorBlock;
 	extern unsigned char *ScreenBuffer;
 	extern char projectsubdirectory[];
@@ -150,184 +140,6 @@ void InitialiseImageHeaders(void)
 
 	#endif
 }
-
-
-int LoadImageCHsForShapes(SHAPEHEADER **shapelist)
-
-{
-
-	SHAPEHEADER **shlistptr;
-	SHAPEHEADER *shptr;
-	char **txfiles;
-	int TxIndex;
-	int LTxIndex;
-
-
-/*
-
- Build the Texture List
-
-*/
-
-	shlistptr = shapelist;
-
-	while(*shlistptr) {
-
-		shptr = *shlistptr++;
-
-		/* If the shape has textures */
-
-		if(shptr->sh_localtextures) {
-
-			txfiles = shptr->sh_localtextures;
-
-			LTxIndex = 0;
-
-			while(*txfiles) {
-
-				/* The RIFF Image loaders have changed to support not loading the same image twice - JH 17-2-96 */
-				
-				char *src;
-				char *dst;
-				char fname[ImageNameSize];
-				char *texfilesptr;
-				#ifndef RIFF_SYSTEM
-				int i, j, NewImage;
-				char *iname;
-				IMAGEHEADER *ihptr;
-				IMAGEHEADER *new_ihptr;
-				void* im;
-				#endif
-				
-				txfilesptr = *txfiles++;
-				
-				/*
-
-				"txfilesptr" is in the form "textures\<fname>". We need to
-				prefix that text with the name of the current textures path.
-
-				Soon this path may be varied but for now it is just the name of
-				the current project subdirectory.
-
-				*/
-
-				src = projectsubdirectory;
-				dst = fname;
-
-				while(*src)
-					*dst++ = *src++;
-
-				src = txfilesptr;
-
-				while(*src)
-					*dst++ = *src++;
-
-				*dst = 0;
-
-				#ifdef RIFF_SYSTEM
-
-				/* This function calls GetExistingImageHeader to figure out if the image is already loaded */
-				TxIndex = CL_LoadImageOnce(fname,(ScanDrawDirectDraw == ScanDrawMode ? LIO_CHIMAGE : LIO_D3DTEXTURE)|LIO_TRANSPARENT|LIO_RELATIVEPATH|LIO_RESTORABLE);
-				GLOBALASSERT(GEI_NOTLOADED != TxIndex);
-				
-				#else
-				
-				/* If there are already images, try and find this one */
-
-				NewImage = Yes;
-
-				#ifdef MaxImageGroups
-
-				TxIndex = CurrentImageGroup * MaxImages;			/* Assume image 0 */
-				
-				if(NumImagesArray[CurrentImageGroup]) {
-
-					for(i=NumImagesArray[CurrentImageGroup]; i!=0 && NewImage!=No; i--) {
-
-				#else
-
-				TxIndex = 0;			/* Assume image 0 */
-				
-				if(NumImages) {
-
-					for(i=NumImages; i!=0 && NewImage!=No; i--) {
-
-				#endif
-
-						ihptr = ImageHeaderPtrs[TxIndex];
-
-						iname = &ihptr->ImageName[0];
-
-						j = CompareFilenameCH(txfilesptr, iname);
-
-						if(j) NewImage = No;
-
-						else TxIndex++;
-
-					}
-
-				}
-
-
-				/* If this is a new image, add it */
-
-				if(NewImage) {
-
-					/* Get an Image Header */
-
-					new_ihptr = GetImageHeader();
-
-					if(new_ihptr) {
-
-			            if (ScanDrawMode == ScanDrawDirectDraw)
-						  im = (void*) LoadImageCH(&fname[0], new_ihptr);
-						else
-						  im = LoadImageIntoD3DImmediateSurface
-						     (&fname[0], new_ihptr, DefinedTextureType);
-
-					}
-
-				}
-
-				#endif
-
-				/*
-
-					The local index for this image in this shape is
-					"LTxIndex".
-
-					The global index for the image is "TxIndex".
-
-					We must go through the shape's items and change all the
-					local references to global.
-
-				*/
-
-				MakeShapeTexturesGlobal(shptr, TxIndex, LTxIndex);
-
-				LTxIndex++;			/* Next Local Texture */
-
-			}
-
-			/* Is this shape a sprite that requires resizing? */
-
-			if((shptr->shapeflags & ShapeFlag_Sprite) &&
-				(shptr->shapeflags & ShapeFlag_SpriteResizing)) {
-
-				SpriteResizing(shptr);
-
-			}
-
-		}
-
-	}
-
-
-	return Yes;
-
-
-}
-
 
 #else
 
@@ -577,10 +389,7 @@ int InitialiseTextures(void)
 
 	#endif
 
-
 	return Yes;
-
-
 }
 
 
@@ -1041,10 +850,6 @@ void SpriteResizing(SHAPEHEADER *sptr)
 	}
 
 
-	/* TEST */
-	/*trip_up;*/
-
-
 	texture_defn_index = (pheader->PolyColour >> TxDefn);
 	txah_ptr = (TXANIMHEADER **) shape_textures[texture_defn_index];
 
@@ -1411,10 +1216,6 @@ void FindImageExtents(IMAGEHEADER *ihdr, int numuvs, int *uvdata, IMAGEEXTENTS *
 				if(e->u_high == smallint) e->u_high = e_curr->u_high;
 				if(e->v_high == smallint) e->v_high = e_curr->v_high;
 
-
-				/* TEST */
-				/*trip_up;*/
-
 			}
 
 			break;
@@ -1559,7 +1360,7 @@ static void DeallocateImageHeader(IMAGEHEADER * ihptr)
 	{
 		ReleaseD3DTexture(ihptr->D3DTexture);
 		ihptr->D3DTexture = (void*) 0;
-		ihptr->D3DHandle = (void*) 0;
+		ihptr->D3DHandle = /* (void*) */ 0;
 	}
 }
 
@@ -1575,7 +1376,7 @@ static void MinimizeImageHeader(IMAGEHEADER * ihptr)
 	{
 		ReleaseD3DTexture(ihptr->D3DTexture);
 		ihptr->D3DTexture = (void*) 0;
-		ihptr->D3DHandle = (void*) 0;
+		ihptr->D3DHandle = /* (void*) */ 0;
 	}
 }
 
