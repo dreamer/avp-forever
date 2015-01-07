@@ -1,0 +1,31 @@
+Microsoft Visual Studio Solution File, Format Version 11.00
+# Visual C++ Express 2010
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "AvP", "AvP.vcxproj", "{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}"
+	ProjectSection(ProjectDependencies) = postProject
+		{B26A86ED-F166-4955-A171-20B9E1796B8F} = {B26A86ED-F166-4955-A171-20B9E1796B8F}
+	EndProjectSection
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "enet", "..\..\enet\win32\VS2013\enet.vcxproj", "{B26A86ED-F166-4955-A171-20B9E1796B8F}"
+EndProject
+Global
+	GlobalSection(SolutionConfigurationPlatforms) = preSolution
+		Debug|Win32 = Debug|Win32
+		Release|Win32 = Release|Win32
+	EndGlobalSection
+	GlobalSection(ProjectConfigurationPlatforms) = postSolution
+		{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}.Debug|Win32.ActiveCfg = Debug|Win32
+		{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}.Debug|Win32.Build.0 = Debug|Win32
+		{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}.Release|Win32.ActiveCfg = Release|Win32
+		{4BE3644E-61B5-4F5E-ACE0-F8A0844AB003}.Release|Win32.Build.0 = Release|Win32
+		{B26A86ED-F166-4955-A171-20B9E1796B8F}.Debug|Win32.ActiveCfg = Debug|Win32
+		{B26A86ED-F166-4955-A171-20B9E1796B8F}.Debug|Win32.Build.0 = Debug|Win32
+		{B26A86ED-F166-4955-A171-20B9E1796B8F}.Release|Win32.ActiveCfg = Release|Win32
+		{B26A86ED-F166-4955-A171-20B9E1796B8F}.Release|Win32.Build.0 = Release|Win32
+	EndGlobalSection
+	GlobalSection(SolutionProperties) = preSolution
+		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		AMDCaProjectFile = D:\Development\AvP-Branch\trunk\CodeAnalyst\AvP.caw
+	EndGlobalSection
+EndGlobal
