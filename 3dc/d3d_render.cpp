@@ -1716,7 +1716,8 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 
 	texID_t textureID = SpecialFXImageNumber;
 
-	float RecipW, RecipH;
+	float RecipW = 1.0f;
+	float RecipH = 1.0f;
 	RCOLOR colour;
 
 	assert(RenderPolygon.NumberOfVertices == 4);
