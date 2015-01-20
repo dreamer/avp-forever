@@ -96,7 +96,7 @@ static void Net_AddSession(SessionDescription &session)
 	SessionData[NumberOfSessionsFound].host = session.host;
 	SessionData[NumberOfSessionsFound].port = session.port;
 
-	sprintf(SessionData[NumberOfSessionsFound].Name,"%s (%d/%d)", session.sessionName, session.nPlayers, session.maxPlayers);
+	sprintf(SessionData[NumberOfSessionsFound].Name,"%s (%u/%u)", session.sessionName, session.nPlayers, session.maxPlayers);
 
 	SessionData[NumberOfSessionsFound].Guid	= session.guidInstance;
 

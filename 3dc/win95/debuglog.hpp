@@ -47,7 +47,7 @@ public:
 	inline int dputs(char const * const buf)
 	{
 		if (!fname) return EOF;
-		FILE * fp = avp_fopen(fname,"a");
+		FILE * fp = avp_open_userfile(fname, "a");
 		if (!fp)
 		{
 			if (!ever_written) return EOF;
@@ -66,7 +66,7 @@ public:
 	inline int dprintf(char const * format, ... )
 	{
 		if (!fname) return -1;
-		FILE * fp = avp_fopen(fname,"a");
+		FILE * fp = avp_open_userfile(fname, "a");
 		if (!fp && !ever_written) return -1;
 		va_list ap;
 		va_start(ap, format);
@@ -93,7 +93,7 @@ public:
 	inline int vdprintf(char const * format, va_list ap)
 	{
 		if (!fname) return -1;
-		FILE * fp = avp_fopen(fname,"a");
+		FILE * fp = avp_open_userfile(fname, "a");
 		if (!fp && !ever_written) return -1;
 
 		int rv;
@@ -125,7 +125,7 @@ public:
 	inline int lprintf(char const * format, ... )
 	{
 		if (!fname) return -1;
-		FILE * fp = avp_fopen(fname,"a");
+		FILE * fp = avp_open_userfile(fname, "a");
 		if (!fp && !ever_written) return -1;
 		va_list ap;
 		va_start(ap, format);
@@ -152,7 +152,7 @@ public:
 	inline int vlprintf(char const * format, va_list ap)
 	{
 		if (!fname) return -1;
-		FILE * fp = avp_fopen(fname,"a");
+		FILE * fp = avp_open_userfile(fname, "a");
 		if (!fp && !ever_written) return -1;
 
 		int rv;

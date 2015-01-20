@@ -124,6 +124,10 @@ STICKYKEYS skOff;
 // entry point
 int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLine, int nCmdShow)
 {
+	SetWindowTitle();
+	ClearLog();
+	LogString(GetWindowTitle());
+
 	I_AVP_ENVIRONMENTS level_to_load = I_Num_Environments;
 	char *command_line = lpCmdLine;
 	char *instr = 0;
@@ -171,6 +175,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 					{
 						case 'a':
 							ForceLoad_Alien = TRUE;
+							printf("ForceLoad_Alien set to true\n");
 							break;
 						case 'm':
 							ForceLoad_Marine = TRUE;
@@ -206,6 +211,7 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 			else
 			{
 				ForceLoad_Alien = TRUE;
+				printf("ForceLoad_Alien set to true\n");
 			}
 			strpos = strstr(strpos, "-l");
 		}

@@ -2236,6 +2236,7 @@ void SetupAnimatedTextures(Shape_Chunk *sc, SHAPEHEADER *shp, Animation_Chunk *a
 	{
 		mgd = smdc->merge_data;
 		PolyConv = new int[smdc->num_polys];
+		assert(PolyConv);
 
 		for (int i = 0, j = 0; i < smdc->num_polys; i++)
 		{

@@ -95,7 +95,7 @@ int NextFMVTextureFrame(FMVTEXTURE *ftPtr)
 		// panning of 32768 = centre (both speakers)
 
 		fmvList[ftPtr->fmvHandle]->_audioStream->SetVolume(volume);
-//		fmvList[ftPtr->fmvHandle]->_audioStream->SetPan(PanningOfNearestVideoScreen);
+		fmvList[ftPtr->fmvHandle]->_audioStream->SetPan(PanningOfNearestVideoScreen);
 
 		ftPtr->SoundVolume = FmvSoundVolume;
 

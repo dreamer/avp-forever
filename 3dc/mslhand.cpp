@@ -74,20 +74,17 @@ void FlushMSLSection(MSL_SECTION sect)
 
 #if StandardShapeLanguage
 
-	int i;
-	
 	EnsureInitialized();
 
 	if (MSS_FREE == begins[sect] || MSS_FREE == ends[sect]) return;
 
-	for (i=begins[sect]; i<ends[sect]; ++i)
+	for (int i=begins[sect]; i<ends[sect]; ++i)
 	{
 		if (autodelete[i] && mainshapelist[i])
 		{
 			SHAPEHEADER * shp = mainshapelist[i];
 
 			int max_num_texs = 0;
-			int i;
 
 			if (shp->points)
 			{
@@ -113,7 +110,7 @@ void FlushMSLSection(MSL_SECTION sect)
 			*/
 			if (shp->items)
 			{
-				for (i=0; i<shp->numitems; i++)
+				for (int i=0; i<shp->numitems; i++)
 				{
 					if (shp->items[i][0] == 5 || shp->items[i][0] == 6)
 					{
@@ -121,9 +118,8 @@ void FlushMSLSection(MSL_SECTION sect)
 						max_num_texs = (std::max)(max_num_texs, shp->items[i][3] &0x7fff);
 						if(shp->items[i][2]& iflag_txanim)
 						{
-							int j;
 							TXANIMHEADER** thlist=(TXANIMHEADER**)shp->sh_textures[UVIndex];
-							for(j=1;thlist[j]!=0;j++)
+							for(int j=1;thlist[j]!=0;j++)
 							{
 								int k;
 								TXANIMHEADER* th=thlist[j];
@@ -155,15 +151,16 @@ void FlushMSLSection(MSL_SECTION sect)
 
 			if (shp->sh_localtextures)
 			{
-				for (i=0; i<(max_num_texs+1); i++)
+				for (int i=0; i<(max_num_texs+1); i++)
 				{
 					free (shp->sh_localtextures[i]);
 				}
 				free (shp->sh_localtextures);
 			}
 
-			if (shp->sh_instruction)
+			if (shp->sh_instruction) {
 				free(shp->sh_instruction);
+			}
 
 			free(shp);
 		}

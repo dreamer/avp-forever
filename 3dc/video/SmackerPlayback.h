@@ -43,7 +43,6 @@ class SmackerPlayback
 		bool _audioThreadInited;
 
 		bool _frameCriticalSectionInited;
-		bool _isLooped;
 
 		uint8_t _palette[768];
 		uint8_t *_frame;
@@ -69,8 +68,9 @@ class SmackerPlayback
 		volatile bool	_fmvPlaying;
 		bool			_audioStarted;
 		volatile bool	_frameReady;
+		bool			_isLooped;
 
-		int	Open(const std::string &fileName);
+		int	Open(const std::string &fileName, bool isLooped = false);
 		void Close();
 		bool IsPlaying();
 		bool ConvertFrame(uint32_t width, uint32_t height, uint8_t *bufferPtr, uint32_t pitch);

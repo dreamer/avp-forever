@@ -294,6 +294,8 @@ void Object_Chunk::destroy(File_Chunk * fc)
 	for (LIF<Chunk *> cli(&cl); !cli.done(); cli.next())
 	{
 		Object_Chunk * ob = (Object_Chunk *)cli();
+		assert(ob);
+
 		if (ob == this) continue;
 		
 		VModule_Array_Chunk * vmac = ob->get_vmod_chunk();

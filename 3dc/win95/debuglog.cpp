@@ -6,7 +6,7 @@
 LogFile::LogFile(char const * const _fname) : fname(0) , ever_written(0)
 {
 #ifdef WIN32
-	FILE * fp = avp_fopen(_fname,"w");
+	FILE * fp = avp_open_userfile(_fname, "w");
 	if (fp)
 	{
 		fclose(fp);
@@ -21,7 +21,7 @@ LogFile::LogFile(char const * const _fname) : fname(0) , ever_written(0)
 	strcpy(fname,path);
 	strncat(fname,"/",1);
 	strcat(fname,_fname);
-	fp = avp_fopen(fname,"w");
+	fp = avp_open_userfile(fname, "w");
 	if (fp)
 		fclose(fp);
 	else
@@ -36,11 +36,11 @@ LogFile::~LogFile()
 {
 	if (unwritten.size())
 	{
-		FILE * fp = avp_fopen(fname,"a");
+		FILE * fp = avp_open_userfile(fname, "a");
 		for (int attempt=0; !fp && attempt<10; ++attempt)
 		{
 			Sleep(100);
-			fp = avp_fopen(fname,"a");
+			fp = avp_open_userfile(fname, "a");
 		}
 		if (fp)
 		{

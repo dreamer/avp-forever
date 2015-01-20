@@ -209,6 +209,45 @@ char *GetSaveFolderPath()
 #endif
 }
 
+/* 
+   for files that should not be saved in the AvP game folder (ie /Program Files/ on windows.
+   for files such as user profile data, config files, screenshots etc
+*/
+FILE *avp_open_userfile(const char *fileName, const char *mode)
+{
+#ifdef _XBOX
+
+	finalPath.append("d:/");
+	finalPath.append(fileName);
+
+	// change forwardslashes in path to backslashes
+	std::replace(finalPath.begin(), finalPath.end(), '/', '\\');
+
+	return fopen(finalPath.c_str(), mode);
+#endif
+
+#ifdef WIN32
+
+	std::string sFileName(fileName);
+	std::string savePath(GetSaveFolderPath());
+	std::string finalPath;
+
+	size_t savePathSize = savePath.length();
+
+	// check if the path passed already contains the save folder path
+	size_t found = sFileName.find(savePath);
+	if (savePathSize >= found) {
+		// contains the path already
+		finalPath = sFileName;
+	}
+	else {
+		finalPath = savePath + sFileName;
+	}	
+
+	return fopen(finalPath.c_str(), mode);
+#endif
+}
+
 FILE *avp_fopen(const char *fileName, const char *mode)
 {
 	std::string finalPath;
@@ -225,16 +264,7 @@ FILE *avp_fopen(const char *fileName, const char *mode)
 #endif
 #ifdef WIN32
 
-	// if write mode, direct to home path
-	if ((strcmp(mode, "wb") == 0) || (strcmp(mode, "w") == 0))
-	{
-		finalPath += GetSaveFolderPath();
-		finalPath += fileName;
-	}
-	else
-	{
-		finalPath += fileName;
-	}
+	finalPath += fileName;
 
 	return fopen(finalPath.c_str(), mode);
 #endif
@@ -323,3 +353,21 @@ void avp_exit(int code)
 #endif
 }
 
+static const char *date = __DATE__;
+static const char *time = __TIME__;
+
+char windowTitle[256];
+
+char *GetWindowTitle()
+{
+	assert(strlen(windowTitle) != 0);
+	return windowTitle;
+}
+
+void SetWindowTitle()
+{
+	strcpy(windowTitle, "AvPx - Build Date: ");
+	strcat(windowTitle, date);
+	strcat(windowTitle, " at ");
+	strcat(windowTitle, time);
+}

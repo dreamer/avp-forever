@@ -62,7 +62,7 @@ SmackerPlayback::~SmackerPlayback()
 	}
 }
 
-int SmackerPlayback::Open(const std::string &fileName)
+int SmackerPlayback::Open(const std::string &fileName, bool isLooped)
 {
 #ifdef _XBOX
 	_fileName = "d:/";
@@ -70,6 +70,8 @@ int SmackerPlayback::Open(const std::string &fileName)
 #else
 	_fileName = fileName;
 #endif
+
+	_isLooped = isLooped;
 
 	// open the file
 	_handle = Smacker_Open(_fileName.c_str());
@@ -264,6 +266,14 @@ void *SmackerDecodeThread(void *args)
 		::Sleep(timeToSleep);
 
 		fmv->_currentFrame++;
+
+		if (fmv->_isLooped)
+		{
+			// handle looping
+			if (fmv->_currentFrame >= Smacker_GetNumFrames(fmv->_handle)) {
+//				Smacker_GotoFrame(fmv->_handle, 0);
+			}
+		}
 	}
 
 	/*

@@ -1968,7 +1968,7 @@ bool R_ChangeResolution(uint32_t width, uint32_t height)
 bool InitialiseDirect3D()
 {
 	// clear log file first, then write header text
-	ClearLog();
+//	ClearLog();
 	Con_PrintMessage("Starting to initialise Direct3D9");
 
 	// grab the users selected resolution from the config file
@@ -2953,7 +2953,7 @@ bool SetRenderStateDefaults()
 	d3d.lpD3DDevice->SetSamplerState(0, D3DSAMP_MAXANISOTROPY, 16);
 #endif
 
-/*
+/*  // SetTextureStageState is ignored when using HLSL
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLOROP,	D3DTOP_MODULATE);
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLORARG1,	D3DTA_TEXTURE);
 	d3d.lpD3DDevice->SetTextureStageState(0, D3DTSS_COLORARG2,	D3DTA_DIFFUSE);

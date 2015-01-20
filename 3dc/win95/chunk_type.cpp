@@ -520,8 +520,6 @@ ChunkShape::ChunkShape(const ChunkShape &shp)
 
 ChunkShape& ChunkShape::operator=(const ChunkShape &shp)
 {
-	int i;
-
 	delete[] v_list;
 	delete[] v_normal_list;
 	delete[] p_normal_list;
@@ -554,7 +552,7 @@ ChunkShape& ChunkShape::operator=(const ChunkShape &shp)
 	if (shp.v_list)
 	{
 		v_list = new ChunkVectorInt [num_verts];
-		for (i=0; i < num_verts; i++)
+		for (int i=0; i < num_verts; i++)
 		{
 			v_list[i] = shp.v_list[i];
 		}
@@ -563,7 +561,7 @@ ChunkShape& ChunkShape::operator=(const ChunkShape &shp)
 	if (shp.v_normal_list)
 	{
 		v_normal_list = new ChunkVectorFloat [num_verts];
-		for (i=0; i < num_verts; i++)
+		for (int i=0; i < num_verts; i++)
 		{
 			v_normal_list[i] = shp.v_normal_list[i];
 		}
@@ -572,7 +570,7 @@ ChunkShape& ChunkShape::operator=(const ChunkShape &shp)
 	if (shp.p_normal_list)
 	{
 		p_normal_list = new ChunkVectorFloat [num_polys];
-		for (i=0; i < num_polys; i++)
+		for (int i=0; i < num_polys; i++)
 		{
 			p_normal_list[i] = shp.p_normal_list[i];
 		}
@@ -581,7 +579,7 @@ ChunkShape& ChunkShape::operator=(const ChunkShape &shp)
 	if (shp.poly_list)
 	{
 		poly_list = new ChunkPoly [num_polys];
-		for (i=0; i < num_polys; i++)
+		for (int i=0; i < num_polys; i++)
 		{
 			poly_list[i] = shp.poly_list[i];
 		}
@@ -590,7 +588,7 @@ ChunkShape& ChunkShape::operator=(const ChunkShape &shp)
 	if (shp.uv_list)
 	{
 		uv_list = new ChunkUV_List [num_uvs];
-		for (i=0; i < num_uvs; i++)
+		for (int i=0; i < num_uvs; i++)
 		{
 			uv_list[i] = shp.uv_list[i];
 		}
@@ -599,7 +597,7 @@ ChunkShape& ChunkShape::operator=(const ChunkShape &shp)
 	if (shp.texture_fns)
 	{
 		texture_fns = new char * [num_texfiles];
-		for (i=0; i < num_texfiles; i++)
+		for (int i=0; i < num_texfiles; i++)
 		{
 			texture_fns[i] = new char [strlen (shp.texture_fns[i]) + 1];
 			strcpy (texture_fns[i], shp.texture_fns[i]);

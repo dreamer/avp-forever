@@ -506,47 +506,42 @@ void FlushTextprintBuffer(void)
 
 	/* CODE: */
 	{
+		DAVEPRINTCHAR* pDPR=&DHM_PrintQueue[0];
+
+		for (int i=0; i<DHM_NumCharsInQueue; i++)
 		{
-			int i;
-			DAVEPRINTCHAR* pDPR=&DHM_PrintQueue[0];
-
-			for (i=0; i<DHM_NumCharsInQueue; i++)
-			{
-			#if 0
-				BlitWin95Char
-				(
-					pDPR->x, 
-					pDPR->y,
-					pDPR->CharToPrint
-				);
-			#else 
-				D3D_BlitWhiteChar
-				(
-					pDPR->x, 
-					pDPR->y,
-					pDPR->CharToPrint
-				);
-			#endif
-				pDPR++;
-			}
-
-			if (fTextLost)
-			{
-				/* Display error message in case test has been lost due to clipping of Y edge, or buffer overflow */
-				size_t NumChars = strlen(TextLostMessage);
-				size_t i;
-
-				for (i = 0; i < NumChars; i++)
-				{
-	   //			   	BlitWin95Char(TEXT_LOST_X+(i*CharWidth),TEXT_LOST_Y,TextLostMessage[i]);
-				}
-
-				fTextLost=FALSE;
-			}
+		#if 0
+			BlitWin95Char
+			(
+				pDPR->x, 
+				pDPR->y,
+				pDPR->CharToPrint
+			);
+		#else 
+			D3D_BlitWhiteChar
+			(
+				pDPR->x, 
+				pDPR->y,
+				pDPR->CharToPrint
+			);
+		#endif
+			pDPR++;
 		}
-		DHM_NumCharsInQueue=0;
 
+		if (fTextLost)
+		{
+			/* Display error message in case test has been lost due to clipping of Y edge, or buffer overflow */
+			size_t NumChars = strlen(TextLostMessage);
+
+			for (size_t i = 0; i < NumChars; i++)
+			{
+	//			   	BlitWin95Char(TEXT_LOST_X+(i*CharWidth),TEXT_LOST_Y,TextLostMessage[i]);
+			}
+
+			fTextLost=FALSE;
+		}
 	}
+	DHM_NumCharsInQueue=0;
 }
 
 static int LastDisplayableXForChars(void)

@@ -48,7 +48,7 @@ unsigned char ToAsciiTable[256][256];
 */
 
 const char *className = "AvP";
-const char *windowTitle = "AvP";
+// const char *windowTitle = "AvP";
 
 //	Necessary globals
 
@@ -112,7 +112,7 @@ LRESULT CALLBACK WindowProc(HWND hWnd, UINT message, WPARAM wParam, LPARAM lPara
 
 		case WM_INPUT:
 		{
-			UINT dwSize;
+			UINT dwSize = 0;
 			::GetRawInputData((HRAWINPUT)lParam, RID_INPUT, NULL, &dwSize, sizeof(RAWINPUTHEADER));
 			assert(dwSize == 40);
 
@@ -461,7 +461,7 @@ bool InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 
 		hWndMain = ::CreateWindow(
 			className,
-			windowTitle,
+			GetWindowTitle(),
 			0,
 			clientRect.left,
 			clientRect.top,
@@ -484,7 +484,7 @@ bool InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode)
 		hWndMain = ::CreateWindowEx(
 			WS_EX_TOPMOST,
 			className,   // Name of class (registered by RegisterClass call above) 
-			windowTitle, // Name of window 
+			GetWindowTitle(), // Name of window 
 			WS_POPUP,
 			0,
 			0,
