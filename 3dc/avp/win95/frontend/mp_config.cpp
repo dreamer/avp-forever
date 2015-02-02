@@ -199,13 +199,14 @@ const char* GetMultiplayerConfigDescription(int index)
 
 	char filename[MAX_PATH];
 	if (netGameData.skirmishMode) {
-		sprintf(filename, "%s%s/%s.skirmish_cfg", GetSaveFolderPath(), MP_CONFIG_DIR, name);
+		sprintf(filename, "%s/%s.skirmish_cfg", MP_CONFIG_DIR, name);
 	}
 	else {
-		sprintf(filename, "%s%s/%s.cfg", GetSaveFolderPath(), MP_CONFIG_DIR, name);
+		sprintf(filename, "%s/%s.cfg", MP_CONFIG_DIR, name);
 	}
 
-	FILE* file = avp_fopen(filename, "rb");
+	// TODO - fixme
+	FILE* file = avp_open_userfile(filename, "rb");
 	if (!file)
 	{
 		return 0;

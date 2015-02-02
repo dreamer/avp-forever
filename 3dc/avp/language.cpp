@@ -65,6 +65,7 @@ void InitTextStrings(void)
 		ChangeWindowsSize(1, 1);
 		avp_MessageBox(message, MB_OK);
 		avp_exit(1);
+		return;
 	}
 
 	if (!strncmp(TextBufferPtr, "REBCRIF1", 8))

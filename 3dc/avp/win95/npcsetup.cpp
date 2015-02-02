@@ -257,10 +257,8 @@ List<int> LoadedNPC::image_groups;
 
 void InitNPCs(RIFFHANDLE h)
 {
-	
 	File_Chunk * old_env_chunk = Env_Chunk; // push Env_Chunk
-	
-	
+
 	// build list of objects for the npcs in this level
 
 	for(int i=0;i<HNPC_Last;i++)
@@ -268,7 +266,7 @@ void InitNPCs(RIFFHANDLE h)
 		Load_HNPC[i]=FALSE;
 	}
 
-	#if debug
+//	#if debug
 	if(ForceLoad_Alien)Load_HNPC[HNPC_Alien]=TRUE;
 	if(ForceLoad_Marine)Load_HNPC[HNPC_Marine]=TRUE;
 	if(ForceLoad_Predator)Load_HNPC[HNPC_Predator]=TRUE;
@@ -279,7 +277,7 @@ void InitNPCs(RIFFHANDLE h)
 	if(ForceLoad_Xenoborg)Load_HNPC[HNPC_Xenoborg]=TRUE;
 	if(ForceLoad_Pretorian)Load_HNPC[HNPC_Pretorian]=TRUE;
 	if(ForceLoad_SentryGun)Load_HNPC[HNPC_SentryGun]=TRUE;
-	#endif
+//	#endif
 	
 	HNPC_Files DefaultGeneratorEnemy;
 	
@@ -294,7 +292,7 @@ void InitNPCs(RIFFHANDLE h)
 				break;
 			case Generate_Marines :
 				DefaultGeneratorEnemy=HNPC_Marine;
-				break;					
+				break;
 			default :
 				DefaultGeneratorEnemy=HNPC_Marine;
 				GLOBALASSERT("Invalid enemy type"==0);
@@ -332,7 +330,6 @@ void InitNPCs(RIFFHANDLE h)
 		Load_HNPC[HNPC_Marine]=TRUE;
 	}
 	
-	
 	/* KJL 16:31:03 06/05/98 - Force all characters to be loaded 
 	for testing of 'bots etc. */
 	
@@ -344,7 +341,7 @@ void InitNPCs(RIFFHANDLE h)
 	#endif
 
 	Special_Objects_Chunk * soc = 0;
- 	soc = (Special_Objects_Chunk *)((Chunk_With_Children*)h->envd)->lookup_single_child ("SPECLOBJ");
+	soc = (Special_Objects_Chunk *)((Chunk_With_Children*)h->envd)->lookup_single_child ("SPECLOBJ");
 	
 	if (soc)
 	{
@@ -353,7 +350,7 @@ void InitNPCs(RIFFHANDLE h)
 		for (LIF<Chunk *> cli(&cl); !cli.done(); cli.next())
 		{
 			AVP_Generator_Chunk * agc = (AVP_Generator_Chunk *)cli();
-		
+
 			if (agc->type)
 			{
 				#if 0 //forget about game mode settings for generators / badguys

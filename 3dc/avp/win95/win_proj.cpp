@@ -1,4 +1,4 @@
-#ifdef WIN32
+#ifdef _WIN32
 /****
 
 Project specific (or potentially project specific) windows functionality
@@ -590,4 +590,4 @@ BOOL ExitWindowsSystem(void)
 	return ::DestroyWindow(hWndMain);
 }
 
-#endif //ifdef WIN32
+#endif //ifdef _WIN32

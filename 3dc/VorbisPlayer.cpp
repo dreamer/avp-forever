@@ -47,7 +47,7 @@ extern int musicVolume; // volume control from menus
 
 std::vector<std::string> TrackList;
 
-#ifdef WIN32
+#ifdef _WIN32
 	const std::string tracklistFilename = "Music/ogg_tracks.txt";
 	const std::string musicFolderName = "Music/";
 #endif

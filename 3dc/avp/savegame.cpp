@@ -31,6 +31,7 @@
 #include "fmvCutscenes.h"
 #define UseLocalAssert TRUE
 #include "ourasert.h"
+#include <assert.h>
 
 extern void NewOnScreenMessage(char *messagePtr);
 extern void GetFilenameForSaveSlot(int i, char *filenamePtr);
@@ -302,6 +303,7 @@ void* GetPointerForSaveBlock(unsigned int size)
 
 		//allocate the memory
 		SaveInfo.BufferStart = (char*) realloc(SaveInfo.BufferStart,newBufferSize);
+		assert(SaveInfo.BufferStart);
 
 		//correct the position etc.
 		SaveInfo.BufferPos = SaveInfo.BufferStart + SaveInfo.BufferSpaceUsed;

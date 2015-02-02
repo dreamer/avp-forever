@@ -1,4 +1,4 @@
-#ifdef WIN32
+#ifdef _WIN32
 
 #ifndef _included_d3_func_h_
 #define _included_d3_func_h_

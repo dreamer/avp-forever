@@ -29,7 +29,7 @@
 #include "logString.h"
 #include <assert.h>
 
-#ifdef WIN32
+#ifdef _WIN32
 	#include <shlobj.h>
 	#include <shlwapi.h>
 #endif
@@ -39,7 +39,7 @@ static char saveFolder[MAX_PATH] = {0};
 // TODO: remove this
 extern void ReleaseDirect3D();
 
-#ifdef WIN32
+#ifdef _WIN32
 	extern HWND	hWndMain;
 #endif
 
@@ -118,7 +118,7 @@ char *GetSaveFolderPath()
 	strcat(saveFolder, "D:\\");
 	return saveFolder;
 #endif
-#ifdef WIN32
+#ifdef _WIN32
 
 	// get path to users "My Documents" folder
 	if (FAILED(::SHGetFolderPath(NULL, CSIDL_MYDOCUMENTS, NULL, SHGFP_TYPE_CURRENT, saveFolder)))
@@ -226,7 +226,7 @@ FILE *avp_open_userfile(const char *fileName, const char *mode)
 	return fopen(finalPath.c_str(), mode);
 #endif
 
-#ifdef WIN32
+#ifdef _WIN32
 
 	std::string sFileName(fileName);
 	std::string savePath(GetSaveFolderPath());
@@ -262,7 +262,7 @@ FILE *avp_fopen(const char *fileName, const char *mode)
 
 	return fopen(finalPath.c_str(), mode);
 #endif
-#ifdef WIN32
+#ifdef _WIN32
 
 	finalPath += fileName;
 
@@ -284,7 +284,7 @@ DWORD avp_GetFileAttributes(LPCTSTR lpFileName)
 
 	return GetFileAttributes(finalPath.c_str());
 #endif
-#ifdef WIN32
+#ifdef _WIN32
 	return GetFileAttributes(lpFileName);
 #endif
 }
@@ -304,7 +304,7 @@ HANDLE avp_CreateFile(LPCTSTR lpFileName, DWORD dwDesiredAccess, DWORD dwShareMo
 	return CreateFile(finalPath.c_str(), dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
 
 #endif
-#ifdef WIN32
+#ifdef _WIN32
 	return CreateFile(lpFileName, dwDesiredAccess, dwShareMode, lpSecurityAttributes, dwCreationDisposition, dwFlagsAndAttributes, hTemplateFile);
 #endif
 }
@@ -323,7 +323,7 @@ HANDLE avp_FindFirstFile(LPCTSTR lpFileName, LPWIN32_FIND_DATA lpFindFileData)
 
 	return FindFirstFile(finalPath.c_str(), lpFindFileData);
 #endif
-#ifdef WIN32
+#ifdef _WIN32
 	return FindFirstFile(lpFileName, lpFindFileData);
 #endif
 }
@@ -340,7 +340,7 @@ void avp_GetCommandLineArgs(char *args, uint32_t size)
 
 void avp_MessageBox(const char* message, int type)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	ReleaseDirect3D();
 	MessageBox(hWndMain, message, "AvP Error", type);
 #endif
@@ -348,7 +348,7 @@ void avp_MessageBox(const char* message, int type)
 
 void avp_exit(int code)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	exit(code);
 #endif
 }

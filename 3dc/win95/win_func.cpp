@@ -1,5 +1,5 @@
 
-#ifdef WIN32 // windows only
+#ifdef _WIN32 // windows only
 /****
 
 Windows functionality that is definitely
@@ -43,4 +43,4 @@ void CheckForWindowsMessages(void)
 	while (!bActive);
 }
 
-#endif // ifdef WIN32
+#endif // ifdef _WIN32

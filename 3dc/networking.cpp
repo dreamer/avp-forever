@@ -978,7 +978,7 @@ static NetResult Net_CreateSession(const char *sessionName, const char *levelNam
 {
 	memset(&netSession, 0, sizeof(netSession));
 
-#ifdef WIN32
+#ifdef _WIN32
 	CoCreateGuid(&netSession.guidInstance);
 #endif
 

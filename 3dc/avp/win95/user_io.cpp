@@ -51,7 +51,7 @@ extern int CameraZoomLevel;
 extern int MouseVelX;
 extern int MouseVelY;
 
-#ifdef WIN32
+#ifdef _WIN32
 extern JOYINFOEX JoystickData;
 extern JOYCAPS JoystickCaps;
 #endif
@@ -1615,7 +1615,7 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 /* XInput -------------------------------------------------------------------------------------------------- */
 	}
 
-#ifdef WIN32
+#ifdef _WIN32
 	/* KJL 18:27:34 04/29/97 - joystick control */
 	if (GotJoystick)
 	{
@@ -1854,7 +1854,7 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 		#endif
 	}
 
-#endif // ifdef WIN32
+#endif // ifdef _WIN32
 
 	/* KJL 16:03:06 05/11/97 - Handle map options */
 	#if 0
@@ -1922,7 +1922,7 @@ void SaveKeyConfiguration(void)
 void LoadAKeyConfiguration(char* Filename)
 {
 	#if 0
-	FILE* file = avp_fopen(Filename, "rb");
+	FILE* file = avp_open_userfile(Filename, "rb");
 	if (!file)
 	{
 		MarineInputPrimaryConfig = DefaultMarineInputPrimaryConfig;
@@ -1950,7 +1950,7 @@ void LoadAKeyConfiguration(char* Filename)
 void SaveAKeyConfiguration(char* Filename)
 {
 	#if 0
-	FILE* file = avp_fopen(Filename, "wb");
+	FILE* file = avp_open_userfile(Filename, "wb");
 	if (!file) return;
 
 	fwrite(&MarineInputPrimaryConfig,sizeof(PLAYER_INPUT_CONFIGURATION),1,file);
@@ -1969,7 +1969,7 @@ void SaveAKeyConfiguration(char* Filename)
 
 void SaveDefaultPrimaryConfigs(void)
 {
-	FILE* file = avp_fopen("default.cfg","wb");
+	FILE* file = avp_open_userfile("default.cfg", "wb");
 	if (!file) return;
 
 	fwrite(&DefaultMarineInputPrimaryConfig,   sizeof(PLAYER_INPUT_CONFIGURATION), 1, file);
@@ -1981,8 +1981,8 @@ void SaveDefaultPrimaryConfigs(void)
 
 void LoadDefaultPrimaryConfigs(void)
 {
-#ifdef WIN32
-	FILE* file = avp_fopen("default.cfg","rb");
+#ifdef _WIN32
+	FILE* file = avp_open_userfile("default.cfg", "rb");
 	if (!file) return;
 
 	fread(&DefaultMarineInputPrimaryConfig,   sizeof(PLAYER_INPUT_CONFIGURATION), 1, file);

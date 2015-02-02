@@ -1,6 +1,6 @@
 
 // only for windows
-#ifdef WIN32
+#ifdef _WIN32
 #include "os_header.h"
 #include <process.h>
 

@@ -28,7 +28,7 @@ void LogCameraPosForModuleLinking()
 	strcat(Filename, Env_List[AvP.CurrentEnv]->main);
 	strcat(Filename, ".mlf");
 
-	FILE* file = avp_fopen(Filename,"ab");
+	FILE* file = avp_open_userfile(Filename, "ab");
 	if (!file )return;
 
 	char output_buffer[300];

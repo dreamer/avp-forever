@@ -136,7 +136,7 @@ void RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_KEYDOWN( WPARAM wParam )
 /* Functions callable from the WinMain() body of code */
 void RE_ENTRANT_QUEUE_WinMain_FlushMessages(void)
 {
-#ifdef WIN32
+#ifdef _WIN32
 	// Process the messages:
 	{
 		#if UseGadgets

@@ -76,7 +76,7 @@
       <AdditionalOptions>/MP /J %(AdditionalOptions)</AdditionalOptions>
       <Optimization>Disabled</Optimization>
       <AdditionalIncludeDirectories>..\..\3dc;..\..\3dc\avp;..\..\3dc\video;..\;..\..\3dc\avp\support;..\..\3dc\avp\win95;..\..\3dc\avp\win95\frontend;..\..\3dc\avp\win95\gadgets;..\..\3dc\include;..\..\3dc\win95;..\..\win32;..\..\enet\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;D3D_DEBUG_INFO;USE_D3D9;USE_OPENAL;_DEBUG;AVP_DEBUG_VERSION;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>D3D_DEBUG_INFO;USE_D3D9;USE_OPENAL;_DEBUG;AVP_DEBUG_VERSION;_CRT_SECURE_NO_WARNINGS;_WIN32_WINNT=0x0501;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>false</MinimalRebuild>
       <ExceptionHandling>Sync</ExceptionHandling>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
@@ -152,7 +152,7 @@
       <OmitFramePointers>true</OmitFramePointers>
       <WholeProgramOptimization>true</WholeProgramOptimization>
       <AdditionalIncludeDirectories>..\..\3dc;..\..\3dc\video;..\..\3dc\avp;..\..\3dc\avp\support;..\..\3dc\avp\win95;..\..\3dc\avp\win95\frontend;..\..\3dc\avp\win95\gadgets;..\..\3dc\include;..\..\3dc\win95;..\..\win32;..\..\enet\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>WIN32;USE_D3D9;_WINDOWS;USE_OPENAL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINNT=0x0501;_SECURE_SCL=0;_HAS_ITERATOR_DEBUGGING=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>USE_D3D9;_WINDOWS;USE_OPENAL;NDEBUG;_CRT_SECURE_NO_DEPRECATE;_WIN32_WINNT=0x0501;_SECURE_SCL=0;_HAS_ITERATOR_DEBUGGING=0;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <ExceptionHandling>Sync</ExceptionHandling>
       <BasicRuntimeChecks>Default</BasicRuntimeChecks>
@@ -596,6 +596,7 @@
     <ClInclude Include="..\..\3dc\include\prototyp.h" />
     <ClInclude Include="..\..\3dc\include\shape.h" />
     <ClInclude Include="..\..\3dc\MemoryStream.h" />
+    <ClInclude Include="..\..\3dc\os_header.h" />
     <ClInclude Include="..\..\3dc\video\BinkPlayback.h" />
     <ClInclude Include="..\..\3dc\video\SmackerPlayback.h" />
     <ClInclude Include="..\..\3dc\video\TheoraPlayback.h" />
@@ -641,6 +642,8 @@
     <ClInclude Include="..\..\3dc\win95\showcmds.h" />
     <ClInclude Include="..\..\3dc\win95\shpanim.h" />
     <ClInclude Include="..\..\3dc\win95\zsp.hpp" />
+    <ClInclude Include="..\d3_func.h" />
+    <ClInclude Include="..\resource.h" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="..\AvP.rc" />

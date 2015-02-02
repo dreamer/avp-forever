@@ -357,7 +357,7 @@ void KeyBinding :: WriteToConfigFile(char* Filename)
 
 	GLOBALASSERT(Filename);
 
-	FILE* pFile = avp_fopen(Filename,"w");
+	FILE* pFile = avp_open_userfile(Filename, "w");
 
 	if (!pFile)
 	{
@@ -401,11 +401,10 @@ void KeyBinding :: WriteToConfigFile(char* Filename)
 		(
 			List_pKeyBindings . size() > 0
 		)
-		{
-			delete List_pKeyBindings . first_entry();
-				// The destructor for the KeyBinding will remove
-				// it from the list and hence the list will shrink.
-		}
+	
+		delete List_pKeyBindings . first_entry();
+		// The destructor for the KeyBinding will remove
+		// it from the list and hence the list will shrink.
 	}
 }
 
@@ -893,10 +892,7 @@ bool KeyBinding :: ParseBindCommand
 
 		return bGotMatch;
 	}
-
 }
-
-
 
 // private:
 // Maintain a static list of all of objects of the class:
@@ -916,6 +912,3 @@ void CONSBIND_WriteKeyBindingsToConfigFile(void)
 	KeyBinding :: WriteToConfigFile("CONFIG.CFG");
 	#endif
 }
-
-
-/* Internal function definitions ***********************************/

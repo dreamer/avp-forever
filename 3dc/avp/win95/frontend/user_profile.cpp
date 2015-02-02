@@ -98,19 +98,20 @@ void EmptyUserProfilesList()
 
 extern int SaveUserProfile(AVP_USER_PROFILE *profilePtr)
 {
-	// avp_fopen will add SaveFolderPath for us
+	// avp_open_userfile will add SaveFolderPath for us
 	char *filename = new char [strlen(USER_PROFILES_PATH) + strlen(profilePtr->Name) + strlen(USER_PROFILES_SUFFIX) + 1];
 
 	strcpy(filename, USER_PROFILES_PATH);
 	strcat(filename, profilePtr->Name);
 	strcat(filename, USER_PROFILES_SUFFIX);
 
-	FILE* file = avp_fopen(filename, "wb");
+	FILE* file = avp_open_userfile(filename, "wb");
 
 	delete[] filename;
 
-	if (!file)
+	if (!file) {
 		return 0;
+	}
 
 	SaveSettingsToUserProfile(profilePtr);
 

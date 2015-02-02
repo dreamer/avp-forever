@@ -47,6 +47,7 @@ int IsThisObjectVisibleFromThisPosition_WithIgnore(DISPLAYBLOCK *objectPtr, DISP
 
 #include "networking.h"
 #include "MemoryStream.h"
+#include <assert.h>
 
 /*----------------------------------------------------------------------
   Some globals for use in this file
@@ -1049,7 +1050,7 @@ static void ProcessSystemMessage(uint8_t *msgP, size_t msgSize)
 		default:
 		{
 			char buf[100];
-			sprintf(buf, "invalid system message type: %d\n", newMessageHeader.messageType);
+			sprintf(buf, "invalid system message type: %u\n", newMessageHeader.messageType);
 			OutputDebugString(buf);
 			/* invalid system message type: ignore */
 			break;
@@ -9590,22 +9591,22 @@ static FILE *netLogfile;
 void InitNetLog(void)
 {
 #if logNetGameProcesses
-	netLogfile = avp_fopen("NETINFO.TXT", "w");
+	netLogfile = avp_open_userfile("NETINFO.TXT", "w");
 	fprintf(netLogfile, "NETGAME DEBUGGING LOG \n \n");
 	fclose(netLogfile);
 #endif
 }
 
-void LogNetInfo(char *msg)
+void LogNetInfo(char *_msg)
 {
 #if logNetGameProcesses
 
-	if (!msg) {
+	if (!_msg) {
 		return;
 	}
 
-	netLogfile = avp_fopen("NETINFO.TXT", "a");
-	fprintf(netLogfile, msg);
+	netLogfile = avp_open_userfile("NETINFO.TXT", "a");
+	fprintf(netLogfile, _msg);
 	fclose(netLogfile);
 #endif
 }
@@ -9651,6 +9652,12 @@ void CreatePlayersImageInMirror(void)
 		case (I_Alien):
 		{
 			type = I_BehaviourAlienPlayer;
+			break;
+		}
+		default:
+		{
+			assert(1 == 0);
+			return;
 			break;
 		}
 	}
@@ -10437,7 +10444,7 @@ static void Handle_LastManStanding_RestartTimer(unsigned char time)
 	else
 	{
 		// show countdown
-		sprintf(OnScreenMessageBuffer, "%d...", time);
+		sprintf(OnScreenMessageBuffer, "%u...", time);
 		NewOnScreenMessage(OnScreenMessageBuffer);
 	}
 }

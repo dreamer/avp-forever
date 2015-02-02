@@ -57,16 +57,13 @@ BatchFileProcessing :: Run(char* Filename)
 	// to ProjChar
 
 	RefList<SCString> PendingList;
-
 	{
-		FILE* pFile = avp_fopen(Filename,"r");
+		FILE *pFile = avp_open_userfile(Filename, "r");
 
 		if (NULL==pFile)
 		{
 			return FALSE;
 		}
-		
-		
 
 		// Read the file, line by line.  
 		{

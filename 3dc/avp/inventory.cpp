@@ -246,6 +246,9 @@ void InitialisePlayersInventory(PLAYER_STATUS *playerStatusPtr)
 		case I_Predator:
 			PlayerWeaponKey=&PredatorWeaponKey[0];
 			break;
+		default:
+			assert(1 == 0);
+			return;
 	}
 	
 
