@@ -121,7 +121,7 @@ int GetSequenceID(int sequence_type, int sub_sequence)
 SEQUENCE *GetSequencePointer(int sequence_type, int sub_sequence, SECTION *this_section)
 {
 	int sequence_id, a;
-	SEQUENCE *sequence_pointer;
+	SEQUENCE *sequence_pointer = NULL;
 	sequence_id = GetSequenceID(sequence_type, sub_sequence);
 
 	for (a = 0; a < this_section->num_sequences; a++)
