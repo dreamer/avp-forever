@@ -4247,7 +4247,7 @@ void MakeFlechetteExplosionAt(VECTORCH *positionPtr,int seed)
 
 void MakeMolotovExplosionAt(VECTORCH *positionPtr,int seed)
 {
-	enum PARTICLE_ID particle_to_use;
+	enum PARTICLE_ID particle_to_use = PARTICLE_NULL;
 
 	if(!seed)
 	{
