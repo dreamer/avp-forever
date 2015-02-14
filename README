@@ -7,7 +7,8 @@ Table of Contents:
 3. Compilation
 4. Installation
 5. Credits
-a. Gold edition MD5s
+a. Change History
+b. Gold edition MD5s
 
 
 Part 1: Introduction
@@ -71,8 +72,20 @@ Chuck Mason, initial OpenAL implementation
 
 For everything else, there's http://community.ioquake.org/c/avp
 
+Appendix A: Change History
+--------------------------
 
-Appendix A: Gold edition MD5s
+20150214:
+OpenGL ES 1.1 compatibility
+SDL2 support progress
+
+20141225:
+CMake build system
+x86_64 support
+Beginnings of SDL2 support
+
+ 
+Appendix B: Gold edition MD5s
 -----------------------------
 
 A proper install of the Gold edition should look similar to this:

@@ -130,8 +130,7 @@ namespace AwTl {
 		DDSurface * surfaceP;
 		void * voidP;
 		SurfUnion(){}
-		SurfUnion(D3DTexture * p) : textureP(p){}
-		SurfUnion(DDSurface * p) : surfaceP(p){}
+		SurfUnion(void * p) : voidP(p){}
 	};
 
 	union PtrUnion

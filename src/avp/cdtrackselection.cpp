@@ -130,6 +130,7 @@ void LoadCDTrackList()
 	//copy the file contents into a buffer
 	buffer=new char[file_size+1];
 	fread(buffer, 1, file_size, file);
+	buffer[file_size]='\0';
 	fclose(file);
 	
 	char* bufferptr=buffer;

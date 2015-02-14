@@ -1,6 +1,7 @@
 #include <math.h>
 
 #include "3dc.h"
+#include "mathline.h"
 
 void ADD_LL(LONGLONGCH *a, LONGLONGCH *b, LONGLONGCH *c);
 void ADD_LL_PP(LONGLONGCH *c, LONGLONGCH *a);
@@ -12,20 +13,12 @@ void EQUALS_LL(LONGLONGCH *a, LONGLONGCH *b);
 void NEG_LL(LONGLONGCH *a);
 void ASR_LL(LONGLONGCH *a, int shift);
 void IntToLL(LONGLONGCH *a, int *b);
-int MUL_FIXED(int a, int b);
 int DIV_FIXED(int a, int b);
-
-#define DIV_INT(a, b) ((a) / (b))
 
 int NarrowDivide(LONGLONGCH *a, int b);
 int WideMulNarrowDiv(int a, int b, int c);
 void RotateVector_ASM(VECTORCH *v, MATRIXCH *m);
 void RotateAndCopyVector_ASM(VECTORCH *v1, VECTORCH *v2, MATRIXCH *m);
-
-#if 0
-int FloatToInt(float);
-#define f2i(a, b) { a = FloatToInt(b); }
-#endif
 
 #undef ASM386
 
@@ -450,63 +443,10 @@ __asm__("movl	0(%%esi), %%eax		\n\t"
 #endif
 }
 
-/*
-
- Fixed Point Multiply.
-
-
- 16.16 * 16.16 -> 16.16
- or
- 16.16 * 0.32 -> 0.32
-
- A proper version of this function ought to read
- 16.16 * 16.16 -> 32.16
- but this would require a __int64 result
-
- Algorithm:
-
- Take the mid 32 bits of the 64 bit result
-
-*/
-
-/*
-	These functions have been checked for suitability for 
-	a Pentium and look as if they would work adequately.
-	Might be worth a more detailed look at optimising
-	them though.
-*/
-
-int MUL_FIXED(int a, int b)
-{
-/*
-	int retval;
-	_asm
-	{
-		mov eax,a
-		imul b
-		shrd eax,edx,16
-		mov retval,eax
-	}
-*/
-
-#if defined(ASM386)
-	int retval;
-__asm__("imull	%2			\n\t"
-	"shrdl	$16, %%edx, %%eax	\n\t"
-	: "=a" (retval)
-	: "0" (a), "m" (b)
-	: "%edx", "cc"
-	);
-	return retval;
-#else
-	__int64 aa = (__int64) a;
-	__int64 bb = (__int64) b;
-	
-	__int64 cc = aa * bb;
-	
-	return (int) ((cc >> 16) & 0xffffffff);
-#endif
-}
+//
+// Fixed Point Multiply - MUL_FIXED
+// See mathline.h
+//
 
 /*
 
@@ -560,17 +500,6 @@ __asm__("cdq				\n\t"
  Multiply and Divide Functions.
 
 */
-
-
-/*
-
- 32/32 division
-
- This macro is a function on some other platforms
-
-*/
-
-#define DIV_INT(a, b) ((a) / (b))
 
 /*
 
@@ -687,31 +616,7 @@ __asm__ volatile
 	
 	return sqrt_temp;
 #else
-	return (int) sqrt( (float)A );
-#endif
-}
-
-/*
-
- This may look ugly (it is) but it is a MUCH faster way to convert "float" into "int" than
- the function call "CHP" used by the WATCOM compiler.
-
-*/
-
-volatile float fti_fptmp;
-volatile int fti_itmp;
-
-void FloatToInt()
-{
-#if defined(ASM386)
-__asm__ volatile
-	("flds	fti_fptmp		\n\t"
-	"fistpl	fti_itmp		\n\t"
-	:
-	:
-	: "memory", "cc"
-	);
-#else
-	fti_itmp = (int)fti_fptmp;	
+    float fA = A;
+	return lrintf(sqrtf(fA));
 #endif
 }

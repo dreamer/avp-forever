@@ -386,7 +386,7 @@ AwTl::SurfUnion AwBackupTexture::Restore(AwTl::CreateTextureParms const & rParam
 	
 	if (!pixelFormat.validB)
 		db_log3("AwCreateGraphic(): ERROR: pixel format not valid");
-	if (!driverDesc.ddP || !driverDesc.validB && rParams.loadTextureB)
+	if (!driverDesc.ddP || (!driverDesc.validB && rParams.loadTextureB))
 		db_log3("AwCreateGraphic(): ERROR: driver description not valid");
 	
 	awTlLastErr = pixelFormat.validB && driverDesc.ddP && (driverDesc.validB || !rParams.loadTextureB) ? AW_TLE_OK : AW_TLE_NOINIT;
@@ -426,13 +426,13 @@ void AwBackupTexture::ChoosePixelFormat(AwTl::CreateTextureParms const & _parmsR
 	unsigned fMyFlags =
 		_parmsR.flags & AW_TLF_PREVSRCALL ? db_assert1(_parmsR.restoreH), m_fFlags
 		: _parmsR.flags & AW_TLF_PREVSRC ? db_assert1(_parmsR.restoreH),
-			_parmsR.flags & ~AW_TLF_TRANSP | m_fFlags & AW_TLF_TRANSP
+			((_parmsR.flags & ~AW_TLF_TRANSP) | (m_fFlags & AW_TLF_TRANSP))
 		: _parmsR.flags;
 		
 	// transparency?
 	m_bTranspMask = HasTransparentMask(fMyFlags & AW_TLF_TRANSP ? true : false);
 
-	if (_parmsR.loadTextureB || fMyFlags & AW_TLF_TEXTURE)
+	if (_parmsR.loadTextureB || (fMyFlags & AW_TLF_TEXTURE))
 	{
 #if 0		
 		// use a texture format
@@ -521,13 +521,26 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 {
 	using namespace AwTl;
 	
-//	fprintf(stderr, "AwBackupTexture::CreateTexture(...) This is where we could convert the image to RGB/RGBA, and so on\n");
+	// which flags to use?
+	unsigned fMyFlags =
+	(_parmsR.flags & AW_TLF_PREVSRCALL) ? db_assert1(_parmsR.restoreH),
+	(_parmsR.flags & (AW_TLF_CHECKLOST|AW_TLF_SKIPNOTLOST)) | (m_fFlags & ~(AW_TLF_CHECKLOST|AW_TLF_SKIPNOTLOST))
+	: (_parmsR.flags & AW_TLF_PREVSRC) ? db_assert1(_parmsR.restoreH),
+	((_parmsR.flags & ~AW_TLF_TRANSP) | (m_fFlags & AW_TLF_TRANSP))
+	: _parmsR.flags;
 
 	if (_parmsR.originalWidthP) *_parmsR.originalWidthP = m_nWidth;
 	if (_parmsR.originalHeightP) *_parmsR.originalHeightP = m_nHeight;	
 	
-	D3DTexture *Tex = (D3DTexture *)malloc(sizeof(D3DTexture));
+	if (_parmsR.rectA != NULL) {
+		fprintf(stderr, "AwBackupTexture::CreateTexture - rectangle cutouts?\n");
+	}
 	
+	if (pixelFormat.texB && (m_bTranspMask && (!pixelFormat.alphaB || fMyFlags & AW_TLF_CHROMAKEY))) {
+		fprintf(stderr, "AwBackupTexture::CreateTexture - chroma\n");
+	}
+	
+	// convert asset to 32-bit rgba
 			unsigned char *buf = (unsigned char *)malloc(m_nWidth * m_nHeight * 4);
 			
 			Colour * paletteP = m_nPaletteSize ? GetPalette() : NULL;
@@ -573,19 +586,20 @@ AwTl::SurfUnion AwBackupTexture::CreateTexture(AwTl::CreateTextureParms const & 
 				
 			}
 				
-/* temp junk */
+	// convert to texture
+	D3DTexture *Tex = (D3DTexture *)calloc(1, sizeof(D3DTexture));
+
 	Tex->w = m_nWidth;
 	Tex->h = m_nHeight;
+
 	if (pixelFormat.texB) {
-		Tex->buf = NULL; /* not used */
-		CreateOGLTexture(Tex, buf); /* this will set the id */
-		free(buf);
+		CreateOGLTexture(Tex, buf);
 	} else {
-		Tex->buf = buf; /* hey, I need this! */
 		CreateIMGSurface(Tex, buf); 
 	}
-				
+
 	return static_cast<SurfUnion>(Tex);
+
 #if 0
 	
 	// which flags to use?

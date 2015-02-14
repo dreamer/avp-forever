@@ -45,8 +45,19 @@
 #include "version.h"
 #include "fmv.h"
 
+
+#if defined(__IPHONEOS__) || defined(__ANDROID__)
+#define FIXED_WINDOW_SIZE 1
+#endif
+
+#if defined(__IPHONEOS__) || defined(__ANDROID__)
+#define USE_OPENGL_ES 1
+#endif
+
 void RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR(char Ch);
 void RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_KEYDOWN(int wParam);
+
+static int SDLCALL SDLEventFilter(void* userData, SDL_Event* event);
 
 char LevelName[] = {"predbit6\0QuiteALongNameActually"}; /* the real way to load levels */
 
@@ -72,15 +83,39 @@ SDL_Joystick *joy;
 JOYINFOEX JoystickData;
 JOYCAPS JoystickCaps;
 
-/* defaults */
+// Window configuration and state
+static int WindowWidth;
+static int WindowHeight;
+static int ViewportWidth;
+static int ViewportHeight;
+
+enum RENDERING_MODE {
+	RENDERING_MODE_SOFTWARE,
+	RENDERING_MODE_OPENGL
+};
+
+enum RENDERING_MODE RenderingMode;
+
+#if defined(FIXED_WINDOW_SIZE)
+static int WantFullscreen = 1;
+static int WantFullscreenToggle = 0;
+static int WantResolutionChange = 0;
+static int WantMouseGrab = 1;
+#else
 static int WantFullscreen = 0;
+static int WantFullscreenToggle = 1;
+static int WantResolutionChange = 1;
 static int WantMouseGrab = 0;
+#endif
+
+// Additional configuration
 int WantSound = 1;
 static int WantCDRom = 0;
 static int WantJoystick = 0;
 
-static int ViewportWidth;
-static int ViewportHeight;
+static GLuint FullscreenTexture;
+static GLsizei FullscreenTextureWidth;
+static GLsizei FullscreenTextureHeight;
 
 /* originally was "/usr/lib/libGL.so.1:/usr/lib/tls/libGL.so.1:/usr/X11R6/lib/libGL.so" */
 static const char * opengl_library = NULL;
@@ -171,21 +206,24 @@ void ReadJoysticks()
 
 unsigned char *GetScreenShot24(int *width, int *height)
 {
-#if 0//REVIEW
 	unsigned char *buf;
-//	Uint16 redtable[256], greentable[256], bluetable[256];
-	
+
 	if (surface == NULL) {
 		return NULL;
 	}
-	
-	buf = (unsigned char *)malloc(surface->w * surface->h * 3);
-	
-	if (surface->flags & SDL_WINDOW_OPENGL) {
+
+	if (RenderingMode == RENDERING_MODE_OPENGL) {
+		buf = (unsigned char *)malloc(ViewportWidth * ViewportHeight * 3);
+
+		*width = ViewportWidth;
+		*height = ViewportHeight;
+
 		pglPixelStorei(GL_PACK_ALIGNMENT, 1);
 		pglPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		pglReadPixels(0, 0, surface->w, surface->h, GL_RGB, GL_UNSIGNED_BYTE, buf);
+		pglReadPixels(0, 0, ViewportWidth, ViewportHeight, GL_RGB, GL_UNSIGNED_BYTE, buf);
 	} else {
+		buf = (unsigned char *)malloc(surface->w * surface->h * 3);
+
 		unsigned char *ptrd;
 		unsigned short int *ptrs;
 		int x, y;
@@ -213,15 +251,17 @@ unsigned char *GetScreenShot24(int *width, int *height)
 			}
 		}
 		
+		*width = surface->w;
+		*height = surface->h;
+
 		if (SDL_MUSTLOCK(surface)) {
 			SDL_UnlockSurface(surface);
 		}
 	}
-	
-	*width = surface->w;
-	*height = surface->h;
 
-#if 0	
+#if 0
+	Uint16 redtable[256], greentable[256], bluetable[256];
+	
 	if (SDL_GetGammaRamp(redtable, greentable, bluetable) != -1) {
 		unsigned char *ptr;
 		int i;
@@ -234,10 +274,9 @@ unsigned char *GetScreenShot24(int *width, int *height)
 			ptr += 3;
 		}
 	}
-#endif	
-	return buf;
 #endif
-	return NULL;
+
+	return buf;
 }
 
 /* ** */
@@ -279,6 +318,16 @@ void LoadDeviceAndVideoModePreferences()
 	fp = OpenGameFile("AvP_TempVideo.cfg", FILEMODE_READONLY, FILETYPE_CONFIG);
 	
 	if (fp != NULL) {
+		// fullscreen mode (0=window,1=fullscreen,2=fullscreen desktop)
+		// window width
+		// window height
+		// fullscreen width
+		// fullscreen height
+		// fullscreen desktop aspect ratio n
+		// fullscreen desktop aspect ratio d
+		// fullscreen desktop scale n
+		// fullscreen desktop scale d
+		// multisample number of samples (0/2/4)
 	 	if (fscanf(fp, "%d", &mode) == 1) {
 			fclose(fp);
 		
@@ -372,6 +421,8 @@ int InitSDL()
 	}
 
 	atexit(SDL_Quit);
+
+	SDL_AddEventWatch(SDLEventFilter, NULL);
 
 #if 0
 	SDL_Rect **SDL_AvailableVideoModes;
@@ -480,10 +531,128 @@ int InitSDL()
 	return 0;
 }
 
+#if !defined(NDEBUG)
+static void DumpVideoModeInfo(SDL_Window* w) {
+	int numVideoDisplays;
+	int displayIndex;
+	int numDisplayModes;
+	int modeIndex;
+	const char* displayName;
+	numVideoDisplays = SDL_GetNumVideoDisplays();
+	if (numVideoDisplays > 0) {
+		for (displayIndex = 0; displayIndex < numVideoDisplays; displayIndex++) {
+			displayName = SDL_GetDisplayName(displayIndex);
+			printf("%d: %s\n", displayIndex, displayName);
+			
+			SDL_Rect bounds;
+			SDL_DisplayMode mode;
+			
+			if (SDL_GetDisplayBounds(displayIndex, &bounds) == 0) {
+				printf("\tbounds: %4d,%4d,%4d,%4d\n",
+					   bounds.x,
+					   bounds.y,
+					   bounds.w,
+					   bounds.h);
+			}
+			
+			if (SDL_GetDesktopDisplayMode(displayIndex, &mode) == 0) {
+				printf("\tdesktop: %08x,%4d,%4d,%d\n",
+					   mode.format,
+					   mode.w,
+					   mode.h,
+					   mode.refresh_rate);
+			}
+			
+			if (SDL_GetCurrentDisplayMode(displayIndex, &mode) == 0) {
+				printf("\tcurrent: %08x,%4d,%4d,%d\n",
+					   mode.format,
+					   mode.w,
+					   mode.h,
+					   mode.refresh_rate);
+			}
+			
+			numDisplayModes = SDL_GetNumDisplayModes(displayIndex);
+			for (modeIndex = 0; modeIndex < numDisplayModes; modeIndex++) {
+				if (SDL_GetDisplayMode(displayIndex, modeIndex, &mode) == 0) {
+					printf("\t%2d: %08x,%4d,%4d,%d\n",
+						   modeIndex,
+						   mode.format,
+						   mode.w,
+						   mode.h,
+						   mode.refresh_rate);
+				}
+			}
+		}
+	}
+	
+	if (w != NULL) {
+		int displayIndex;
+		SDL_DisplayMode mode;
+
+		displayIndex = SDL_GetWindowDisplayIndex(w);
+		
+		printf("Window display index: %d\n", displayIndex);
+		if (SDL_GetWindowDisplayMode(w, &mode) == 0) {
+			printf("Window display mode: %08x,%4d,%4d,%d\n",
+				   mode.format,
+				   mode.w,
+				   mode.h,
+				   mode.refresh_rate);
+		}
+	}
+}
+#endif
+
+static void SetWindowSize(int PhysicalWidth, int PhysicalHeight, int VirtualWidth, int VirtualHeight)
+{
+#if !defined(NDEBUG)
+	fprintf(stderr, "SetWindowSize(%d,%d,%d,%d); %d\n", PhysicalWidth, PhysicalHeight, VirtualWidth, VirtualHeight, CurrentVideoMode);
+#endif
+
+	ViewportWidth = PhysicalWidth;
+	ViewportHeight = PhysicalHeight;
+
+	ScreenDescriptorBlock.SDB_Width     = VirtualWidth;
+	ScreenDescriptorBlock.SDB_Height    = VirtualHeight;
+	ScreenDescriptorBlock.SDB_CentreX   = VirtualWidth/2;
+	ScreenDescriptorBlock.SDB_CentreY   = VirtualHeight/2;
+	ScreenDescriptorBlock.SDB_ProjX     = VirtualWidth/2;
+	ScreenDescriptorBlock.SDB_ProjY     = VirtualHeight/2;
+	ScreenDescriptorBlock.SDB_ClipLeft  = 0;
+	ScreenDescriptorBlock.SDB_ClipRight = VirtualWidth;
+	ScreenDescriptorBlock.SDB_ClipUp    = 0;
+	ScreenDescriptorBlock.SDB_ClipDown  = VirtualHeight;
+
+	if (window != NULL) {
+		SDL_SetWindowSize(window, PhysicalWidth, PhysicalHeight);
+
+		//pglViewport(0, 0, ViewportWidth, ViewportHeight);
+	}
+	
+#if !defined(NDEBUG)
+	DumpVideoModeInfo(window);
+#endif
+}
+
+static int SetSoftVideoMode(int Width, int Height, int Depth)
+{
+	//TODO: clear surface
+
+	RenderingMode = RENDERING_MODE_SOFTWARE;
+	ScanDrawMode = ScanDrawD3DHardwareRGB;
+	GotMouse = 1;
+
+	// reset input
+	IngameKeyboardInput_ClearBuffer();
+
+	SetWindowSize(ViewportWidth, ViewportHeight, Width, Height);
+
+	return 0;
+}
+
 /* ** */
 static void load_opengl_library(const char *lib)
 {
-#if 0//REVIEW
 	char tmppath[PATH_MAX];
 	size_t len, copylen;
 	
@@ -499,9 +668,9 @@ static void load_opengl_library(const char *lib)
 	
 	while (lib != NULL && *lib) {
 		len = strcspn(lib, ":");
-				
+		
 		copylen = min(len, PATH_MAX-1);
-				
+		
 		strncpy(tmppath, lib, copylen);
 		tmppath[copylen] = 0;
 		
@@ -516,33 +685,9 @@ static void load_opengl_library(const char *lib)
 	
 	fprintf(stderr, "ERROR: unable to initialize opengl library: %s\n", SDL_GetError());
 	exit(EXIT_FAILURE);
-#endif
 }
 
-int SetSoftVideoMode(int Width, int Height, int Depth)
-{
-	//TODO: clear surface
-
-	ScanDrawMode = ScanDrawD3DHardwareRGB;
-	GotMouse = 1;
-
-	// reset input
-	IngameKeyboardInput_ClearBuffer();
-
-	ScreenDescriptorBlock.SDB_Width     = Width;
-	ScreenDescriptorBlock.SDB_Height    = Height;
-	ScreenDescriptorBlock.SDB_CentreX   = Width/2;
-	ScreenDescriptorBlock.SDB_CentreY   = Height/2;
-	ScreenDescriptorBlock.SDB_ProjX     = Width/2;
-	ScreenDescriptorBlock.SDB_ProjY     = Height/2;
-	ScreenDescriptorBlock.SDB_ClipLeft  = 0;
-	ScreenDescriptorBlock.SDB_ClipRight = Width;
-	ScreenDescriptorBlock.SDB_ClipUp    = 0;
-	ScreenDescriptorBlock.SDB_ClipDown  = Height;
-
-	return 0;
-}
-
+/* ** */
 static int SDLCALL SDLEventFilter(void* userData, SDL_Event* event) {
 	(void) userData;
 
@@ -557,29 +702,44 @@ static int SDLCALL SDLEventFilter(void* userData, SDL_Event* event) {
 	return 1;
 }
 
-int SetOGLVideoMode(int Width, int Height)
+static int InitSDLVideo(void) {
+	return 0;
+}
+
+static int SetOGLVideoMode(int Width, int Height)
 {
 	int oldflags;
 	int flags;
 	
+	RenderingMode = RENDERING_MODE_OPENGL;
 	ScanDrawMode = ScanDrawD3DHardwareRGB;
 	GotMouse = 1;
+
+#if defined(FIXED_WINDOW_SIZE)
+	// force the game to use the full desktop
+	SDL_DisplayMode dm;
+	if (SDL_GetDesktopDisplayMode(0, &dm) == 0) {
+		Width = dm.w;
+		Height = dm.h;
+	}
+#endif
 
 	if (window == NULL) {
 		load_ogl_functions(0);
 
-		/*
-		if (window != NULL) {
-			oldflags = SDL_GetWindowFlags(window);
-
-			SDL_DestroyWindow(window);
-		}
-		
-		 */
 		flags = SDL_WINDOW_OPENGL;
+
+#if defined(FIXED_WINDOW_SIZE)
+		flags |= SDL_WINDOW_BORDERLESS;
+		flags |= SDL_WINDOW_FULLSCREEN_DESKTOP;
+#else
 		if (WantFullscreen) {
-			flags |= SDL_WINDOW_FULLSCREEN;
+			flags |= (WantResolutionChange != 0 ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_FULLSCREEN_DESKTOP);
 		}
+
+		// the game doesn't properly support window resizing
+		//flags |= SDL_WINDOW_RESIZABLE;
+#endif
 
 		// reset input
 		IngameKeyboardInput_ClearBuffer();
@@ -588,27 +748,35 @@ int SetOGLVideoMode(int Width, int Height)
 		SDL_QuitSubSystem(SDL_INIT_VIDEO);
 		SDL_InitSubSystem(SDL_INIT_VIDEO);
 
-		load_opengl_library(opengl_library);
-		
+		// set OpenGL attributes first
+#if defined(USE_OPENGL_ES)
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+#else
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
-
+#endif
+		// These should be configurable video options.
+		// If user requests 8bpp, try that, else fall back to 5.
+		// Same with depth.  Try 32, 24, 16.
 		SDL_GL_SetAttribute(SDL_GL_RED_SIZE, 5);
 		SDL_GL_SetAttribute(SDL_GL_GREEN_SIZE, 5);
 		SDL_GL_SetAttribute(SDL_GL_BLUE_SIZE, 5);
 		SDL_GL_SetAttribute(SDL_GL_DEPTH_SIZE, 16);
 		SDL_GL_SetAttribute(SDL_GL_DOUBLEBUFFER, 1);
 
+		load_opengl_library(opengl_library);
+
 		// These should be configurable video options.
 		//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLEBUFFERS, 1);
 		//SDL_GL_SetAttribute(SDL_GL_MULTISAMPLESAMPLES, 4);
-		SDL_GL_SetSwapInterval(1);
-		
+
 		window = SDL_CreateWindow("Aliens vs Predator",
 								  SDL_WINDOWPOS_UNDEFINED,
 								  SDL_WINDOWPOS_UNDEFINED,
-								  Width,
-								  Height,
+								  WindowWidth,
+								  WindowHeight,
 								  flags);
 		if (window == NULL) {
 			fprintf(stderr, "(OpenGL) SDL SDL_CreateWindow failed: %s\n", SDL_GetError());
@@ -622,27 +790,41 @@ int SetOGLVideoMode(int Width, int Height)
 		}
 		SDL_GL_MakeCurrent(window, context);
 
-		SDL_AddEventWatch(SDLEventFilter, NULL); //TODO move this to startup?
+		// These should be configurable video options.
+		SDL_GL_SetSwapInterval(1);
 
 		load_ogl_functions(1);
 
-		///* this is for supporting keyboard input processing with little hassle */
-		//SDL_EnableKeyRepeat(SDL_DEFAULT_REPEAT_DELAY, SDL_DEFAULT_REPEAT_INTERVAL);
-		
-		//SDL_SetRelativeMouseMode(isgrab);
+		SDL_GetWindowSize(window, &Width, &Height);
+		pglViewport(0, 0, Width, Height);
+
+		// create fullscreen window texture
+		pglGenTextures(1, &FullscreenTexture);
+
+		pglBindTexture(GL_TEXTURE_2D, FullscreenTexture);
+
+		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+
+		FullscreenTextureWidth = 1024;
+		FullscreenTextureHeight = 512;
+		pglTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, FullscreenTextureWidth, FullscreenTextureHeight, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, NULL);
 	}
+
+	SDL_GetWindowSize(window, &Width, &Height);
 	
-	ViewportWidth = Width;
-	ViewportHeight = Height;
-
-	SDL_SetWindowSize(window, Width, Height);
-
-	pglViewport(0, 0, Width, Height);
-		
-	pglMatrixMode(GL_PROJECTION);
-	pglLoadIdentity();
-	pglMatrixMode(GL_MODELVIEW);
-	pglLoadIdentity();
+	SetWindowSize(Width, Height, Width, Height);
+	
+	int NewWidth, NewHeight;
+	SDL_GetWindowSize(window, &Width, &Height);
+	if (Width != NewWidth || Height != NewHeight) {
+		//printf("Failed to change size: %d,%d vs. %d,%d\n", Width, Height, NewWidth, NewHeight);
+		//Width = NewWidth;
+		//Height = NewHeight;
+		//SetWindowSize(Width, Height, Width, Height);
+	}
 
 	pglEnable(GL_BLEND);
 	pglBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -654,22 +836,9 @@ int SetOGLVideoMode(int Width, int Height)
 		
 	pglEnable(GL_TEXTURE_2D);
 
-	pglPolygonMode(GL_FRONT, GL_FILL);
-	pglPolygonMode(GL_BACK, GL_FILL);
 	pglDisable(GL_CULL_FACE);
 	
 	pglClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	ScreenDescriptorBlock.SDB_Width     = Width;
-	ScreenDescriptorBlock.SDB_Height    = Height;
-	ScreenDescriptorBlock.SDB_CentreX   = Width/2;
-	ScreenDescriptorBlock.SDB_CentreY   = Height/2;
-	ScreenDescriptorBlock.SDB_ProjX     = Width/2;
-	ScreenDescriptorBlock.SDB_ProjY     = Height/2;
-	ScreenDescriptorBlock.SDB_ClipLeft  = 0;
-	ScreenDescriptorBlock.SDB_ClipRight = Width;
-	ScreenDescriptorBlock.SDB_ClipUp    = 0;
-	ScreenDescriptorBlock.SDB_ClipDown  = Height;
 	
 	InitOpenGL();
 	
@@ -686,6 +855,11 @@ int ExitWindowsSystem()
 	if (joy != NULL) {
 		SDL_JoystickClose(joy);
 	}
+
+	if (FullscreenTexture != 0) {
+		pglDeleteTextures(1, &FullscreenTexture);
+	}
+	FullscreenTexture = 0;
 
 	load_ogl_functions(0);
 	
@@ -941,6 +1115,9 @@ static void handle_keypress(int key, int unicode, int press)
 
 	if (press) {
 		switch(key) {
+			case KEY_CR:
+				RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR('\r');
+				break;
 			case KEY_BACKSPACE:
 				RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_KEYDOWN(VK_BACK);
 				break;
@@ -986,33 +1163,6 @@ static void handle_keypress(int key, int unicode, int press)
 	KeyboardInput[key] = press;
 }
 
-static void handle_buttonpress(int button, int press)
-{
-	int key;
-
-	switch(button) {
-		case 4: /* mouse wheel up */
-			key = KEY_MOUSEWHEELUP;
-			break;
-		case 5: /* mouse wheel down */
-			key = KEY_MOUSEWHEELDOWN;
-			break;
-		default: /* other buttons are handled elsewhere */
-			return;
-	}
-	
-	/* since this currently only handles wheel up/down */
-	if (press == 0)
-		return;
-		
-	if (press && !KeyboardInput[key]) {
-		DebouncedKeyboardInput[key] = 1;
-	}
-	
-	GotAnyKey = 1;
-	KeyboardInput[key] = press;
-}
-
 void CheckForWindowsMessages()
 {
 	SDL_Event event;
@@ -1022,52 +1172,77 @@ void CheckForWindowsMessages()
 	DebouncedGotAnyKey = 0;
 	memset(DebouncedKeyboardInput, 0, sizeof(DebouncedKeyboardInput));
 	
-	wantmouse =	0; //(surface->flags & SDL_FULLSCREEN) ||
-			//(SDL_WM_GrabInput(SDL_GRAB_QUERY) == SDL_GRAB_ON);
+	wantmouse =	(SDL_GetRelativeMouseMode() == SDL_TRUE);
 
+	// "keyboard" events that don't have an up event
 	KeyboardInput[KEY_MOUSEWHEELUP] = 0;
 	KeyboardInput[KEY_MOUSEWHEELDOWN] = 0;
 	
-	if (SDL_PollEvent(&event)) {
-		do {
-			switch(event.type) {
-				case SDL_MOUSEBUTTONDOWN:
-					if (wantmouse)
-						handle_buttonpress(event.button.button, 1);
-					break;
-				case SDL_MOUSEBUTTONUP:
-					break;
-				case SDL_TEXTINPUT: {
-						int unicode = event.text.text[0]; //TODO convert to utf-32
-						if (unicode && !(unicode & 0xFF80)) {
-							RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR(unicode);
-							KeyboardEntryQueue_Add(unicode);
+	while (SDL_PollEvent(&event)) {
+		switch(event.type) {
+			case SDL_MOUSEBUTTONDOWN:
+				break;
+			case SDL_MOUSEBUTTONUP:
+				break;
+			case SDL_MOUSEWHEEL:
+				if (wantmouse) {
+					if (event.wheel.y < 0) {
+						handle_keypress(KEY_MOUSEWHEELDOWN, 0, 1);
+					} else if (event.wheel.y > 0) {
+						handle_keypress(KEY_MOUSEWHEELUP, 0, 1);
+					}
+				}
+				break;
+			case SDL_TEXTINPUT: {
+					int unicode = event.text.text[0]; //TODO convert to utf-32
+					if (unicode && !(unicode & 0xFF80)) {
+						RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR(unicode);
+						KeyboardEntryQueue_Add(unicode);
+					}
+				}
+				break;
+			case SDL_KEYDOWN:
+				if (event.key.keysym.sym == SDLK_PRINTSCREEN) {
+					if (HavePrintScn == 0)
+						GotPrintScn = 1;
+					HavePrintScn = 1;
+				} else {
+					handle_keypress(KeySymToKey(event.key.keysym.sym), 0, 1);
+				}
+				break;
+			case SDL_KEYUP:
+				if (event.key.keysym.sym == SDLK_PRINTSCREEN) {
+					GotPrintScn = 0;
+					HavePrintScn = 0;
+				} else {
+					handle_keypress(KeySymToKey(event.key.keysym.sym), 0, 0);
+				}
+				break;
+			case SDL_WINDOWEVENT:
+				switch (event.window.event) {
+					case SDL_WINDOWEVENT_FOCUS_LOST:
+						// disable mouse grab?
+						break;
+					case SDL_WINDOWEVENT_RESIZED:
+						//printf("test, %d,%d\n", event.window.data1, event.window.data2);
+						WindowWidth = event.window.data1;
+						WindowHeight = event.window.data2;
+						if (RenderingMode == RENDERING_MODE_SOFTWARE) {
+							SetWindowSize(WindowWidth, WindowHeight, 640, 480);
+						} else {
+							SetWindowSize(WindowWidth, WindowHeight, WindowWidth, WindowHeight);
 						}
-					}
-					break;
-				case SDL_KEYDOWN:
-					if (event.key.keysym.sym == SDLK_PRINTSCREEN) {
-						if (HavePrintScn == 0)
-							GotPrintScn = 1;
-						HavePrintScn = 1;
-					} else {
-						handle_keypress(KeySymToKey(event.key.keysym.sym), 0, 1);
-					}
-					break;
-				case SDL_KEYUP:
-					if (event.key.keysym.sym == SDLK_PRINTSCREEN) {
-						GotPrintScn = 0;
-						HavePrintScn = 0;
-					} else {
-						handle_keypress(KeySymToKey(event.key.keysym.sym), 0, 0);
-					}
-					break;
-				case SDL_QUIT:
-					AvP.MainLoopRunning = 0; /* TODO */
-					exit(0); //TODO
-					break;
-			}
-		} while (SDL_PollEvent(&event));
+						if (pglViewport != NULL) {
+							pglViewport(0, 0, WindowWidth, WindowHeight);
+						}
+						break;
+				}
+				break;
+			case SDL_QUIT:
+				AvP.MainLoopRunning = 0; /* TODO */
+				exit(0); //TODO
+				break;
+		}
 	}
 	
 	buttons = SDL_GetRelativeMouseState(&x, &y);
@@ -1085,7 +1260,7 @@ void CheckForWindowsMessages()
 			handle_keypress(KEY_RMOUSE, 0, 1);
 		else
 			handle_keypress(KEY_RMOUSE, 0, 0);
-	
+
 		MouseVelX = DIV_FIXED(x, NormalFrameTime);
 		MouseVelY = DIV_FIXED(y, NormalFrameTime);
 	} else {
@@ -1117,31 +1292,47 @@ void CheckForWindowsMessages()
 		}
 	}
 
+//#warning Redo WantX, need to split it out better so fullscreen can temporary set relative without clobbering user setting
 	if ((KeyboardInput[KEY_LEFTALT]||KeyboardInput[KEY_RIGHTALT]) && DebouncedKeyboardInput[KEY_CR]) {
-		//SDL_GrabMode gm;
-		//
-		//SDL_WM_ToggleFullScreen(surface);
-		//
-		//gm = SDL_WM_GrabInput(SDL_GRAB_QUERY);
-		//if (gm == SDL_GRAB_OFF && !(surface->flags & SDL_FULLSCREEN))
-		//	SDL_ShowCursor(1);
-		//else
-		//	SDL_ShowCursor(0);
+		if (WantFullscreenToggle != 0) {
+			int displayMode = SDL_GetWindowFlags(window);
+			//printf("Current window mode:%08x\n", displayMode);
+			if ((displayMode & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_FULLSCREEN_DESKTOP)) != 0) {
+				SDL_SetWindowFullscreen(window, 0);
+			} else {
+				SDL_SetWindowFullscreen(window, WantResolutionChange ? SDL_WINDOW_FULLSCREEN : SDL_WINDOW_FULLSCREEN_DESKTOP);
+			}
+
+			displayMode = SDL_GetWindowFlags(window);
+			//printf("New window mode:%08x\n", displayMode);
+			if ((displayMode & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_FULLSCREEN_DESKTOP)) != 0) {
+				SDL_SetRelativeMouseMode(SDL_TRUE);
+				WantFullscreen = 1;
+			} else {
+				SDL_SetRelativeMouseMode(WantMouseGrab ? SDL_TRUE : SDL_FALSE);
+				WantFullscreen = 0;
+			}
+		}
 	}
 
 	if (KeyboardInput[KEY_LEFTCTRL] && DebouncedKeyboardInput[KEY_G]) {
-		//SDL_GrabMode gm;
-		//
-		//gm = SDL_WM_GrabInput(SDL_GRAB_QUERY);
-		//SDL_WM_GrabInput((gm == SDL_GRAB_ON) ? SDL_GRAB_OFF : SDL_GRAB_ON);
-		//
-		//gm = SDL_WM_GrabInput(SDL_GRAB_QUERY);
-		//if (gm == SDL_GRAB_OFF && !(surface->flags & SDL_FULLSCREEN))
-		//	SDL_ShowCursor(1);
-		//else
-		//	SDL_ShowCursor(0);
+		int IsWindowed = (SDL_GetWindowFlags(window) & (SDL_WINDOW_FULLSCREEN|SDL_WINDOW_FULLSCREEN_DESKTOP)) == 0;
+
+		if (IsWindowed) {
+			WantMouseGrab = WantMouseGrab != 0 ? 0 : 1;
+			if (WantMouseGrab != 0) {
+				SDL_SetRelativeMouseMode(SDL_TRUE);
+			} else {
+				SDL_SetRelativeMouseMode(SDL_FALSE);
+			}
+			WantMouseGrab = (SDL_GetRelativeMouseMode() == SDL_TRUE);
+		}
 	}
-	
+
+	// a second reset of relative mouse state because
+	// enabling relative mouse mode moves the mouse
+	SDL_GetRelativeMouseState(NULL, NULL);
+
 	if (GotPrintScn) {
 		GotPrintScn = 0;
 		
@@ -1151,45 +1342,24 @@ void CheckForWindowsMessages()
         
 void InGameFlipBuffers()
 {
-	if (window != NULL) {
-		SDL_GL_SwapWindow(window);
-	}
+#if !defined(NDEBUG)
+	check_for_errors();
+#endif
+
+	SDL_GL_SwapWindow(window);
 }
 
 void FlipBuffers()
 {
-	// TODO: move this to init
-	static GLuint t;
-
-	if (t == 0) {
-		pglGenTextures(1, &t);
-
-		pglBindTexture(GL_TEXTURE_2D, t);
-
-		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP);
-		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP);
-
-		pglTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, 640, 480, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, NULL);
-	}
-
-	pglDisableClientState(GL_VERTEX_ARRAY);
-	pglDisableClientState(GL_TEXTURE_COORD_ARRAY);
-	pglDisableClientState(GL_COLOR_ARRAY);
-
 	pglClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
-	pglMatrixMode(GL_PROJECTION);
-	pglLoadIdentity();
-	pglMatrixMode(GL_MODELVIEW);
-	pglLoadIdentity();
 
 	pglDisable(GL_ALPHA_TEST);
 	pglDisable(GL_BLEND);
 	pglDisable(GL_DEPTH_TEST);
 
-	pglBindTexture(GL_TEXTURE_2D, t);
+	pglBindTexture(GL_TEXTURE_2D, FullscreenTexture);
+	pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
 	pglTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	pglTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 640, 480, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, surface->pixels);
 
@@ -1197,6 +1367,10 @@ void FlipBuffers()
 	GLfloat x1;
 	GLfloat y0;
 	GLfloat y1;
+	GLfloat s0;
+	GLfloat s1;
+	GLfloat t0;
+	GLfloat t1;
 
 	// figure out the best way to fit the 640x480 virtual window
 	GLfloat a = ViewportHeight * 640.0f / 480.0f;
@@ -1218,23 +1392,54 @@ void FlipBuffers()
 		y0 = -y1;
 	}
 
-	pglBegin(GL_QUADS);
+	s0 = 0.0f;
+	s1 = 640.0f / (float) FullscreenTextureWidth;
+	t0 = 0.0f;
+	t1 = 480.0f / (float) FullscreenTextureHeight;
 
-    pglTexCoord2f(0.0, 1.0);
-    pglVertex3f(x0, y0, -1.0);
+	GLfloat v[4*4];
+	GLshort s[6];
 
-    pglTexCoord2f(1.0, 1.0);
-    pglVertex3f(x1, y0, -1.0);
+	v[0+0*4] = x0;
+	v[1+0*4] = y0;
+	v[2+0*4] = s0;
+	v[3+0*4] = t1;
+	v[0+1*4] = x1;
+	v[1+1*4] = y0;
+	v[2+1*4] = s1;
+	v[3+1*4] = t1;
+	v[0+2*4] = x1;
+	v[1+2*4] = y1;
+	v[2+2*4] = s1;
+	v[3+2*4] = t0;
+	v[0+3*4] = x0;
+	v[1+3*4] = y1;
+	v[2+3*4] = s0;
+	v[3+3*4] = t0;
 
-    pglTexCoord2f(1.0, 0.0);
-    pglVertex3f(x1, y1, -1.0);
+	s[0] = 0;
+	s[1] = 1;
+	s[2] = 2;
+	s[3] = 0;
+	s[4] = 2;
+	s[5] = 3;
 
-    pglTexCoord2f(0.0, 0.0);
-    pglVertex3f(x0, y1, -1.0);
+	pglEnableClientState(GL_VERTEX_ARRAY);
+	pglVertexPointer(2, GL_FLOAT, sizeof(GLfloat) * 4, &v[0]);
 
-    pglEnd();
+	pglEnableClientState(GL_TEXTURE_COORD_ARRAY);
+	pglTexCoordPointer(2, GL_FLOAT, sizeof(GLfloat) * 4, &v[2]);
+
+	pglDisableClientState(GL_COLOR_ARRAY);
+
+	pglColor4f(1.0f, 1.0f, 1.0f, 1.0f);
+	pglDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, s);
 
 	pglBindTexture(GL_TEXTURE_2D, 0);
+
+#if !defined(NDEBUG)
+	check_for_errors();
+#endif
 
 	SDL_GL_SwapWindow(window);
 }
@@ -1339,10 +1544,9 @@ int main(int argc, char *argv[])
 #endif
 	InitGame();
 
-	//NEW
-	SetOGLVideoMode(VideoModeList[1].w, VideoModeList[1].h);
-	//NEW
-
+	WindowWidth = VideoModeList[CurrentVideoMode].w;
+	WindowHeight = VideoModeList[CurrentVideoMode].h;
+	SetOGLVideoMode(0, 0);
 	SetSoftVideoMode(640, 480, 16);
 	
 	InitialVideoMode();
@@ -1391,16 +1595,8 @@ if (AvP_MainMenus())
 	
 	/* turn off any special effects */
 	d3d_light_ctrl.ctrl = LCCM_NORMAL;
-	
-	//NEW
-	//TODO
-	// need to watch for CurrentVideoMode to change in all cases
-	// the menu will always render in a 640x480 virtual window
-	// game will render in a user-specified virtual window
-	// real window will be which ever size is available
-	//TODO
-	//NEW
-	SetOGLVideoMode(VideoModeList[CurrentVideoMode].w, VideoModeList[CurrentVideoMode].h);
+
+	SetOGLVideoMode(0, 0);
 
 	InitialiseGammaSettings(RequestedGammaSetting);
 	
