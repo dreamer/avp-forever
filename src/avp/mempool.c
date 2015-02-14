@@ -5,8 +5,8 @@
 
 #if USE_LEVEL_MEMORY_POOL
 
-#define MAX_NUM_MEMORY_BLOCK 40
-#define MEMORY_BLOCK_SIZE (1024*1024)
+#define MAX_NUM_MEMORY_BLOCK 64
+#define MEMORY_BLOCK_SIZE (8192*1024)
 
 static char* MemoryBlocks[MAX_NUM_MEMORY_BLOCK];
 static int CurrentMemoryBlock =-1;
@@ -14,6 +14,10 @@ static int CurrentMemoryBlock =-1;
 static char* MemoryPoolPtr=0;
 static unsigned int MemoryLeft=0;
 
+static size_t AllocationCount=0;
+static size_t LargestRequest=0;
+static size_t MemoryRequested=0;
+static size_t MemoryWasted=0;
 
 void* PoolAllocateMem(unsigned int amount)
 {
@@ -31,6 +35,8 @@ void* PoolAllocateMem(unsigned int amount)
 
 	if(amount>MemoryLeft)
 	{
+		MemoryWasted += MemoryLeft;
+
 		CurrentMemoryBlock++;
 		GLOBALASSERT(CurrentMemoryBlock<MAX_NUM_MEMORY_BLOCK);
 		if (CurrentMemoryBlock >= MAX_NUM_MEMORY_BLOCK)
@@ -49,7 +55,14 @@ void* PoolAllocateMem(unsigned int amount)
 		MemoryLeft=MEMORY_BLOCK_SIZE;
 		MemoryPoolPtr=MemoryBlocks[CurrentMemoryBlock];
 	}
-		
+
+	if (amount > LargestRequest) {
+		LargestRequest = amount;
+	}
+
+	MemoryRequested+=amount;
+	AllocationCount++;
+
 	retval=MemoryPoolPtr;
 	MemoryLeft-=amount;
 	MemoryPoolPtr+=amount;
@@ -62,6 +75,11 @@ void ClearMemoryPool()
 {
 	int i;
 
+#if !defined(NDEBUG)
+	printf("%d blocks in use, %u bytes left in current block\n", CurrentMemoryBlock + 1, MemoryLeft);
+	printf("%zu requests, %zu bytes requested, %zu bytes wasted, %zu largest request\n", AllocationCount, MemoryRequested, MemoryWasted, LargestRequest);
+#endif
+
 	for(i=0;i<=CurrentMemoryBlock;i++)
 	{
 		DeallocateMem(MemoryBlocks[i]);
@@ -70,8 +88,11 @@ void ClearMemoryPool()
 	CurrentMemoryBlock=-1;
 	MemoryPoolPtr=0;
 	MemoryLeft=0;
+
+	MemoryRequested = 0;
+	MemoryWasted = 0;
+	LargestRequest = 0;
+	AllocationCount = 0;
 }
-
-
 
 #endif

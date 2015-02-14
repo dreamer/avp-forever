@@ -115,13 +115,6 @@ AVPMENUGFX AvPMenuGfxStorage[MAX_NO_OF_AVPMENUGFXS] =
 #endif
 };
 
-int CreateIMGSurface(D3DTexture *tex, unsigned char *buf)
-{
-	tex->id = 0;
-	
-	return 0;
-}
-
 static void DrawAvPMenuGlowyBar(int topleftX, int topleftY, int alpha, int length)
 {
 	enum AVPMENUGFX_ID menuGfxID = AVPMENUGFX_GLOWY_MIDDLE;
@@ -449,17 +442,25 @@ int RenderMenuText(const char *textPtr, int sx, int sy, int alpha, enum AVPMENUF
 		char c = *textPtr++;
 
 		if (c>=' ') {
-			int topLeftU = 1;
-			int topLeftV = 1+(c-32)*33;
-			int x, y;
-			int width = IntroFont_Light.FontWidth[(unsigned int) c];
-			
+			unsigned int topLeftU = 0;
+			unsigned int topLeftV = 1+(c-32)*33;
+			unsigned int x, y;
+			unsigned int width = IntroFont_Light.FontWidth[(unsigned int) c];
+			unsigned int remainder = 0;
+			unsigned int stride = width;
+
+			if (image->w > width) {
+				remainder = image->w - width;
+			} else {
+				stride = image->w;
+			}
+
 			srcPtr = &image->buf[(topLeftU+topLeftV*image->w)*4];
-			
+
 			for (y=sy; y<33+sy; y++) {
 				destPtr = (unsigned short *)(((unsigned char *)surface->pixels)+y*surface->pitch) + sx;
 				
-				for (x=width; x>0; x--) {					
+				for (x=stride; x>0; x--) {
 					if (srcPtr[0] || srcPtr[1] || srcPtr[2]) {
 						unsigned int destR, destG, destB;
 						
@@ -484,7 +485,7 @@ int RenderMenuText(const char *textPtr, int sx, int sy, int alpha, enum AVPMENUF
 					srcPtr += 4;
 					destPtr++;
 				}
-				srcPtr += (image->w - width) * 4;
+				srcPtr += remainder * 4;
 			}
 			sx += width;
 		}
@@ -546,18 +547,26 @@ int RenderMenuText_Clipped(char *textPtr, int sx, int sy, int alpha, enum AVPMEN
 		char c = *textPtr++;
 
 		if (c>=' ') {
-			int topLeftU = 1;
-			int topLeftV = 1+(c-32)*33;
-			int x, y;
-			int width = IntroFont_Light.FontWidth[(unsigned int) c];
-			
+			unsigned int topLeftU = 0;
+			unsigned int topLeftV = 1+(c-32)*33;
+			unsigned int x, y;
+			unsigned int width = IntroFont_Light.FontWidth[(unsigned int) c];
+			unsigned int remainder = 0;
+			unsigned int stride = width;
+
+			if (image->w > width) {
+				remainder = image->w - width;
+			} else {
+				stride = image->w;
+			}
+
 			srcPtr = &image->buf[(topLeftU+topLeftV*image->w)*4];
-			
+
 			for (y=sy; y<33+sy; y++) {
 				if(y>=topY && y<=bottomY) {
 					destPtr = (unsigned short *)(((unsigned char *)surface->pixels)+y*surface->pitch) + sx;
 				
-					for (x=width; x>0; x--) {
+					for (x=stride; x>0; x--) {
 						if (srcPtr[0] || srcPtr[1] || srcPtr[2]) {
 							unsigned int destR, destG, destB;
 						
@@ -582,7 +591,7 @@ int RenderMenuText_Clipped(char *textPtr, int sx, int sy, int alpha, enum AVPMEN
 						srcPtr += 4;
 						destPtr++;
 					}
-					srcPtr += (image->w - width) * 4;	
+					srcPtr += remainder * 4;
 				} else {
 					srcPtr += image->w * 4;
 				}

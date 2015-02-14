@@ -581,6 +581,10 @@ a = itmp;}
 
 #else
 
+// parts of mathline.c that have been re-inlined.
+// MUL_FIXED, f2i
+#include "mathline.h"
+
 /* inline assembly has been moved to mathline.c */
 void ADD_LL(LONGLONGCH *a, LONGLONGCH *b, LONGLONGCH *c);
 void ADD_LL_PP(LONGLONGCH *c, LONGLONGCH *a);
@@ -592,7 +596,6 @@ void EQUALS_LL(LONGLONGCH *a, LONGLONGCH *b);
 void NEG_LL(LONGLONGCH *a);
 void ASR_LL(LONGLONGCH *a, int shift);
 void IntToLL(LONGLONGCH *a, int *b);
-int MUL_FIXED(int a, int b);
 int DIV_FIXED(int a, int b);
 
 #define DIV_INT(a, b) ((a) / (b))
@@ -602,20 +605,7 @@ int WideMulNarrowDiv(int a, int b, int c);
 void RotateVector_ASM(VECTORCH *v, MATRIXCH *m);
 void RotateAndCopyVector_ASM(VECTORCH *v1, VECTORCH *v2, MATRIXCH *m);
 
-/*
-int FloatToInt(float);
-#define f2i(a, b) { a = FloatToInt(b); }
-*/
-
 int SqRoot32(int A);
-void FloatToInt();
-extern float fti_fptmp;
-extern int fti_itmp;
-
-#define f2i(a, b) { \
-fti_fptmp = (b); \
-FloatToInt(); \
-a = fti_itmp;}
 
 #endif
 

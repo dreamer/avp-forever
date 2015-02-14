@@ -612,11 +612,6 @@ int SetOGLVideoMode(int Width, int Height)
 		SDL_ShowCursor(0);	
 	
 	pglViewport(0, 0, Width, Height);
-	
-	pglMatrixMode(GL_PROJECTION);
-	pglLoadIdentity();
-	pglMatrixMode(GL_MODELVIEW);
-	pglLoadIdentity();
 
 	pglEnable(GL_BLEND);
 	pglBlendFunc(GL_SRC_ALPHA, GL_ONE);
@@ -628,8 +623,6 @@ int SetOGLVideoMode(int Width, int Height)
 	
 	pglEnable(GL_TEXTURE_2D);
 
-	pglPolygonMode(GL_FRONT, GL_FILL);
-	pglPolygonMode(GL_BACK, GL_FILL);
 	pglDisable(GL_CULL_FACE);
 	
 	pglClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);

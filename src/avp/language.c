@@ -78,8 +78,13 @@ void InitTextStrings(void)
 	for (i=1; i<MAX_NO_OF_TEXTSTRINGS; i++)
 	{	
 		/* scan for a quote mark */
-		while (*textPtr++ != '"') 
-			if (*textPtr == '@') return; /* '@' should be EOF */
+		while (*textPtr++ != '"')  {
+			if (*textPtr == '@') {
+				// should be an error as this language file
+				// doesn't match the game.
+				return; /* '@' should be EOF */
+			}
+		}
 
 		/* now pointing to a text string after quote mark*/
 		TextStringPtr[i] = textPtr;
@@ -107,9 +112,20 @@ void KillTextStrings(void)
 
 char *GetTextString(enum TEXTSTRING_ID stringID)
 {
+	// Not good.
+	// These strings do not exist in data.
+	if (stringID > MIN_NEW_TEXTSTRINGS && stringID < MAX_NEW_TEXTSTRINGS) {
+		switch (stringID) {
+			case TEXTSTRING_MAINMENU_EXITGAME_HELP_NEW: return "Exit the game.";
+			case TEXTSTRING_MAINMENU_CREDITS_NEW: return "Credits";
+			case TEXTSTRING_MAINMENU_CREDITS_HELP_NEW: return "View the credits.";
+			default: break;
+		}
+	}
+
 	LOCALASSERT(stringID<MAX_NO_OF_TEXTSTRINGS);
-
-	return TextStringPtr[stringID];
+	if (stringID < MAX_NO_OF_TEXTSTRINGS) {
+		return TextStringPtr[stringID];
+	}
+	return EmptyString;
 }
-
-
