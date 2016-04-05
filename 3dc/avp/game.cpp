@@ -43,6 +43,7 @@
 #include "menus.h"
 #include "FileStream.h"
 #include "console.h"
+#include "ConfigFile.h"
 
 // extern Varibles
 extern int VideoMode;
@@ -111,6 +112,8 @@ void MessageHistory_Initialise();
 void TimeScaleThingy();
 void MessageHistory_Maintain(void);
 
+bool bTurnSpeedAdjust = true; // when true, players turn speed will half when crouched or walking
+
 void DetermineGameVersion()
 {
 	// test for demo versions first
@@ -145,6 +148,12 @@ bool IsDemoVersion()
 	} else {
 		return true;
 	}
+}
+
+/* bjd - check for game specific variables from the use config file */
+void SetConfigGameVariables()
+{
+	bTurnSpeedAdjust = Config_GetBool("[Gameplay]", "TurnSpeedAdjust", true);
 }
 
 /*********************************************
@@ -198,6 +207,8 @@ void InitGame(void)
 	#else
 	SetToDefaultDetailLevels();
 	#endif
+
+	SetConfigGameVariables();
 }
 
 void StartGame(void)

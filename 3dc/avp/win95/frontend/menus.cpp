@@ -1238,7 +1238,7 @@ static void RenderBriefingScreenInfo(void)
 		}
 		case I_Alien:
 		{
-			textID =static_cast<enum TEXTSTRING_ID>( AlienEpisodeToPlay+TEXTSTRING_ALIENLEVELS_1);
+			textID = static_cast<enum TEXTSTRING_ID>( AlienEpisodeToPlay+TEXTSTRING_ALIENLEVELS_1);
 			break;
 		}
 	}

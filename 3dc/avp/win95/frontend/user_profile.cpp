@@ -245,15 +245,15 @@ static int LoadUserProfiles(void)
 
 	// get any path in the load_name
 	ptrdiff_t nPathLen = 0;
-	const char * pColon = strrchr(load_name,':');
-	if (pColon) nPathLen = pColon - load_name + 1;
-	const char * pBackSlash = strrchr(load_name,'/');
+	const char* pColon = strrchr(load_name,':');
+	if (pColon) nPathLen = pColon - load_name + 1; // n chars before :
+	const char* pBackSlash = strrchr(load_name,'/');
 	if (pBackSlash)
 	{
 		ptrdiff_t nLen = pBackSlash - load_name + 1;
 		if (nLen > nPathLen) nPathLen = nLen;
 	}
-	const char * pSlash = strrchr(load_name,'/');
+	const char* pSlash = strrchr(load_name,'/');
 	if (pSlash)
 	{
 		ptrdiff_t nLen = pSlash - load_name + 1;
@@ -272,7 +272,12 @@ static int LoadUserProfiles(void)
 				// not a directory, hidden or system file
 		)
 		{
-			char * pszFullPath = new char [nPathLen + strlen(wfd.cFileName)+1];
+			/* 
+				generate the full file name.
+				fill pszFullPath with characters up until last / (this will remove the *.prf from the path)
+				then adds the found profile name from avp_FindFirstFile - eg "Bob.prf"
+			*/
+			char* pszFullPath = new char [nPathLen + strlen(wfd.cFileName)+1];
 			strncpy(pszFullPath,load_name,nPathLen);
 			strcpy(pszFullPath + nPathLen,wfd.cFileName);
 

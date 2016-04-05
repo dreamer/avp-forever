@@ -112,7 +112,9 @@ void exit_break_point_function()
 	#endif
 }
 
-//#define _ALLOC_CONSOLE
+#ifdef _DEBUG
+#define _ALLOC_CONSOLE
+#endif
 
 extern void LoadKeyConfiguration();
 extern bool InitialiseWindowsSystem(HINSTANCE hInstance, int nCmdShow, int WinInitMode);
@@ -468,6 +470,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 
 		IngameKeyboardInput_ClearBuffer();
 
+		uint32_t startTime = timeGetTime();
+
 		while (AvP.MainLoopRunning && bRunning) 
 		{
 			CheckForWindowsMessages();
@@ -506,11 +510,8 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 						}
 						//#endif  /* MainTextPrint */
 
-						const int FRAMES_PER_SECOND = 60;
-						const int SKIP_TICKS = 1000 / FRAMES_PER_SECOND;
-
 						ThisFramesRenderingHasBegun();
-						
+
 						DoAllShapeAnimations();
 
 						UpdateGame();
@@ -554,16 +555,15 @@ int WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance, LPTSTR lpCmdLin
 					ThisFramesRenderingHasFinished();
 
 					FlipBuffers();
-
 					FrameCounterHandler();
-					{
-						PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
+					
+					PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
 
-						if (!menusActive && playerStatusPtr->IsAlive && !AvP.LevelCompleted)
-						{
-							DealWithElapsedTime();
-						}
+					if (!menusActive && playerStatusPtr->IsAlive && !AvP.LevelCompleted)
+					{
+						DealWithElapsedTime();
 					}
+					
 					break;
 				}
 				case I_GM_Menus:

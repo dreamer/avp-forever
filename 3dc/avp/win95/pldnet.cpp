@@ -1726,7 +1726,7 @@ void NetSendMessages(void)
 						case NET_ERR_BUSY :
 
 							/*
-								failed to send this frame , try preserving the contents of the send buffer,
+								failed to send this frame, try preserving the contents of the send buffer,
 								unless it is getting to full.
 							*/
 							if (nBytes < NET_MESSAGEBUFFERSIZE / 2) {

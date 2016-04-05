@@ -126,6 +126,8 @@ extern int PlayerDamagedOverlayIntensity;
 #define JETPACK_MAX_SPEED 10000
 #define JETPACK_THRUST 40000
 
+extern bool bTurnSpeedAdjust;
+
 /*----------------------------------------------------------- 
 Initialise player movement data
 -------------------------------------------------------------*/
@@ -405,19 +407,39 @@ void ExecuteFreeMovement(STRATEGYBLOCK* sbPtr)
 		}
 		#endif
 
-		MaxSpeed=forwardSpeed;
+		MaxSpeed = forwardSpeed;
 
-		if((playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Strafe)&&(playerStatusPtr->Mvt_SideStepIncrement==0))
+		if ((playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Strafe) && (playerStatusPtr->Mvt_SideStepIncrement==0))
 		{
-			strafeSpeed	= MUL_FIXED(strafeSpeed,playerStatusPtr->Mvt_TurnIncrement);
+			strafeSpeed	= MUL_FIXED(strafeSpeed, playerStatusPtr->Mvt_TurnIncrement);
 		}
 		else
 		{
-			strafeSpeed	= MUL_FIXED(strafeSpeed,playerStatusPtr->Mvt_SideStepIncrement);
+			strafeSpeed	= MUL_FIXED(strafeSpeed, playerStatusPtr->Mvt_SideStepIncrement);
 		}
-		forwardSpeed = MUL_FIXED(forwardSpeed,playerStatusPtr->Mvt_MotionIncrement);
-		turnSpeed    = MUL_FIXED(turnSpeed,playerStatusPtr->Mvt_TurnIncrement);
-		
+
+		int preTurnSpeed = turnSpeed;
+
+		forwardSpeed = MUL_FIXED(forwardSpeed, playerStatusPtr->Mvt_MotionIncrement);
+
+#if 1
+		// bjd - test code
+		int turnSpeedTest = MUL_FIXED(turnSpeed, playerStatusPtr->Mvt_TurnIncrement);
+
+		if (turnSpeedTest > 0) {
+			turnSpeedTest++;
+		}
+
+		turnSpeed = turnSpeedTest;
+#else
+
+		turnSpeed    = MUL_FIXED(turnSpeed,    playerStatusPtr->Mvt_TurnIncrement);
+#endif
+/*
+		char buf[100];
+		sprintf(buf, "Turn increment: %d, turnSpeed: %d, preTurnSpeed: %d\n", playerStatusPtr->Mvt_TurnIncrement, turnSpeed, preTurnSpeed);
+		OutputDebugString(buf);
+*/		
 		if (MIRROR_CHEATMODE)
 		{
 			turnSpeed = -turnSpeed;
@@ -430,11 +452,16 @@ void ExecuteFreeMovement(STRATEGYBLOCK* sbPtr)
 			{
 				turnSpeed >>= CameraZoomLevel;
 				playerStatusPtr->Mvt_PitchIncrement >>= CameraZoomLevel;
+
+				char buf[100];
+				sprintf(buf, "PitchIncremen: %d\n", playerStatusPtr->Mvt_PitchIncrement);
+				OutputDebugString(buf);
 			}
 		}
 		
-		if( ((AvP.PlayerType == I_Alien) || (playerStatusPtr->ShapeState == PMph_Standing))
+		if (( ((AvP.PlayerType == I_Alien) || (playerStatusPtr->ShapeState == PMph_Standing))
 			&& (playerStatusPtr->Mvt_InputRequests.Flags.Rqst_Faster) && (playerStatusPtr->Encumberance.CanRun) )
+			|| !bTurnSpeedAdjust)
 		{	
 			/* Test - half backward speed for predators */
 			if (AvP.PlayerType==I_Predator) {
@@ -450,17 +477,28 @@ void ExecuteFreeMovement(STRATEGYBLOCK* sbPtr)
 			forwardSpeed = (forwardSpeed)/2;
 			turnSpeed = (turnSpeed)/2;
 		}	
-		
-		/* Marker */
 
-		strafeSpeed=MUL_FIXED(strafeSpeed,playerStatusPtr->Encumberance.MovementMultiple);
-		forwardSpeed=MUL_FIXED(forwardSpeed,playerStatusPtr->Encumberance.MovementMultiple);
-		turnSpeed=MUL_FIXED(turnSpeed,playerStatusPtr->Encumberance.TurningMultiple);
-		jumpSpeed=MUL_FIXED(jumpSpeed,playerStatusPtr->Encumberance.JumpingMultiple);
+		/* Marker */
+		strafeSpeed  = MUL_FIXED(strafeSpeed,  playerStatusPtr->Encumberance.MovementMultiple);
+		forwardSpeed = MUL_FIXED(forwardSpeed, playerStatusPtr->Encumberance.MovementMultiple);
+
+		preTurnSpeed = turnSpeed;
+
+		turnSpeed = MUL_FIXED(turnSpeed, playerStatusPtr->Encumberance.TurningMultiple);
+		if (preTurnSpeed > 0) {
+			turnSpeed++;
+		}
+
+		// bjd - test
+//		char buf[100];
+//		sprintf(buf, "turnSpeed: %d, preTurnSpeed: %d\n", turnSpeed, preTurnSpeed);
+//		OutputDebugString(buf);
+
+		jumpSpeed = MUL_FIXED(jumpSpeed, playerStatusPtr->Encumberance.JumpingMultiple);
 		
 		/* KJL 17:45:03 9/9/97 - inertia means it's difficult to stop */			
-	  	if (forwardSpeed*playerStatusPtr->ForwardInertia<0) playerStatusPtr->ForwardInertia = 0;
-	  	if (strafeSpeed*playerStatusPtr->StrafeInertia<0) playerStatusPtr->StrafeInertia = 0;
+	  	if (forwardSpeed * playerStatusPtr->ForwardInertia < 0) playerStatusPtr->ForwardInertia = 0;
+	  	if (strafeSpeed  * playerStatusPtr->StrafeInertia  < 0) playerStatusPtr->StrafeInertia = 0;
 	  	
 	  	if (!forwardSpeed)
 		{
@@ -823,7 +861,16 @@ void ExecuteFreeMovement(STRATEGYBLOCK* sbPtr)
 	{
 		MATRIXCH mat;
    	
-   		int angle = MUL_FIXED(NormalFrameTime,dynPtr->AngVelocity.EulerY)&4095;
+   		int angle = MUL_FIXED(NormalFrameTime, dynPtr->AngVelocity.EulerY) & 4095;
+		if (playerStatusPtr->Mvt_InputRequests.Flags.Rqst_TurnRight) {
+			angle++; // BJD - right turn deadzone fix
+		}
+
+		// bjd - test
+//		char buf[100];
+//		sprintf(buf, "Angle: %d\n", angle);
+//		OutputDebugString(buf);
+
  	  	int cos = GetCos(angle);
  	  	int sin = GetSin(angle);
  	  	mat.mat11 = cos;		 
@@ -900,7 +947,7 @@ void ExecuteFreeMovement(STRATEGYBLOCK* sbPtr)
 
 		if (playerStatusPtr->Mvt_MotionIncrement == 0)
 		{
-			timeBeenContinuouslyMoving=0;
+			timeBeenContinuouslyMoving = 0;
 		}
 		else
 		{
@@ -908,11 +955,11 @@ void ExecuteFreeMovement(STRATEGYBLOCK* sbPtr)
 			&& !playerStatusPtr->Mvt_InputRequests.Flags.Rqst_LookUp
 			&& !playerStatusPtr->Mvt_InputRequests.Flags.Rqst_LookDown)
 			{
-				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_CentreView =1;
+				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_CentreView = 1;
 			}
 			else
 			{
-				timeBeenContinuouslyMoving+=NormalFrameTime;	
+				timeBeenContinuouslyMoving += NormalFrameTime;	
 			}
 		}
 		
@@ -927,7 +974,7 @@ void ExecuteFreeMovement(STRATEGYBLOCK* sbPtr)
 										NormalFrameTime>>PANRATESHIFT
 									);
 
-			if (playerStatusPtr->ViewPanX < AllowedLookUpAngle) playerStatusPtr->ViewPanX=AllowedLookUpAngle; 
+			if (playerStatusPtr->ViewPanX < AllowedLookUpAngle) playerStatusPtr->ViewPanX = AllowedLookUpAngle; 
 
         	playerStatusPtr->ViewPanX -= 1024;
 			playerStatusPtr->ViewPanX &= wrap360;
@@ -943,7 +990,9 @@ void ExecuteFreeMovement(STRATEGYBLOCK* sbPtr)
 										NormalFrameTime>>PANRATESHIFT
 									);
 
-			if (playerStatusPtr->ViewPanX > AllowedLookDownAngle) playerStatusPtr->ViewPanX=AllowedLookDownAngle; 
+			PlayerStatusPtr->ViewPanX++; // deadzone fix
+
+			if (playerStatusPtr->ViewPanX > AllowedLookDownAngle) playerStatusPtr->ViewPanX = AllowedLookDownAngle; 
 
         	playerStatusPtr->ViewPanX -= 1024;
 			playerStatusPtr->ViewPanX &= wrap360;

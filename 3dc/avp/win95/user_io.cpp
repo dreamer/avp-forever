@@ -1460,18 +1460,23 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 	{
 		if (ControlMethods.HAxisIsTurning)
 		{
+#if 1 // REVERT - turning left and right
 			if (MouseVelX < 0)
 			{
 				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_TurnLeft = 1;
 				playerStatusPtr->Mvt_AnalogueTurning = 1;
-				playerStatusPtr->Mvt_TurnIncrement = ((int)MouseVelX)*ControlMethods.MouseXSensitivity;
+//				playerStatusPtr->Mvt_TurnIncrement = ((int)MouseVelX)*ControlMethods.MouseXSensitivity;
+				playerStatusPtr->Mvt_TurnIncrement = MouseVelX * ControlMethods.MouseXSensitivity;
+//				playerStatusPtr->Mvt_TurnIncrement = -50; //MouseVelX;
 			   
 			}
 			else if (MouseVelX > 0)
 			{
 				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_TurnRight = 1;
 				playerStatusPtr->Mvt_AnalogueTurning = 1;
-				playerStatusPtr->Mvt_TurnIncrement = ((int)MouseVelX)*ControlMethods.MouseXSensitivity;
+//				playerStatusPtr->Mvt_TurnIncrement = ((int)MouseVelX)*ControlMethods.MouseXSensitivity;
+				playerStatusPtr->Mvt_TurnIncrement = MouseVelX * ControlMethods.MouseXSensitivity;
+//				playerStatusPtr->Mvt_TurnIncrement = 50; //MouseVelX;
 			}
 
 			/* KJL 17:36:37 9/9/97 - cap values if strafing */
@@ -1482,6 +1487,7 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 		   		if (playerStatusPtr->Mvt_TurnIncrement > ONE_FIXED)
 		   			playerStatusPtr->Mvt_TurnIncrement = ONE_FIXED;
 			}
+#endif
 		}
 		else // it's sidestep
 		{
@@ -1522,6 +1528,7 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 		}
 		else // it's looking
 		{
+#if 1 // REVERT - looking up and down
 			int newMouseVelY;
 
 			if (ControlMethods.FlipVerticalAxis) {
@@ -1536,13 +1543,22 @@ void ReadPlayerGameInput(STRATEGYBLOCK* sbPtr)
 				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_LookUp = 1;
 				playerStatusPtr->Mvt_AnaloguePitching = 1;
 				playerStatusPtr->Mvt_PitchIncrement = newMouseVelY * ControlMethods.MouseYSensitivity;
+//				playerStatusPtr->Mvt_PitchIncrement = newMouseVelY;
+//				playerStatusPtr->Mvt_PitchIncrement = -50;
 			}
 			else if (newMouseVelY > 0)
 			{
 				playerStatusPtr->Mvt_InputRequests.Flags.Rqst_LookDown = 1;
 				playerStatusPtr->Mvt_AnaloguePitching = 1;
 				playerStatusPtr->Mvt_PitchIncrement = newMouseVelY * ControlMethods.MouseYSensitivity;
+//				playerStatusPtr->Mvt_PitchIncrement = newMouseVelY;
+//				playerStatusPtr->Mvt_PitchIncrement = 50;
 			}
+
+//			char buf[100];
+//			sprintf(buf, "Mvt_PitchIncrement: %d\n", playerStatusPtr->Mvt_PitchIncrement);
+//			OutputDebugString(buf);
+#endif
 		}
 	}
 

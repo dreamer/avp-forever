@@ -22,7 +22,7 @@ void RotateAndCopyVector_ASM(VECTORCH *v1, VECTORCH *v2, MATRIXCH *m);
 
 #undef ASM386
 
-//#define USE_ASM
+// #define USE_ASM
 
 #if !defined(ASM386)
 static __int64 ConvertToLongLong(const LONGLONGCH* llch)
@@ -514,6 +514,8 @@ fixed_t DIV_FIXED(fixed_t a, fixed_t b)
 		idiv b
 		mov retval,eax
 	}
+
+	return retval;
 
 #else
 

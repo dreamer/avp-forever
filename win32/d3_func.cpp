@@ -2384,7 +2384,8 @@ bool InitialiseDirect3D()
 			Con_PrintMessage("\t Depth Format set: Unknown");
 			break;
 	}
-
+	
+	// TODO - this isn't needed with HLSL?
 	ZeroMemory (&d3d.D3DViewport, sizeof(d3d.D3DViewport));
 	d3d.D3DViewport.X = 0;
 	d3d.D3DViewport.Y = 0;

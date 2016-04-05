@@ -88,6 +88,63 @@ const uint32_t kMessageHeaderSize = sizeof(MessageHeader);
 
 */
 
+// Debug function
+const char* Net_MessageTypeToString(uint32_t messageType)
+{
+	switch (messageType)
+	{
+		case NETSYS_REQUEST_SESSION_INFO:
+			return "NETSYS_REQUEST_SESSION_INFO";
+			break;
+		case NETSYS_SESSION_INFO:
+			return "NETSYS_SESSION_INFO";
+			break;
+		case NET_CREATEPLAYERORGROUP:
+			return "NET_CREATEPLAYERORGROUP";
+			break;
+		case NET_SETPLAYERID:
+			return "NET_SETPLAYERID";
+			break;
+		case NET_DESTROYPLAYERORGROUP:
+			return "NET_DESTROYPLAYERORGROUP";
+			break;
+		case NET_ADDPLAYERTOGROUP:
+			return "NET_ADDPLAYERTOGROUP";
+			break;
+		case NET_DELETEPLAYERFROMGROUP:
+			return "NET_DELETEPLAYERFROMGROUP";
+			break;
+		case NET_SESSIONLOST:
+			return "NET_SESSIONLOST";
+			break;
+		case NET_HOST:
+			return "NET_HOST";
+			break;
+			//	NET_SETPLAYERORGROUPDATA,
+			//	NET_SETPLAYERORGROUPNAME,
+			//	NET_SETSESSIONDESC,
+			//	NET_ADDGROUPTOGROUP,
+			//	NET_DELETEGROUPFROMGROUP,
+			//	NET_SECUREMESSAGE,
+			//	NET_STARTSESSION,
+			//	NET_CHAT,
+			//	NET_SETGROUPOWNER,
+			//	NET_SENDCOMPLETE,
+			//	NET_PLAYERTYPE_GROUP,
+		case NET_PLAYERTYPE_PLAYER:
+			return "NET_PLAYERTYPE_PLAYER";
+			break;
+			//	NET_RECEIVE_ALL,
+		case NET_ID_ALLPLAYERS:
+			return "NET_ID_ALLPLAYERS";
+			break;
+			//	NET_ID_SERVERPLAYER,
+		default:
+			return "Unknown message type";
+			break;
+	}
+}
+
 static void Net_AddSession(SessionDescription &session)
 {
 	uint16_t gameStyle = session.gameStyle;
@@ -124,7 +181,7 @@ static void Net_AddSession(SessionDescription &session)
 			// we don't have the level, so ignore this session
 			return;
 		}
-						
+
 		SessionData[NumberOfSessionsFound].levelIndex = local_index;
 	}
 
@@ -150,7 +207,6 @@ bool Net_UpdateSessionList(int &SelectedItem)
 	// poll network for session data
 	{
 		MessageHeader header;
-		
 		ENetBuffer buf;
 		buf.data = &packetBuffer;
 		buf.dataLength = kPacketBufferSize;
@@ -326,6 +382,8 @@ int Net_ConnectingToLobbiedGame(char *playerName)
 
 NetResult Net_HostGame(char *playerName, char *sessionName, int species, uint16_t gameStyle, uint16_t level)
 {
+	printf("Net_HostGame\n");
+
 	if (!net_IsInitialised)
 	{
 		Con_PrintError("Networking is not initialisedr");
@@ -369,7 +427,7 @@ NetResult Net_HostGame(char *playerName, char *sessionName, int species, uint16_
 					return NET_FAIL;
 				}
 			}
-			else 
+			else
 			{
 				if ((Net_CreateSession(sessionName, levelName, maxPlayers, kMultiplayerVersion, gameStyle, level)) != NET_OK) {
 					return NET_FAIL;
@@ -440,12 +498,11 @@ void Net_Disconnect()
 	}
 
 	enet_socket_destroy(broadcastSocket);
-
 	return;
 }
 
 uint32_t Net_JoinGame()
-{	
+{
 //	char buf[100];
 //	sprintf(buf, "Net_JoinGame at %d\n", timeGetTime());
 //	OutputDebugString(buf);
@@ -577,7 +634,7 @@ void Net_ConnectToAddress()
 					// we don't have the level, so ignore this session
 					//return;
 				}
-					
+
 				SessionData[NumberOfSessionsFound].levelIndex = local_index;
 			}
 /*
@@ -636,7 +693,7 @@ static void Net_CheckForSessionRequest()
 				header.messageType = NETSYS_SESSION_INFO;
 				ws.PutBytes(&header, sizeof(header));
 				ws.PutBytes(&netSession, sizeof(SessionDescription));
-				
+
 				buf.dataLength = ws.GetBytesWritten();
 				buf.data = packetBuffer;
 
@@ -732,7 +789,12 @@ NetResult Net_Receive(uint8_t *messageData, size_t &dataSize)
 
 // used to send a message to the server only
 NetResult Net_SendSystemMessage(uint32_t messageType, NetID fromID, NetID toID, const void *messageData, size_t dataSize)
-{
+{ 
+	if (!ServerPeer) {
+		printf("ServerPeer is NULL! tring to send message type: %s\n", Net_MessageTypeToString(messageType));
+	}
+	assert(ServerPeer);
+
 	// create a new header and copy it into the packet buffer
 	MessageHeader newMessageHeader;
 	newMessageHeader.marker = kMarker;
@@ -821,6 +883,7 @@ NetResult Net_Send(uint32_t messageType, NetID fromID, NetID toID, uint8_t *mess
 
 NetResult Net_ConnectToSession(int sessionNumber, char *playerName)
 {
+	printf("Net_ConnectToSession\n");
 	OutputDebugString("Step 1: Connect To Session\n");
 
 	if (host) {
@@ -847,7 +910,7 @@ NetResult Net_ConnectToSession(int sessionNumber, char *playerName)
 		Con_PrintError("Net_ConnectToSession - Failed to create Enet client");
 		return NET_FAIL;
 	}
-	
+
 	ServerPeer = enet_host_connect(host, &ServerAddress, 2, 0);
 	if (ServerPeer == NULL)
 	{
@@ -877,20 +940,21 @@ NetResult Net_ConnectToSession(int sessionNumber, char *playerName)
 
 	netGameData.levelNumber = SessionData[sessionNumber].levelIndex;
 	netGameData.joiningGameStatus = JOINNETGAME_WAITFORDESC;
-	
+
 	return NET_OK;
 }
 
 // this function should be called for the host only?
 static bool Net_CreatePlayer(char *playerName)
 {
+	printf("Net_CreatePlayer\n");
 	memset(&thisClientPlayer, 0, sizeof(PlayerDetails));
 
 	if (AvP.Network == I_Host) {
 		thisClientPlayer.ID = Net_GetNextPlayerID();
 		AvPNetID = thisClientPlayer.ID;
-	}	
-	
+	}
+
 	thisClientPlayer.type = NET_PLAYERTYPE_PLAYER;
 	strncpy(thisClientPlayer.name, playerName, kPlayerNameSize - 1);
 	thisClientPlayer.name[kPlayerNameSize-1] = 0;
@@ -900,7 +964,7 @@ static bool Net_CreatePlayer(char *playerName)
 	{
 		OutputDebugString("Net_CreatePlayer - Sending player struct\n");
 
-		// send struct as system message 
+		// send struct as system message
 		// FIXME - to and from IDs
 		if (Net_SendSystemMessage(NET_CREATEPLAYERORGROUP, 0, 0, &thisClientPlayer, sizeof(PlayerDetails)) != NET_OK)
 		{
@@ -976,6 +1040,7 @@ void Net_FindAvPSessions()
 
 static NetResult Net_CreateSession(const char *sessionName, const char *levelName, int maxPlayers, int version, uint16_t gameStyle, uint16_t level)
 {
+	printf("Net_CreateSession\n");
 	memset(&netSession, 0, sizeof(netSession));
 
 #ifdef _WIN32

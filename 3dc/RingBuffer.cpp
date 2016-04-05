@@ -140,15 +140,13 @@ uint32_t RingBuffer::ReadData(uint8_t *destData, uint32_t amountToRead)
 
 	pthread_mutex_lock(&_criticalSection);
 
-	if (amountToRead > readableSpace)
-	{
+	if (amountToRead > readableSpace) {
 		amountToRead = readableSpace;
 	}
 
 	firstSize = _bufferCapacity - _readPos;
 
-	if (firstSize > amountToRead)
-	{
+	if (firstSize > amountToRead) {
 		firstSize = amountToRead;
 	}
 
@@ -187,8 +185,7 @@ uint32_t RingBuffer::WriteData(uint8_t *srcData, uint32_t srcDataSize)
 
 	pthread_mutex_lock(&_criticalSection);
 
-	if (srcDataSize > availableSpace)
-	{
+	if (srcDataSize > availableSpace) {
 		srcDataSize = availableSpace;
 	}
 

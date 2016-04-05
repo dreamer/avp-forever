@@ -54,7 +54,7 @@ extern void ConstructOneOverSinTable(void);
 */
 	
 /* Timer */
-long lastTickCount;
+uint32_t lastTickCount;
 
 int VideoMode;
 int VideoModeType;
@@ -232,25 +232,12 @@ void ResetFrameCounter(void)
 	RouteFinder_CallsThisFrame = 0;
 }
 
-uint64_t lastTickCount2 = 0;
-
-
 void FrameCounterHandler(void)
 {
-	static BOOL inited = FALSE;
-
-	int newTickCount = timeGetTime();
-
-	int fcnt;
-
-	if (!inited)
-	{
-		lastTickCount2 = timeGetTime();
-		inited = TRUE;
-	}
+	uint32_t newTickCount = timeGetTime();
 
 	// fcnt = time passed since last check
-	fcnt = newTickCount - lastTickCount;
+	uint32_t fcnt = newTickCount - lastTickCount;
 
 	lastTickCount = newTickCount;
 
@@ -261,6 +248,8 @@ void FrameCounterHandler(void)
 
 	PrevNormalFrameTime = NormalFrameTime;
 	NormalFrameTime = DIV_FIXED(fcnt,TimerFrame);
+
+//	NormalFrameTime = (fcnt / TimerFrame) << 16;
 
 	// RealFrameTime. unscaled frame time
 	RealFrameTime = NormalFrameTime;
