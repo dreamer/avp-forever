@@ -387,6 +387,10 @@ void db_print_fired(int x, int y, const char *strP)
  */
 void db_log_fired(const char *strP)
 {
+#if EMSCRIPTEN
+	printf("%s\n", strP);
+	return;
+#else
 	/* Have we intialised the file?	*/
 	if(!InitialisedLog) db_log_init();
 	{
@@ -398,6 +402,7 @@ void db_log_fired(const char *strP)
 		fprintf(fP, "%s\n", strP);
 		fclose(fP);
 	}
+#endif
 }
 
 void db_log_init(void)

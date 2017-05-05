@@ -228,7 +228,8 @@ void Game_Has_Loaded(void)
 
 	int f = 65536;
 	ResetFrameCounter();
-	do
+#warning Game_Has_Loaded commented out a blocking loop
+	//do
 	{
 		CheckForWindowsMessages();
 		ReadUserInput();
@@ -284,7 +285,7 @@ void Game_Has_Loaded(void)
 		}
 		
 	}
-	while(!DebouncedGotAnyKey);
+//	while(!DebouncedGotAnyKey);
 
 	FadingGameInAfterLoading=ONE_FIXED;
 

@@ -3,8 +3,13 @@
 #include <string.h>
 #include <math.h>
 
+#if EMSCRIPTEN
+#include <AL/al.h>
+#include <AL/alc.h>
+#else
 #include "al.h"
 #include "alc.h"
+#endif
 
 #include "fixer.h"
 
@@ -19,7 +24,7 @@
 #include "dynblock.h"
 #include "stratdef.h"
 
-#if defined( _MSC_VER )
+#if defined( _MSC_VERx )
 #include <AL/eax.h>
 #endif
 
@@ -47,7 +52,7 @@ static struct {
 	unsigned int env_index;
 } SoundConfig;
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VERx)
 // EAX1.0
 #define EAX_REVERBMIX_USEDISTANCE -1.0F
 
@@ -225,7 +230,7 @@ int PlatStartSoundSys()
 		exit(1);
 	}
 
-#if defined(_MSC_VER)
+#if defined(_MSC_VERx)
 	EAX_pfPropSet = NULL;
 	EAX_pfPropGet = NULL;
 	
@@ -870,7 +875,7 @@ void PlatUpdatePlayer()
 			or[5] = -(float) ((Global_VDB_Ptr->VDB_Mat.mat32) / 65536.0F);
 		}
 
-#warning VELOCITY AND/OR OPENAL SETUP IS IN WRONG UNITS
+#pragma message ("VELOCITY AND/OR OPENAL SETUP IS IN WRONG UNITS")
 		static int useVel = 0;
 		if (useVel!=0&&(AvP.PlayerType == I_Alien && DopplerShiftIsOn && NormalFrameTime)) {
 			DYNAMICSBLOCK *dynPtr = Player->ObStrategyBlock->DynPtr;
@@ -902,7 +907,7 @@ void PlatUpdatePlayer()
 		alListenerfv (AL_POSITION, pos);
 	}
 
-#if defined( _MSC_VER )
+#if defined( _MSC_VERx )
 	if( SoundConfig.reverb_changed ) {
 		// TODO: reverb handling
 	}
@@ -915,7 +920,7 @@ void PlatSetEnviroment(unsigned int env_index, float reverb_mix)
 	fprintf(stderr, "OPENAL: PlatSetEnvironment(%d, %f)\n", env_index, reverb_mix);
 #endif
 
-#if defined( _MSC_VER )
+#if defined( _MSC_VERx )
 	if( SoundConfig.env_index != env_index ) {
 		
 		// TODO: support the custom plain reverb

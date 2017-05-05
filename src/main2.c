@@ -45,6 +45,9 @@
 #include "version.h"
 #include "fmv.h"
 
+#if EMSCRIPTEN
+#include <emscripten.h>
+#endif
 
 #if defined(__IPHONEOS__) || defined(__ANDROID__)
 #define FIXED_WINDOW_SIZE 1
@@ -53,6 +56,13 @@
 #if defined(__IPHONEOS__) || defined(__ANDROID__)
 #define USE_OPENGL_ES 1
 #endif
+
+#warning WINDOW_SIZE_DEBUG is on in all builds
+#if 1 //!defined(NDEBUG)
+#define WINDOW_SIZE_DEBUG
+#endif
+
+static void main_loop(void);
 
 void RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_CHAR(char Ch);
 void RE_ENTRANT_QUEUE_WinProc_AddMessage_WM_KEYDOWN(int wParam);
@@ -83,11 +93,15 @@ SDL_Joystick *joy;
 JOYINFOEX JoystickData;
 JOYCAPS JoystickCaps;
 
+static int main_loop_state = 0;
+
 // Window configuration and state
 static int WindowWidth;
 static int WindowHeight;
 static int ViewportWidth;
 static int ViewportHeight;
+static int DrawableWidth;
+static int DrawableHeight;
 
 enum RENDERING_MODE {
 	RENDERING_MODE_SOFTWARE,
@@ -111,11 +125,20 @@ static int WantMouseGrab = 0;
 // Additional configuration
 int WantSound = 1;
 static int WantCDRom = 0;
-static int WantJoystick = 0;
+static int WantJoystick = 1;
 
 static GLuint FullscreenTexture;
 static GLsizei FullscreenTextureWidth;
 static GLsizei FullscreenTextureHeight;
+
+static GLuint FullscreenArrayBuffer;
+static GLuint FullscreenElementArrayBuffer;
+
+static GLuint FramebufferTexture;
+static GLsizei FramebufferTextureWidth;
+static GLsizei FramebufferTextureHeight;
+static GLuint FramebufferObject;
+static GLuint FramebufferDepthObject;
 
 /* originally was "/usr/lib/libGL.so.1:/usr/lib/tls/libGL.so.1:/usr/X11R6/lib/libGL.so" */
 static const char * opengl_library = NULL;
@@ -213,14 +236,14 @@ unsigned char *GetScreenShot24(int *width, int *height)
 	}
 
 	if (RenderingMode == RENDERING_MODE_OPENGL) {
-		buf = (unsigned char *)malloc(ViewportWidth * ViewportHeight * 3);
+		buf = (unsigned char *)malloc(DrawableWidth * DrawableHeight * 3);
 
-		*width = ViewportWidth;
-		*height = ViewportHeight;
+		*width = DrawableWidth;
+		*height = DrawableHeight;
 
 		pglPixelStorei(GL_PACK_ALIGNMENT, 1);
 		pglPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-		pglReadPixels(0, 0, ViewportWidth, ViewportHeight, GL_RGB, GL_UNSIGNED_BYTE, buf);
+		pglReadPixels(0, 0, DrawableWidth, DrawableHeight, GL_RGB, GL_UNSIGNED_BYTE, buf);
 	} else {
 		buf = (unsigned char *)malloc(surface->w * surface->h * 3);
 
@@ -415,6 +438,11 @@ char *GetVideoModeDescription3()
 
 int InitSDL()
 {
+#if EMSCRIPTEN
+	printf("Setting main loop...\n");
+	emscripten_set_main_loop(main_loop, 0, 0);
+#endif
+
 	if (SDL_Init(SDL_INIT_VIDEO) < 0) {
 		fprintf(stderr, "SDL Init failed: %s\n", SDL_GetError());
 		exit(EXIT_FAILURE);
@@ -531,7 +559,7 @@ int InitSDL()
 	return 0;
 }
 
-#if !defined(NDEBUG)
+#if defined(WINDOW_SIZE_DEBUG)
 static void DumpVideoModeInfo(SDL_Window* w) {
 	int numVideoDisplays;
 	int displayIndex;
@@ -599,18 +627,27 @@ static void DumpVideoModeInfo(SDL_Window* w) {
 				   mode.h,
 				   mode.refresh_rate);
 		}
+
+		int width, height;
+		SDL_GetWindowSize(w, &width, &height);
+		printf("Window size: %4d,%4d\n", width, height);
+
+		SDL_GL_GetDrawableSize(w, &width, &height);
+		printf("Window drawable size: %4d,%4d\n", width, height);
 	}
 }
 #endif
 
 static void SetWindowSize(int PhysicalWidth, int PhysicalHeight, int VirtualWidth, int VirtualHeight)
 {
-#if !defined(NDEBUG)
-	fprintf(stderr, "SetWindowSize(%d,%d,%d,%d); %d\n", PhysicalWidth, PhysicalHeight, VirtualWidth, VirtualHeight, CurrentVideoMode);
+#if defined(WINDOW_SIZE_DEBUG)
+	printf("SetWindowSize(%d,%d,%d,%d); %d\n", PhysicalWidth, PhysicalHeight, VirtualWidth, VirtualHeight, CurrentVideoMode);
 #endif
 
 	ViewportWidth = PhysicalWidth;
 	ViewportHeight = PhysicalHeight;
+	DrawableWidth = ViewportWidth;
+	DrawableHeight = ViewportHeight;
 
 	ScreenDescriptorBlock.SDB_Width     = VirtualWidth;
 	ScreenDescriptorBlock.SDB_Height    = VirtualHeight;
@@ -626,10 +663,11 @@ static void SetWindowSize(int PhysicalWidth, int PhysicalHeight, int VirtualWidt
 	if (window != NULL) {
 		SDL_SetWindowSize(window, PhysicalWidth, PhysicalHeight);
 
-		//pglViewport(0, 0, ViewportWidth, ViewportHeight);
+		SDL_GL_GetDrawableSize(window, &DrawableWidth, &DrawableHeight);
+		pglViewport(0, 0, DrawableWidth, DrawableHeight);
 	}
 	
-#if !defined(NDEBUG)
+#if defined(WINDOW_SIZE_DEBUG)
 	DumpVideoModeInfo(window);
 #endif
 }
@@ -708,6 +746,8 @@ static int InitSDLVideo(void) {
 
 static int SetOGLVideoMode(int Width, int Height)
 {
+	GLenum status;
+	int firsttime = 0;
 	int oldflags;
 	int flags;
 	
@@ -725,9 +765,11 @@ static int SetOGLVideoMode(int Width, int Height)
 #endif
 
 	if (window == NULL) {
+		firsttime = 1;
+
 		load_ogl_functions(0);
 
-		flags = SDL_WINDOW_OPENGL;
+		flags = SDL_WINDOW_OPENGL|SDL_WINDOW_ALLOW_HIGHDPI;
 
 #if defined(FIXED_WINDOW_SIZE)
 		flags |= SDL_WINDOW_BORDERLESS;
@@ -751,8 +793,8 @@ static int SetOGLVideoMode(int Width, int Height)
 		// set OpenGL attributes first
 #if defined(USE_OPENGL_ES)
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, SDL_GL_CONTEXT_PROFILE_ES);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 1);
-		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
 #else
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
 		SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 1);
@@ -795,7 +837,10 @@ static int SetOGLVideoMode(int Width, int Height)
 
 		load_ogl_functions(1);
 
-		SDL_GetWindowSize(window, &Width, &Height);
+		SDL_GL_GetDrawableSize(window, &Width, &Height);
+#if defined(WINDOW_SIZE_DEBUG)
+		printf("glViewport(0, 0, %d, %d)\n", Width, Height);
+#endif
 		pglViewport(0, 0, Width, Height);
 
 		// create fullscreen window texture
@@ -808,17 +853,79 @@ static int SetOGLVideoMode(int Width, int Height)
 		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
 		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
 
-		FullscreenTextureWidth = 1024;
-		FullscreenTextureHeight = 512;
+		FullscreenTextureWidth = 640;
+		FullscreenTextureHeight = 480;
 		pglTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, FullscreenTextureWidth, FullscreenTextureHeight, 0, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, NULL);
+
+		// this should be deleted and rebuilt when the screen size changes
+		GLint maxRenderbufferSize;
+		GLint maxTextureSize;
+		GLint maxViewportDims;
+		GLint maxRenderSize;
+
+		pglGetIntegerv(GL_MAX_RENDERBUFFER_SIZE, &maxRenderbufferSize);
+		pglGetIntegerv(GL_MAX_TEXTURE_SIZE, &maxTextureSize);
+		pglGetIntegerv(GL_MAX_VIEWPORT_DIMS, &maxViewportDims);
+		printf("DEBUG:%d,%d,%d\n", maxRenderbufferSize, maxTextureSize, maxViewportDims);
+
+		FramebufferTextureWidth = Width * 2;
+		FramebufferTextureHeight = Height * 2;
+		printf("DEBUG2:%d,%d\n", FramebufferTextureWidth, FramebufferTextureHeight);
+
+		maxRenderSize = maxRenderbufferSize;
+		if (maxRenderSize > maxTextureSize) {
+			maxRenderSize = maxTextureSize;
+		}
+		if (maxRenderSize > maxViewportDims) {
+			maxRenderSize = maxViewportDims;
+		}
+
+		if (FramebufferTextureWidth > maxRenderSize) {
+			FramebufferTextureWidth = maxRenderSize;
+		}
+		if (FramebufferTextureHeight > maxRenderSize) {
+			FramebufferTextureHeight = maxRenderSize;
+		}
+		printf("DEBUG3:%d,%d\n", FramebufferTextureWidth, FramebufferTextureHeight);
+
+		pglGenTextures(1, &FramebufferTexture);
+		pglGenFramebuffers(1, &FramebufferObject);
+		pglGenRenderbuffers(1, &FramebufferDepthObject);
+
+		pglBindTexture(GL_TEXTURE_2D, FramebufferTexture);
+		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+		pglTexImage2D(GL_TEXTURE_2D, 0, GL_RGB, FramebufferTextureWidth, FramebufferTextureHeight, 0, GL_RGB, GL_UNSIGNED_BYTE, NULL);
+
+		pglBindTexture(GL_TEXTURE_2D, 0);
+		pglBindFramebuffer(GL_FRAMEBUFFER, FramebufferObject);
+		pglFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, FramebufferTexture, 0);
+		pglBindRenderbuffer(GL_RENDERBUFFER, FramebufferDepthObject);
+		pglRenderbufferStorage(GL_RENDERBUFFER, GL_DEPTH_COMPONENT16, FramebufferTextureWidth, FramebufferTextureHeight);
+		pglFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, FramebufferDepthObject);
+
+		pglGenBuffers(1, &FullscreenArrayBuffer);
+		pglGenBuffers(1, &FullscreenElementArrayBuffer);
+
+		check_for_errors();
+
+		status = pglCheckFramebufferStatus(GL_FRAMEBUFFER);
+		if (status != GL_FRAMEBUFFER_COMPLETE) {
+			fprintf(stderr, "Incomplete framebuffer, status:%04x\n", status);
+		}
+
+		pglBindFramebuffer(GL_FRAMEBUFFER, 0);
+		pglBindRenderbuffer(GL_RENDERBUFFER, 0);
 	}
 
 	SDL_GetWindowSize(window, &Width, &Height);
-	
+
 	SetWindowSize(Width, Height, Width, Height);
 	
 	int NewWidth, NewHeight;
-	SDL_GetWindowSize(window, &Width, &Height);
+	SDL_GetWindowSize(window, &NewWidth, &NewHeight);
 	if (Width != NewWidth || Height != NewHeight) {
 		//printf("Failed to change size: %d,%d vs. %d,%d\n", Width, Height, NewWidth, NewHeight);
 		//Width = NewWidth;
@@ -833,15 +940,15 @@ static int SetOGLVideoMode(int Width, int Height)
 	pglDepthFunc(GL_LEQUAL);
 	pglDepthMask(GL_TRUE);
 	pglDepthRange(0.0, 1.0);
-		
-	pglEnable(GL_TEXTURE_2D);
 
 	pglDisable(GL_CULL_FACE);
 	
 	pglClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 	
-	InitOpenGL();
+	InitOpenGL(firsttime);
 	
+	check_for_errors();
+
 	return 0;
 }
 
@@ -860,6 +967,16 @@ int ExitWindowsSystem()
 		pglDeleteTextures(1, &FullscreenTexture);
 	}
 	FullscreenTexture = 0;
+
+	if (FullscreenArrayBuffer != 0) {
+		pglDeleteBuffers(1, &FullscreenArrayBuffer);
+	}
+	FullscreenArrayBuffer = 0;
+
+	if (FullscreenElementArrayBuffer != 0) {
+		pglDeleteBuffers(1, &FullscreenElementArrayBuffer);
+	}
+	FullscreenElementArrayBuffer = 0;
 
 	load_ogl_functions(0);
 	
@@ -1224,7 +1341,9 @@ void CheckForWindowsMessages()
 						// disable mouse grab?
 						break;
 					case SDL_WINDOWEVENT_RESIZED:
-						//printf("test, %d,%d\n", event.window.data1, event.window.data2);
+#if defined(WINDOW_SIZE_DEBUG)
+						printf("Window Resized %d,%d\n", event.window.data1, event.window.data2);
+#endif
 						WindowWidth = event.window.data1;
 						WindowHeight = event.window.data2;
 						if (RenderingMode == RENDERING_MODE_SOFTWARE) {
@@ -1233,6 +1352,7 @@ void CheckForWindowsMessages()
 							SetWindowSize(WindowWidth, WindowHeight, WindowWidth, WindowHeight);
 						}
 						if (pglViewport != NULL) {
+							SDL_GL_GetDrawableSize(window, &WindowWidth, &WindowHeight);
 							pglViewport(0, 0, WindowWidth, WindowHeight);
 						}
 						break;
@@ -1346,21 +1466,39 @@ void InGameFlipBuffers()
 	check_for_errors();
 #endif
 
+	pglBindFramebuffer(GL_FRAMEBUFFER, 0);
+	pglBindRenderbuffer(GL_RENDERBUFFER, 0);
+	pglViewport(0, 0, DrawableWidth, DrawableHeight);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+	DrawFullscreenTexture(FramebufferTexture);
+
+#if !defined(NDEBUG)
+	check_for_errors();
+#endif
+
 	SDL_GL_SwapWindow(window);
+
+	pglBindFramebuffer(GL_FRAMEBUFFER, FramebufferObject);
+	pglBindRenderbuffer(GL_RENDERBUFFER, FramebufferDepthObject);
+	pglViewport(0, 0, FramebufferTextureWidth, FramebufferTextureHeight);
+	glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 }
 
 void FlipBuffers()
 {
+	pglBindFramebuffer(GL_FRAMEBUFFER, 0);
+	pglBindRenderbuffer(GL_RENDERBUFFER, 0);
+
+	pglViewport(0, 0, DrawableWidth, DrawableHeight);
 	pglClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-	pglDisable(GL_ALPHA_TEST);
 	pglDisable(GL_BLEND);
 	pglDisable(GL_DEPTH_TEST);
 
 	pglBindTexture(GL_TEXTURE_2D, FullscreenTexture);
 	pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 	pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-	pglTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_REPLACE);
 	pglTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 640, 480, GL_RGB, GL_UNSIGNED_SHORT_5_6_5, surface->pixels);
 
 	GLfloat x0;
@@ -1373,22 +1511,22 @@ void FlipBuffers()
 	GLfloat t1;
 
 	// figure out the best way to fit the 640x480 virtual window
-	GLfloat a = ViewportHeight * 640.0f / 480.0f;
-	GLfloat b = ViewportWidth * 480.0f / 640.0f;
+	GLfloat a = DrawableHeight * 640.0f / 480.0f;
+	GLfloat b = DrawableWidth * 480.0f / 640.0f;
 
-	if (a <= ViewportWidth) {
-		// a x ViewportHeight window
+	if (a <= DrawableWidth) {
+		// a x DrawableHeight window
 		y0 = -1.0f;
 		y1 =  1.0f;
 
-		x1 = 1.0 - (ViewportWidth - a) / ViewportWidth;
+		x1 = 1.0 - (DrawableWidth - a) / DrawableWidth;
 		x0 = -x1;
 	} else {
-		// ViewportWidth x b window
+		// DrawableWidth x b window
 		x0 = -1.0f;
 		x1 =  1.0f;
 
-		y1 = 1.0 - (ViewportHeight - b) / ViewportHeight;
+		y1 = 1.0 - (DrawableHeight - b) / DrawableHeight;
 		y0 = -y1;
 	}
 
@@ -1424,16 +1562,18 @@ void FlipBuffers()
 	s[4] = 2;
 	s[5] = 3;
 
-	pglEnableClientState(GL_VERTEX_ARRAY);
-	pglVertexPointer(2, GL_FLOAT, sizeof(GLfloat) * 4, &v[0]);
+	SelectProgram(AVP_SHADER_PROGRAM_NO_COLOR_NO_DISCARD);
 
-	pglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	pglTexCoordPointer(2, GL_FLOAT, sizeof(GLfloat) * 4, &v[2]);
+	// slow webgl compatibility changes
+	pglBindBuffer(GL_ARRAY_BUFFER, FullscreenArrayBuffer);
+	pglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, FullscreenElementArrayBuffer);
+	pglBufferData(GL_ARRAY_BUFFER, sizeof(v), v, GL_STREAM_DRAW);
+	pglBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(s), s, GL_STREAM_DRAW);
 
-	pglDisableClientState(GL_COLOR_ARRAY);
+	pglVertexAttribPointer(OPENGL_VERTEX_ATTRIB_INDEX, 2, GL_FLOAT, GL_FALSE, 4*sizeof(GLfloat), (const GLvoid*) 0);
+	pglVertexAttribPointer(OPENGL_TEXCOORD_ATTRIB_INDEX, 2, GL_FLOAT, GL_FALSE, 4*sizeof(GLfloat), (const GLvoid*) 8);
 
-	pglColor4f(1.0f, 1.0f, 1.0f, 1.0f);
-	pglDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, s);
+	pglDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_SHORT, (const GLvoid*) 0);
 
 	pglBindTexture(GL_TEXTURE_2D, 0);
 
@@ -1478,6 +1618,10 @@ static const char *usage_string =
 "      [-j | --nojoy]          Do not access the joystick\n"
 "      [-g | --withgl] [x]     Use [x] instead of /usr/lib/libGL.so.1 for OpenGL\n"
 ;
+
+static int menusActive = 0;
+static int thisLevelHasBeenCompleted = 0;
+
          
 int main(int argc, char *argv[])
 {			
@@ -1534,7 +1678,7 @@ int main(int argc, char *argv[])
 	LoadCDTrackList();
 	
 	SetFastRandom();
-	
+
 #if MARINE_DEMO
 	ffInit("fastfile/mffinfo.txt","fastfile/");
 #elif ALIEN_DEMO
@@ -1553,7 +1697,7 @@ int main(int argc, char *argv[])
 
 	/* Env_List can probably be removed */
 	Env_List[0]->main = LevelName;
-	
+
 	InitialiseSystem();
 	InitialiseRenderer();
 	
@@ -1584,14 +1728,18 @@ int main(int argc, char *argv[])
 	SetLevelToLoad(AVP_ENVIRONMENT_INVASION);
 #endif
 
+	main_loop_state = 1;
+	return 0;
+
+#if 0
 #if !(ALIEN_DEMO|PREDATOR_DEMO|MARINE_DEMO)	
 while (AvP_MainMenus())
 #else
 if (AvP_MainMenus())
 #endif
 {
-	int menusActive = 0;
-	int thisLevelHasBeenCompleted = 0;
+	menusActive = 0;
+	thisLevelHasBeenCompleted = 0;
 	
 	/* turn off any special effects */
 	d3d_light_ctrl.ctrl = LCCM_NORMAL;
@@ -1742,9 +1890,10 @@ if (AvP_MainMenus())
 /* go back to menu mode */
 #if !(ALIEN_DEMO|PREDATOR_DEMO|MARINE_DEMO)
 	SetSoftVideoMode(640, 480, 16);
-#endif	
+#endif
 }
 
+#if !EMSCRIPTEN
 	SoundSys_StopAll();
 	SoundSys_RemoveAll();
 	
@@ -1752,6 +1901,241 @@ if (AvP_MainMenus())
 	
 	CDDA_End();
 	ClearMemoryPool();
+#endif
+#endif
+	return 0;
+}
+
+int AvP_MainMenus_Init(void);
+int AvP_MainMenus_Update(void);
+int AvP_MainMenus_Deinit(void);
+
+static int MainGame_Init(void);
+static int MainGame_Update(void);
+static int MainGame_Deinit(void);
+
+static void main_loop(void) {
+	switch (main_loop_state) {
+		case 0:
+			return;
+
+		case -1:
+			printf("You can't exit the game!\n");
+			main_loop_state = 0;
+			return;
+
+		case -999:
+			printf("Unimplemented!\n");
+			main_loop_state = 0;
+			return;	
+
+		case 1:
+			AvP_MainMenus_Init();
+			main_loop_state = 2;
+			// fallthrough
+		case 2: {
+			int cont = AvP_MainMenus_Update();
+			if (cont != 0) {
+				return;
+			}
+		}
+			// fallthrough
+
+		case 3: {
+			int cont = AvP_MainMenus_Deinit();
+			if (cont != 0) {
+				main_loop_state = 4;
+				return;
+			}
+		}
+			main_loop_state = -1;
+			return;
+		
+		case 4: {
+			MainGame_Init();
+			main_loop_state = 5;
+			// fallthrough
+		}
+		
+		case 5: {
+			int cont = MainGame_Update();
+			if (cont != 0) {
+				return;
+			}
+			// fallthrough
+		}
+		
+		case 6: {
+			MainGame_Deinit();
+			main_loop_state = 1;
+		}
+		
+	}
+}
+
+static int MainGame_Init(void) {
+	menusActive = 0;
+	thisLevelHasBeenCompleted = 0;
+	
+	/* turn off any special effects */
+	d3d_light_ctrl.ctrl = LCCM_NORMAL;
+
+	SetOGLVideoMode(0, 0);
+
+	InitialiseGammaSettings(RequestedGammaSetting);
+	
+	start_of_loaded_shapes = load_precompiled_shapes();
+	
+	InitCharacter();
+	
+	LoadRifFile(); /* sets up a map */
+	
+	AssignAllSBNames();
+	
+	StartGame();
+	
+	ffcloseall();
+	
+	AvP.MainLoopRunning = 1;
+	
+	ScanImagesForFMVs();
+	
+	ResetFrameCounter();
+
+	Game_Has_Loaded();
+	
+	ResetFrameCounter();
+	
+	if(AvP.Network!=I_No_Network)
+	{
+		/*Need to choose a starting position for the player , but first we must look
+		through the network messages to find out which generator spots are currently clear*/
+		netGameData.myGameState = NGS_Playing;
+		MinimalNetCollectMessages();
+		TeleportNetPlayerToAStartingPosition(Player->ObStrategyBlock,1);
+	}
+
+	IngameKeyboardInput_ClearBuffer();
+
+	return 0;
+}
+
+static int MainGame_Update(void) {	
+	if(AvP.MainLoopRunning) {
+		CheckForWindowsMessages();
+		
+		switch(AvP.GameMode) {
+		case I_GM_Playing:
+			if ((!menusActive || (AvP.Network!=I_No_Network && !netGameData.skirmishMode)) && !AvP.LevelCompleted) {
+				/* TODO: print some debugging stuff */
+				
+				DoAllShapeAnimations();
+				
+				UpdateGame();
+				
+				AvpShowViews();
+				
+				MaintainHUD();
+				
+				CheckCDAndChooseTrackIfNeeded();
+				
+				if(InGameMenusAreRunning() && ( (AvP.Network!=I_No_Network && netGameData.skirmishMode) || (AvP.Network==I_No_Network)) ) {
+					SoundSys_StopAll();
+				}
+			} else {
+				ReadUserInput();
+				
+				SoundSys_Management();
+				
+				FlushD3DZBuffer();
+				
+				ThisFramesRenderingHasBegun();
+			}
+
+			menusActive = AvP_InGameMenus();
+			if (AvP.RestartLevel) menusActive=0;
+			
+			if (AvP.LevelCompleted) {
+				SoundSys_FadeOutFast();
+				DoCompletedLevelStatisticsScreen();
+				thisLevelHasBeenCompleted = 1;
+			}
+
+			ThisFramesRenderingHasFinished();
+
+			InGameFlipBuffers();
+			
+			FrameCounterHandler();
+			{
+				PLAYER_STATUS *playerStatusPtr = (PLAYER_STATUS *) (Player->ObStrategyBlock->SBdataptr);
+				
+				if (!menusActive && playerStatusPtr->IsAlive && !AvP.LevelCompleted) {
+					DealWithElapsedTime();
+				}
+			}
+			break;
+			
+		case I_GM_Menus:
+			AvP.GameMode = I_GM_Playing;
+			break;
+		default:
+			fprintf(stderr, "AvP.MainLoopRunning: gamemode = %d\n", AvP.GameMode);
+			exit(EXIT_FAILURE);
+		}
+		
+		if (AvP.RestartLevel) {
+			AvP.RestartLevel = 0;
+			AvP.LevelCompleted = 0;
+
+			FixCheatModesInUserProfile(UserProfilePtr);
+
+			RestartLevel();
+		}
+	}
+
+	return AvP.MainLoopRunning;
+}
+
+static int MainGame_Deinit(void) {
+	
+	AvP.LevelCompleted = thisLevelHasBeenCompleted;
+
+	FixCheatModesInUserProfile(UserProfilePtr);
+
+	ReleaseAllFMVTextures();
+
+	CONSBIND_WriteKeyBindingsToConfigFile();
+	
+	DeInitialisePlayer();
+	
+	DeallocatePlayersMirrorImage();
+	
+	KillHUD();
+	
+	Destroy_CurrentEnvironment();
+	
+	DeallocateAllImages();
+	
+	EndNPCs();
+	
+	ExitGame();
+	
+	SoundSys_StopAll();
+	
+	SoundSys_ResetFadeLevel();
+	
+	CDDA_Stop();
+	
+	if (AvP.Network != I_No_Network) {
+		EndAVPNetGame();
+	}
+	
+	ClearMemoryPool();
+
+/* go back to menu mode */
+#if !(ALIEN_DEMO|PREDATOR_DEMO|MARINE_DEMO)
+	SetSoftVideoMode(640, 480, 16);
+#endif
 	
 	return 0;
 }

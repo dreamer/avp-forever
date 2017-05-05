@@ -227,6 +227,162 @@ static const char* MultiplayerConfigurationName=0; //ditto
 
 extern int DebuggingCommandsActive;
 
+int AvP_MainMenus_Init(void)
+{
+	#if 0
+	SaveDefaultPrimaryConfigs();
+	#else
+	LoadDefaultPrimaryConfigs();
+	#endif
+	
+	SoundSys_ResetFadeLevel();
+	SoundSys_Management();	
+	
+	TimeScale = ONE_FIXED;
+
+
+
+ 	if (!LobbiedGame)  // Edmond
+		CheckForCredits();
+	
+	TimeStampedMessage("start of menus");
+	// open a 640x480x16 screen     
+	SelectMenuDisplayMode();
+	TimeStampedMessage("after SelectMenuDisplayMode");
+
+	
+	
+
+
+	InitialiseMenuGfx();
+	TimeStampedMessage("after InitialiseMenuGfx");
+
+	// inform backdrop code
+	InitMainMenusBackdrop();
+	TimeStampedMessage("after InitMainMenusBackdrop");
+
+
+	#if PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO
+	if (AvP.LevelCompleted)
+	{
+		Show_WinnerScreen();
+	}
+	#endif
+
+	LoadAllAvPMenuGfx();
+	TimeStampedMessage("after LoadAllAvPMenuGfx");
+
+
+
+	ResetFrameCounter();
+
+ 	if (!LobbiedGame)	// Edmond
+		PlayIntroSequence();
+	
+	if (VideoModeNotAvailable)
+	{	
+		LoadGameRequest = SAVELOAD_REQUEST_NONE;
+		DisplayVideoModeUnavailableScreen();
+	}
+	VideoModeNotAvailable = 0;
+
+	if(AvP.LevelCompleted && CheatMode_Active == CHEATMODE_NONACTIVE && !DebuggingCommandsActive)
+	{
+		HandlePostGameFMVs();
+		OkayToPlayNextEpisode();
+		AvP.LevelCompleted = 0;
+		AvPMenus.MenusState = MENUSSTATE_MAINMENUS;
+	}
+	else if(!LobbiedGame)
+	{
+		if (UserProfileNumber==-1)
+		{
+			SetupNewMenu(AVPMENU_USERPROFILESELECT);
+		}
+		else
+		{
+			SetupNewMenu(AVPMENU_MAIN);
+		}
+		AvPMenus.MenusState = MENUSSTATE_MAINMENUS;
+	}
+	else
+	{
+ 		SetupNewMenu(AVPMENU_USERPROFILESELECT);
+	  //AvPMenus.MenusState = MENUSSTATE_STARTGAME;	
+		
+	}
+
+	CheatMode_Active = CHEATMODE_NONACTIVE;
+	
+
+	TimeStampedMessage("starting general menus");
+
+	return 0;
+}
+
+int AvP_MainMenus_Update(void) {
+	CheckForWindowsMessages();
+	DrawMainMenusBackdrop();
+	ReadUserInput();
+	AvP_UpdateMenus();
+//	BezierCurve();
+	
+	ShowMenuFrameRate();
+
+	FlipBuffers();
+	FrameCounterHandler();
+	PlayMenuMusic();
+	#if 0
+	{
+		extern int EffectsSoundVolume;
+		SoundSys_ChangeVolume(EffectsSoundVolume);
+	}
+	#endif
+	SoundSys_Management();
+	UpdateGammaSettings();
+
+	CheckForLoadGame();
+
+	return AvPMenus.MenusState == MENUSSTATE_MAINMENUS;
+}
+
+int AvP_MainMenus_Deinit(void) {
+	if (AvPMenus.MenusState==MENUSSTATE_OUTSIDEMENUS)
+	{
+		//Don't bother showing credits if we are just exiting in order to start a game
+		//using mplayer. The credits will get shown later after the player has actually
+		//played the game
+		if(!LaunchingMplayer)
+		{
+ 			if (!LobbiedGame)	// Edmond
+				DoCredits();
+		}
+	}
+	TimeStampedMessage("ready to exit menus");
+	
+	EndMenuMusic();
+	EndMenuBackgroundBink();
+	TimeStampedMessage("after EndMenuMusic");
+
+	#if PREDATOR_DEMO||MARINE_DEMO||ALIEN_DEMO
+	if ((AvPMenus.MenusState != MENUSSTATE_STARTGAME)) ShowSplashScreens();
+	TimeStampedMessage("after ShowSplashScreens");
+	#endif
+	ReleaseAllAvPMenuGfx();
+
+	TimeStampedMessage("after ReleaseAllAvPMenuGfx");
+
+	SoundSys_StopAll();
+	SoundSys_Management();
+
+	if (CheatMode_Active == CHEATMODE_NONACTIVE) HandlePreGameFMVs();
+
+	HandleCheatModeFeatures();
+	AvP.LevelCompleted = 0;
+
+	return (AvPMenus.MenusState == MENUSSTATE_STARTGAME);
+}
+
 int AvP_MainMenus(void)
 {
 	#if 0

@@ -620,8 +620,6 @@ int SetOGLVideoMode(int Width, int Height)
 	pglDepthFunc(GL_LEQUAL);
 	pglDepthMask(GL_TRUE);
 	pglDepthRange(0.0, 1.0);
-	
-	pglEnable(GL_TEXTURE_2D);
 
 	pglDisable(GL_CULL_FACE);
 	
@@ -640,7 +638,7 @@ int SetOGLVideoMode(int Width, int Height)
 	
 	load_ogl_functions(1);
 
-	InitOpenGL();
+	InitOpenGL(1);
 	
 	return 0;
 }
