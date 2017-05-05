@@ -288,7 +288,7 @@ void SetupFMVTexture(FMVTEXTURE *ftPtr)
 {
 	if (ftPtr->PalettedBuf == NULL)
 	{
-		ftPtr->PalettedBuf = (unsigned char*) malloc(128*128*4);
+		ftPtr->PalettedBuf = (unsigned char*) calloc(1, 128*128+128*128*4);
 	}
 	
 	if (ftPtr->RGBBuf == NULL)
@@ -300,6 +300,10 @@ void SetupFMVTexture(FMVTEXTURE *ftPtr)
 		
 		ftPtr->RGBBuf = &ftPtr->PalettedBuf[128*128];
 	}
+
+	pglBindTexture(GL_TEXTURE_2D, ftPtr->ImagePtr->D3DTexture->id);	
+	pglTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 128, 128, GL_RGBA, GL_UNSIGNED_BYTE, &ftPtr->RGBBuf[0]);
+
 }
 
 void UpdateFMVTexture(FMVTEXTURE *ftPtr)
@@ -327,16 +331,20 @@ void UpdateFMVTexture(FMVTEXTURE *ftPtr)
 		unsigned char source = (*srcPtr++);
 		dstPtr[0] = ftPtr->SrcPalette[source].peRed;
 		dstPtr[1] = ftPtr->SrcPalette[source].peGreen;
-		dstPtr[2] = ftPtr->SrcPalette[source].peBlue; 
+		dstPtr[2] = ftPtr->SrcPalette[source].peBlue;
+		dstPtr[3] = 255;
 		
-		dstPtr += 3;
+		dstPtr += 4;
 	} while(--pixels);
 	
 //#warning move this into opengl.c
 	// update the opengl texture
 	pglBindTexture(GL_TEXTURE_2D, ftPtr->ImagePtr->D3DTexture->id);
 	
-	pglTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 128, 96, GL_RGB, GL_UNSIGNED_BYTE, &ftPtr->RGBBuf[0]);
+	pglTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, 128, 96, GL_RGBA, GL_UNSIGNED_BYTE, &ftPtr->RGBBuf[0]);
+
+	// if using mipmaps, they will need to be updated now
+	//pglGenerateMipmap(GL_TEXTURE_2D);
 }
 
 void ReleaseFMVTexture(FMVTEXTURE *ftPtr)

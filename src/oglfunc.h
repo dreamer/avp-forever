@@ -5,8 +5,10 @@
 #include <windows.h>
 #endif
 
+#include "SDL_version.h"
+
 #if defined(USE_OPENGL_ES)
-#include "SDL_opengles.h"
+#include "SDL_opengles2.h"
 
 // OpenGL compatibility
 typedef GLclampf GLclampd;
@@ -25,91 +27,157 @@ typedef GLfloat GLdouble;
 #define APIENTRY
 #endif
 
-typedef void (APIENTRY *PFNGLALPHAFUNCPROC)(GLenum, GLclampf);
-typedef void (APIENTRY *PFNGLBINDTEXTUREPROC)(GLenum, GLuint);
-typedef void (APIENTRY *PFNGLBLENDFUNCPROC)(GLenum, GLenum);
-typedef void (APIENTRY *PFNGLCLEARPROC)(GLbitfield);
-typedef void (APIENTRY *PFNGLCLEARCOLORPROC)(GLclampf, GLclampf, GLclampf, GLclampf);
-typedef void (APIENTRY *PFNGLCOLOR4FPROC)(GLfloat, GLfloat, GLfloat, GLfloat);
-typedef void (APIENTRY *PFNGLCOLORPOINTERPROC)(GLint, GLenum, GLsizei, const GLvoid *);
-typedef void (APIENTRY *PFNGLCULLFACEPROC)(GLenum);
-typedef void (APIENTRY *PFNGLDELETETEXTURESPROC)(GLsizei,const GLuint*);
-typedef void (APIENTRY *PFNGLDEPTHFUNCPROC)(GLenum);
-typedef void (APIENTRY *PFNGLDEPTHMASKPROC)(GLboolean);
-typedef void (APIENTRY *PFNGLDEPTHRANGEPROC)(GLclampd, GLclampd);
-typedef void (APIENTRY *PFNGLDISABLEPROC)(GLenum);
-typedef void (APIENTRY *PFNGLDISABLECLIENTSTATEPROC)(GLenum);
-typedef void (APIENTRY *PFNGLDRAWELEMENTSPROC)(GLenum, GLsizei, GLenum, const GLvoid *);
-typedef void (APIENTRY *PFNGLENABLEPROC)(GLenum);
-typedef void (APIENTRY *PFNGLENABLECLIENTSTATEPROC)(GLenum);
-typedef void (APIENTRY *PFNGLFRONTFACEPROC)(GLenum);
-typedef void (APIENTRY *PFNGLGENTEXTURESPROC)(GLsizei,GLuint*);
-typedef GLenum (APIENTRY *PFNGLGETERRORPROC)(void);
-typedef void (APIENTRY *PFNGLGETFLOATVPROC)(GLenum, GLfloat *);
-typedef void (APIENTRY *PFNGLGETINTEGERVPROC)(GLenum, GLint *);
-typedef const GLubyte* (APIENTRY *PFNGLGETSTRINGPROC)(GLenum);
-typedef void (APIENTRY *PFNGLGETTEXPARAMETERFVPROC)(GLenum, GLenum, GLfloat*);
-typedef void (APIENTRY *PFNGLHINTPROC)(GLenum, GLenum);
-typedef void (APIENTRY *PFNGLPIXELSTOREIPROC)(GLenum, GLint);
-typedef void (APIENTRY *PFNGLPOLYGONOFFSETPROC)(GLfloat, GLfloat);
-typedef void (APIENTRY *PFNGLREADPIXELSPROC)(GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, GLvoid *);
-typedef void (APIENTRY *PFNGLSHADEMODELPROC)(GLenum);
-typedef void (APIENTRY *PFNGLTEXCOORDPOINTERPROC)(GLint, GLenum, GLsizei, const GLvoid *);
-typedef void (APIENTRY *PFNGLTEXENVFPROC)(GLenum, GLenum, GLfloat);
-typedef void (APIENTRY *PFNGLTEXENVFVPROC)(GLenum, GLenum, const GLfloat *);
-typedef void (APIENTRY *PFNGLTEXENVIPROC)(GLenum, GLenum, GLint);
-typedef void (APIENTRY *PFNGLTEXIMAGE2DPROC)(GLenum,GLint,GLint,GLsizei,GLsizei,GLint,GLenum,GLenum,const GLvoid*);
-typedef void (APIENTRY *PFNGLTEXPARAMETERFPROC)(GLenum, GLenum, GLfloat);
-typedef void (APIENTRY *PFNGLTEXPARAMETERIPROC)(GLenum, GLenum, GLint);
-typedef void (APIENTRY *PFNGLTEXSUBIMAGE2DPROC)(GLenum,GLint,GLint,GLint,GLsizei,GLsizei,GLenum,GLenum,const GLvoid*);
-typedef void (APIENTRY *PFNGLVERTEXPOINTERPROC)(GLint, GLenum, GLsizei, const GLvoid *);
-typedef void (APIENTRY *PFNGLVIEWPORTPROC)(GLint, GLint, GLsizei, GLsizei);
+// Base OpenGL / OpenGL ES
+typedef void (APIENTRY *avpPFNGLACTIVETEXTUREPROC)(GLenum);
+typedef void (APIENTRY *avpPFNGLBINDTEXTUREPROC)(GLenum, GLuint);
+typedef void (APIENTRY *avpPFNGLBLENDFUNCPROC)(GLenum, GLenum);
+typedef void (APIENTRY *avpPFNGLCLEARPROC)(GLbitfield);
+typedef void (APIENTRY *avpPFNGLCLEARCOLORPROC)(GLclampf, GLclampf, GLclampf, GLclampf);
+typedef void (APIENTRY *avpPFNGLCULLFACEPROC)(GLenum);
+typedef void (APIENTRY *avpPFNGLDELETETEXTURESPROC)(GLsizei,const GLuint*);
+typedef void (APIENTRY *avpPFNGLDEPTHFUNCPROC)(GLenum);
+typedef void (APIENTRY *avpPFNGLDEPTHMASKPROC)(GLboolean);
+typedef void (APIENTRY *avpPFNGLDEPTHRANGEPROC)(GLclampd, GLclampd);
+typedef void (APIENTRY *avpPFNGLDISABLEPROC)(GLenum);
+typedef void (APIENTRY *avpPFNGLDRAWELEMENTSPROC)(GLenum, GLsizei, GLenum, const GLvoid *);
+typedef void (APIENTRY *avpPFNGLENABLEPROC)(GLenum);
+typedef void (APIENTRY *avpPFNGLFRONTFACEPROC)(GLenum);
+typedef void (APIENTRY *avpPFNGLGENTEXTURESPROC)(GLsizei,GLuint*);
+typedef GLenum (APIENTRY *avpPFNGLGETERRORPROC)(void);
+typedef void (APIENTRY *avpPFNGLGETFLOATVPROC)(GLenum, GLfloat *);
+typedef void (APIENTRY *avpPFNGLGETINTEGERVPROC)(GLenum, GLint *);
+typedef const GLubyte* (APIENTRY *avpPFNGLGETSTRINGPROC)(GLenum);
+typedef void (APIENTRY *avpPFNGLGETTEXPARAMETERFVPROC)(GLenum, GLenum, GLfloat*);
+typedef void (APIENTRY *avpPFNGLHINTPROC)(GLenum, GLenum);
+typedef void (APIENTRY *avpPFNGLPIXELSTOREIPROC)(GLenum, GLint);
+typedef void (APIENTRY *avpPFNGLPOLYGONOFFSETPROC)(GLfloat, GLfloat);
+typedef void (APIENTRY *avpPFNGLREADPIXELSPROC)(GLint, GLint, GLsizei, GLsizei, GLenum, GLenum, GLvoid *);
+typedef void (APIENTRY *avpPFNGLTEXIMAGE2DPROC)(GLenum,GLint,GLint,GLsizei,GLsizei,GLint,GLenum,GLenum,const GLvoid*);
+typedef void (APIENTRY *avpPFNGLTEXPARAMETERFPROC)(GLenum, GLenum, GLfloat);
+typedef void (APIENTRY *avpPFNGLTEXPARAMETERIPROC)(GLenum, GLenum, GLint);
+typedef void (APIENTRY *avpPFNGLTEXSUBIMAGE2DPROC)(GLenum,GLint,GLint,GLint,GLsizei,GLsizei,GLenum,GLenum,const GLvoid*);
+typedef void (APIENTRY *avpPFNGLVIEWPORTPROC)(GLint, GLint, GLsizei, GLsizei);
 
-extern PFNGLALPHAFUNCPROC		pglAlphaFunc;
-extern PFNGLBINDTEXTUREPROC		pglBindTexture;
-extern PFNGLBLENDFUNCPROC		pglBlendFunc;
-extern PFNGLCLEARPROC			pglClear;
-extern PFNGLCLEARCOLORPROC		pglClearColor;
-extern PFNGLCOLOR4FPROC		pglColor4f;
-extern PFNGLCOLORPOINTERPROC		pglColorPointer;
-extern PFNGLCULLFACEPROC		pglCullFace;
-extern PFNGLDELETETEXTURESPROC		pglDeleteTextures;
-extern PFNGLDEPTHFUNCPROC		pglDepthFunc;
-extern PFNGLDEPTHMASKPROC		pglDepthMask;
-extern PFNGLDEPTHRANGEPROC		pglDepthRange;
-extern PFNGLDISABLEPROC		pglDisable;
-extern PFNGLDISABLECLIENTSTATEPROC	pglDisableClientState;
-extern PFNGLDRAWELEMENTSPROC		pglDrawElements;
-extern PFNGLENABLEPROC			pglEnable;
-extern PFNGLENABLECLIENTSTATEPROC	pglEnableClientState;
-extern PFNGLFRONTFACEPROC		pglFrontFace;
-extern PFNGLGENTEXTURESPROC		pglGenTextures;
-extern PFNGLGETERRORPROC		pglGetError;
-extern PFNGLGETFLOATVPROC		pglGetFloatv;
-extern PFNGLGETINTEGERVPROC		pglGetIntegerv;
-extern PFNGLGETSTRINGPROC		pglGetString;
-extern PFNGLGETTEXPARAMETERFVPROC	pglGetTexParameterfv;
-extern PFNGLHINTPROC			pglHint;
-extern PFNGLPIXELSTOREIPROC		pglPixelStorei;
-extern PFNGLPOLYGONOFFSETPROC		pglPolygonOffset;
-extern PFNGLREADPIXELSPROC		pglReadPixels;
-extern PFNGLSHADEMODELPROC		pglShadeModel;
-extern PFNGLTEXCOORDPOINTERPROC	pglTexCoordPointer;
-extern PFNGLTEXENVFPROC		pglTexEnvf;
-extern PFNGLTEXENVFVPROC		pglTexEnvfv;
-extern PFNGLTEXENVIPROC		pglTexEnvi;
-extern PFNGLTEXIMAGE2DPROC		pglTexImage2D;
-extern PFNGLTEXPARAMETERFPROC		pglTexParameterf;
-extern PFNGLTEXPARAMETERIPROC		pglTexParameteri;
-extern PFNGLTEXSUBIMAGE2DPROC		pglTexSubImage2D;
-extern PFNGLVERTEXPOINTERPROC		pglVertexPointer;
-extern PFNGLVIEWPORTPROC		pglViewport;
+extern avpPFNGLACTIVETEXTUREPROC pglActiveTexture;
+extern avpPFNGLBINDTEXTUREPROC		pglBindTexture;
+extern avpPFNGLBLENDFUNCPROC		pglBlendFunc;
+extern avpPFNGLCLEARPROC			pglClear;
+extern avpPFNGLCLEARCOLORPROC		pglClearColor;
+extern avpPFNGLCULLFACEPROC		pglCullFace;
+extern avpPFNGLDELETETEXTURESPROC		pglDeleteTextures;
+extern avpPFNGLDEPTHFUNCPROC		pglDepthFunc;
+extern avpPFNGLDEPTHMASKPROC		pglDepthMask;
+extern avpPFNGLDEPTHRANGEPROC		pglDepthRange;
+extern avpPFNGLDISABLEPROC		pglDisable;
+extern avpPFNGLDRAWELEMENTSPROC		pglDrawElements;
+extern avpPFNGLENABLEPROC			pglEnable;
+extern avpPFNGLFRONTFACEPROC		pglFrontFace;
+extern avpPFNGLGENTEXTURESPROC		pglGenTextures;
+extern avpPFNGLGETERRORPROC		pglGetError;
+extern avpPFNGLGETFLOATVPROC		pglGetFloatv;
+extern avpPFNGLGETINTEGERVPROC		pglGetIntegerv;
+extern avpPFNGLGETSTRINGPROC		pglGetString;
+extern avpPFNGLGETTEXPARAMETERFVPROC	pglGetTexParameterfv;
+extern avpPFNGLHINTPROC			pglHint;
+extern avpPFNGLPIXELSTOREIPROC		pglPixelStorei;
+extern avpPFNGLPOLYGONOFFSETPROC		pglPolygonOffset;
+extern avpPFNGLREADPIXELSPROC		pglReadPixels;
+extern avpPFNGLTEXIMAGE2DPROC		pglTexImage2D;
+extern avpPFNGLTEXPARAMETERFPROC		pglTexParameterf;
+extern avpPFNGLTEXPARAMETERIPROC		pglTexParameteri;
+extern avpPFNGLTEXSUBIMAGE2DPROC		pglTexSubImage2D;
+extern avpPFNGLVIEWPORTPROC		pglViewport;
+
+// OpenGL 2.1 / OpenGL ES 2.0
+typedef void (APIENTRY *avpPFNGLATTACHSHADERPROC)(GLuint, GLuint);
+typedef void (APIENTRY *avpPFNGLBINDATTRIBLOCATIONPROC)(GLuint, GLuint, const GLchar*);
+typedef void (APIENTRY *avpPFNGLBINDBUFFERPROC)(GLenum, GLuint);
+typedef void (APIENTRY *avpPFNGLBUFFERDATAPROC)(GLenum, GLsizeiptr, const GLvoid*, GLenum);
+typedef void (APIENTRY *avpPFNGLBUFFERSUBDATAPROC)(GLenum, GLintptr, GLsizeiptr, const GLvoid*);
+typedef GLuint (APIENTRY *avpPFNGLCREATEPROGRAMPROC)(void);
+typedef GLuint (APIENTRY *avpPFNGLCREATESHADERPROC)(GLenum);
+typedef void (APIENTRY *avpPFNGLCOMPILESHADERPROC)(GLuint);
+typedef void (APIENTRY *avpPFNGLDELETEBUFFERSPROC)(GLsizei, const GLuint*);
+typedef void (APIENTRY *avpPFNGLDELETEPROGRAMPROC)(GLuint);
+typedef void (APIENTRY *avpPFNGLDELETESHADERPROC)(GLuint);
+typedef void (APIENTRY *avpPFNGLDISABLEVERTEXATTRIBARRAYPROC)(GLuint);
+typedef void (APIENTRY *avpPFNGLENABLEVERTEXATTRIBARRAYPROC)(GLuint);
+typedef void (APIENTRY *avpPFNGLGENBUFFERSPROC)(GLsizei, GLuint*);
+typedef int (APIENTRY *avpPFNGLGETATTRIBLOCATIONPROC)(GLuint, const GLchar*);
+typedef void (APIENTRY *avpPFNGLGETPROGRAMINFOLOGPROC)(GLuint, GLsizei, GLsizei*, GLchar*);
+typedef void (APIENTRY *avpPFNGLGETPROGRAMIVPROC)(GLuint, GLenum, GLint*);
+typedef void (APIENTRY *avpPFNGLGETSHADERINFOLOGPROC)(GLuint, GLsizei, GLsizei*, GLchar*);
+typedef void (APIENTRY *avpPFNGLGETSHADERIVPROC)(GLuint, GLenum, GLint*);
+typedef int (APIENTRY *avpPFNGLGETUNIFORMLOCATIONPROC)(GLuint, const GLchar*);
+typedef void (APIENTRY *avpPFNGLLINKPROGRAMPROC)(GLuint);
+typedef void (APIENTRY *avpPFNGLSHADERSOURCEPROC)(GLuint, GLsizei, const GLchar* const*, const GLint*);
+typedef void (APIENTRY *avpPFNGLVALIDATEPROGRAMPROC)(GLuint);
+typedef void (APIENTRY *avpPFNGLVERTEXATTRIBPOINTERPROC)(GLuint, GLint, GLenum, GLboolean, GLsizei, const GLvoid*);
+typedef void (APIENTRY *avpPFNGLUNIFORM1IPROC)(GLint, GLint);
+typedef void (APIENTRY *avpPFNGLUNIFORMMATRIX4FVPROC)(GLint, GLsizei, GLboolean, const GLfloat*);
+typedef void (APIENTRY *avpPFNGLUSEPROGRAMPROC)(GLuint);
+
+extern avpPFNGLATTACHSHADERPROC pglAttachShader;
+extern avpPFNGLBINDATTRIBLOCATIONPROC pglBindAttribLocation;
+extern avpPFNGLBINDBUFFERPROC pglBindBuffer;
+extern avpPFNGLBUFFERDATAPROC pglBufferData;
+extern avpPFNGLBUFFERSUBDATAPROC pglBufferSubData;
+extern avpPFNGLCREATEPROGRAMPROC pglCreateProgram;
+extern avpPFNGLCREATESHADERPROC pglCreateShader;
+extern avpPFNGLCOMPILESHADERPROC pglCompileShader;
+extern avpPFNGLDELETEBUFFERSPROC pglDeleteBuffers;
+extern avpPFNGLDELETEPROGRAMPROC pglDeleteProgram;
+extern avpPFNGLDELETESHADERPROC pglDeleteShader;
+extern avpPFNGLDISABLEVERTEXATTRIBARRAYPROC pglDisableVertexAttribArray;
+extern avpPFNGLENABLEVERTEXATTRIBARRAYPROC pglEnableVertexAttribArray;
+extern avpPFNGLGENBUFFERSPROC pglGenBuffers;
+extern avpPFNGLGETATTRIBLOCATIONPROC pglGetAttribLocation;
+extern avpPFNGLGETPROGRAMINFOLOGPROC pglGetProgramInfoLog;
+extern avpPFNGLGETPROGRAMIVPROC pglGetProgramiv;
+extern avpPFNGLGETSHADERINFOLOGPROC pglGetShaderInfoLog;
+extern avpPFNGLGETSHADERIVPROC pglGetShaderiv;
+extern avpPFNGLGETUNIFORMLOCATIONPROC pglGetUniformLocation;
+extern avpPFNGLLINKPROGRAMPROC pglLinkProgram;
+extern avpPFNGLSHADERSOURCEPROC pglShaderSource;
+extern avpPFNGLVALIDATEPROGRAMPROC pglValidateProgram;
+extern avpPFNGLVERTEXATTRIBPOINTERPROC pglVertexAttribPointer;
+extern avpPFNGLUNIFORM1IPROC pglUniform1i;
+extern avpPFNGLUNIFORMMATRIX4FVPROC pglUniformMatrix4fv;
+extern avpPFNGLUSEPROGRAMPROC pglUseProgram;
+
+// GL_EXT_framebuffer_object / GL_ARB_framebuffer_object / OpenGL ES 2.0
+typedef void (APIENTRY *avpPFNGLBINDFRAMEBUFFERPROC)(GLenum, GLuint);
+typedef void (APIENTRY *avpPFNGLBINDRENDERBUFFERPROC)(GLenum, GLuint);
+typedef GLenum (APIENTRY *avpPFNGLCHECKFRAMEBUFFERSTATUSPROC)(GLenum);
+typedef void (APIENTRY *avpPFNGLDELETEFRAMEBUFFERSPROC)(GLsizei, const GLuint*);
+typedef void (APIENTRY *avpPFNGLDELETERENDERBUFFERSPROC)(GLsizei, const GLuint*);
+typedef void (APIENTRY *avpPFNGLFRAMEBUFFERRENDERBUFFERPROC)(GLenum, GLenum, GLenum, GLuint);
+typedef void (APIENTRY *avpPFNGLFRAMEBUFFERTEXTURE2DPROC)(GLenum, GLenum, GLenum, GLuint, GLint);
+typedef void (APIENTRY *avpPFNGLGENERATEMIPMAPPROC)(GLenum);
+typedef void (APIENTRY *avpPFNGLGENFRAMEBUFFERSPROC)(GLsizei, GLuint*);
+typedef void (APIENTRY *avpPFNGLGENRENDERBUFFERSPROC)(GLsizei, GLuint*);
+typedef void (APIENTRY *avpPFNGLRENDERBUFFERSTORAGEPROC)(GLenum, GLenum, GLsizei, GLsizei);
+
+extern avpPFNGLBINDFRAMEBUFFERPROC pglBindFramebuffer;
+extern avpPFNGLBINDRENDERBUFFERPROC pglBindRenderbuffer;
+extern avpPFNGLCHECKFRAMEBUFFERSTATUSPROC pglCheckFramebufferStatus;
+extern avpPFNGLDELETEFRAMEBUFFERSPROC pglDeleteFramebuffers;
+extern avpPFNGLDELETERENDERBUFFERSPROC pglDeleteRenderbuffers;
+extern avpPFNGLFRAMEBUFFERRENDERBUFFERPROC pglFramebufferRenderbuffer;
+extern avpPFNGLFRAMEBUFFERTEXTURE2DPROC pglFramebufferTexture2D;
+extern avpPFNGLGENERATEMIPMAPPROC pglGenerateMipmap;
+extern avpPFNGLGENFRAMEBUFFERSPROC pglGenFramebuffers;
+extern avpPFNGLGENRENDERBUFFERSPROC pglGenRenderbuffers;
+extern avpPFNGLRENDERBUFFERSTORAGEPROC pglRenderbufferStorage;
+
 
 extern int ogl_have_multisample_filter_hint;
 extern int ogl_have_texture_filter_anisotropic;
+extern int ogl_have_framebuffer_object;
 
 extern int ogl_use_multisample_filter_hint;
 extern int ogl_use_texture_filter_anisotropic;
+extern int ogl_use_framebuffer_object;
 
 extern void load_ogl_functions(int mode);
 

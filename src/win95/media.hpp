@@ -4,24 +4,14 @@
 #include <stdio.h>
 #include <limits.h>
 #include <string.h>
-	
-class MediaMedium;
 
-// use this to read in simple data types
-// note especially that if the size of TYPE is greater than the
-// default buffer size, then the operation will fail
-// and the virtual end of file error flag will be set
-// - use ReadBlock instead
-template <class TYPE>
-void MediaRead(MediaMedium * pThis, TYPE * p);
-
-// use this to write simple data types
-// note especially that if the size of TYPE is greater than the
-// default buffer size, then the operation will fail
-// and the virtual end of file error flag will be set
-// - use WriteBlock instead
-template <class TYPE>
-void MediaWrite(MediaMedium * pThis, TYPE d);
+// type names that do not conflcit with anything else
+typedef signed char S8;
+typedef unsigned char U8;
+typedef signed short int S16;
+typedef unsigned short int U16;
+typedef signed int S32;
+typedef unsigned int U32;
 
 class MediaMedium
 {
@@ -270,62 +260,13 @@ class MediaMedium
 		virtual void DoSetPos(unsigned nPos) = 0;
 		
 	friend class MediaSection;
-	
-	friend class _Media_CompilerHack;
-};
 
-class _Media_CompilerHack
-{
-	public:
-		template <class TYPE>
-		static inline void MediaRead(MediaMedium * pThis, TYPE * p)
-		{
-			if (pThis->m_nReadBufPos + sizeof(TYPE) <= pThis->m_nBufSize)
-			{
-				*p = *reinterpret_cast<TYPE const *>(static_cast<char const *>(pThis->m_pReadBuffer) + pThis->m_nReadBufPos/sizeof(char));
-				
-				pThis->m_nReadBufPos += sizeof(TYPE);
-			}
-			else
-			{
-				pThis->Flush();
-				pThis->m_pReadBuffer = pThis->GetReadBuffer(&pThis->m_nBufSize,pThis->m_nDefBufSize);
-				if (sizeof(TYPE) <= pThis->m_nBufSize)
-				{
-					*p = *static_cast<TYPE const *>(pThis->m_pReadBuffer);
-					pThis->m_nReadBufPos = sizeof(TYPE);
-				}
-				else
-				{
-					pThis->m_fError |= MediaMedium::MME_VEOFMET;
-				}
-			}
-		}
-	
-		template <class TYPE>
-		static inline void MediaWrite(MediaMedium * pThis, TYPE d)
-		{
-			if (pThis->m_nWriteBufPos + sizeof(TYPE) <= pThis->m_nBufSize)
-			{
-				*reinterpret_cast<TYPE *>(static_cast<char *>(pThis->m_pWriteBuffer) + pThis->m_nWriteBufPos/sizeof(char)) = d;
-				
-				pThis->m_nWriteBufPos += sizeof(TYPE);
-			}
-			else
-			{
-				pThis->Flush();
-				pThis->m_pWriteBuffer = pThis->GetWriteBuffer(&pThis->m_nBufSize,pThis->m_nDefBufSize);
-				if (sizeof(TYPE) <= pThis->m_nBufSize)
-				{
-					*static_cast<TYPE *>(pThis->m_pWriteBuffer) = d;
-					pThis->m_nWriteBufPos = sizeof(TYPE);
-				}
-				else
-				{
-					pThis->m_fError |= MediaMedium::MME_VEOFMET;
-				}
-			}
-		}
+	friend void MediaRead(MediaMedium * pThis, S8 * p);
+	friend void MediaRead(MediaMedium * pThis, U8 * p);
+	friend void MediaRead(MediaMedium * pThis, S16 * p);
+	friend void MediaRead(MediaMedium * pThis, U16 * p);
+	friend void MediaRead(MediaMedium * pThis, S32 * p);
+	friend void MediaRead(MediaMedium * pThis, U32 * p);
 };
 
 // use this to read in simple data types
@@ -333,21 +274,86 @@ class _Media_CompilerHack
 // default buffer size, then the operation will fail
 // and the virtual end of file error flag will be set
 // - use ReadBlock instead
-template <class TYPE>
-inline void MediaRead(MediaMedium * pThis, TYPE * p)
+inline void MediaRead(MediaMedium * pThis, S8 * p)
 {
-	_Media_CompilerHack::MediaRead(pThis,p);
+	if (pThis->m_nReadBufPos + sizeof(S8) <= pThis->m_nBufSize)
+	{
+		*p = static_cast<S8 const *>(pThis->m_pReadBuffer)[pThis->m_nReadBufPos];
+		pThis->m_nReadBufPos += sizeof(S8);
+	}
+	else
+	{
+		pThis->Flush();
+		pThis->m_pReadBuffer = pThis->GetReadBuffer(&pThis->m_nBufSize,pThis->m_nDefBufSize);
+		if (sizeof(S8) <= pThis->m_nBufSize)
+		{
+			*p = *static_cast<S8 const *>(pThis->m_pReadBuffer);
+			pThis->m_nReadBufPos = sizeof(S8);
+		}
+		else
+		{
+			pThis->m_fError |= MediaMedium::MME_VEOFMET;
+		}
+	}
 }
 
-// use this to write simple data types
-// note especially that if the size of TYPE is greater than the
-// default buffer size, then the operation will fail
-// and the virtual end of file error flag will be set
-// - use WriteBlock instead
-template <class TYPE>
-inline void MediaWrite(MediaMedium * pThis, TYPE d)
+inline void MediaRead(MediaMedium * pThis, U8 * p)
 {
-	_Media_CompilerHack::MediaWrite(pThis,d);
+	if (pThis->m_nReadBufPos + sizeof(U8) <= pThis->m_nBufSize)
+	{
+		*p = static_cast<U8 const *>(pThis->m_pReadBuffer)[pThis->m_nReadBufPos];
+		pThis->m_nReadBufPos += sizeof(U8);
+	}
+	else
+	{
+		pThis->Flush();
+		pThis->m_pReadBuffer = pThis->GetReadBuffer(&pThis->m_nBufSize,pThis->m_nDefBufSize);
+		if (sizeof(U8) <= pThis->m_nBufSize)
+		{
+			*p = *static_cast<U8 const *>(pThis->m_pReadBuffer);
+			pThis->m_nReadBufPos = sizeof(U8);
+		}
+		else
+		{
+			pThis->m_fError |= MediaMedium::MME_VEOFMET;
+		}
+	}
+}
+
+inline void MediaRead(MediaMedium * pThis, S16 * p)
+{
+	S8 b0, b1;
+	::MediaRead(pThis, &b0);
+	::MediaRead(pThis, &b1);
+	*p = (b0 << 0) | (b1 << 8);
+}
+
+inline void MediaRead(MediaMedium * pThis, U16 * p)
+{
+	U8 b0, b1;
+	::MediaRead(pThis, &b0);
+	::MediaRead(pThis, &b1);
+	*p = (b0 << 0) | (b1 << 8);
+}
+
+inline void MediaRead(MediaMedium * pThis, S32 * p)
+{
+	S8 b0, b1, b2, b3;
+	::MediaRead(pThis, &b0);
+	::MediaRead(pThis, &b1);
+	::MediaRead(pThis, &b2);
+	::MediaRead(pThis, &b3);
+	*p = (b0 << 0) | (b1 << 8) | (b2 << 16) | (b3 << 24);
+}
+
+inline void MediaRead(MediaMedium * pThis, U32 * p)
+{
+	U8 b0, b1, b2, b3;
+	::MediaRead(pThis, &b0);
+	::MediaRead(pThis, &b1);
+	::MediaRead(pThis, &b2);
+	::MediaRead(pThis, &b3);
+	*p = (b0 << 0) | (b1 << 8) | (b2 << 16) | (b3 << 24);
 }
 
 #ifdef _MEDIA_WIN_TARGET

@@ -158,16 +158,19 @@ namespace IFF
 		UBYTE b;
 	};
 
-	union ID
+	struct ID
 	{
 		UINT32 m_nID;
-		char m_sID[4];
 		
-		inline ID(){}
-		inline ID(char const * pszID) { m_nID = *reinterpret_cast<UINT32 const *>(pszID); }
+		inline ID() : m_nID(0) {}
+		inline ID(char const * pszID) {
+			m_nID = (pszID[0] << 0)
+				| (pszID[1] << 8)
+				| (pszID[2] << 16)
+				| (pszID[3] << 24);
+		}
 		inline ID(UINT32 nID) : m_nID(nID) {}
 		inline operator UINT32 () const { return m_nID; }
-		inline operator char const * () const { return &m_sID[0]; }
 		inline bool operator == (ID const & rId) const { return !m_nID || !rId.m_nID || m_nID == rId.m_nID; }
 		inline bool operator != (ID const & rId) const { return ! operator == (rId); }
 		inline bool operator ! () const { return !m_nID; }
@@ -717,8 +720,13 @@ namespace IFF
 		m_nBytesRemaining -= 4;
 		if (m_nBytesRemaining >= 0)
 		{
-			// cast pointer to pointer to 4 byte data type to force 4 byte 'fast' read
-			::MediaRead(m_pMedium, reinterpret_cast<UINT32 *>(&n.m_sID[0]));
+
+			UBYTE b0, b1, b2, b3;
+			::MediaRead(m_pMedium, &b0);
+			::MediaRead(m_pMedium, &b1);
+			::MediaRead(m_pMedium, &b2);
+			::MediaRead(m_pMedium, &b3);
+			n.m_nID = b0 | (b1 << 8) | (b2 << 16) | (b3 << 24);
 			if (m_pMedium->m_fError) m_bError = true;
 		}
 		else m_bError = true;

@@ -46,10 +46,13 @@ extern int CloakingPhase;
 
 static D3DTexture *CurrTextureHandle;
 
+enum AVP_SHADER_PROGRAM CurrShaderProgram;
+
+GLuint DefaultTexture;
 
 static enum TRANSLUCENCY_TYPE CurrentTranslucencyMode = TRANSLUCENCY_OFF;
 static enum FILTERING_MODE_ID CurrentFilteringMode = FILTERING_BILINEAR_OFF;
-static GLenum TextureMinFilter = GL_LINEAR_MIPMAP_LINEAR;
+static GLenum TextureMinFilter = GL_LINEAR; //GL_LINEAR_MIPMAP_LINEAR;
 static D3DTexture *CurrentlyBoundTexture = NULL;
 
 #if defined(_MSC_VER)
@@ -86,23 +89,17 @@ static VertexArray *varrp = varr;
 static TriangleArray *tarrp = tarr;
 static int varrc, tarrc;
 
-static ALIGN16 TriangleArray starr[TA_MAXTRIANGLES];
-static TriangleArray *starrp = starr;
-static int starrc;
+static GLuint ElementArrayBuffer;
+static GLuint ArrayBuffer;
 
 /* Do not call this directly! */
 static void SetTranslucencyMode(enum TRANSLUCENCY_TYPE mode)
 {
-	pglDisable(GL_ALPHA_TEST);
-
 	switch(mode) {
 		case TRANSLUCENCY_OFF:
 			if (TRIPTASTIC_CHEATMODE||MOTIONBLUR_CHEATMODE) {
 				pglBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_SRC_ALPHA);
-			} else {
-				// alien tail hack
-				pglEnable(GL_ALPHA_TEST);
-				
+			} else {			
 				pglBlendFunc(GL_ONE, GL_ZERO);
 			}
 			break;
@@ -130,158 +127,699 @@ static void SetTranslucencyMode(enum TRANSLUCENCY_TYPE mode)
 	}
 }
 
-static void SetSecondPassTranslucencyMode(enum TRANSLUCENCY_TYPE mode)
-{
-	pglDisable(GL_ALPHA_TEST);
+#if defined(USE_OPENGL_ES)
+#define SHADER_PRAGMAS "\n"
+#define SHADER_VERSION "#version 100\n"
+#else
+#define SHADER_PRAGMAS "\n"
+#define SHADER_VERSION "#version 120\n"
+#endif
 
-	switch(mode) {
-		case TRANSLUCENCY_OFF:
-			if (TRIPTASTIC_CHEATMODE||MOTIONBLUR_CHEATMODE) {
-				pglBlendFunc(GL_ONE_MINUS_SRC_ALPHA, GL_ONE);
+#if USE_OPENGL_ES
+
+#define SHADER_SETUP \
+"#define HIGHP highp\n" \
+"#define MEDIUMP mediump\n" \
+"#define LOWP lowp\n"
+
+#else
+
+#define SHADER_SETUP \
+"#ifdef GL_ES\n" \
+"#define HIGHP highp\n" \
+"#define MEDIUMP mediump\n" \
+"#define LOWP lowp\n" \
+"#else\n" \
+"#define HIGHP\n" \
+"#define MEDIUMP\n" \
+"#define LOWP\n" \
+"#endif\n"
+
+#endif
+
+static const char AVP_VERTEX_SHADER_SOURCE[] =
+   SHADER_VERSION
+   SHADER_PRAGMAS
+   SHADER_SETUP
+   "\n"
+   "attribute HIGHP vec4 aVertex;\n"
+   "attribute HIGHP vec2 aTexCoord;\n"
+   "attribute LOWP vec4 aColor0;\n"
+   "attribute LOWP vec4 aColor1;\n"
+   "\n"
+   "varying HIGHP vec2 vTexCoord;\n"
+   "varying LOWP vec4 vColor0;\n"
+   "varying LOWP vec4 vColor1;\n"
+   "\n"
+   "void main(void)\n"
+   "{\n"
+   "	gl_Position = aVertex;\n"
+   "	vTexCoord	= aTexCoord;\n"
+   "	vColor0		= aColor0;\n"
+   "	vColor1     = aColor1;\n"
+   "}\n"
+   ;
+
+static const char AVP_VERTEX_SHADER_SOURCE_NO_SECONDARY[] =
+   SHADER_VERSION
+   SHADER_PRAGMAS
+   SHADER_SETUP
+   "\n"
+   "attribute HIGHP vec4 aVertex;\n"
+   "attribute HIGHP vec2 aTexCoord;\n"
+   "attribute LOWP vec4 aColor0;\n"
+   "\n"
+   "varying HIGHP vec2 vTexCoord;\n"
+   "varying LOWP vec4 vColor0;\n"
+   "\n"
+   "void main(void)\n"
+   "{\n"
+   "	gl_Position = aVertex;\n"
+   "	vTexCoord	= aTexCoord;\n"
+   "	vColor0		= aColor0;\n"
+   "}\n"
+   ;
+
+static const char AVP_VERTEX_SHADER_SOURCE_NO_TEXTURE[] =
+   SHADER_VERSION
+   SHADER_PRAGMAS
+   SHADER_SETUP
+   "\n"
+   "attribute HIGHP vec4 aVertex;\n"
+   "attribute LOWP vec4 aColor0;\n"
+   "\n"
+   "varying LOWP vec4 vColor0;\n"
+   "\n"
+   "void main(void)\n"
+   "{\n"
+   "	gl_Position = aVertex;\n"
+   "	vColor0		= aColor0;\n"
+   "}\n"
+   ;
+
+static const char AVP_VERTEX_SHADER_SOURCE_NO_COLOR[] =
+   SHADER_VERSION
+   SHADER_PRAGMAS
+   SHADER_SETUP
+   "\n"
+   "attribute HIGHP vec4 aVertex;\n"
+   "attribute HIGHP vec2 aTexCoord;\n"
+   "\n"
+   "varying HIGHP vec2 vTexCoord;\n"
+   "\n"
+   "void main(void)\n"
+   "{\n"
+   "	gl_Position = aVertex;\n"
+   "	vTexCoord	= aTexCoord;\n"
+   "}\n"
+   ;
+
+static const char AVP_FRAGMENT_SHADER_SOURCE[] =
+   SHADER_VERSION
+   SHADER_PRAGMAS
+   SHADER_SETUP
+   "\n"
+   "uniform LOWP sampler2D uTexture;\n"
+   "\n"
+   "varying HIGHP vec2 vTexCoord;\n"
+   "varying LOWP vec4 vColor0;\n"
+   "varying LOWP vec4 vColor1;\n"
+   "\n"
+   "void main(void)\n"
+   "{\n"
+   "\n"
+   "	MEDIUMP vec4 t       = texture2D( uTexture, vTexCoord );\n"
+   "	if (t.a == 0.0) discard;\n"
+   "	gl_FragColor = t * vColor0 + vColor1;\n"
+   "}\n"
+   ;
+
+static const char AVP_FRAGMENT_SHADER_SOURCE_NO_SECONDARY[] =
+   SHADER_VERSION
+   SHADER_PRAGMAS
+   SHADER_SETUP
+   "\n"
+   "uniform LOWP sampler2D uTexture;\n"
+   "\n"
+   "varying HIGHP vec2 vTexCoord;\n"
+   "varying LOWP vec4 vColor0;\n"
+   "\n"
+   "void main(void)\n"
+   "{\n"
+   "	MEDIUMP vec4 t       = texture2D( uTexture, vTexCoord );\n"
+   "	if (t.a == 0.0) discard;\n"
+   "	gl_FragColor = t * vColor0;\n"
+   "}\n"
+   ;
+
+static const char AVP_FRAGMENT_SHADER_SOURCE_NO_TEXTURE[] =
+   SHADER_VERSION
+   SHADER_PRAGMAS
+   SHADER_SETUP
+   "\n"
+   "varying LOWP vec4 vColor0;\n"
+   "\n"
+   "void main(void)\n"
+   "{\n"
+   "	gl_FragColor = vColor0;\n"
+   "}\n"
+   ;
+
+static const char AVP_FRAGMENT_SHADER_SOURCE_NO_DISCARD[] =
+   SHADER_VERSION
+   SHADER_PRAGMAS
+   SHADER_SETUP
+   "\n"
+   "uniform LOWP sampler2D uTexture;\n"
+   "\n"
+   "varying HIGHP vec2 vTexCoord;\n"
+   "varying LOWP vec4 vColor0;\n"
+   "varying LOWP vec4 vColor1;\n"
+   "\n"
+   "void main(void)\n"
+   "{\n"
+   "	MEDIUMP vec4 t       = texture2D( uTexture, vTexCoord );\n"
+   "	gl_FragColor = t * vColor0 + vColor1;\n"
+   "}\n"
+   ;
+
+static const char AVP_FRAGMENT_SHADER_SOURCE_NO_SECONDARY_NO_DISCARD[] =
+   SHADER_VERSION
+   SHADER_PRAGMAS
+   SHADER_SETUP
+   "\n"
+   "uniform LOWP sampler2D uTexture;\n"
+   "\n"
+   "varying HIGHP vec2 vTexCoord;\n"
+   "varying LOWP vec4 vColor0;\n"
+   "\n"
+   "void main(void)\n"
+   "{\n"
+   "	MEDIUMP vec4 t       = texture2D( uTexture, vTexCoord );\n"
+   "	gl_FragColor = t * vColor0;\n"
+   "}\n"
+   ;
+
+static const char AVP_FRAGMENT_SHADER_SOURCE_NO_COLOR_NO_DISCARD[] =
+   SHADER_VERSION
+   SHADER_PRAGMAS
+   SHADER_SETUP
+   "\n"
+   "uniform LOWP sampler2D uTexture;\n"
+   "\n"
+   "varying HIGHP vec2 vTexCoord;\n"
+   "\n"
+   "void main(void)\n"
+   "{\n"
+   "	MEDIUMP vec4 t       = texture2D( uTexture, vTexCoord );\n"
+   "	gl_FragColor = t;\n"
+   "}\n"
+   ;
+
+enum AVP_VERTEX_SHADER {
+	AVP_VERTEX_SHADER_DEFAULT,
+	AVP_VERTEX_SHADER_NO_TEXTURE,
+	AVP_VERTEX_SHADER_NO_SECONDARY,
+	AVP_VERTEX_SHADER_NO_COLOR,
+	AVP_VERTEX_SHADER_MAX
+};
+
+enum AVP_FRAGMENT_SHADER {
+	AVP_FRAGMENT_SHADER_DEFAULT,
+	AVP_FRAGMENT_SHADER_NO_TEXTURE,
+	AVP_FRAGMENT_SHADER_NO_DISCARD,
+	AVP_FRAGMENT_SHADER_NO_SECONDARY,
+	AVP_FRAGMENT_SHADER_NO_SECONDARY_NO_DISCARD,
+	AVP_FRAGMENT_SHADER_NO_COLOR_NO_DISCARD,
+	AVP_FRAGMENT_SHADER_MAX
+};
+
+static const char* const AvpVertexShaderSources[AVP_VERTEX_SHADER_MAX] = {
+	AVP_VERTEX_SHADER_SOURCE,
+	AVP_VERTEX_SHADER_SOURCE_NO_TEXTURE,
+	AVP_VERTEX_SHADER_SOURCE_NO_SECONDARY,
+	AVP_VERTEX_SHADER_SOURCE_NO_COLOR
+};
+
+static const char* AvpFragmentShaderSources[AVP_FRAGMENT_SHADER_MAX] = {
+	AVP_FRAGMENT_SHADER_SOURCE,
+	AVP_FRAGMENT_SHADER_SOURCE_NO_TEXTURE,
+	AVP_FRAGMENT_SHADER_SOURCE_NO_DISCARD,
+	AVP_FRAGMENT_SHADER_SOURCE_NO_SECONDARY,
+	AVP_FRAGMENT_SHADER_SOURCE_NO_SECONDARY_NO_DISCARD,
+	AVP_FRAGMENT_SHADER_SOURCE_NO_COLOR_NO_DISCARD
+};
+
+struct AvpShaderProgramSource {
+	enum AVP_VERTEX_SHADER VertexShader;
+	enum AVP_FRAGMENT_SHADER FragmentShader;
+};
+
+struct AvpVertexShader {
+	int shaderObj;
+};
+
+struct AvpFragmentShader {
+	int shaderObj;
+};
+
+struct AvpShaderProgram {
+	int programObj;
+
+	int uTexture;
+};
+
+static const struct AvpShaderProgramSource AvpShaderProgramSources[AVP_SHADER_PROGRAM_MAX] = {
+	// AVP_SHADER_PROGRAM_DEFAULT
+	{
+		AVP_VERTEX_SHADER_DEFAULT,
+		AVP_FRAGMENT_SHADER_DEFAULT
+	},
+	// AVP_SHADER_PROGRAM_NO_SECONDARY
+	{
+		AVP_VERTEX_SHADER_NO_SECONDARY,
+		AVP_FRAGMENT_SHADER_NO_SECONDARY
+	},
+	// AVP_SHADER_PROGRAM_NO_TEXTURE
+	{
+		AVP_VERTEX_SHADER_NO_TEXTURE,
+		AVP_FRAGMENT_SHADER_NO_TEXTURE
+	},
+	// AVP_SHADER_PROGRAM_NO_DISCARD
+	{
+		AVP_VERTEX_SHADER_DEFAULT,
+		AVP_FRAGMENT_SHADER_NO_DISCARD
+	},
+	// AVP_SHADER_PROGRAM_NO_SECONDARY_NO_DISCARD
+	{
+		AVP_VERTEX_SHADER_NO_SECONDARY,
+		AVP_FRAGMENT_SHADER_NO_SECONDARY_NO_DISCARD
+	},
+	// AVP_SHADER_PROGRAM_NO_COLOR_NO_DISCARD
+	{
+		AVP_VERTEX_SHADER_NO_COLOR,
+		AVP_FRAGMENT_SHADER_NO_COLOR_NO_DISCARD
+	}
+};
+
+static const unsigned int AvpShaderProgramAttributes[AVP_SHADER_PROGRAM_MAX+1] = {
+	// AVP_SHADER_PROGRAM_DEFAULT
+	(1 << OPENGL_VERTEX_ATTRIB_INDEX) | (1 << OPENGL_TEXCOORD_ATTRIB_INDEX) | (1 << OPENGL_COLOR0_ATTRIB_INDEX) | (1 << OPENGL_COLOR1_ATTRIB_INDEX),
+	// AVP_SHADER_PROGRAM_NO_SECONDARY
+	(1 << OPENGL_VERTEX_ATTRIB_INDEX) | (1 << OPENGL_TEXCOORD_ATTRIB_INDEX) | (1 << OPENGL_COLOR0_ATTRIB_INDEX) | (0 << OPENGL_COLOR1_ATTRIB_INDEX),
+	// AVP_SHADER_PROGRAM_NO_TEXTURE
+	(1 << OPENGL_VERTEX_ATTRIB_INDEX) | (0 << OPENGL_TEXCOORD_ATTRIB_INDEX) | (1 << OPENGL_COLOR0_ATTRIB_INDEX) | (0 << OPENGL_COLOR1_ATTRIB_INDEX),
+	// AVP_SHADER_PROGRAM_NO_DISCARD
+	(1 << OPENGL_VERTEX_ATTRIB_INDEX) | (1 << OPENGL_TEXCOORD_ATTRIB_INDEX) | (1 << OPENGL_COLOR0_ATTRIB_INDEX) | (1 << OPENGL_COLOR1_ATTRIB_INDEX),
+	// AVP_SHADER_PROGRAM_NO_SECONDARY_NO_DISCARD
+	(1 << OPENGL_VERTEX_ATTRIB_INDEX) | (1 << OPENGL_TEXCOORD_ATTRIB_INDEX) | (1 << OPENGL_COLOR0_ATTRIB_INDEX) | (0 << OPENGL_COLOR1_ATTRIB_INDEX),
+	// AVP_SHADER_PROGRAM_NO_COLOR_NO_DISCARD
+	(1 << OPENGL_VERTEX_ATTRIB_INDEX) | (1 << OPENGL_TEXCOORD_ATTRIB_INDEX) | (0 << OPENGL_COLOR0_ATTRIB_INDEX) | (0 << OPENGL_COLOR1_ATTRIB_INDEX),
+	// AVP_SHADER_PROGRAM_MAX
+	0
+};
+
+static const char* AvpShaderProgramAttributeNames[4] = {
+	"aVertex",
+	"aTexCoord",
+	"aColor0",
+	"aColor1"
+};
+
+static struct AvpVertexShader AvpVertexShaders[AVP_FRAGMENT_SHADER_MAX];
+static struct AvpFragmentShader AvpFragmentShaders[AVP_FRAGMENT_SHADER_MAX];
+static struct AvpShaderProgram AvpShaderPrograms[AVP_SHADER_PROGRAM_MAX];
+
+static int CompileShader(GLuint shader, const GLchar* shaderSource) {
+	GLint infoLogLength;
+	GLchar* infoLog;
+	GLint compileStatus;
+
+	pglShaderSource(shader, 1, &shaderSource, NULL);
+	pglCompileShader(shader);
+
+	pglGetShaderiv(shader, GL_INFO_LOG_LENGTH, &infoLogLength);
+	if (infoLogLength > 1) {
+		infoLog = (GLchar*) malloc((size_t) infoLogLength * sizeof(GLchar));
+		if (infoLog == NULL) {
+			fprintf(stderr, "unable to allocate info log\n");
+			return GL_FALSE;
+		}
+
+		pglGetShaderInfoLog(shader, infoLogLength, NULL, infoLog);
+		printf("Shader:\n-------\n%s\n\nCompile Log:\n------------\n%s\n", shaderSource, infoLog);
+
+		free(infoLog);
+	}
+
+	pglGetShaderiv(shader, GL_COMPILE_STATUS, &compileStatus);
+	return compileStatus;
+}
+
+static int LinkProgram(GLuint program) {
+	GLint infoLogLength;
+	GLchar* infoLog;
+	GLint compileStatus;
+
+	pglLinkProgram(program);
+	pglGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
+
+	if (infoLogLength > 1) {
+		infoLog = (GLchar*) malloc((size_t) infoLogLength * sizeof(GLchar));
+		if (infoLog == NULL) {
+			fprintf(stderr, "unable to allocate info log\n");
+			return GL_FALSE;
+		}
+
+		pglGetProgramInfoLog(program, infoLogLength, NULL, infoLog);
+		printf("Program Link Log:\n%s\n", infoLog);
+
+		free(infoLog);
+	}
+
+	pglGetProgramiv(program, GL_LINK_STATUS, &compileStatus);
+	return compileStatus;
+}
+
+static int ValidateProgram(GLuint program) {
+	GLint infoLogLength;
+	GLchar* infoLog;
+	GLint compileStatus;
+
+	pglValidateProgram(program);
+
+	pglGetProgramiv(program, GL_INFO_LOG_LENGTH, &infoLogLength);
+
+	if (infoLogLength > 1) {
+		infoLog = (GLchar*) malloc((size_t) infoLogLength * sizeof(GLchar));
+		if (infoLog == NULL) {
+			fprintf(stderr, "unable to allocate info log\n");
+			return GL_FALSE;
+		}
+
+		pglGetProgramInfoLog(program, infoLogLength, NULL, infoLog);
+		printf("Program Validation Log:\n%s\n", infoLog);
+
+		free(infoLog);
+	}
+
+	pglGetProgramiv(program, GL_VALIDATE_STATUS, &compileStatus);
+	return compileStatus;
+}
+
+static int CreateProgram(GLuint* pprogram, const GLchar* vertexShaderSource, const GLchar* fragmentShaderSource) {
+	GLuint program;
+	GLuint vertexShader;
+	GLuint fragmentShader;
+
+	GLint compileStatus;
+
+	// create program object
+	program = pglCreateProgram();
+
+	// vertex shader
+	vertexShader = pglCreateShader(GL_VERTEX_SHADER);
+
+	compileStatus = CompileShader(vertexShader, vertexShaderSource);
+
+	if (compileStatus == GL_FALSE) {
+		fprintf(stderr, "vertex shader compilation failed\n");
+
+		pglDeleteProgram(program);
+		return GL_FALSE;
+	}
+
+	pglAttachShader(program, vertexShader);
+	pglDeleteShader(vertexShader);
+
+	// fragment shader
+	fragmentShader = pglCreateShader(GL_FRAGMENT_SHADER);
+
+	compileStatus = CompileShader(fragmentShader, fragmentShaderSource);
+
+	if (compileStatus == GL_FALSE) {
+		fprintf(stderr, "fragment shader compilation failed\n");
+
+		pglDeleteProgram(program);
+		return GL_FALSE;
+	}
+
+	pglAttachShader(program, fragmentShader);
+	pglDeleteShader(fragmentShader);
+
+	// link the program
+	compileStatus = LinkProgram(program);
+
+	if (compileStatus == GL_FALSE) {
+		fprintf(stderr, "program failed to link\n");
+
+		pglDeleteProgram(program);
+		return GL_FALSE;
+	}
+
+	// validate the program for good measure
+	compileStatus = ValidateProgram(program);
+
+	if (compileStatus == GL_FALSE) {
+		fprintf(stderr, "program failed to validate\n");
+
+		pglDeleteProgram(program);
+		return GL_FALSE;
+	}
+
+	*pprogram = program;
+	return GL_TRUE;
+}
+
+static int CreateProgram2(GLuint* pprogram, GLuint vertexShader, GLuint fragmentShader) {
+	GLuint program;
+	GLint compileStatus;
+	int i;
+
+	// create program object
+	program = pglCreateProgram();
+
+	// vertex shader
+	pglAttachShader(program, vertexShader);
+
+	// fragment shader
+	pglAttachShader(program, fragmentShader);
+
+	// need to bind locations before linking
+	pglBindAttribLocation(program, OPENGL_VERTEX_ATTRIB_INDEX, "aVertex");
+	pglBindAttribLocation(program, OPENGL_TEXCOORD_ATTRIB_INDEX, "aTexCoord");
+	pglBindAttribLocation(program, OPENGL_COLOR0_ATTRIB_INDEX, "aColor0");
+	pglBindAttribLocation(program, OPENGL_COLOR1_ATTRIB_INDEX, "aColor1");
+
+	// link the program
+	compileStatus = LinkProgram(program);
+
+	if (compileStatus == GL_FALSE) {
+		fprintf(stderr, "program failed to link\n");
+
+		pglDeleteProgram(program);
+		return GL_FALSE;
+	}
+
+	// validate the program for good measure
+	compileStatus = ValidateProgram(program);
+
+	if (compileStatus == GL_FALSE) {
+		fprintf(stderr, "program failed to validate\n");
+
+		pglDeleteProgram(program);
+		return GL_FALSE;
+	}
+
+	*pprogram = program;
+	return GL_TRUE;
+}
+
+static int InitOpenGLPrograms(void) {
+	GLenum status;
+	int i;
+
+	for (i = 0; i < AVP_VERTEX_SHADER_MAX; i++) {
+		GLuint vertexShader;
+
+		vertexShader = pglCreateShader(GL_VERTEX_SHADER);
+
+		status = CompileShader(vertexShader, AvpVertexShaderSources[i]);
+
+		if (status == GL_FALSE) {
+			fprintf(stderr, "vertex shader compilation failed\n");
+			return GL_FALSE;
+		}
+
+		AvpVertexShaders[i].shaderObj = vertexShader;
+	}
+
+	for (i = 0; i < AVP_FRAGMENT_SHADER_MAX; i++) {
+		GLuint fragmentShader;
+
+		fragmentShader = pglCreateShader(GL_FRAGMENT_SHADER);
+
+		status = CompileShader(fragmentShader, AvpFragmentShaderSources[i]);
+
+		if (status == GL_FALSE) {
+			fprintf(stderr, "fragment shader compilation failed\n");
+			return GL_FALSE;
+		}
+
+		AvpFragmentShaders[i].shaderObj = fragmentShader;
+	}
+
+	for (i = 0; i < AVP_SHADER_PROGRAM_MAX; i++) {
+		GLuint program;
+		GLuint vertexShader;
+		GLuint fragmentShader;
+
+		vertexShader = AvpVertexShaders[AvpShaderProgramSources[i].VertexShader].shaderObj;
+		fragmentShader = AvpFragmentShaders[AvpShaderProgramSources[i].FragmentShader].shaderObj;
+
+		status = CreateProgram2(&program, vertexShader, fragmentShader);
+		if (status == GL_FALSE) {
+			fprintf(stderr, "program compilation failed\n");
+			return GL_FALSE;
+		}
+
+		AvpShaderPrograms[i].programObj = program;
+		AvpShaderPrograms[i].uTexture = pglGetUniformLocation(program, "uTexture");
+	}
+
+	return GL_TRUE;
+}
+
+void SelectProgram(enum AVP_SHADER_PROGRAM program) {
+
+	if (CurrShaderProgram != program) {
+		// supposed to flush here
+
+		unsigned int PrevAttribs = AvpShaderProgramAttributes[CurrShaderProgram];
+		unsigned int NextAttribs = AvpShaderProgramAttributes[program];
+		unsigned int DiffAttribs = PrevAttribs ^ NextAttribs;
+		int ShaderProgram = AvpShaderPrograms[program].programObj;
+		int TextureUniformIndex = AvpShaderPrograms[program].uTexture;
+
+		CurrShaderProgram = program;
+		pglUseProgram(ShaderProgram);
+
+		if ((DiffAttribs & OPENGL_VERTEX_ATTRIB_BITINDEX) != 0) {
+			if ((NextAttribs & OPENGL_VERTEX_ATTRIB_BITINDEX) != 0) {
+				pglEnableVertexAttribArray(OPENGL_VERTEX_ATTRIB_INDEX);
 			} else {
-				pglBlendFunc(GL_ONE, GL_ONE);
+				pglDisableVertexAttribArray(OPENGL_VERTEX_ATTRIB_INDEX);
 			}
-			break;
-		case TRANSLUCENCY_NORMAL:
-			pglBlendFunc(GL_SRC_ALPHA, GL_ONE);
-			break;
-		case TRANSLUCENCY_GLOWING:
-			pglBlendFunc(GL_SRC_ALPHA, GL_ONE);
-			break;
-		case TRANSLUCENCY_COLOUR:
-			//fprintf(stderr, "SetSecondPassTranslucencyMode: unsupported blend mode %d\n", mode);
-			// can't easily emulate this one
-			pglBlendFunc(GL_DST_COLOR, GL_ONE);
-			break;
-		case TRANSLUCENCY_INVCOLOUR:
-			//fprintf(stderr, "SetSecondPassTranslucencyMode: unsupported blend mode %d\n", mode);
-			// can't easily emulate this one
-			pglBlendFunc(GL_ONE_MINUS_DST_COLOR, GL_ONE);
-			break;
+		}
 
-		case TRANSLUCENCY_DARKENINGCOLOUR:
-		case TRANSLUCENCY_JUSTSETZ:
-			fprintf(stderr, "SetSecondPassTranslucencyMode: unsupported blend mode %d\n", mode);
-			pglBlendFunc(GL_SRC_ALPHA, GL_ONE);
-			break;
-		default:
-			fprintf(stderr, "SetSecondPassTranslucencyMode: invalid blend mode %d\n", mode);
-			break;
+		if ((DiffAttribs & OPENGL_TEXCOORD_ATTRIB_BITINDEX) != 0) {
+			if ((NextAttribs & OPENGL_TEXCOORD_ATTRIB_BITINDEX) != 0) {
+				pglEnableVertexAttribArray(OPENGL_TEXCOORD_ATTRIB_INDEX);
+			} else {
+				pglDisableVertexAttribArray(OPENGL_TEXCOORD_ATTRIB_INDEX);
+			}
+		}
+
+		if ((DiffAttribs & OPENGL_COLOR0_ATTRIB_BITINDEX) != 0) {
+			if ((NextAttribs & OPENGL_COLOR0_ATTRIB_BITINDEX) != 0) {
+				pglEnableVertexAttribArray(OPENGL_COLOR0_ATTRIB_INDEX);
+			} else {
+				pglDisableVertexAttribArray(OPENGL_COLOR0_ATTRIB_INDEX);
+			}
+		}
+
+		if ((DiffAttribs & OPENGL_COLOR1_ATTRIB_BITINDEX) != 0) {
+			if ((NextAttribs & OPENGL_COLOR1_ATTRIB_BITINDEX) != 0) {
+				pglEnableVertexAttribArray(OPENGL_COLOR1_ATTRIB_INDEX);
+			} else {
+				pglDisableVertexAttribArray(OPENGL_COLOR1_ATTRIB_INDEX);
+			}
+		}
+
+		if (TextureUniformIndex >= 0) {
+			pglUniform1i(TextureUniformIndex, 0);
+		}
 	}
 }
 
-/* 
-A few things:
-- Vertices with a specular color are done twice.
-  Might want to try spitting apart the three arrays and using the same vertex
-  array for both passes.
-- Fix code for separate color support.
-*/
+static void InitOpenGLDefaultTexture(void) {
+	pglGenTextures(1, &DefaultTexture);
 
-void InitOpenGL()
+	pglBindTexture(GL_TEXTURE_2D, DefaultTexture);
+
+	pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+
+	pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+	pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+	pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+
+	GLubyte defaultTexData[4] = { 255, 255, 255, 255 };
+	pglTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, 1, 1, 0, GL_RGBA, GL_UNSIGNED_BYTE, defaultTexData);
+}
+
+void InitOpenGL(int firsttime)
 {
-        pglHint( GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST );
-        pglHint( GL_GENERATE_MIPMAP_HINT, GL_NICEST );
+	if (firsttime) {
+		InitOpenGLPrograms();
+		check_for_errors();
+		InitOpenGLDefaultTexture();
+		check_for_errors();
+	}
+
+	pglHint( GL_GENERATE_MIPMAP_HINT, GL_NICEST );
 
 #if GL_NV_multisample_filter_hint
-        if ( ogl_use_multisample_filter_hint )
-        {
-                pglHint( GL_MULTISAMPLE_FILTER_HINT_NV, GL_NICEST );
-        }
+	if ( ogl_use_multisample_filter_hint )
+	{
+		pglHint( GL_MULTISAMPLE_FILTER_HINT_NV, GL_NICEST );
+	}
 #endif
 
 	CurrentTranslucencyMode = TRANSLUCENCY_OFF;
 	pglBlendFunc(GL_ONE, GL_ZERO);
 	
-	pglAlphaFunc(GL_GREATER, 0.0f);
-	
 	CurrentFilteringMode = FILTERING_BILINEAR_OFF;
-	pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
-	pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
-                        
 	CurrentlyBoundTexture = NULL;
 	pglBindTexture(GL_TEXTURE_2D, 0);
-	
-	pglEnableClientState(GL_VERTEX_ARRAY);
-	pglVertexPointer(4, GL_FLOAT, sizeof(varr[0]), varr[0].v);
-		
-	pglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-	pglTexCoordPointer(2, GL_FLOAT, sizeof(varr[0]), varr[0].t);
-		
-	pglEnableClientState(GL_COLOR_ARRAY);
-	pglColorPointer(4, GL_UNSIGNED_BYTE, sizeof(varr[0]), varr[0].c);
+
+	// create array and element array buffers, as required by WebGL
+	pglGenBuffers(1, &ArrayBuffer);
+	pglGenBuffers(1, &ElementArrayBuffer);
+
+	pglBindBuffer(GL_ARRAY_BUFFER, ArrayBuffer);
+	pglBindBuffer(GL_ELEMENT_ARRAY_BUFFER, ElementArrayBuffer);
+
+	pglVertexAttribPointer(OPENGL_VERTEX_ATTRIB_INDEX, 4, GL_FLOAT, GL_FALSE, sizeof(varr[0]), (const GLvoid*) 0);
+	pglVertexAttribPointer(OPENGL_TEXCOORD_ATTRIB_INDEX, 2, GL_FLOAT, GL_FALSE, sizeof(varr[0]), (const GLvoid*) 16);
+	pglVertexAttribPointer(OPENGL_COLOR0_ATTRIB_INDEX, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(varr[0]), (const GLvoid*) 24);
+	pglVertexAttribPointer(OPENGL_COLOR1_ATTRIB_INDEX, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(varr[0]), (const GLvoid*) 28);
+
+	CurrShaderProgram = AVP_SHADER_PROGRAM_MAX;
+	SelectProgram(AVP_SHADER_PROGRAM_DEFAULT);
 
 	tarrc = 0;
 	tarrp = tarr;
 		
 	varrc = 0;
 	varrp = varr;
-	
-	starrc = 0;
-	starrp = starr;
+
+	check_for_errors();
 }
 
 static void FlushTriangleBuffers(int backup)
 {
 	if (tarrc) {
-		pglDrawElements(GL_TRIANGLES, tarrc*3, GL_UNSIGNED_SHORT, tarr);
+		// not optimal but required by WebGL
+		pglBufferData(GL_ARRAY_BUFFER, varrc * sizeof(varr[0]), varr, GL_STREAM_DRAW);
+		pglBufferData(GL_ELEMENT_ARRAY_BUFFER, tarrc * sizeof(tarr[0]), tarr, GL_STREAM_DRAW);
+
+		pglDrawElements(GL_TRIANGLES, tarrc*3, GL_UNSIGNED_SHORT, (const GLvoid*) 0);
 		
 		tarrc = 0;
 		tarrp = tarr;
 		
 		varrc = 0;
 		varrp = varr;
-	}
-	
-	if (starrc) {
-		//if (CurrentlyBoundTexture != NULL) {
-		//	if (!backup) CurrentlyBoundTexture = NULL;
-		//	pglBindTexture(GL_TEXTURE_2D, 0);
-		//}
-		
-		//if (CurrentTranslucencyMode != TRANSLUCENCY_GLOWING) {
-		//	if (!backup) CurrentTranslucencyMode = TRANSLUCENCY_GLOWING;
-		//	SetTranslucencyMode(TRANSLUCENCY_GLOWING);
-		//	//if (CurrentTranslucencyMode == TRANSLUCENCY_OFF)
-		//	//	pglEnable(GL_BLEND);
-		//	//glBlendFunc(GL_SRC_ALPHA, GL_ONE);
-		//}
-
-		SetSecondPassTranslucencyMode(CurrentTranslucencyMode);
-
-		pglTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_COMBINE);
-		pglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_RGB, GL_REPLACE);
-		pglTexEnvi(GL_TEXTURE_ENV, GL_SRC0_RGB, GL_PRIMARY_COLOR);
-		pglTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_RGB, GL_SRC_COLOR);
-		pglTexEnvi(GL_TEXTURE_ENV, GL_COMBINE_ALPHA, GL_MODULATE);
-		pglTexEnvi(GL_TEXTURE_ENV, GL_SRC0_ALPHA, GL_TEXTURE);
-		pglTexEnvi(GL_TEXTURE_ENV, GL_OPERAND0_ALPHA, GL_SRC_ALPHA);
-		pglTexEnvi(GL_TEXTURE_ENV, GL_SRC1_ALPHA, GL_PRIMARY_COLOR);
-		pglTexEnvi(GL_TEXTURE_ENV, GL_OPERAND1_ALPHA, GL_SRC_ALPHA);
-
-		//pglDisableClientState(GL_TEXTURE_COORD_ARRAY);
-		pglColorPointer(4, GL_UNSIGNED_BYTE, sizeof(varr[0]), varr[0].s);
-
-		pglDrawElements(GL_TRIANGLES, starrc*3, GL_UNSIGNED_SHORT, starr);
-
-		//pglEnableClientState(GL_TEXTURE_COORD_ARRAY);
-		pglColorPointer(4, GL_UNSIGNED_BYTE, sizeof(varr[0]), varr[0].c);
-		
-		//if (backup) {
-		//	//if (CurrentlyBoundTexture)
-		//	//	pglBindTexture(GL_TEXTURE_2D, CurrentlyBoundTexture->id);
-		//	if (CurrentTranslucencyMode != TRANSLUCENCY_GLOWING)
-		//		SetTranslucencyMode(CurrentTranslucencyMode);
-		//} else {
-		//	//CurrentlyBoundTexture = NULL;
-		//	CurrentTranslucencyMode = TRANSLUCENCY_GLOWING;
-		//}
-
-		SetTranslucencyMode(CurrentTranslucencyMode);
-		pglTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
-
-		starrc = 0;
-		starrp = starr;
 	}
 }
 
@@ -293,7 +831,7 @@ static void CheckBoundTextureIsCorrect(D3DTexture *tex)
 	FlushTriangleBuffers(1);
 	
 	if (tex == NULL) {
-		pglBindTexture(GL_TEXTURE_2D, 0);
+		pglBindTexture(GL_TEXTURE_2D, DefaultTexture);
 		
 		CurrentlyBoundTexture = NULL;
 		
@@ -301,6 +839,10 @@ static void CheckBoundTextureIsCorrect(D3DTexture *tex)
 	} 
 	
 	pglBindTexture(GL_TEXTURE_2D, tex->id);
+
+	/*if (tex->hasAlpha != 0 || tex->hasChroma != 0) {
+		// modulate emulation?
+	}*/
 
 	if (tex->filter != CurrentFilteringMode) {
 		switch(CurrentFilteringMode) {
@@ -310,7 +852,7 @@ static void CheckBoundTextureIsCorrect(D3DTexture *tex)
 				break;
 			case FILTERING_BILINEAR_ON:
 				pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, TextureMinFilter);
+				pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, tex->IsNpot ? GL_LINEAR : TextureMinFilter);
 				break;
 			default:
 				break;
@@ -336,7 +878,7 @@ static void CheckFilteringModeIsCorrect(enum FILTERING_MODE_ID filter)
 				break;
 			case FILTERING_BILINEAR_ON:
 				pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-				pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, TextureMinFilter);
+				pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, CurrentlyBoundTexture->IsNpot ? GL_LINEAR : TextureMinFilter);
 				break;
 			default:
 				break;
@@ -358,7 +900,7 @@ static void CheckTranslucencyModeIsCorrect(enum TRANSLUCENCY_TYPE mode)
 	CurrentTranslucencyMode = mode;
 }
 
-static void CheckTriangleBuffer(int rver, int sver, int rtri, int stri, D3DTexture *tex, enum TRANSLUCENCY_TYPE mode, enum FILTERING_MODE_ID filter)
+static void CheckTriangleBuffer(int rver, int rtri, D3DTexture *tex, enum TRANSLUCENCY_TYPE mode, enum FILTERING_MODE_ID filter)
 {
 	if ((rver+varrc) >= TA_MAXVERTICES) {
 		FlushTriangleBuffers(0);
@@ -412,44 +954,6 @@ static void CheckTriangleBuffer(int rver, int sver, int rtri, int stri, D3DTextu
 				fprintf(stderr, "DrawTriangles_T2F_C4UB_V4F: vertices = %d\n", rver);
 		}
 	}	
-#undef OUTPUT_TRIANGLE
-	
-#define OUTPUT_TRIANGLE(x, y, z) \
-{ \
-	starrp->a = varrc+(x);	\
-	starrp->b = varrc+(y);	\
-	starrp->c = varrc+(z);	\
-						\
-	starrp++;				\
-	starrc++; 				\
-}
-	if (stri == 0) {
-		switch(sver) {
-			case 0:
-				break;
-			case 3:
-				OUTPUT_TRIANGLE(0, 2, 1);
-				break;
-			case 5:
-				OUTPUT_TRIANGLE(0, 1, 4);
-				OUTPUT_TRIANGLE(1, 3, 4);
-				OUTPUT_TRIANGLE(1, 2, 3);
-				break;
-			case 8:
-				OUTPUT_TRIANGLE(0, 6, 7);
-			case 7:
-				OUTPUT_TRIANGLE(0, 5, 6);
-			case 6:
-				OUTPUT_TRIANGLE(0, 4, 5);
-				OUTPUT_TRIANGLE(0, 3, 4);
-			case 4:
-				OUTPUT_TRIANGLE(0, 2, 3);
-				OUTPUT_TRIANGLE(0, 1, 2);
-				break;
-			default:
-				fprintf(stderr, "DrawTriangles_T2F_C4UB_V4F: vertices = %d\n", sver);
-		}
-	}
 #undef OUTPUT_TRIANGLE
 }
 
@@ -513,34 +1017,26 @@ GLuint CreateOGLTexture(D3DTexture *tex, unsigned char *buf)
 	pglGenTextures(1, &h);
 
 	pglBindTexture(GL_TEXTURE_2D, h);
-	pglTexParameteri(GL_TEXTURE_2D, GL_GENERATE_MIPMAP, GL_TRUE);
 
-	pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
-	pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
+	pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
 
-    if (tex->IsNpot) {
-        // OpenGL 1.x compatibility
-        tex->TexWidth = PotWidth;
-        tex->TexHeight = PotHeight;
-
-		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	if (tex->IsNpot) {
 		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-
-		pglTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex->TexWidth, tex->TexHeight, 0, GL_RGBA, GL_UNSIGNED_BYTE, NULL);
-		pglTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, tex->w, tex->h, GL_RGBA, GL_UNSIGNED_BYTE, buf);
-    } else {
-		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-		if (tex->IsNpot) {
-			pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-		} else {
-			pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, TextureMinFilter);
-		}
-
-		pglTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex->w, tex->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf);
+		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_CLAMP_TO_EDGE);
+		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_CLAMP_TO_EDGE);
+	} else {
+		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, TextureMinFilter);
+		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_S, GL_REPEAT);
+		pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_WRAP_T, GL_REPEAT);
 	}
 
-	pglTexEnvi(GL_TEXTURE_ENV, GL_TEXTURE_ENV_MODE, GL_MODULATE);
+	pglTexImage2D(GL_TEXTURE_2D, 0, GL_RGBA, tex->w, tex->h, 0, GL_RGBA, GL_UNSIGNED_BYTE, buf);
+
+	if (!tex->IsNpot && TextureMinFilter != GL_LINEAR) {
+		// generate mipmaps if needed
+		// OpenGL 3.0 / ES 2 feature -- need fbo extension support
+		//pglGenerateMipmap(GL_TEXTURE_2D);
+	}
 
     tex->buf = NULL;
 	tex->id = h;
@@ -660,7 +1156,8 @@ void D3D_Rectangle(int x0, int y0, int x1, int y1, int r, int g, int b, int a)
 	if (y1 <= y0)
 		return;
 
-	CheckTriangleBuffer(4, 0, 0, 0, NULL, TRANSLUCENCY_GLOWING, -1);
+	CheckTriangleBuffer(4, 0, NULL, TRANSLUCENCY_GLOWING, -1);
+	SelectProgram(AVP_SHADER_PROGRAM_NO_TEXTURE);
 
 	x[0] = x0;
 	x[0] =  (x[0] - ScreenDescriptorBlock.SDB_CentreX)/ScreenDescriptorBlock.SDB_CentreX;
@@ -730,8 +1227,9 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 	RecipW = TextureHandle->RecipW / 65536.0f;
 	RecipH = TextureHandle->RecipH / 65536.0f;
 
-	CheckTriangleBuffer(RenderPolygon.NumberOfVertices, RenderPolygon.NumberOfVertices, 0, 0, TextureHandle, RenderPolygon.TranslucencyMode, -1);
-	
+	CheckTriangleBuffer(RenderPolygon.NumberOfVertices, 0, TextureHandle, RenderPolygon.TranslucencyMode, -1);
+	SelectProgram(AVP_SHADER_PROGRAM_DEFAULT);
+
 	for (i = 0; i < RenderPolygon.NumberOfVertices; i++) {
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
 		GLfloat x, y, z;
@@ -764,7 +1262,7 @@ void D3D_ZBufferedGouraudTexturedPolygon_Output(POLYHEADER *inputPolyPtr, RENDER
 		varrp->s[0] = GammaValues[vertices->SpecularR];
 		varrp->s[1] = GammaValues[vertices->SpecularG];
 		varrp->s[2] = GammaValues[vertices->SpecularB];
-		varrp->s[3] = vertices->A;
+		varrp->s[3] = 0;
 		
 		varrp++;
 		varrc++;
@@ -785,8 +1283,9 @@ void D3D_SkyPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *renderVertice
 	RecipW = TextureHandle->RecipW / 65536.0f;
 	RecipH = TextureHandle->RecipH / 65536.0f;
 	
-	CheckTriangleBuffer(RenderPolygon.NumberOfVertices, 0, 0, 0, TextureHandle, RenderPolygon.TranslucencyMode, -1);
-	
+	CheckTriangleBuffer(RenderPolygon.NumberOfVertices, 0, TextureHandle, RenderPolygon.TranslucencyMode, -1);
+	SelectProgram(AVP_SHADER_PROGRAM_NO_SECONDARY);
+
 	for (i = 0; i < RenderPolygon.NumberOfVertices; i++) {
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
 		GLfloat x, y, z;
@@ -847,8 +1346,9 @@ void D3D_ZBufferedCloakedPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 	RecipW = TextureHandle->RecipW / 65536.0f;
 	RecipH = TextureHandle->RecipH / 65536.0f;
 	
-	CheckTriangleBuffer(RenderPolygon.NumberOfVertices, 0, 0, 0, TextureHandle, TRANSLUCENCY_NORMAL, -1);
-	
+	CheckTriangleBuffer(RenderPolygon.NumberOfVertices, 0, TextureHandle, TRANSLUCENCY_NORMAL, -1);
+	SelectProgram(AVP_SHADER_PROGRAM_NO_SECONDARY);
+
 	for (i = 0; i < RenderPolygon.NumberOfVertices; i++) {
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
 		
@@ -943,8 +1443,9 @@ void D3D_Decal_Output(DECAL *decalPtr, RENDERVERTEX *renderVerticesPtr)
 		a = decalDescPtr->Alpha;
 	}
 	
-	CheckTriangleBuffer(RenderPolygon.NumberOfVertices, 0, 0, 0, TextureHandle, decalDescPtr->TranslucencyType, -1);
-	
+	CheckTriangleBuffer(RenderPolygon.NumberOfVertices, 0, TextureHandle, decalDescPtr->TranslucencyType, -1);
+	SelectProgram(AVP_SHADER_PROGRAM_NO_SECONDARY);
+
 	for (i = 0; i < RenderPolygon.NumberOfVertices; i++) {
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
 		
@@ -1035,8 +1536,9 @@ void D3D_Particle_Output(PARTICLE *particlePtr, RENDERVERTEX *renderVerticesPtr)
 		a = particleDescPtr->Alpha;
 	}
 
-	CheckTriangleBuffer(RenderPolygon.NumberOfVertices, 0, 0, 0, TextureHandle, particleDescPtr->TranslucencyType, -1);
-	
+	CheckTriangleBuffer(RenderPolygon.NumberOfVertices, 0, TextureHandle, particleDescPtr->TranslucencyType, -1);
+	SelectProgram(AVP_SHADER_PROGRAM_NO_SECONDARY);
+
 	for (i = 0; i < RenderPolygon.NumberOfVertices; i++) {
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
 		
@@ -1087,8 +1589,9 @@ void D3D_PredatorThermalVisionPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVER
 	int i;
 	ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
 	
-	CheckTriangleBuffer(RenderPolygon.NumberOfVertices, 0, 0, 0, NULL, TRANSLUCENCY_OFF, -1);
-	
+	CheckTriangleBuffer(RenderPolygon.NumberOfVertices, 0, NULL, TRANSLUCENCY_OFF, -1);
+	SelectProgram(AVP_SHADER_PROGRAM_NO_TEXTURE);
+
 	for (i = 0; i < RenderPolygon.NumberOfVertices; i++) {
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];
 		
@@ -1133,8 +1636,9 @@ void D3D_ZBufferedGouraudPolygon_Output(POLYHEADER *inputPolyPtr, RENDERVERTEX *
 	
 	flags = inputPolyPtr->PolyFlags;
 	
-	CheckTriangleBuffer(RenderPolygon.NumberOfVertices, 0, 0, 0, NULL, RenderPolygon.TranslucencyMode, -1);
-	
+	CheckTriangleBuffer(RenderPolygon.NumberOfVertices, 0, NULL, RenderPolygon.TranslucencyMode, -1);
+	SelectProgram(AVP_SHADER_PROGRAM_NO_TEXTURE);
+
 	for (i = 0; i < RenderPolygon.NumberOfVertices; i++) {
 		RENDERVERTEX *vertices = &renderVerticesPtr[i];	
 		GLfloat x, y, z;
@@ -1209,8 +1713,9 @@ void D3D_PlayerOnFireOverlay()
 	s[3] = u;
 	t[3] = v + 1.0f;
 	
-	CheckTriangleBuffer(4, 0, 0, 0, TextureHandle, TRANSLUCENCY_GLOWING, FILTERING_BILINEAR_ON);
-	
+	CheckTriangleBuffer(4, 0, TextureHandle, TRANSLUCENCY_GLOWING, FILTERING_BILINEAR_ON);
+	SelectProgram(AVP_SHADER_PROGRAM_NO_SECONDARY);
+
 	for (i = 0; i < 4; i++) {
 		varrp->v[0] = x[i];
 		varrp->v[1] = y[i];
@@ -1266,7 +1771,7 @@ void D3D_PlayerDamagedOverlay(int intensity)
 		GLfloat x[4], y[4], s[4], t[4];
 		
 		if (i == 0) {
-			CheckTriangleBuffer(4, 0, 0, 0, TextureHandle, TRANSLUCENCY_INVCOLOUR, FILTERING_BILINEAR_ON);
+			CheckTriangleBuffer(4, 0, TextureHandle, TRANSLUCENCY_INVCOLOUR, FILTERING_BILINEAR_ON);
 
 			colour = 0xffffff - baseColour + (intensity<<24);
 			
@@ -1275,7 +1780,7 @@ void D3D_PlayerDamagedOverlay(int intensity)
 			r = (colour >> 16) & 0xFF;
 			a = (colour >> 24) & 0xFF;
 		} else {
-			CheckTriangleBuffer(4, 0, 0, 0, TextureHandle, TRANSLUCENCY_GLOWING, FILTERING_BILINEAR_ON);
+			CheckTriangleBuffer(4, 0, TextureHandle, TRANSLUCENCY_GLOWING, FILTERING_BILINEAR_ON);
 
 			colour = baseColour + (intensity<<24);
 			
@@ -1284,6 +1789,8 @@ void D3D_PlayerDamagedOverlay(int intensity)
 			r = (colour >> 16) & 0xFF;
 			a = (colour >> 24) & 0xFF;
 		}
+
+		SelectProgram(AVP_SHADER_PROGRAM_NO_SECONDARY);
 
 		float sin = (GetSin(theta[i]))/65536.0f/16.0f;
 		float cos = (GetCos(theta[i]))/65536.0f/16.0f;	
@@ -1368,7 +1875,8 @@ void DrawNoiseOverlay(int tr)
 
 	// changing the depth func manually, so flush now
 	FlushTriangleBuffers(0);
-	CheckTriangleBuffer(4, 0, 0, 0, tex, TRANSLUCENCY_GLOWING, FILTERING_BILINEAR_ON);
+	CheckTriangleBuffer(4, 0, tex, TRANSLUCENCY_GLOWING, FILTERING_BILINEAR_ON);
+	SelectProgram(AVP_SHADER_PROGRAM_NO_SECONDARY);
 
 	for (j = 0; j < 4; j++) {
 		varrp->v[0] = x[j];
@@ -1414,10 +1922,12 @@ void D3D_ScreenInversionOverlay()
 		GLfloat x[4], y[4], s[4], t[4];
 		
 		if (i == 0) {
-			CheckTriangleBuffer(4, 0, 0, 0, tex, TRANSLUCENCY_DARKENINGCOLOUR, FILTERING_BILINEAR_ON);
+			CheckTriangleBuffer(4, 0, tex, TRANSLUCENCY_DARKENINGCOLOUR, FILTERING_BILINEAR_ON);
 		} else {
-			CheckTriangleBuffer(4, 0, 0, 0, tex, TRANSLUCENCY_COLOUR, FILTERING_BILINEAR_ON);
+			CheckTriangleBuffer(4, 0, tex, TRANSLUCENCY_COLOUR, FILTERING_BILINEAR_ON);
 		}
+
+		SelectProgram(AVP_SHADER_PROGRAM_NO_SECONDARY);
 
 		float sin = (GetSin(theta[i]))/65536.0f/16.0f;
 		float cos = (GetCos(theta[i]))/65536.0f/16.0f;
@@ -1470,8 +1980,9 @@ void D3D_PredatorScreenInversionOverlay()
 
 	// changing the depth func manually, so flush now
 	FlushTriangleBuffers(0);
-	CheckTriangleBuffer(4, 0, 0, 0, NULL, TRANSLUCENCY_DARKENINGCOLOUR, -1);
-	
+	CheckTriangleBuffer(4, 0, NULL, TRANSLUCENCY_DARKENINGCOLOUR, -1);
+	SelectProgram(AVP_SHADER_PROGRAM_NO_TEXTURE);
+
 	for (j = 0; j < 4; j++) {
 
 		switch (j) {
@@ -1554,7 +2065,8 @@ void DrawScanlinesOverlay(float level)
 	
 	// changing the depth func manually, so flush now
 	FlushTriangleBuffers(0);
-	CheckTriangleBuffer(4, 0, 0, 0, tex, TRANSLUCENCY_NORMAL, FILTERING_BILINEAR_ON);
+	CheckTriangleBuffer(4, 0, tex, TRANSLUCENCY_NORMAL, FILTERING_BILINEAR_ON);
+	SelectProgram(AVP_SHADER_PROGRAM_NO_SECONDARY);
 
 	for (j = 0; j < 4; j++) {
 		varrp->v[0] = x[j];
@@ -1594,8 +2106,9 @@ void D3D_FadeDownScreen(int brightness, int colour)
 	if (t<0) t = 0;
 	colour = (t<<24)+colour;
 	
-	CheckTriangleBuffer(4, 0, 0, 0, NULL, TRANSLUCENCY_NORMAL, -1);
-	
+	CheckTriangleBuffer(4, 0, NULL, TRANSLUCENCY_NORMAL, -1);
+	SelectProgram(AVP_SHADER_PROGRAM_NO_TEXTURE);
+
 	b = (colour >> 0)  & 0xFF;
 	g = (colour >> 8)  & 0xFF;
 	r = (colour >> 16) & 0xFF;
@@ -1634,6 +2147,68 @@ void D3D_FadeDownScreen(int brightness, int colour)
 	}
 }
 
+void DrawFullscreenTexture(int texureObject)
+{
+	int j;
+
+	// using a custom texture, so flush now
+	FlushTriangleBuffers(0);
+	CheckTriangleBuffer(4, 0, NULL, TRANSLUCENCY_OFF, -1);
+	SelectProgram(AVP_SHADER_PROGRAM_NO_COLOR_NO_DISCARD);
+	pglBindTexture(GL_TEXTURE_2D, texureObject);
+	pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+	pglTexParameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+
+	for (j = 0; j < 4; j++) {
+
+		switch (j) {
+			case 0:
+				varrp->v[0] = -1.0f;
+				varrp->v[1] = -1.0f;
+				varrp->t[0] =  0.0f;
+				varrp->t[1] =  0.0f;
+				break;
+			case 1:
+				varrp->v[0] =  1.0f;
+				varrp->v[1] = -1.0f;
+				varrp->t[0] =  1.0f;
+				varrp->t[1] =  0.0f;
+				break;
+			case 2:
+				varrp->v[0] =  1.0f;
+				varrp->v[1] =  1.0f;
+				varrp->t[0] =  1.0f;
+				varrp->t[1] =  1.0f;
+				break;
+			case 3:
+				varrp->v[0] = -1.0f;
+				varrp->v[1] =  1.0f;
+				varrp->t[0] =  0.0f;
+				varrp->t[1] =  1.0f;
+				break;
+		}
+
+		varrp->v[2] = -1.0f;
+		varrp->v[3] =  1.0f;
+
+		varrp->c[0] = 255;
+		varrp->c[1] = 255;
+		varrp->c[2] = 255;
+		varrp->c[3] = 255;
+
+		varrp->s[0] = 0;
+		varrp->s[1] = 0;
+		varrp->s[2] = 0;
+		varrp->s[3] = 0;
+
+		varrp++;
+		varrc++;
+	}
+
+	FlushTriangleBuffers(0);
+	pglBindTexture(GL_TEXTURE_2D, 0);
+}
+
 void D3D_HUD_Setup()
 {
 	FlushTriangleBuffers(1);
@@ -1653,8 +2228,9 @@ void D3D_HUDQuad_Output(int imageNumber, struct VertexTag *quadVerticesPtr, unsi
 
 /* possibly use polygon offset? (predator hud) */
 
-	CheckTriangleBuffer(4, 0, 0, 0, tex, TRANSLUCENCY_GLOWING, -1);
-	
+	CheckTriangleBuffer(4, 0, tex, TRANSLUCENCY_GLOWING, -1);
+	SelectProgram(AVP_SHADER_PROGRAM_NO_SECONDARY);
+
 	RecipW = tex->RecipW / 65536.0f;
 	RecipH = tex->RecipH / 65536.0f;
 	
@@ -1982,11 +2558,11 @@ int Hardware_RenderSmallMenuText(char *textPtr, int x, int y, int alpha, enum AV
 		case AVPMENUFORMAT_RIGHTJUSTIFIED:
 		{
 			int length = 0;
-			signed char *ptr = (signed char*) textPtr;
+			char *ptr = textPtr;
 
 			while(*ptr)
 			{
-				length+=AAFontWidths[*ptr++];
+				length+=AAFontWidths[(unsigned char) *ptr++];
 			}
 
 			x -= length;
@@ -1995,11 +2571,11 @@ int Hardware_RenderSmallMenuText(char *textPtr, int x, int y, int alpha, enum AV
 		case AVPMENUFORMAT_CENTREJUSTIFIED:
 		{
 			int length = 0;
-			signed char *ptr = (signed char*) textPtr;
+			char *ptr = textPtr;
 
 			while(*ptr)
 			{
-				length+=AAFontWidths[*ptr++];
+				length+=AAFontWidths[(unsigned char) *ptr++];
 			}
 
 			x -= length/2;
@@ -2034,11 +2610,11 @@ int Hardware_RenderSmallMenuText_Coloured(char *textPtr, int x, int y, int alpha
 		case AVPMENUFORMAT_RIGHTJUSTIFIED:
 		{
 			int length = 0;
-			signed char *ptr = (signed char*) textPtr;
+			char *ptr = textPtr;
 
 			while(*ptr)
 			{
-				length+=AAFontWidths[*ptr++];
+				length+=AAFontWidths[(unsigned char) *ptr++];
 			}
 
 			x -= length;
@@ -2047,11 +2623,11 @@ int Hardware_RenderSmallMenuText_Coloured(char *textPtr, int x, int y, int alpha
 		case AVPMENUFORMAT_CENTREJUSTIFIED:
 		{
 			int length = 0;
-			signed char *ptr = (signed char*) textPtr;
+			char *ptr = textPtr;
 
 			while(*ptr)
 			{
-				length+=AAFontWidths[*ptr++];
+				length+=AAFontWidths[(unsigned char) *ptr++];
 			}
 
 			x -= length/2;
@@ -2489,7 +3065,8 @@ void D3D_DrawColourBar(int yTop, int yBottom, int rScale, int gScale, int bScale
 	int a;
 	int start;
 
-	CheckTriangleBuffer(256*2, 0, 255*2, 0, NULL, TRANSLUCENCY_OFF, -1);
+	CheckTriangleBuffer(256*2, 255*2, NULL, TRANSLUCENCY_OFF, -1);
+	SelectProgram(AVP_SHADER_PROGRAM_NO_TEXTURE);
 
 	start = varrc;
 
@@ -2593,8 +3170,9 @@ void ColourFillBackBufferQuad(int FillColour, int x0, int y0, int x1, int y1)
 	if (y1 <= y0)
 		return;
 	
-	CheckTriangleBuffer(4, 0, 0, 0, NULL, TRANSLUCENCY_OFF, -1);
-	
+	CheckTriangleBuffer(4, 0, NULL, TRANSLUCENCY_OFF, -1);
+	SelectProgram(AVP_SHADER_PROGRAM_NO_TEXTURE);
+
 	b = ((FillColour >> 0)  & 0xFF);
 	g = ((FillColour >> 8)  & 0xFF);
 	r = ((FillColour >> 16) & 0xFF);
@@ -2741,7 +3319,8 @@ void BltImage(RECT *dest, DDSurface *image, RECT *src)
 	s[3] = src->left * image->RecipW;
 	t[3] = src->bottom * image->RecipH;
 
-    CheckTriangleBuffer(4, 0, 0, 0, image, TRANSLUCENCY_OFF, -1);
+    CheckTriangleBuffer(4, 0, image, TRANSLUCENCY_OFF, -1);
+    SelectProgram(AVP_SHADER_PROGRAM_NO_SECONDARY);
 
 	for (i = 0; i < 4; i++) {
 		varrp->v[0] = x[i];
@@ -2834,8 +3413,9 @@ void D3D_DrawParticle_Rain(PARTICLE *particlePtr,VECTORCH *prevPositionPtr)
 
 		ZNear = (float) (Global_VDB_Ptr->VDB_ClipZ * GlobalScale);
 
-		CheckTriangleBuffer(3, 0, 0, 0, NULL, TRANSLUCENCY_NORMAL, -1);
-				
+		CheckTriangleBuffer(3, 0, NULL, TRANSLUCENCY_NORMAL, -1);
+		SelectProgram(AVP_SHADER_PROGRAM_NO_TEXTURE);
+
 		for (i = 0; i < 3; i++) {
 			GLfloat xf, yf, zf;
 			GLfloat w;
@@ -2968,7 +3548,7 @@ void PostLandscapeRendering()
 		 	MeshZScale/=2;
 			
 			CurrTextureHandle = ImageHeaderArray[ChromeImageNumber].D3DTexture;
-			CheckTriangleBuffer(0, 0, 0, 0, CurrTextureHandle, TRANSLUCENCY_NORMAL, -1);
+			CheckTriangleBuffer(0, 0, CurrTextureHandle, TRANSLUCENCY_NORMAL, -1);
 			
 		 	D3D_DrawWaterPatch(x, y, z);		 	
 		 	D3D_DrawWaterPatch(x+MeshXScale, y, z);
@@ -3000,7 +3580,7 @@ void PostLandscapeRendering()
 		 	MeshZScale/=2;
 			
 			CurrTextureHandle = ImageHeaderArray[ChromeImageNumber].D3DTexture;
-			CheckTriangleBuffer(0, 0, 0, 0, CurrTextureHandle, TRANSLUCENCY_NORMAL, -1);
+			CheckTriangleBuffer(0, 0, CurrTextureHandle, TRANSLUCENCY_NORMAL, -1);
 			
 		 	D3D_DrawWaterPatch(x, y, z);		 	
 		 	D3D_DrawWaterPatch(x+MeshXScale, y, z);
@@ -3340,7 +3920,7 @@ void PostLandscapeRendering()
 		 	MeshZScale/=2;
 			
 			CurrTextureHandle = ImageHeaderArray[ChromeImageNumber].D3DTexture;
-			CheckTriangleBuffer(0, 0, 0, 0, CurrTextureHandle, TRANSLUCENCY_NORMAL, -1);
+			CheckTriangleBuffer(0, 0, CurrTextureHandle, TRANSLUCENCY_NORMAL, -1);
 		 	D3D_DrawWaterPatch(x, y, z);
 		 	D3D_DrawWaterPatch(x+MeshXScale, y, z);		 	
 		 	D3D_DrawWaterPatch(x+MeshXScale*2, y, z);
@@ -3369,7 +3949,7 @@ void PostLandscapeRendering()
 		 	MeshZScale/=2;
 			
 			CurrTextureHandle = ImageHeaderArray[WaterShaftImageNumber].D3DTexture;
-			CheckTriangleBuffer(0, 0, 0, 0, CurrTextureHandle, TRANSLUCENCY_NORMAL, -1);
+			CheckTriangleBuffer(0, 0, CurrTextureHandle, TRANSLUCENCY_NORMAL, -1);
 		 	D3D_DrawWaterPatch(x, y, z);
 		 	D3D_DrawWaterPatch(x+MeshXScale, y, z);
 		 	D3D_DrawWaterPatch(x+MeshXScale*2, y, z);
@@ -3436,7 +4016,7 @@ void PostLandscapeRendering()
 		 	MeshZScale/=2;
 			
 			CurrTextureHandle = ImageHeaderArray[ChromeImageNumber].D3DTexture;
-			CheckTriangleBuffer(0, 0, 0, 0, CurrTextureHandle, TRANSLUCENCY_NORMAL, -1);
+			CheckTriangleBuffer(0, 0, CurrTextureHandle, TRANSLUCENCY_NORMAL, -1);
 		 	D3D_DrawWaterPatch(x, y, z);
 		 	D3D_DrawWaterPatch(x+MeshXScale, y, z);
 		 	D3D_DrawWaterPatch(x, y, z+MeshZScale);
@@ -3518,7 +4098,7 @@ void D3D_DrawWaterTest(MODULE *testModulePtr)
 				MeshZScale/=2;
 				
 				CurrTextureHandle = ImageHeaderArray[WaterShaftImageNumber].D3DTexture;
-				CheckTriangleBuffer(0, 0, 0, 0, CurrTextureHandle, TRANSLUCENCY_NORMAL, -1);
+				CheckTriangleBuffer(0, 0, CurrTextureHandle, TRANSLUCENCY_NORMAL, -1);
 				D3D_DrawWaterPatch(x, y, z);
 				D3D_DrawWaterPatch(x+MeshXScale, y, z);
 				D3D_DrawWaterPatch(x, y, z+MeshZScale);
@@ -4708,8 +5288,9 @@ void D3D_DrawMoltenMetalMesh_Unclipped(void)
 	int i, x, y, z;
 	int start;
 	
-	CheckTriangleBuffer(256, 0, 450, 0, (D3DTexture *)-1, -1, -1);
-	
+	CheckTriangleBuffer(256, 450, (D3DTexture *)-1, -1, -1);
+	SelectProgram(AVP_SHADER_PROGRAM_NO_SECONDARY);
+
 	start = varrc;
 	for (i=0; i<256; i++) {
 		GLfloat xf, yf, zf;
@@ -4807,7 +5388,8 @@ void D3D_DrawMoltenMetalMesh_Clipped(void)
 		}
 	}
 	
-	CheckTriangleBuffer(256, 0, c, 0, (D3DTexture *)-1, -1, -1);
+	CheckTriangleBuffer(256, c, (D3DTexture *)-1, -1, -1);
+	SelectProgram(AVP_SHADER_PROGRAM_NO_SECONDARY);
 	start = varrc;
 	
 		for (i=0; i<256; i++)
