@@ -637,7 +637,7 @@ int UpdateBinkFMV(FMVHandle aFmvHandle, int volume)
 void CloseBinkFMV(FMVHandle aFmvHandle)
 {
 	if(!binkInitialized || aFmvHandle==0)
-		return 0;
+		return;
 	
 	struct binkMovie* movie = (struct binkMovie*)aFmvHandle;
 	BinkReleaseMovie(movie);
