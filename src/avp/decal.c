@@ -1082,7 +1082,7 @@ void ScanHModelForDecals(DISPLAYBLOCK *objectPtr, SECTION_DATA *sectionDataPtr)
 				decal.ModuleIndex = playerPherModule->m_index;
 				decal.UOffset = 0;
 
-				for(i=0; i<5; i++)
+				for(i=0; i<4; i++)
 				{
 					decal.Vertices[i] = sectionDataPtr->Decals[d].Vertices[i];
 					RotateVector(&(decal.Vertices[i]),&(sectionDataPtr->SecMat));
