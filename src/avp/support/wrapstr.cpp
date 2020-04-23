@@ -156,7 +156,7 @@ List<SCString*>* WordWrap :: DeprecatedMake
 					// Whitespace character:
 					if
 					(
-						(CharsInLine == 0)
+						CharsInLine == 0
 					)
 					{
 						// Ignore leading whitespace in a line:

@@ -2270,7 +2270,7 @@ static void ActUponUsersInput(void)
 			signed int key,selectedKey=-1;
 
 			// see if a valid key has been pressed
-			for (key = 0 ; key <= MAX_NUMBER_OF_INPUT_KEYS ; key++)
+			for (key = 0 ; key < MAX_NUMBER_OF_INPUT_KEYS ; key++)
 			{
 				if (!(key == KEY_ESCAPE) &&
 //					!(key >= KEY_F1 && key <= KEY_F12) &&
@@ -4924,31 +4924,6 @@ extern void DrawMainMenusBackdrop(void)
 	{
 		DrawAvPMenuGfx(AVPMENUGFX_BACKDROP,0,0,ONE_FIXED+1,AVPMENUFORMAT_LEFTJUSTIFIED);
 	}
-	else
-	{
-		extern unsigned char *ScreenBuffer;
-		unsigned int *screenPtr = (unsigned int*)ScreenBuffer;
-		int i;	  
-
-		i = ScreenDescriptorBlock.SDB_Width * 60 /2;
-		do
-		{
-			*screenPtr++=0; 
-		}
-		while(--i);
-
-		screenPtr+=ScreenDescriptorBlock.SDB_Width * 360/2;
-
-		i = ScreenDescriptorBlock.SDB_Width * 60 /2;
-		do
-		{
-			*screenPtr++=0; 
-		}
-		while(--i);
-	}
-
-
-
 	#else
 	extern DDPIXELFORMAT DisplayPixelFormat;
 	extern unsigned char *ScreenBuffer;

@@ -1148,6 +1148,7 @@ static const char *usage_string =
 "      [-c | --nocdrom]        Do not access the CD-ROM\n"
 "      [-j | --nojoy]          Do not access the joystick\n"
 "      [-g | --withgl] [x]     Use [x] instead of /usr/lib/libGL.so.1 for OpenGL\n"
+"      [-d | --debug]          Enable debugging commands\n"
 ;
          
 int main(int argc, char *argv[])

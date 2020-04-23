@@ -8017,14 +8017,14 @@ DAMAGE_PROFILE console_nuke = {0,0,0,0,1000,0, 0,0,0,0,0,0,0,AMMO_NONE};
 DAMAGE_PROFILE firedamage 	= {0,0,0,5,0,0, 0,0,0,0,0,0,0,AMMO_FIREDAMAGE_POSTMAX}; 
 
 //Deamage caused by placed objects that explode when destroyed
-DAMAGE_PROFILE SmallExplosionDamage = {50,0,1,0,0,0, 1,0,0,0,0,0,AMMO_NONE};
-DAMAGE_PROFILE BigExplosionDamage = {60,0,10,0,0,0, 2,0,0,0,0,0,AMMO_NONE};
+DAMAGE_PROFILE SmallExplosionDamage = {50,0,1,0,0,0, 1,0,0,0,0,0,0,AMMO_NONE};
+DAMAGE_PROFILE BigExplosionDamage = {60,0,10,0,0,0, 2,0,0,0,0,0,0,AMMO_NONE};
 
 /* KJL 17:05:19 27/08/98 - Flechette damage */
 DAMAGE_PROFILE FlechetteDamage={0,10,0,0,0,0,0,0,0,0,0,0,1,AMMO_FLECHETTE_POSTMAX};
 
 /* CDF 16:45 9/11/98 - Fan damage, from bh_fan.c */
-DAMAGE_PROFILE fan_damage={0,100,0,0,0,0,2,1,1,0,0,0,AMMO_NONE};
+DAMAGE_PROFILE fan_damage={0,100,0,0,0,0,2,1,1,0,0,0,0,AMMO_NONE};
 
 /* KJL 18:29:27 10/11/98 - Falling damage */
 /* CDF 17:52:00 22/2/99 Changed to Pen from Electrical, to fix NPC death selection */
@@ -8034,10 +8034,10 @@ DAMAGE_PROFILE FallingDamage={0,0,1,0,0,0,0,0,0,0,0,0,0,AMMO_FALLING_POSTMAX};
 DAMAGE_PROFILE PredPistol_FlechetteDamage={0,0,0,0,1,0,0,0,0,0,0,0,1,AMMO_NONE};
 
 /*Damage profiles related to queen level*/
-DAMAGE_PROFILE QueenButtDamage={40,0,0,0,0,0,0,0,0,0,0,0,AMMO_NONE};
+DAMAGE_PROFILE QueenButtDamage={40,0,0,0,0,0,0,0,0,0,0,0,0,AMMO_NONE};
 //the impact damage entry is filled in when the damage is done
-DAMAGE_PROFILE QueenImpactDamage={0,0,0,0,0,0,0,0,0,0,0,0,AMMO_NONE}; 
-DAMAGE_PROFILE VacuumDamage={0,0,0,0,20,0,0,0,0,0,0,0,AMMO_NONE};
+DAMAGE_PROFILE QueenImpactDamage={0,0,0,0,0,0,0,0,0,0,0,0,0,AMMO_NONE};
+DAMAGE_PROFILE VacuumDamage={0,0,0,0,20,0,0,0,0,0,0,0,0,AMMO_NONE};
 
 
 //Damage for death volumes that do damage per second

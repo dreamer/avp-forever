@@ -964,7 +964,7 @@ static void ProcessSystemMessage(char *msgP,unsigned int msgSize)
 		{
 			/* only useful during startup: during main game, connecting player should
 			detect game state and exit immediately */
-			if((AvP.Network==I_Host))
+			if(AvP.Network==I_Host)
 			{	
 				LPDPMSG_CREATEPLAYERORGROUP createMessage;
 				createMessage = (LPDPMSG_CREATEPLAYERORGROUP)systemMessage;
@@ -990,7 +990,7 @@ static void ProcessSystemMessage(char *msgP,unsigned int msgSize)
 			or s/he has exited abnormally. In either case, only need to act on
 			this during start-up. During the main game, the ghosts will time-out
 			anyway */
-			if((AvP.Network==I_Host))
+			if(AvP.Network==I_Host)
 			{	
 				LPDPMSG_DESTROYPLAYERORGROUP destroyMessage;
 				destroyMessage = (LPDPMSG_DESTROYPLAYERORGROUP)systemMessage;

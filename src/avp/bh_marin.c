@@ -2472,10 +2472,10 @@ void MarineBehaviour(STRATEGYBLOCK *sbPtr)
 		tracker_noise=1;
 	}
 
-	if ((marineStatusPointer->Target==NULL) 
+	if (marineStatusPointer->Target==NULL
 		#if ANARCHY
-		|| (marineStatusPointer->lastmodule!=sbPtr->containingModule->m_aimodule)
-		|| (marineStatusPointer->Target==Player->ObStrategyBlock)
+		|| marineStatusPointer->lastmodule!=sbPtr->containingModule->m_aimodule
+		|| marineStatusPointer->Target==Player->ObStrategyBlock
 		#endif
 		) {
 		

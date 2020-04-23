@@ -17,7 +17,7 @@ LogFile::LogFile(char const * const _fname) : fname(0) , ever_written(0)
 	if (!path) return;
 	fname = new char[strlen(path)+1+strlen(_fname)+1];
 	strcpy(fname,path);
-	strncat(fname,"\\",1);
+	strcat(fname,"\\");
 	strcat(fname,_fname);
 	fp = fopen(fname,"w");
 	if (fp)
