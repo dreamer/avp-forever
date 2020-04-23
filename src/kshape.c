@@ -4864,7 +4864,7 @@ void RenderParticle(PARTICLE *particlePtr)
 		offset[3].vx = -particleSize;
 		offset[3].vy = +particleSize;
 
-		if ((particlePtr->ParticleID == PARTICLE_MUZZLEFLASH) )
+		if (particlePtr->ParticleID == PARTICLE_MUZZLEFLASH)
 		{
 			int theta = FastRandom()&4095;
 			RotateVertex(&offset[0],theta);
